@@ -80,6 +80,6 @@ Mocks are useful for expensive, external, nondeterministic, or framework-owned b
 - SHOULD use manual fakes for large boundary objects, filesystem/network boundaries, clocks, and loggers.
 - SHOULD NOT mock neighboring pure helpers unless the test specifically covers how the unit handles that dependency's failure.
 - MUST keep module-mock declarations visible near the imports they affect.
-- MUST import the mocking API explicitly if {{UNIT_TEST_FRAMEWORK}} requires it before using its mock, spy, or typed-mock helpers.
+- MUST import the mocking API explicitly if Jest (jest-expo) with React Native Testing Library requires it before using its mock, spy, or typed-mock helpers.
 - SHOULD prefer typed mocks when a mock has non-trivial arguments or return values.
 - SHOULD restore spies and replaced globals in a teardown hook.

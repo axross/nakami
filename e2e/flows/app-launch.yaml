@@ -1,0 +1,10 @@
+appId: dev.axross.payloadmobile
+name: app-launch — cold start reaches the home screen
+tags:
+  - scenario:app-launch
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "home-screen"
+- assertVisible: "Payload Mobile"

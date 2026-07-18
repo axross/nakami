@@ -31,7 +31,7 @@ For each new direct dependency, the reviewer SHOULD verify (and request from the
 - Recent activity (commits within the last 12 months, ideally)
 - Reasonable adoption (loosely: a download/usage count appropriate for the dependency's niche)
 - Active issue tracker, no recent unaddressed CVEs
-- Type definitions either built-in or available as a companion types package (for a typed {{PRIMARY_LANGUAGE}} project)
+- Type definitions either built-in or available as a companion types package (for a typed TypeScript project)
 - Permissive license (MIT / ISC / Apache-2.0); flag a Critical on copyleft licenses (GPL, AGPL) when the project's license posture is incompatible with them
 
 **Guidelines:**
@@ -57,15 +57,11 @@ A dependency bound to one OS or runtime breaks whichever environment it does not
 
 ## Bundling Implications
 
-<!-- INIT:OPTIONAL key=CLIENT_BUNDLE — keep this section OR delete it (projects with no client bundle). -->
-*This section applies only when the project bundles code for a client/browser. Delete it during INIT for projects that ship no client bundle (e.g., a CLI or backend service).*
-
-A dependency that cannot be tree-shaken ships its whole body to the browser, taxing every visitor with code paths they never exercise.
+A dependency that cannot be tree-shaken ships its whole body in the app bundle, taxing every user with code paths they never exercise.
 
 **Guidelines:**
 
-- MUST flag a Major when the new dependency lacks tree-shaking support (no ESM, no `sideEffects: false`) and is imported into a client component or shared module that gets bundled into the client. Cross-reference with the project's performance-and-reliability requirements (bundle-weight rules).
-- MUST flag a Critical when a new dependency is added to the app framework's "externalize from the server bundle" list without justification — entries there are typically native or stream-based packages incompatible with the bundler.
+- MUST flag a Major when the new dependency lacks tree-shaking support (no ESM, no `sideEffects: false`) and is imported into app code that Metro bundles. Cross-reference with the project's performance-and-reliability requirements (bundle-weight rules).
 
 ## Transitive CVEs
 
@@ -73,4 +69,4 @@ A single new direct dependency can pull in dozens of transitive packages the aut
 
 **Guidelines:**
 
-- SHOULD recommend the author run the {{PACKAGE_MANAGER}} audit command and report findings before merge when the diff changes the lockfile. `high` and `critical` severities MUST be resolved or explicitly deferred with rationale.
+- SHOULD recommend the author run the npm audit command and report findings before merge when the diff changes the lockfile. `high` and `critical` severities MUST be resolved or explicitly deferred with rationale.

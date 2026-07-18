@@ -24,16 +24,12 @@ Values sent to the browser/client are public. The framework's public/client-expo
 - MUST verify `process.env.*` access remains limited to the env-access files allowed by [secret-handling](./secret-handling.md).
 - SHOULD ask for a narrower public value when a client component only needs a derived boolean or public identifier.
 
-## Analytics and Error Reporting Exposure
+## Error Reporting Exposure
 
-<!-- INIT:OPTIONAL key=ERROR_TRACKER_OR_ANALYTICS — keep & fill the token (add the tool, INIT Step 5) OR delete this section. -->
-*If this project has no analytics service or no {{ERROR_TRACKER}}, delete the corresponding guidelines below during INIT.*
-
-Analytics and error-reporting services are third-party data processors. Event context should be useful for debugging or analytics without carrying raw private content.
+An error-reporting service is a third-party data processor. Event context should be useful for debugging without carrying raw private content.
 
 **Guidelines:**
 
-- MUST flag a Major when analytics events include unpublished content, body/rich-text content, private data-layer fields, auth/session data, or high-cardinality user-entered values.
-- MUST flag a Major when {{ERROR_TRACKER}} context includes secrets, raw request bodies, raw content, access tokens, or unpublished data-layer content.
-- MUST treat a "send default PII" option in the {{ERROR_TRACKER}} config as a privacy-sensitive default and require explicit justification when adding identifiers to its context.
-- SHOULD prefer stable non-sensitive identifiers such as route names, identifiers for published content, feature names, and boolean state over raw content values.
+- MUST flag a Major when Sentry context includes secrets, raw request/response bodies, raw user content, access tokens, or private data-layer fields.
+- MUST treat a "send default PII" option in the Sentry config as a privacy-sensitive default and require explicit justification when adding identifiers to its context.
+- SHOULD prefer stable non-sensitive identifiers such as route names, feature names, and boolean state over raw content values.

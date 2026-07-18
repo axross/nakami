@@ -1,65 +1,42 @@
 # Access Control
 
-Apply these rules to verify the data layer's access rules and the project's request handlers gate sensitive data correctly.
+Apply these rules to verify the change keeps sensitive data gated correctly. In this project the data layer is an on-device SQLite database (Drizzle ORM over expo-sqlite) owned by the single device user; authorization for remote data lives with the backend the app talks to, never in the app.
 
-<!-- INIT:OPTIONAL key=DATA_LAYER — keep & fill the token OR delete the layer-specific sections; a project with neither a data layer nor an authentication system deletes this whole file per the INIT.md Step-4 AUTH bullet. -->
-*Some sections below assume a data/content layer with built-in access rules and a draft/published lifecycle (a CMS-style `{{CMS_OR_DATA_LAYER}}`); others assume an authentication system. If the project has neither, delete this file during INIT; if it has only one, adapt or delete the sections that assume the other.*
+## On-Device Data Exposure
 
-## Data-Layer Access Rules
-
-Access rules are enforced at the data layer itself, so every route, handler, and background job inherits whatever a resource's rules allow — a wrong rule is wrong everywhere at once.
+Everything the app persists lives on the user's device and rides along in OS backups, so the storage tier chosen for a value decides who can ever read it.
 
 **Guidelines:**
 
-- MUST flag a Critical when a new data-layer resource is added without an explicit access configuration. A default-deny default is safe, but a missing-by-omission rule on a resource that should be publicly readable (e.g., content for anonymous visitors) means the rendered route returns empty.
-- MUST flag a Critical when a resource's read rule is changed to allow-all (`read = () => true`) on a resource that contains non-public data (as opposed to intentionally public static assets such as media/cover/avatar images).
-- MUST flag a Major when a new resource's update, delete, or create rule defaults to allowing all authenticated users — these should typically be admin-only.
-- MUST flag a Major when a resource's read rule ignores the requesting user and returns `true` unconditionally — even public resources SHOULD return a query filter that excludes non-default (e.g., draft) content for non-authenticated requests.
+- MUST flag a Critical when an access token, password, API key, or other credential is written to the Drizzle database or any plain key-value store — credentials belong in the platform keychain (`expo-secure-store`), which is encrypted at rest.
+- MUST flag a Major when a new table or column stores sensitive personal data the feature does not strictly need — on-device data is still subject to device compromise and backup extraction.
+- SHOULD flag a Minor when cached remote content with real privacy weight is stored without an expiry/cleanup path.
 
-## Unpublished / Non-Default Content Gating
+## Remote API Authorization
 
-Unpublished content is only as private as the least-guarded code path able to request it, so the authentication check belongs before the flag is forwarded, not somewhere downstream.
-
-**Guidelines:**
-
-- MUST flag a Critical when a data-access function accepts a flag requesting non-default/unpublished content and passes it to the data layer without first verifying the request is authenticated to view it. Established callers gate on an explicit request flag AND rely on the data layer's auth — confirm both.
-- MUST flag a Critical when a data-access function omits the published/default-state filter when the unpublished flag is not set. The established pattern adds the filter conditionally — diverging exposes unpublished identifiers publicly.
-- MUST flag a Critical when a server-side render injects non-public-only fields (internal status or shadow fields) into a public response or public metadata.
-
-## Authentication Lockout Settings
-
-Lockout settings are the only brake on credential brute-forcing, and a weakened threshold looks like an innocuous config tweak in a diff.
+A client binary is fully inspectable, so any authorization decision or credential embedded in the app is public the moment it ships.
 
 **Guidelines:**
 
-- MUST flag a Critical when the diff weakens the authentication lockout settings:
-  - lockout duration reduced below 5 minutes
-  - max login attempts raised above 5
-  - the auth/lockout configuration block removed entirely (defaults may be weaker or absent)
+- MUST flag a Critical when the app enforces an authorization rule client-side only (hiding a button, filtering a list) for data the backend would still return to an unauthorized call — the backend is the authority; the UI check is an affordance.
+- MUST flag a Critical when a shared or privileged credential (service API key, admin token) is embedded in app code, config, or an `EXPO_PUBLIC_*` env var — anything in the bundle is extractable. Per-user credentials obtained at runtime are the only credentials the app may hold.
+- MUST flag a Major when a new remote call transmits more local data than the endpoint needs.
 
-## Request Handler Authentication
+## Deep-Link Surface
 
-A mutation handler is reachable by every client on the internet the moment it deploys, whether or not any UI links to it.
-
-**Guidelines:**
-
-- MUST flag a Critical when a new mutation handler (`POST`, `PUT`, `PATCH`, `DELETE`) does not verify the caller's identity. Even cache-busting or idempotent endpoints can be abused for DoS — recommend rate-limiting or a shared-secret header for new ones.
-- MUST flag a Major when a new server-side callable or handler reads from a resource with sensitive access rules but does not pass a user-scoped data-layer context.
-
-## Preview / Privileged Mode
-
-Query flags travel in URLs — shared, logged, crawled, and guessable — so a flag can select a rendering mode but never stand in for a credential.
+Every screen registered under the app's URL scheme is reachable from outside the app — other apps and web pages can open it with arbitrary parameters.
 
 **Guidelines:**
 
-- MUST flag a Critical when a new route uses a query flag (e.g., `?preview=true`) to bypass production gating without also requiring the authenticated content path. A preview flag should only switch rendering mode — it must not itself unlock non-public content.
-- MUST flag a Major when a new route reads cookies or headers to derive auth state without going through the project's authentication system — that system owns sessions in this project.
+- MUST flag a Major when a new deep-linkable route performs a state-changing action directly from its parameters without user confirmation.
+- MUST flag a Major when deep-link parameters are trusted without validation (parse them with a Zod schema like any other external input, per the input-validation rules).
 
-## Admin / Tool-Owned UI Surface
+## Future Authentication System
 
-If the data/content layer ships its own admin UI under a dedicated route segment, that segment is owned by the tool. Review focuses on respecting that boundary and on not mistaking UI affordances for access control.
+> **Dormant until the app gains an authentication system** — remove this banner
+> when accounts/sessions land, making the lens unconditional.
 
 **Guidelines:**
 
-- MUST NOT review files inside a tool-owned admin route segment per the project's code-review guideline (scoping rules). The data/content layer owns that route segment.
-- MUST flag a Critical when a data-layer field is added with a "hidden from admin UI" flag to "hide" sensitive data — hiding is a UI affordance, not access control. Use the read access rule to actually gate the field.
+- MUST flag a Critical when a diff introduces login/session handling that stores session material outside `expo-secure-store`, or weakens lockout/expiry settings the backend prescribes.
+- MUST flag a Major when auth state is derived from anything other than the project's single authentication entry point once one exists.

@@ -1,59 +1,45 @@
 # E2E Test Commands
 
-Use this reference to choose the {{E2E_TEST_FRAMEWORK}} command that matches the target environment and snapshot task.
+Use this reference to choose the Maestro command that matches the target environment. Maestro drives a real build of the app, so a simulator/emulator (or device) with the app installed must be running first.
 
 ## Running E2E Tests
 
 Run:
 
 ```bash
-{{E2E_TEST_CMD}}
+npm run test:e2e
+```
+
+This first runs the scenario-coverage gate (`e2e/check-scenario-coverage.mjs`), then `maestro test e2e/flows` against the running app.
+
+**Guidelines:**
+
+- MUST use `npm run test:e2e` for the default local end-to-end verification run.
+- MUST have the app installed and running on a simulator/emulator first (`npm run ios` or `npm run android`).
+- MUST run `npm run test:e2e:coverage` (the gate alone, no device needed) when no simulator is available, and report that the on-device run was skipped.
+
+## Running a Subset
+
+Run a single flow or a tagged subset while iterating:
+
+```bash
+npx maestro test e2e/flows/app-launch.yaml
+npx maestro test --include-tags "scenario:app-launch" e2e/flows
 ```
 
 **Guidelines:**
 
-- MUST use `{{E2E_TEST_CMD}}` for the default local end-to-end verification run.
+- SHOULD iterate on one flow with a direct file argument, then finish with the full `npm run test:e2e` run.
 
-## Updating Test Snapshots
+## Test Against a Release-Shaped Build
 
-Add the framework's snapshot-update flag to the test command:
+Maestro exercises whatever build is installed. To verify production-only behavior, install a release build first:
 
 ```bash
-{{E2E_TEST_CMD}} -- --update-snapshots
+npx expo run:ios --configuration Release   # or: npx expo run:android --variant release
+npm run test:e2e
 ```
 
 **Guidelines:**
 
-- MUST update snapshots only when the visual output change is intentional.
-- SHOULD pair snapshot updates with the reason the expected output changed.
-
-## Test Against Local Production Build
-
-Run:
-
-```bash
-{{BUILD_CMD}} && {{START_CMD}}
-```
-
-And then run the tests in another terminal session:
-
-```bash
-{{E2E_TEST_CMD}}
-```
-
-**Guidelines:**
-
-- SHOULD use the local production build flow when verifying production-only behavior after `{{BUILD_CMD}}`.
-- MUST keep the production server running while the e2e command executes in the second terminal session.
-
-## Test Against a Deployed Environment
-
-Set the framework's base-URL env var to target a deployed environment ({{PROJECT_NAME}}) instead of the local app:
-
-```bash
-E2E_BASE_URL=https://example.com {{E2E_TEST_CMD}}
-```
-
-**Guidelines:**
-
-- SHOULD set the base-URL env var only when intentionally testing a deployed environment instead of the local app.
+- SHOULD use a release-configuration build when verifying behavior that differs from the dev client (startup, error reporting, performance).

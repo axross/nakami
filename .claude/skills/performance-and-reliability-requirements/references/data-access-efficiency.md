@@ -1,9 +1,6 @@
 # Data-Access Efficiency
 
-<!-- INIT:OPTIONAL key=DATA_LAYER — fill the token OR, if the project has no data/content layer, delete this file together with the "Data-Access Efficiency" section in ../SKILL.md and the data-access phrases in that skill's frontmatter description and the AGENTS.md index row. -->
-*If this project has no data/content layer, delete this file during INIT (see the marker above for the inbound links).*
-
-Apply these rules to verify that reads against the data/content layer ({{CMS_OR_DATA_LAYER}}) are bounded and N+1-free.
+Apply these rules to verify that reads against the data/content layer (Drizzle ORM over expo-sqlite) are bounded and N+1-free.
 
 ## Mandatory Query Bounds
 
@@ -30,17 +27,16 @@ A per-record read inside a loop multiplies round-trip latency by result-set size
 **Guidelines:**
 
 - MUST flag a Critical when the diff iterates a list of records and issues a per-record data-layer read inside the loop. Use a single batched read (e.g., an `id IN (...)` predicate) instead, or populate relationships in the original query.
-- MUST flag a Critical when a server-rendered list renders each item by awaiting its own data fetch — pre-fetch in the parent and pass the data (or a deferred handle) down, per [server-client-boundary.md](./server-client-boundary.md).
+- MUST flag a Critical when a list renders each row through its own per-row data fetch — fetch the list (with its relationships) in the owning query and pass row data down, per [async-loading-cost.md](./async-loading-cost.md).
 - MUST flag a Major when a write/lifecycle hook iterates a result set and performs a per-record network call serially (i.e., without batching the independent calls to run concurrently). Match the project's pattern of running independent per-record calls concurrently.
 
-## Single Data Client Per Request
+## Single Data Client
 
-Acquiring the data-layer client carries real setup cost — connections, config, auth — and paying it repeatedly within one request buys nothing.
+Opening a database connection carries real setup cost, and parallel connections to the same SQLite file invite lock contention.
 
 **Guidelines:**
 
-- MUST flag a Major when the diff acquires the data-layer client more than once inside the same request scope. Cache it to a local variable and reuse it.
-- MUST flag a Critical when the diff acquires the data-layer client from a non-canonical entry point. If the runtime intends a single shared (process-global) client, alternative construction paths break that singleton.
+- MUST flag a Critical when the diff opens the database from a non-canonical entry point instead of importing the shared `db` client from `src/core/db/client.ts`. The app intends a single process-global client; alternative construction paths break that singleton.
 
 ## Pagination
 
@@ -59,14 +55,3 @@ A migration runs against production data exactly once, and a dropped or renamed 
 
 - MUST flag a Critical when a new data-layer schema migration drops a column or renames a field on a collection/table that holds production data, without a data-backfill step. Defer to the human owner per the project's code-review guideline (escalation rules).
 - MUST flag a Major when a new field used in a filter predicate is added without an index — the storage engine will full-scan. Either add an index to the field or document the expected row count.
-
-## Locale / Variant Handling
-
-<!-- INIT:OPTIONAL key=LOCALE — keep this section OR delete it. -->
-*If this project has no per-locale or per-variant content, delete this section during INIT.*
-
-Locale fallback makes an omitted variant parameter succeed with plausible-looking content, so the wrong variant ships without any error to catch it.
-
-**Guidelines:**
-
-- MUST flag a Major when a new data-access call omits the locale/variant parameter that the project's content reads require, when the data layer supports localized or variant content.

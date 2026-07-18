@@ -26,7 +26,7 @@ These categories use fixed minimum severities, regardless of perceived "smallnes
 | Missing or incorrect access control on a non-public data-layer field or record | Critical |
 | Unsanitized user input flowing into a data-layer query, request handler, or content-rendering pipeline | Critical |
 | New request handler / server-side action that reads or mutates data without verifying the request's authenticated identity | Critical |
-| Lint error introduced ({{LINT_CMD}} would fail) | Critical |
+| Lint error introduced (npm run lint would fail) | Critical |
 | New test failure introduced, or removal of an existing assertion that covered changed behavior | Critical |
 | Missing `await` on a Promise returned from a data-layer or network call | Critical |
 | Importing a server-only module from a client-side module (or otherwise crossing the server/client boundary unsafely) | Critical |

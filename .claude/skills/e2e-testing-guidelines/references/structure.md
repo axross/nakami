@@ -1,74 +1,45 @@
 # E2E Test Structure
 
-_Code examples below use Playwright APIs as the concrete shape. If the project's e2e framework is not Playwright, translate them during INIT; the structure conventions in the prose are framework-neutral._
-
 ## Project Structure
 
-Tests are easiest to find when their location mirrors the surface they cover. The default layout groups suites by route, so a route change points directly at the tests that guard it, while helpers and setup files stay in shared locations every suite can reach.
+Tests are easiest to find when their location mirrors the surface they cover. Maestro flows live under `e2e/flows/`, shared subflows under `e2e/helpers/`, and the journey catalog at the root of `e2e/`.
 
 ```
 <root>
-├── {{TEST_DIR}}/
-│   ├── .data/                         # local temporary data
-│   ├── helpers/                       # test helpers
-│   └── tests/
-│       ├── setup.test.ts              # setup test
-│       ├── metadata.test.ts           # app-global metadata test
-│       ├── routes                     # route/feature-specific tests
-│       │   ├── index/
-│       │   │   ├── page.test.ts       # visual/functional tests for the route
-│       │   │   └── thumbnail.test.ts  # supporting endpoint tests
-│       │   └── items/
-│       │       ├── ...
-│       │       └── id/
-│       │           └── ...
-│       └── ...
+├── e2e/
+│   ├── scenarios.md                   # journey catalog (scenario coverage)
+│   ├── check-scenario-coverage.mjs    # coverage gate script
+│   ├── helpers/                       # shared subflows invoked via runFlow
+│   └── flows/
+│       ├── app-launch.yaml            # smoke: cold start reaches home
+│       └── <feature>/                 # feature-specific flows
+│           └── <journey>.yaml
 └── ...
 ```
 
 **Guidelines:**
 
-- MUST place route/feature-specific e2e tests under `{{TEST_DIR}}/tests/routes/`.
-- MUST keep reusable e2e helpers under `{{TEST_DIR}}/helpers/`.
-- SHOULD keep setup and global metadata tests directly under `{{TEST_DIR}}/tests/` when they are not route/feature-specific.
+- MUST place feature-specific flows under `e2e/flows/<feature>/`, mirroring the `src/<feature>/` domain the flow covers; cross-feature journeys (smoke, app-launch) sit directly under `e2e/flows/`.
+- MUST keep reusable subflows under `e2e/helpers/` and invoke them with `runFlow` — helpers there are not picked up as top-level tests.
+- MUST treat `app-launch.yaml` as the smoke gate: if it fails, deeper flows are not worth running.
+- SHOULD guard each previously shipped bug with a named regression flow instead of folding the check into an unrelated flow.
 
-### Purpose-Based Layout
+## Flow File Structure
 
-A route tree adds empty hierarchy when the app has one route or its value lives in cross-route journeys. Purpose-named suites keep the cheapest signal first: smoke proves the app boots and the core loop works, happy-path walks the main journeys end to end, regressions hold named guards for previously shipped bugs, and feature-area suites cover one surface in depth.
-
-```
-{{TEST_DIR}}/
-└── tests/
-    ├── smoke.test.ts          # boots + core loop, the first gate
-    ├── happy-path.test.ts     # main journeys end to end
-    ├── regressions.test.ts    # named guards for shipped bugs
-    └── <feature>.test.ts      # feature-specific suite
-```
+File names are kebab-case `.yaml` files named after the journey they assert, so the flow list reads as a journey list.
 
 **Guidelines:**
 
-- SHOULD organize suites by purpose (`smoke`, `happy-path`, `regressions`, `<feature-area>`) instead of by route in single-route or journey-centric apps.
-- MUST treat the smoke suite as the first gate: if it fails, deeper suites are not worth running.
-- SHOULD guard each previously shipped bug with a named regression test instead of folding the check into an unrelated case.
+- MUST use kebab-case for flow file names, named after the journey (`feed-create.yaml`), not the screen.
+- MUST set a human-readable `name:` in the flow config describing the journey outcome.
+- MUST declare the flow's `tags:` (scenario join tags, optional facets) in the flow config.
 
-## Test File Structure
+## Flow Step Structure
 
-File names are kebab-case with the project's test extension so the framework's test-file matcher picks them up without extra configuration.
-
-**Guidelines:**
-
-- MUST use kebab-case for file names.
-- MUST use the project's `.test.ts` (or equivalent) extension for test files.
-
-## Test Case Structure
-
-One behavior per test keeps failures diagnosable, and named steps turn a multi-phase journey's report into a readable narrative. Steps earn their keep only when a test has phases to narrate — wrapping a single arrange → act → assert in one step adds noise, not structure.
+One journey per flow keeps failures diagnosable, and labeled steps turn a multi-phase journey's log into a readable narrative.
 
 **Guidelines:**
 
-- MUST define one test case per behavior.
-- MUST name test cases concisely.
-- MUST wrap each meaningful action/assertion group of a multi-phase scenario (two or more distinct arrange/act/assert phases) in a step, using the framework's step API, at human-understandable granularity; steps can nest.
-- MAY omit steps in a short atomic test (a single arrange → act → assert).
-- MUST NOT pad an atomic test with a one-step wrapper just to satisfy step structure.
-- MUST name test steps concisely.
+- MUST assert one journey per flow; split independent outcomes into separate flows.
+- SHOULD add a `label:` to steps whose intent is not obvious from the command itself, at human-understandable granularity.
+- MUST NOT pad a short atomic flow with labels that restate the command.

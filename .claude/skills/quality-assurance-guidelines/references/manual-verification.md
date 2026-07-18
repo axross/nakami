@@ -8,7 +8,7 @@ The reviewer MUST ask the author to confirm (in the PR description or the review
 
 | Diff touches | Required manual check |
 |---|---|
-| Any user-facing view, screen, or route-local component | The affected surface was loaded in the running app via `{{DEV_CMD}}` |
+| Any user-facing view, screen, or route-local component | The affected surface was loaded in the running app via `npm run dev` |
 | Any data-driven surface that supports non-default content states *(optional)* | The surface was exercised in each non-default content state the data layer supports (e.g., a draft or unpublished state) |
 | A live-preview / CMS preview path *(optional)* | The preview path was loaded inside the data layer's preview/admin surface |
 | Not-found handling or any routing change | A non-existent identifier was requested and the not-found UI rendered correctly |
@@ -26,17 +26,17 @@ New warnings in the dev log are the app's earliest signal that something regress
 
 **Guidelines:**
 
-- MUST flag a Major when the diff introduces new warning-level log lines that were not in the `{{DEV_CMD}}` output before the change (or removes existing warnings without explanation).
+- MUST flag a Major when the diff introduces new warning-level log lines that were not in the `npm run dev` output before the change (or removes existing warnings without explanation).
 - MUST flag a Critical when the diff causes the running app to throw an uncaught exception during a normal interaction — the error tracker may capture it, but users will see the top-level error UI.
-- SHOULD ask the author to include the `{{DEV_CMD}}` output snippet for the affected surface in the PR description when the change adds new data-layer calls or new logging.
+- SHOULD ask the author to include the `npm run dev` output snippet for the affected surface in the PR description when the change adds new data-layer calls or new logging.
 
 ## Local Production Build
 
-Dev and production diverge on transforms, caching, and asset handling, so a surface that works under `{{DEV_CMD}}` can still break once built.
+Dev and production diverge on transforms, caching, and asset handling, so a surface that works under `npm run dev` can still break once built.
 
 **Guidelines:**
 
-- SHOULD ask the author to run `{{BUILD_CMD}}` then `{{START_CMD}}` and reload the affected surface when the diff touches:
+- SHOULD ask the author to run `npm run build` then `npm run start` and reload the affected surface when the diff touches:
   - build/runtime configuration
   - anything affecting compiler/transform output where dev and prod behavior can differ
   - caching behavior that differs between dev and prod

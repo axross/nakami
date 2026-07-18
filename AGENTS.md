@@ -1,14 +1,5 @@
 # AGENTS.md
 
-> **Template note.** This file is a reusable, framework-agnostic starting
-> point — the working agreement and skill index a Claude Code project loads
-> through `CLAUDE.md`. Before using it in a real project, run the
-> adaptation pass described in [INIT.md](./INIT.md): fill in the `{{...}}` tokens,
-> complete the Project Overview, resolve each optional capability (add the tool
-> or remove its skill — don't assume deletion), and add project-specific skills
-> (structure, components, routing, UI, domain). Delete this note when the
-> template has been adapted.
-
 ## Requirement Level Keywords
 
 Apply these keywords consistently in this document and the documents linked from this document.
@@ -23,19 +14,16 @@ Apply these keywords consistently in this document and the documents linked from
 
 ## Project Overview
 
-<!-- INIT: replace this block with a short, durable description of the project.
-     Keep it to a few bullets; deep detail belongs in a project-specific
-     structure skill, not here. -->
-
-- **{{PROJECT_NAME}}** is a {{PROJECT_KIND}}. {{PROJECT_OVERVIEW}}
-- Primary language: {{PRIMARY_LANGUAGE}}. App framework: {{APP_FRAMEWORK}}.
-- Tooling: {{PACKAGE_MANAGER}} for packages, {{LINTER}} for linting, {{FORMATTER}} for formatting.
+- **payload-mobile** is a companion mobile app for Payload MCP, built for iOS and Android.
+- Primary language: TypeScript. App framework: Expo (React Native) with Expo Router file-based routing. Expo has breaking changes between SDKs — consult the versioned docs for the installed SDK before writing framework-touching code (see [Development Guidelines](.claude/skills/development-guidelines/SKILL.md), current-docs rules).
+- Tooling: npm for packages, Biome for linting and formatting.
+- Core stack: Zustand + TanStack Query for state, Drizzle ORM over expo-sqlite for on-device data, Zod for validation, react-native-unistyles for styling/theming, hand-rolled compound components.
 - For run-scripts, current-docs lookup rules, and verification commands, consult [Development Guidelines](.claude/skills/development-guidelines/SKILL.md).
-- For repository layout, stack, services, and file placement, consult the project's own structure skill once it is created during INIT.
+- For repository layout, stack, and file placement, consult [Project Structure](.claude/skills/project-structure/SKILL.md).
 
 ## Skill Index
 
-`AGENTS.md` is the master routing index for project skills. Consult the relevant skill before acting on matching work. This index ships with a generic, cross-project core; add project-specific skills (structure, components, routing, UI design, domain rules) and list them here during INIT.
+`AGENTS.md` is the master routing index for project skills. Consult the relevant skill before acting on matching work. When a new project-specific skill is added, list it here.
 
 | Skill | When to apply |
 | ----- | ------------- |
@@ -52,17 +40,12 @@ Apply these keywords consistently in this document and the documents linked from
 | [Quality Assurance Guidelines](.claude/skills/quality-assurance-guidelines/SKILL.md) | Reviewing verification evidence, e2e coverage, snapshots, flakiness, lint/format evidence, or manual checks |
 | [Unit Test Guidelines](.claude/skills/unit-test-guidelines/SKILL.md) | Writing, refactoring, reviewing, or running unit tests, including mocks/fakes, fixtures, schema tests, and behavior-focused assertions |
 
-<!-- INIT: add rows for project-specific skills you create, e.g.
 | [Project Structure](.claude/skills/project-structure/SKILL.md) | Navigating the repository, deciding where a new module, route, component, or test belongs, or checking stack, tooling, and directory conventions |
-| [Component Guidelines](.claude/skills/component-guidelines/SKILL.md) | Writing, placing, reviewing, or refactoring a component or hook — tier placement, generic-shell vs domain-wrapper splits, promoting repeated UI, styling extension, test hooks |
-| [Routing Guidelines](.claude/skills/routing-guidelines/SKILL.md) | Creating, moving, renaming, or reviewing routes — URL structure, route-file conventions, layouts, redirects, metadata, or route-level loading and error surfaces |
-| [UI Design Principles](.claude/skills/ui-design-principles/SKILL.md) | Deciding how a surface should look — color roles, elevation, control selection, modal patterns, spacing/typography, responsive behavior, copy, accessibility, theming |
--->
+| [Component Guidelines](.claude/skills/component-guidelines/SKILL.md) | Writing, placing, reviewing, or refactoring a component or hook — compound-component composition, theming with Unistyles, tier placement, promoting repeated UI, test hooks |
+| [Routing Guidelines](.claude/skills/routing-guidelines/SKILL.md) | Creating, moving, renaming, or reviewing routes — Expo Router file conventions, layouts, navigation, deep links, or route-level loading and error surfaces |
 
 ### Workflow Entry Points
 
-<!-- INIT:OPTIONAL key=INDEPENDENT_REVIEW — Fixed: the /address and /handoff skills are fixed infrastructure (INIT.md Step 4), so KEEP this subsection and both rows; just delete this marker and the key=SESSION_HANDOFF one below. -->
-<!-- INIT:OPTIONAL key=SESSION_HANDOFF — Fixed: the Handoff row stays with the fixed /handoff skill; its take-over side lives in /address. Just delete this marker. -->
 Unlike the guideline skills above, these skills are runnable workflows: a human launches one as `/<name>` (or the agent invokes it when its `when_to_use` matches), so they carry `user-invocable: true` and an `argument-hint` per [Agent Skills Best Practices](.claude/skills/agent-skills-best-practices/SKILL.md).
 
 | Skill | What it drives |
@@ -110,12 +93,12 @@ Planning exists to make the work checkable. It should name what changes, what mu
 
 ### User-Facing Work
 
-User-facing changes need design intent before implementation mechanics. The single agent owns both, but the phases must stay distinct. _This subsection applies only to projects with a user-facing surface; delete it during INIT for libraries, CLIs, or services without one._
+User-facing changes need design intent before implementation mechanics. The single agent owns both, but the phases must stay distinct.
 
 **Guidelines:**
 
 - MUST establish design intent before implementing user-facing changes: hierarchy, interaction states, accessibility intent, responsive behavior, and copy constraints.
-- MUST consult the project's own UI/design and component skills (created during INIT) for design decisions and implementation mechanics.
+- MUST consult [Component Guidelines](.claude/skills/component-guidelines/SKILL.md) (and the routing/structure skills where relevant) for design decisions and implementation mechanics.
 - MUST express design intent in user-facing terms before translating it into components, styles, or tests.
 - MUST verify that text, layout, focus behavior, loading states, and responsive behavior remain coherent across relevant viewports or surfaces.
 - SHOULD keep design-system rules in design vocabulary and link to implementation-mechanics skills instead of duplicating them.
@@ -128,13 +111,12 @@ A single agent cannot provide true independent review. This project compensates 
 
 - MUST perform a reviewer-mode reset after non-trivial implementation: stop editing, reread the request, inspect `git status` and `git diff`, and review only the produced diff.
 - MUST apply [Code Review Guideline](.claude/skills/code-review-guideline/SKILL.md) during self-review, including severity labels, file-line evidence, concrete fixes, and an explicit verdict when findings exist.
-- MUST load topic-specific review lenses when relevant: maintainability, quality assurance, security, performance/reliability, observability, e2e testing, and any project-specific lenses (structure, components, routing, UI, domain) defined during INIT.
+- MUST load topic-specific review lenses when relevant: maintainability, quality assurance, security, performance/reliability, observability, e2e testing, and the project-specific lenses (structure, components, routing).
 - MUST judge the actual diff and observed behavior, not the implementation intent.
 - MUST fix Critical or Major self-review findings before claiming completion.
 - MUST perform a second-pass re-review after fixing any blocking self-review finding.
 - MUST report verification evidence before completion: commands run, manual checks, failures, skipped checks, and residual risk.
 - MUST escalate high-risk changes to user review, CI/PR review, or an explicitly requested secondary review before calling them merge-ready.
-<!-- INIT:OPTIONAL key=INDEPENDENT_REVIEW — Fixed: the independent-review channel is fixed infrastructure (INIT.md Step 4), so KEEP the next bullet; just delete this marker. -->
 - SHOULD route that escalation through the project's independent-review channel — the posted-review policy in [REVIEW.md](./REVIEW.md).
 - SHOULD treat auth, access control, injection/output-encoding, SSRF/outbound fetching, data-layer migrations, public route/API contracts, production config, data-loss risk, and large refactors as high-risk.
 
@@ -145,10 +127,10 @@ Verification should match the changed surface. Documentation-only changes need l
 **Guidelines:**
 
 - MUST run the relevant verification commands after non-trivial changes, or report why they could not run.
-- MUST run `{{FORMAT_CMD}}` and `{{LINT_CMD}}` after code or documentation edits.
-- MUST run `{{UNIT_TEST_CMD}}`, when the project has a unit suite, after a change affects code it covers.
-- MUST run `{{E2E_TEST_CMD}}`, when the project has an e2e suite, after a change affects a user-facing output surface or e2e coverage.
-- MUST run `{{BUILD_CMD}}`, when the project has a build step, after a change affects routes, metadata, data-layer config, runtime config, dependencies, or public type signatures.
+- MUST run `npm run format` and `npm run lint` after code or documentation edits.
+- MUST run `npm run test:unit` after a change affects code it covers.
+- MUST run `npm run test:e2e` after a change affects a user-facing output surface or e2e coverage (at minimum `npm run test:e2e:coverage` when no simulator is available, reporting the skipped on-device run).
+- MUST run `npm run build` after a change affects routes, app config, data-layer config, runtime config, dependencies, or public type signatures.
 - SHOULD perform focused manual checks when browser behavior, crawler metadata, custom protocol behavior, responsive layout, or content-preview behavior changes.
 - MUST report unverified acceptance criteria and residual risk in the final summary.
 

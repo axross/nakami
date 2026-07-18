@@ -53,4 +53,4 @@ fi
 
 # install dependencies (a plain install, not a clean/frozen install, so a cached
 # container layer can be reused across sessions).
-{{INSTALL_CMD}}
+npm install

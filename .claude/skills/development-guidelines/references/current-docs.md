@@ -8,12 +8,12 @@ Use current official docs before changing behavior governed by fast-moving frame
 
 | Surface | Refresh docs before changing |
 | ------- | ---------------------------- |
-| {{APP_FRAMEWORK}} | Routing/rendering conventions, request/response handling, metadata, caching, configuration, instrumentation, asset/image behavior |
-| {{CMS_OR_DATA_LAYER}} | Schema/model definitions, fields, access control, hooks, admin/customization, migrations, query APIs, storage adapters <!-- INIT:OPTIONAL key=DATA_LAYER — fill the token OR delete this row. --> |
-| {{ERROR_TRACKER}} | SDK setup, instrumentation, source maps, event capture, PII behavior, runtime-specific config <!-- INIT:OPTIONAL key=ERROR_TRACKER — fill the token OR delete this row. --> |
-| {{HOSTING_PLATFORM}} | Deployment/runtime behavior, asset optimization, storage, environment variables |
-| {{E2E_TEST_FRAMEWORK}} | Test runner configuration, snapshot behavior, locator/assertion APIs |
-| {{LINTER}} | Formatter/linter configuration, suppression syntax, rule names |
+| Expo (React Native) | Routing (Expo Router), app config and config plugins, native module APIs, asset/image behavior. Expo has breaking changes between SDKs — use the exact versioned docs for the installed SDK (currently <https://docs.expo.dev/versions/v57.0.0/>) |
+| Drizzle ORM over expo-sqlite | Schema/table definitions, column types, query APIs, relation helpers, drizzle-kit migration generation, the expo-sqlite driver and runtime migrator |
+| Sentry | SDK setup (`@sentry/react-native` + its Expo config plugin), instrumentation, source maps, event capture, PII behavior |
+| EAS (Expo Application Services) | Deployment/runtime behavior, asset optimization, storage, environment variables |
+| Maestro | Test runner configuration, snapshot behavior, locator/assertion APIs |
+| Biome | Formatter/linter configuration, suppression syntax, rule names |
 
 **Guidelines:**
 
@@ -29,8 +29,8 @@ Some project areas are especially sensitive because a small API mismatch can pro
 
 **Guidelines:**
 
-- MUST refresh {{APP_FRAMEWORK}} docs before changing framework entry points, routing/rendering APIs, metadata generation, caching APIs, or framework configuration files.
-- MUST refresh {{CMS_OR_DATA_LAYER}} docs before changing schemas, auth/access rules, editor/field configuration, migrations, or storage integration. <!-- INIT:OPTIONAL key=DATA_LAYER — fill the token OR delete this bullet. -->
-- MUST refresh {{ERROR_TRACKER}} docs before changing its initialization/instrumentation files, event-capture behavior, source maps, or PII settings. <!-- INIT:OPTIONAL key=ERROR_TRACKER — fill the token OR delete this bullet. -->
-- MUST refresh {{HOSTING_PLATFORM}} docs before changing deployment/runtime assumptions, storage usage, or environment-variable exposure.
-- SHOULD refresh {{E2E_TEST_FRAMEWORK}} or {{LINTER}} docs before changing their configuration files, snapshot behavior, or suppression syntax.
+- MUST refresh Expo (React Native) docs — at the installed SDK's versioned URL — before changing routing, `app.json`/config plugins, native module usage, or framework configuration files.
+- MUST refresh Drizzle ORM over expo-sqlite docs before changing schemas, migrations, or driver integration.
+- MUST refresh Sentry docs before changing its initialization/instrumentation files, event-capture behavior, source maps, or PII settings.
+- MUST refresh EAS (Expo Application Services) docs before changing deployment/runtime assumptions, storage usage, or environment-variable exposure.
+- SHOULD refresh Maestro or Biome docs before changing their configuration files, snapshot behavior, or suppression syntax.

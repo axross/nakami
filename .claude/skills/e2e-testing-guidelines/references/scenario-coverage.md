@@ -1,9 +1,6 @@
 # E2E Scenario Coverage
 
-<!-- INIT:OPTIONAL key=SCENARIO_COVERAGE — keep if the project adopts journey-catalog e2e coverage OR delete this file, its "E2E Scenario Coverage" routing section in ../SKILL.md, and the marked "Scenario Coverage" sites in quality-assurance-guidelines; see the INIT.md Step-4 bullet. -->
-*If this project does not adopt scenario coverage, delete this file (and the other marked sites) during INIT.*
-
-Apply these rules when tagging tests, extending the journey catalog, or reading the coverage report. This project measures e2e coverage as **scenario coverage** — which real user journeys the {{E2E_TEST_FRAMEWORK}} suite *asserts* — not lines of application code executed.
+Apply these rules when tagging tests, extending the journey catalog, or reading the coverage report. This project measures e2e coverage as **scenario coverage** — which real user journeys the Maestro suite *asserts* — not lines of application code executed.
 
 ## Why Scenario Coverage, Not E2E Line Coverage
 
@@ -19,11 +16,9 @@ The trade-off: the denominator is a **human judgment call** — an incomplete ca
 
 Three pieces, joined by a stable scenario id:
 
-- **Catalog** — a human-authored journey list (e.g. `scenarios.md` at the root of `{{TEST_DIR}}`) with one row per journey: a stable dotted id (e.g. `checkout.payment.success`), a title, an area, and a priority of `must` | `should` | `may`.
-- **Tags** — each test declares which journeys it asserts through the tag mechanism {{E2E_TEST_FRAMEWORK}} provides. For example: a `@scenario:<id>` join tag (a test can carry several), optional `@area:<area>` / `@priority:<priority>` facet tags for filtered runs and grouped reporting, and an `@smoke` selection tag marking the fast pre-gate subset — adapt the exact syntax to the framework's tagging feature.
-- **Reporter** — a coverage reporter tallies, for every catalog row, whether at least one **passing** test carries its scenario tag, then prints `covered/total` overall and per priority plus the list of uncovered scenarios.
-
-> The reporter, the gate script, and the coverage run command are built during INIT (Step 5) — the template ships the convention, not an implementation.
+- **Catalog** — the human-authored journey list `e2e/scenarios.md` with one row per journey: a stable kebab-case id (dots allowed for hierarchy, e.g. `feeds.create`), a priority of `must` | `should` | `may`, and the journey description.
+- **Tags** — each flow declares which journeys it asserts via `scenario:<id>` entries in its flow-config `tags:` list (a flow can carry several). Additional plain tags (e.g. `smoke`) MAY be used with `maestro test --include-tags` for filtered runs.
+- **Gate** — `e2e/check-scenario-coverage.mjs` (run via `npm run test:e2e:coverage`, and as the first step of `npm run test:e2e`) tallies, for every catalog row, whether at least one flow carries its scenario tag, prints `covered/total` and the uncovered list, and exits non-zero on an uncovered `must` scenario or a structural tag error. Whether the tagged flows *pass* is enforced by the Maestro run that follows the gate in `npm run test:e2e`.
 
 **Guidelines:**
 
@@ -31,9 +26,9 @@ Three pieces, joined by a stable scenario id:
 - MUST add a catalog row when a change introduces a new user-facing journey, in the same change as the test that asserts it.
 - MUST tag the test that **asserts** the journey's outcome — never a test that merely passes through the journey on its way elsewhere; executed ≠ asserted, and a tag on a pass-through test overstates coverage.
 - MUST NOT rename a scenario id without updating every tag that references it in the same change — the id is the contract between catalog and tests.
-- MUST keep facet tags (area, priority) consistent with the tagged scenario's catalog row, so filtered runs and grouped reports stay trustworthy.
+- MUST keep any selection tags (e.g. `smoke`) consistent with the flow's actual role, so filtered runs stay trustworthy.
 - SHOULD keep genuinely-untested journeys in the catalog with an honest priority so the report shows real gaps; writing tests for surfaced gaps is follow-up work, not a prerequisite for reading the metric.
-- MUST count a scenario as covered only when a **passing** test carries its tag; a failing or skipped test leaves it uncovered.
+- MUST NOT treat a green coverage gate alone as e2e verification — the gate checks tag bookkeeping; only the Maestro run proves the journeys pass.
 
 ## Phased Gate
 
@@ -41,7 +36,7 @@ Gating in phases lets the metric land before coverage is complete: pin the criti
 
 **Guidelines:**
 
-- MUST hard-gate `must`-priority scenarios at 100% first: a `must` row with no passing asserting test blocks.
+- MUST hard-gate `must`-priority scenarios at 100%: a `must` row with no asserting flow blocks the run.
 - MUST fail the run on structural tag errors — an unknown scenario id or a facet tag that disagrees with the catalog — in every phase; a silently mis-joined tag corrupts the metric.
-- SHOULD keep `should` / `may` coverage report-only until the `must` gate is stable, then tighten deliberately.
-- SHOULD keep the default e2e run threshold-free (report + structural errors only) so it stays fast, and enforce the `must` gate in a dedicated coverage command or CI job.
+- SHOULD keep `should` / `may` coverage report-only until the `must` gate is stable, then tighten deliberately (in the gate script).
+- SHOULD keep the gate fast and device-free so it can run everywhere (it is pure file bookkeeping; `npm run test:e2e:coverage` needs no simulator).

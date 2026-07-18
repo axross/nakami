@@ -1,8 +1,5 @@
 # Logging
 
-<!-- INIT:OPTIONAL key=LOGGER — keep & fill the token (add the tool, INIT Step 5) OR delete this section. -->
-*If this project has no {{LOGGER}} (structured logger), delete or adapt this section during INIT.*
-
 Apply these rules when writing, reviewing, or modifying any code that emits log output.
 
 ## When to Log
@@ -23,16 +20,16 @@ Levels are the filter operators reach for under pressure, so a message at the wr
 
 - SHOULD use `logger.info()` for informational messages that describe normal progress.
 - SHOULD use `logger.warn()` for recoverable unexpected conditions — cases where execution continues but something is worth investigating.
-- MUST NOT use `logger.error()` for errors **when the project has a dedicated {{ERROR_TRACKER}}**. Report the error to {{ERROR_TRACKER}} (via its capture call) and let it propagate. See [Error Handling](./error-handling.md).
-  - If the project has **no** {{ERROR_TRACKER}}, `logger.error()` is the sanctioned channel for unexpected failures; this rule depends on whether {{ERROR_TRACKER}} survives INIT.
+- MUST NOT use `logger.error()` for errors — report the error to Sentry (via `reportError(...)`) and let it propagate. See [Error Handling](./error-handling.md).
+  - If the project has **no** Sentry, `logger.error()` is the sanctioned channel for unexpected failures; this rule depends on whether Sentry survives INIT.
 
 ## Logger Setup
 
-The project uses {{LOGGER}} for structured (e.g., JSON) logging.
+The project uses react-native-logs for structured (e.g., JSON) logging.
 
 **Guidelines:**
 
-- MUST derive loggers from the project's shared **root logger** instead of instantiating a new {{LOGGER}} instance directly in each module.
+- MUST derive loggers from the project's shared **root logger** instead of instantiating a new react-native-logs instance directly in each module.
 - MUST create a **child logger** scoped to each module, setting a `module` field that identifies the module:
 
 ```typescript
@@ -46,7 +43,7 @@ const logger = rootLogger.child({ module: "data-fetch" });
 
 ## Structured Log Format
 
-{{LOGGER}} accepts an optional **context object** as the first argument and the **message string** as the second. Use this two-argument form whenever there is relevant context to attach. (Adapt to your logger's signature if it differs.)
+react-native-logs accepts an optional **context object** as the first argument and the **message string** as the second. Use this two-argument form whenever there is relevant context to attach. (Adapt to your logger's signature if it differs.)
 
 ```typescript
 // No context needed

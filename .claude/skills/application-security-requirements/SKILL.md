@@ -1,13 +1,13 @@
 ---
 name: application-security-requirements
-description: The security and privacy review lens for code changes. Covers secrets/env vars, the framework's public/client-exposed env-var prefix, input validation, data-layer access control, public exposure, output-encoding/injection in rendered untrusted content, SSRF/outbound fetch of user-controlled URLs, auth/session settings, analytics/error-reporting data capture, and dependency supply-chain risk.
+description: The security and privacy review lens for code changes. Covers secrets/env vars, the framework's public/client-exposed env-var prefix, input validation, data-layer access control, public exposure, output-encoding/injection in rendered untrusted content, SSRF/outbound fetch of user-controlled URLs, auth/session settings, error-reporting data capture, and dependency supply-chain risk.
 when_to_use: Use when reviewing security or privacy implications of a change — "is this safe", "security", "auth", "admin", "secret", "privacy", "PII", "XSS", "SSRF", or dependency reviews.
 user-invocable: false
 ---
 
 # Application Security Requirements
 
-Apply these rules when reviewing the security implications of any code change in this project. The framing is OWASP Top 10 mapped onto this project's stack. Where a section names a concrete tool (the data/content layer, the hosting platform, the error tracker, an analytics service), treat it as a placeholder for whatever the project actually uses, and delete the section if the project has no such tool.
+Apply these rules when reviewing the security implications of any code change in this project. The framing is OWASP Top 10 mapped onto this project's stack. Where a section names a concrete tool (the data/content layer, the hosting platform, the error tracker), treat it as a placeholder for whatever the project actually uses, and delete the section if the project has no such tool.
 
 ## Secret and Environment-Variable Handling
 
@@ -31,10 +31,9 @@ See [input-validation.md](./references/input-validation.md) for:
 
 See [access-control.md](./references/access-control.md) for:
 
-- Each data-layer resource has explicit access rules appropriate for its data sensitivity
-- Unpublished / non-default content is gated so it is not served to unauthorized requests
-- The authentication system's lockout / rate-limit settings are not weakened
-- New mutation endpoints are protected against unauthenticated abuse
+- Credentials never land in the Drizzle database or plain key-value storage — only the platform keychain
+- Authorization for remote data stays with the backend; UI checks are affordances, not access control
+- Deep-linkable routes validate their parameters and never state-change without confirmation
 
 ## Privacy and Exposure Control
 
@@ -42,8 +41,8 @@ See [privacy-and-exposure.md](./references/privacy-and-exposure.md) for:
 
 - Unpublished, preview, admin-only, and private content cannot leak through public routes, metadata, structured data, sitemap, robots, or media routes
 - Public media/asset URLs expose only intentionally public assets and do not reveal private storage tokens or internal identifiers
-- Analytics and error-reporting changes do not capture unnecessary PII, secrets, private content, or internal fields
-- Client-exposed environment variables, analytics event properties, and error context are intentionally public
+- Error-reporting changes do not capture unnecessary PII, secrets, private content, or internal fields
+- Client-exposed environment variables and error context are intentionally public
 
 ## Injection in Rendered Untrusted Content
 
@@ -67,9 +66,9 @@ See [ssrf-and-embeds.md](./references/ssrf-and-embeds.md) for:
 
 See [auth-and-session.md](./references/auth-and-session.md) for:
 
-- Authentication lockout / rate-limit settings are not relaxed
-- Privileged / preview state is reachable only via the authentication path, not via a query-string bypass
+- Session material lives in the platform keychain, behind the project's single auth entry point (dormant until auth lands)
 - Error-tracker PII exposure is acknowledged when adding new identifiers/contexts
+- Dev-only code paths (`__DEV__` gates) have a production equivalent
 
 ## Supply Chain
 
