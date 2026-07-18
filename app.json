@@ -37,7 +37,14 @@
 			],
 			"expo-sqlite",
 			"react-native-edge-to-edge",
-			"@sentry/react-native"
+			[
+				"@sentry/react-native/expo",
+				{
+					"organization": "axross",
+					"project": "payload-mobile",
+					"url": "https://sentry.io/"
+				}
+			]
 		],
 		"experiments": {
 			"typedRoutes": true,

@@ -3,8 +3,10 @@ import { env } from "~/core/helpers/env";
 
 /**
  * Initializes the Sentry error reporter. Must be called once, before the root
- * component renders. A missing DSN (local development, CI) leaves reporting
- * disabled without failing the app.
+ * component renders. A missing DSN (CI, a machine that opts out via
+ * .env.local) leaves reporting disabled without failing the app, and dev
+ * builds never send events — flip `enabled` temporarily to test the
+ * integration locally.
  */
 export function initializeErrorReporter(): void {
 	if (env.EXPO_PUBLIC_SENTRY_DSN === undefined) {
@@ -13,6 +15,8 @@ export function initializeErrorReporter(): void {
 
 	Sentry.init({
 		dsn: env.EXPO_PUBLIC_SENTRY_DSN,
+		enabled: !__DEV__,
+		environment: __DEV__ ? "development" : "production",
 		sendDefaultPii: false,
 	});
 }

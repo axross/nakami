@@ -27,8 +27,9 @@ feature directories under `src/`.
 
 1. Use the Node version pinned in `.nvmrc` (Node 22).
 2. Install dependencies: `npm install`
-3. Copy `.env.example` to `.env.local` and fill values as needed (a missing
-   Sentry DSN just disables error reporting locally).
+3. Optional: copy `.env.example` to `.env.local` for machine-local overrides.
+   The committed `.env` already carries the public Sentry DSN
+   (`axross/payload-mobile` on sentry.io); dev builds never send events.
 4. Start developing: `npm run dev`, then connect a dev build — or compile and
    launch one with `npm run ios` / `npm run android`.
 5. Export release-shaped JS bundles: `npm run build`. Release binaries are
