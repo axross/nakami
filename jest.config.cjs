@@ -4,7 +4,8 @@ module.exports = {
 	moduleNameMapper: {
 		"^~/(.*)$": "<rootDir>/src/$1",
 	},
-	transformIgnorePatterns: [
-		"node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-unistyles|react-native-nitro-modules|react-native-edge-to-edge|react-native-logs))",
-	],
+	// jest-expo's default transformIgnorePatterns already allows every
+	// react-native-* / expo-* / @expo/* package through Babel — do not override
+	// it here; a narrower hand-rolled list breaks on untranspiled ESM.
+	setupFiles: ["react-native-unistyles/mocks", "<rootDir>/src/unistyles.ts"],
 };

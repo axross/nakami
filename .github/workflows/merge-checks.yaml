@@ -34,7 +34,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Dependency Installation
-        run: "npm install"
+        run: "npm ci"
       - name: Lint
         run: "npm run lint"
       - name: Typecheck
@@ -52,7 +52,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: Dependency Installation
-        run: "npm install"
+        run: "npm ci"
       - name: Unit Test Run
         run: "npm run test:unit"
       - name: E2E Scenario-Coverage Gate

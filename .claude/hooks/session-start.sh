@@ -15,16 +15,15 @@ fi
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$PROJECT_DIR"
 
-# provision the toolchain. this example uses mise; replace with the project's
-# version manager (asdf, nvm, volta, pyenv, rbenv, ...) or a direct install.
-# adapt the runtime-version resolution to wherever the project pins it
-# (e.g. a manifest, .tool-versions, .nvmrc).
+# provision the Node version pinned in .nvmrc via mise. mise does not read
+# .nvmrc unless idiomatic version files are enabled, so the pin is passed
+# explicitly; best-effort, since the base image usually ships a usable Node.
 if ! command -v mise >/dev/null 2>&1; then
   curl -fsSL https://mise.run | sh
 fi
 export PATH="$HOME/.local/bin:$PATH"
 eval "$(mise activate bash)"
-mise install || true
+mise use --global "node@$(cat .nvmrc)" || true
 eval "$(mise activate bash)"
 hash -r 2>/dev/null || true
 
