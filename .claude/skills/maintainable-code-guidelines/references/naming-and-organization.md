@@ -41,7 +41,7 @@ When the diff adds or moves a route/feature, the reviewer MUST verify it against
 
 **Guidelines:**
 
-- MUST verify added or moved route files against the project's own routing skill, if defined, before approving their placement. (Routing conventions are project-specific and may be defined as a dedicated skill during INIT.)
+- MUST verify added or moved route files against the routing-guidelines skill before approving their placement.
 
 ## Identifier Naming
 

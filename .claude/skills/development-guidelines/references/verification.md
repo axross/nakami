@@ -4,7 +4,7 @@ Apply these guidelines to confirm that any change produces the correct applicati
 
 ## Identifying Affected Output Surfaces
 
-Use this table to determine which output surfaces a change puts at risk. Adapt the "Changed area" entries to the project's actual file layout during INIT.
+Use this table to determine which output surfaces a change puts at risk.
 
 | Changed area | Output surface at risk |
 |---|---|

@@ -2,11 +2,6 @@
 
 # posttooluse hook: formats the project after a code change so written files
 # stay consistent. fires on edit/write tools.
-#
-# TEMPLATE NOTE: this is an example Claude Code harness binding. During INIT,
-# replace the `{{...}}` tokens below with the project's real values, or delete this
-# hook (and its entry in .claude/settings.local-example.json) if the project
-# has no formatter.
 set -uo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"

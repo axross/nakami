@@ -3,11 +3,6 @@
 # stop hook: before the task completes, run the unit tests and lint whenever
 # code changed in this session. failures block completion and are reported back
 # on stderr so the agent addresses them before finishing.
-#
-# TEMPLATE NOTE: this is an example Claude Code harness binding. During INIT,
-# replace the `{{...}}` tokens below with the project's real values, or delete this
-# hook (and its entry in .claude/settings.local-example.json) if the project
-# has no automated checks.
 set -uo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"

@@ -4,7 +4,7 @@ Apply this reference when a change depends on framework, platform, service, or t
 
 ## When to Refresh Docs
 
-Use current official docs before changing behavior governed by fast-moving frameworks, services, or tools that the project depends on. The table below lists representative surfaces by tool token; delete rows for tools the project does not use during INIT, and add rows for any other fast-moving dependency.
+Use current official docs before changing behavior governed by fast-moving frameworks, services, or tools that the project depends on. The table below lists the project's fast-moving dependencies; add rows when a new one lands.
 
 | Surface | Refresh docs before changing |
 | ------- | ---------------------------- |
@@ -25,7 +25,7 @@ Use current official docs before changing behavior governed by fast-moving frame
 
 ## Project-Specific Current-Docs Triggers
 
-Some project areas are especially sensitive because a small API mismatch can produce production-only failures. List the project's own high-sensitivity config files and entry points here during INIT.
+Some project areas are especially sensitive because a small API mismatch can produce production-only failures: `app.json` (config plugins), `babel.config.js`, `metro`-related config, `drizzle.config.ts` and `src/core/db/`, and the Sentry/Unistyles initialization in `src/core/helpers/` and `src/unistyles.ts`.
 
 **Guidelines:**
 

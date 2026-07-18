@@ -61,4 +61,4 @@ Style feedback on files the tooling produces is noise the author cannot act on, 
 
 - MUST NOT review generated or tool-managed files (e.g., framework- or data-layer-generated directories, generated type definitions, lockfiles) for code style. See the project's development guidelines (change-management rules) for the project's list.
 - MUST NOT review auto-generated data-layer schema migrations for code style. Only flag a migration if it appears to drop a column or rename a field destructively without a data backfill.
-- MUST consult the project's own structure / change-management skill (defined during INIT) for the exact set of paths to exclude from review, since these vary per project.
+- MUST consult the project-structure skill and the development guidelines (change-management rules) for the exact set of paths to exclude from review (e.g. `src/core/db/migrations/`, `package-lock.json`).

@@ -6,7 +6,7 @@ Apply these rules whenever you write or modify code in this project.
 
 The order matters because the linter reports problems the formatter alone does not resolve, so a passing format step is not proof the code is clean.
 
-- `npm run format` applies auto-fixable formatting. `npm run lint` enforces the lint rules — and, in toolchains where the linter also checks formatting (e.g. Biome), re-flags format issues the formatter missed. In toolchains where it does not (e.g. ESLint with `eslint-config-prettier`), both steps are still always required. <!-- INIT: keep whichever clause matches the project's toolchain and delete the other, then delete this comment. -->
+- `npm run format` applies auto-fixable formatting. `npm run lint` enforces the lint rules — and, because Biome also checks formatting, re-flags format issues the formatter missed. Both steps are always required.
 
 **Guidelines:**
 
@@ -53,9 +53,7 @@ A type system's guarantees only hold when the code does not quietly opt out of t
 
 ## Comments
 
-This project distinguishes two kinds of comment, each with its own style: **doc-comments** that document an API, and **line comments** that explain a specific spot in the code. Existing source files are the authority for both — read them before writing comments and match their voice. These rules apply to source-code comments only, not to commit messages (see [commit-messages.md](./commit-messages.md)) or to prose documentation.
-
-<!-- INIT: name the project's doc-comment standard (e.g., TSDoc, JSDoc, docstrings) and its line-comment voice (casing, punctuation, phrasing) in the intro above, then delete this comment. -->
+This project distinguishes two kinds of comment, each with its own style: **doc-comments** in TSDoc (`/** … */`) that document an API, and **line comments** — lowercase, sentence-style `//` remarks — that explain a specific spot in the code. Existing source files are the authority for both — read them before writing comments and match their voice. These rules apply to source-code comments only, not to commit messages (see [commit-messages.md](./commit-messages.md)) or to prose documentation.
 
 ### Doc-Comments
 

@@ -80,8 +80,9 @@ Consult the appropriate skill for detailed guidance on each area:
 |---|---|
 | Error handling, error-reporting, and logging | the project's observability guidelines |
 | End-to-end test structure, conventions, and commands | the project's end-to-end testing guidelines |
-
-Project-specific topic skills — covering repository structure, routing, UI components, visual design, the data/content layer, and any domain rules — are created per-project during INIT. Consult those skills when implementation touches the area they own, if they have been defined.
+| Repository layout, stack facts, and file placement | the project-structure skill |
+| Component composition, styling, and theming | the component-guidelines skill |
+| Route files, navigation, and deep links | the routing-guidelines skill |
 
 **Guidelines:**
 
