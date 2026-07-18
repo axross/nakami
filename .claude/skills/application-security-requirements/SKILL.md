@@ -15,7 +15,7 @@ See [secret-handling.md](./references/secret-handling.md) for:
 
 - No literal secret committed (any service credential, token, or test password)
 - `process.env.*` accessed only inside the project's whitelisted env-access files
-- The framework's public/client-exposed env-var prefix convention used only for values intentionally exposed to the browser/client
+- The `EXPO_PUBLIC_*` prefix convention used only for values intentionally compiled into the shipped app bundle
 - `.env.local` is gitignored; example only in `.env.example`
 
 ## Input Validation

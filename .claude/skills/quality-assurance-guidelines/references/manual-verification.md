@@ -12,7 +12,7 @@ The reviewer MUST ask the author to confirm (in the PR description or the review
 | Any data-driven surface that supports non-default content states *(optional)* | The surface was exercised in each non-default content state the data layer supports (e.g., a draft or unpublished state) |
 | A live-preview / CMS preview path *(optional)* | The preview path was loaded inside the data layer's preview/admin surface |
 | Not-found handling or any routing change | A non-existent identifier was requested and the not-found UI rendered correctly |
-| Metadata generation, if the project produces any (e.g., page metadata, sitemap, robots, social-share image) *(optional)* | The metadata response was inspected (e.g., view-source, the generated sitemap/robots endpoint, social-share preview) |
+| Deep-link scheme, app config, or store metadata (`app.json`) *(optional)* | The deep link was opened from outside the app (e.g., `npx uri-scheme open`), or the config change was confirmed in the resolved config (`npx expo config`) |
 | The content/markup rendering pipeline *(optional)* | A record containing the affected construct was rendered end-to-end |
 | Error-tracker / instrumentation config *(optional)* | The app starts without throwing, and a test exception was confirmed to reach the error tracker (or the author confirmed reporting is intentionally disabled in dev) |
 
