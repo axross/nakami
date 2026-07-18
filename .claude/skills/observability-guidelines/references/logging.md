@@ -21,41 +21,43 @@ Levels are the filter operators reach for under pressure, so a message at the wr
 - SHOULD use `logger.info()` for informational messages that describe normal progress.
 - SHOULD use `logger.warn()` for recoverable unexpected conditions — cases where execution continues but something is worth investigating.
 - MUST NOT use `logger.error()` for errors — report the error to Sentry (via `reportError(...)`) and let it propagate. See [Error Handling](./error-handling.md).
-  - If the project has **no** Sentry, `logger.error()` is the sanctioned channel for unexpected failures; this rule depends on whether Sentry survives INIT.
 
 ## Logger Setup
 
-The project uses react-native-logs for structured (e.g., JSON) logging.
+The project logs through react-native-logs, wrapped by `src/core/helpers/logging.ts`. That helper owns the single root logger; modules never construct their own.
 
 **Guidelines:**
 
-- MUST derive loggers from the project's shared **root logger** instead of instantiating a new react-native-logs instance directly in each module.
-- MUST create a **child logger** scoped to each module, setting a `module` field that identifies the module:
+- MUST obtain loggers via `createModuleLogger(moduleName)` from `~/core/helpers/logging` instead of instantiating react-native-logs directly in a module — the helper's root logger owns severity and transport configuration.
+- MUST create one module logger per module, named for the module's concern (`createModuleLogger("feeds/queries")`); react-native-logs prefixes every line with that namespace (its `.extend()` mechanism), so lines are filterable by module:
 
 ```typescript
-import { rootLogger } from "the project's shared logger module";
+import { createModuleLogger } from "~/core/helpers/logging";
 
-const logger = rootLogger.child({ module: "data-fetch" });
+const logger = createModuleLogger("data-fetch");
 ```
 
-- SHOULD choose a `module` identifier that represents the module's concern at a glance and is unique per module, so log lines can be filtered by module without reading the full path.
-- MAY adopt a short, scannable convention for the `module` identifier (for example, an emoji per module such as `📥` for data fetching, `🌏` for external requests, `🖼️` for media handling) if the project finds it useful.
+- SHOULD choose a module name that represents the module's concern at a glance and is unique per module, so log lines can be filtered without reading the full path.
 
 ## Structured Log Format
 
-react-native-logs accepts an optional **context object** as the first argument and the **message string** as the second. Use this two-argument form whenever there is relevant context to attach. (Adapt to your logger's signature if it differs.)
+react-native-logs log methods accept multiple arguments and append them to the line — objects are stringified by the transport. Pass the message string first, then one context object with the searchable fields.
 
 ```typescript
 // No context needed
 logger.info("Started fetching records.");
 
 // With context
-logger.info({ id }, "Started fetching record.");
-logger.info({ id, duration: performance.now() - startedAt }, "Completed fetching record.");
+logger.info("Started fetching record.", { id });
+logger.info("Completed fetching record.", {
+	id,
+	duration: performance.now() - startedAt,
+});
 ```
 
 **Guidelines:**
 
+- MUST pass the message string as the first argument; attach context as a single trailing object rather than interpolating values into the message.
 - SHOULD include identifiers (e.g., an entity `id`, `url`, `filename`) in the context object so log lines are searchable and filterable.
 - SHOULD include timing information (`duration`) in "completed" log lines for operations where latency matters.
 - MUST NOT log values that can contain sensitive user data (passwords, tokens, PII). Log only identifiers and metadata.
@@ -72,15 +74,15 @@ Log messages SHOULD follow a consistent past-tense / gerund-phrase pattern that 
 
 ```typescript
 // CORRECT
-logger.info({ url }, "Started fetching external metadata.");
+logger.info("Started fetching external metadata.", { url });
 // ... operation ...
-logger.info({ url, duration }, "Completed fetching external metadata.");
+logger.info("Completed fetching external metadata.", { url, duration });
 
 // CORRECT — warn on recoverable skip
-logger.warn(
-  { id: record.id, error: parseError },
-  "Skipped a record due to parse error.",
-);
+logger.warn("Skipped a record due to parse error.", {
+	id: record.id,
+	error: parseError,
+});
 
 // WRONG — vague, not scannable
 logger.info("done");

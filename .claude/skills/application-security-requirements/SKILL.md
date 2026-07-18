@@ -7,7 +7,7 @@ user-invocable: false
 
 # Application Security Requirements
 
-Apply these rules when reviewing the security implications of any code change in this project. The framing is OWASP Top 10 mapped onto this project's stack. Where a section names a concrete tool (the data/content layer, the hosting platform, the error tracker), treat it as a placeholder for whatever the project actually uses, and delete the section if the project has no such tool.
+Apply these rules when reviewing the security implications of any code change in this project. The framing is OWASP Top 10 mapped onto this project's stack: an Expo (React Native) app with an on-device Drizzle/expo-sqlite data layer, Zod validation, and Sentry error reporting.
 
 ## Secret and Environment-Variable Handling
 
@@ -39,10 +39,10 @@ See [access-control.md](./references/access-control.md) for:
 
 See [privacy-and-exposure.md](./references/privacy-and-exposure.md) for:
 
-- Unpublished, preview, admin-only, and private content cannot leak through public routes, metadata, structured data, sitemap, robots, or media routes
-- Public media/asset URLs expose only intentionally public assets and do not reveal private storage tokens or internal identifiers
+- Everything bundled in the binary — code, assets, `EXPO_PUBLIC_*` values — is treated as public; no secrets or privileged endpoints ship in it
+- Deep links and outbound requests carry no sensitive data beyond what the receiving side needs
 - Error-reporting changes do not capture unnecessary PII, secrets, private content, or internal fields
-- Client-exposed environment variables and error context are intentionally public
+- Log lines carry identifiers and metadata, never user content or credentials
 
 ## Injection in Rendered Untrusted Content
 
@@ -53,14 +53,14 @@ See [xss-in-markdown.md](./references/xss-in-markdown.md) for:
 - Custom render nodes only emit attributes that the rendering layer encodes safely
 - The framework's safe-encoding path is not bypassed (no manual string interpolation of untrusted content into markup)
 
-## SSRF and Outbound Fetch
+## Outbound Fetch and Remote Content
 
 See [ssrf-and-embeds.md](./references/ssrf-and-embeds.md) for:
 
-- Any code that `fetch`-es a user- or CMS-controlled URL cannot be steered at internal-network hosts in production
-- Image/asset rendering does not bypass the host allowlist for user-controlled URLs
-- New user-controlled URLs that flow into a `fetch` call go through an allowlist or a hostname check
-- New entries in the config allowlist of external hosts are tightly scoped
+- Externally-supplied URLs are validated (scheme, shape) before any `fetch`, and stored credentials only travel to the user's configured host
+- Remote images render through the sanctioned `expo-image` path with validated sources
+- Deep-link parameters never steer credentialed or outbound requests unvalidated
+- Outbound fetches carry timeouts
 
 ## Auth and Session Management
 

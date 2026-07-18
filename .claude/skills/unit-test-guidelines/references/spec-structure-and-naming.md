@@ -73,7 +73,7 @@ describe("RecordParameters", () => {
 	describe("when index is invalid", () => {
 		it("rejects fractional index values", () => {
 			expect(() => RecordParameters.parse({ id: "abc", index: [1.5] })).toThrow(
-				SchemaError,
+				z.ZodError,
 			);
 		});
 	});

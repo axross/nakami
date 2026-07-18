@@ -24,9 +24,14 @@ export function initializeErrorReporter(): void {
 /**
  * Reports a handled error to the error tracker. Use at catch sites that
  * swallow errors the user never sees; unhandled errors are captured globally.
+ * Optional context is forwarded as Sentry extras — identifiers and metadata
+ * only, never secrets or raw content.
  */
-export function reportError(error: unknown): void {
-	Sentry.captureException(error);
+export function reportError(
+	error: unknown,
+	context?: { extra?: Record<string, unknown> },
+): void {
+	Sentry.captureException(error, context);
 }
 
 /**

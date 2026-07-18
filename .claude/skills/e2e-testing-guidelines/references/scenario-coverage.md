@@ -37,6 +37,6 @@ Gating in phases lets the metric land before coverage is complete: pin the criti
 **Guidelines:**
 
 - MUST hard-gate `must`-priority scenarios at 100%: a `must` row with no asserting flow blocks the run.
-- MUST fail the run on structural tag errors — an unknown scenario id or a facet tag that disagrees with the catalog — in every phase; a silently mis-joined tag corrupts the metric.
+- MUST fail the run on structural tag errors — a flow tagging a scenario id that is not in the catalog (what `e2e/check-scenario-coverage.mjs` enforces); a silently mis-joined tag corrupts the metric.
 - SHOULD keep `should` / `may` coverage report-only until the `must` gate is stable, then tighten deliberately (in the gate script).
 - SHOULD keep the gate fast and device-free so it can run everywhere (it is pure file bookkeeping; `npm run test:e2e:coverage` needs no simulator).

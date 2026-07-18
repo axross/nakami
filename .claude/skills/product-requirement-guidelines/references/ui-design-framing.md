@@ -45,12 +45,12 @@ Accessibility intent belongs in the spec as testable outcomes, not a compliance 
 
 ## Responsive Behavior Intent
 
-Responsive intent belongs in the spec as content/layout behavior at defined viewport ranges, not fixed device names or pixel breakpoints — breakpoints belong where content or layout breaks, not at arbitrary device widths. WCAG's reflow criterion gives a concrete, citable floor: no layout requires two-dimensional scrolling at narrow viewports or high zoom.
+Responsive intent belongs in the spec as content/layout behavior across screen-size ranges, orientations, and font-scaling levels, not fixed device names or pixel breakpoints — breakpoints belong where content or layout breaks, not at arbitrary device widths. WCAG's reflow criterion gives a concrete, citable floor: no layout requires two-dimensional scrolling on narrow screens or at large accessibility font scales.
 
 **Guidelines:**
 
-- MUST state responsive intent in terms of content/layout behavior (what reflows, reorders, collapses, or hides) at defined viewport ranges, not fixed device names or pixel values.
-- MUST NOT permit a layout that requires two-dimensional scrolling at narrow viewports or high zoom.
+- MUST state responsive intent in terms of content/layout behavior (what reflows, reorders, collapses, or hides) across screen-size ranges, orientations, and font-scale levels, not fixed device names or pixel values.
+- MUST NOT permit a layout that requires two-dimensional scrolling on narrow screens or at large accessibility font scales.
 
 ## Copy and Microcopy Constraints
 

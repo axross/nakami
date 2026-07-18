@@ -40,7 +40,7 @@ These commands enforce formatting, linting, and end-to-end behavior.
 
 ## Data-Layer Commands
 
-Data-layer commands manage the Drizzle schema and its generated migrations. Migrations are generated at development time and applied on-device at app startup (via Drizzle's expo-sqlite migrator), not by a CLI apply step.
+Data-layer commands manage the Drizzle schema and its generated migrations. Migrations are generated at development time and are meant to be applied on-device at app startup via Drizzle's expo-sqlite migrator (`useMigrations`) — that migrator is **not wired yet**: the change that lands the first migration MUST also wire `useMigrations` into the root layout (`src/app/_layout.tsx`), or the migration will never run.
 
 | Command | Purpose |
 | ------- | ------- |

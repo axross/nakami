@@ -21,7 +21,7 @@ payload-mobile is a companion mobile app for Payload MCP, built with Expo (React
 - Validation: Zod for all external input (env, deep-link params, API payloads, db-row parsing).
 - Styling/theming: react-native-unistyles; themes/breakpoints defined in `src/common/constants/style.ts`, configured in `src/unistyles.ts`.
 - Tests: Jest (jest-expo) unit tests colocated with their subject; Maestro e2e flows in `e2e/flows/`.
-- Import alias: `~/*` → `src/*` (declared in `tsconfig.json`; Jest mirrors it in `jest.config.cjs`).
+- Import aliases: `~/*` → `src/*` and `~/assets/*` → `assets/*` (declared in `tsconfig.json`; Jest mirrors both in `jest.config.cjs`).
 
 ## Top-Level Layout
 

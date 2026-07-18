@@ -14,7 +14,7 @@ Use this skill for Jest (jest-expo) with React Native Testing Library-based unit
 See [testing-scope.md](./references/testing-scope.md) for:
 
 - deciding whether a behavior belongs in unit, integration, or e2e coverage
-- keeping pure helper tests small while routing browser, data-layer, and framework behavior to broader tests
+- keeping pure helper tests small while routing native-platform, data-layer, and framework behavior to broader tests
 - recognizing when a unit test would be lower confidence than an integration or e2e check
 
 ## Spec Structure and Naming
@@ -78,4 +78,4 @@ These defaults are intentionally short. Follow the linked references for example
 - MUST use the project's chosen test-case function consistently and not mix it with an alternative spelling within the same project.
 - MUST run unit tests through `npm run test:unit` unless investigating a targeted failure.
 - MUST run `npm run format` and `npm run lint` after adding or changing unit tests, plus `npm run typecheck`.
-- SHOULD prefer integration or e2e tests when confidence depends on framework runtime wiring, the data layer, browser behavior, rendering, routing, or user-facing UI.
+- SHOULD prefer integration or e2e tests when confidence depends on framework runtime wiring, the data layer, native platform behavior, rendering, routing, or user-facing UI.

@@ -39,7 +39,6 @@ Apply these keywords consistently in this document and the documents linked from
 | [Product Requirement Guidelines](.claude/skills/product-requirement-guidelines/SKILL.md) | Writing, refining, or reviewing a product requirement, feature spec, or issue description; framing scope/non-goals, testable acceptance criteria, or a spec's UI-design or architecture sections |
 | [Quality Assurance Guidelines](.claude/skills/quality-assurance-guidelines/SKILL.md) | Reviewing verification evidence, e2e coverage, snapshots, flakiness, lint/format evidence, or manual checks |
 | [Unit Test Guidelines](.claude/skills/unit-test-guidelines/SKILL.md) | Writing, refactoring, reviewing, or running unit tests, including mocks/fakes, fixtures, schema tests, and behavior-focused assertions |
-
 | [Project Structure](.claude/skills/project-structure/SKILL.md) | Navigating the repository, deciding where a new module, route, component, or test belongs, or checking stack, tooling, and directory conventions |
 | [Component Guidelines](.claude/skills/component-guidelines/SKILL.md) | Writing, placing, reviewing, or refactoring a component or hook — compound-component composition, theming with Unistyles, tier placement, promoting repeated UI, test hooks |
 | [Routing Guidelines](.claude/skills/routing-guidelines/SKILL.md) | Creating, moving, renaming, or reviewing routes — Expo Router file conventions, layouts, navigation, deep links, or route-level loading and error surfaces |
@@ -131,7 +130,7 @@ Verification should match the changed surface. Documentation-only changes need l
 - MUST run `npm run test:unit` after a change affects code it covers.
 - MUST run `npm run test:e2e` after a change affects a user-facing output surface or e2e coverage (at minimum `npm run test:e2e:coverage` when no simulator is available, reporting the skipped on-device run).
 - MUST run `npm run build` after a change affects routes, app config, data-layer config, runtime config, dependencies, or public type signatures.
-- SHOULD perform focused manual checks when browser behavior, crawler metadata, custom protocol behavior, responsive layout, or content-preview behavior changes.
+- SHOULD perform focused manual checks when platform-specific native behavior, deep-link handling, responsive layout across device sizes, or content-preview behavior changes.
 - MUST report unverified acceptance criteria and residual risk in the final summary.
 
 ### Skill Maintenance

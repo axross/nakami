@@ -60,7 +60,7 @@ Evidence is what lets a reader confirm a finding without taking the reviewer's w
 
 - A guideline rule citation is evidence. A vague appeal to "best practices" is not — replace it with a specific rule or remove the finding.
 - A reproduced failure path (e.g., "if `params.id` is an array then line 22 returns `true` and …") is evidence. A "smells wrong" hunch is not.
-- A completed command, manual browser check, inspected diff, or log snippet is evidence only when the report states what was checked and what result was observed.
+- A completed command, manual simulator/device check, inspected diff, or log snippet is evidence only when the report states what was checked and what result was observed.
 
 **Guidelines:**
 

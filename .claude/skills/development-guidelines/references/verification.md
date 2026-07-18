@@ -11,7 +11,7 @@ Use this table to determine which output surfaces a change puts at risk.
 | Page/view files and the components they render | Rendered pages/views |
 | Data-access functions or data-fetching logic | Rendered output, content fidelity |
 | Route/navigation definitions and error/not-found handlers | Routing and navigation |
-| Metadata generation, sitemap, robots, and social-preview assets | Metadata and discoverability |
+| Deep-link scheme, app config, and store metadata (`app.json`) | Linking and app identity |
 | Content-processing pipeline (if any) | Content fidelity |
 | Sentry config and react-native-logs setup | Observability |
 

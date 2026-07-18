@@ -13,7 +13,7 @@ A test change is incomplete without proof that the code still passes the local c
 - MUST verify `npm run test:unit` passes or report the exact blocker.
 - MUST run `npm run format` and `npm run lint` after adding or changing unit tests, plus `npm run typecheck`.
 - MUST report skipped commands with a concrete reason and residual risk.
-- MUST run e2e tests instead of relying only on unit tests when the change affects UI output, route behavior, metadata, browser behavior, or e2e coverage.
+- MUST run e2e tests instead of relying only on unit tests when the change affects UI output, route behavior, native platform behavior, or e2e coverage.
 
 ## Naming And Structure Review
 

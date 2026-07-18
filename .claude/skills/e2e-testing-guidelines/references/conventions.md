@@ -32,7 +32,7 @@ tags:
 
 ## Assertions and Waiting
 
-Maestro's assertions (`assertVisible`, `assertNotVisible`, `assertTrue`) auto-wait up to their timeout; explicit waits exist for the cases auto-waiting cannot see.
+Maestro's visibility assertions (`assertVisible`, `assertNotVisible`) auto-wait up to their timeout; `assertTrue` evaluates its condition immediately, so wrap async conditions in `extendedWaitUntil` instead. Explicit waits exist for the cases auto-waiting cannot see.
 
 **Guidelines:**
 

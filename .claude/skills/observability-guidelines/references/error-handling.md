@@ -53,7 +53,7 @@ Unexpected failures caught at the root call site should be reported before execu
 - MUST consult [error-tracking.md](./error-tracking.md) before changing imports, event context, PII behavior, or Sentry configuration.
 
 ```typescript
-import { reportError } from "Sentry's SDK";
+import { reportError } from "~/core/helpers/error-reporting";
 
 try {
   resource = await retrieveResource(id);

@@ -9,15 +9,15 @@ Every read against the data layer should make its projection, relationship depth
 | Concern | Why it matters |
 |---|---|
 | Field selection (projection) | Without an explicit projection, the data layer returns every field on every record, including large blobs (e.g., a full body/content field). Select only what the consumer renders. |
-| Relationship depth | If the data layer auto-populates related records, an unbounded or deep population fans out joins. Removing an explicit shallow depth is Critical when the consumer relies on populated relationships; an excessively deep population is Major because each level multiplies the work. |
-| Result limit | Many data layers apply a small default limit silently. Flag a Critical when the consumer expects all records but no limit is set (the user will silently see a truncated subset). Match the project's established bounding pattern. |
+| Relationship loading | Drizzle loads only the relations the query names (`with: { … }` or an explicit join) — each named relation adds join/query work, so load exactly what the consumer renders. Loading a relation no consumer uses is Major; loading nested relations levels deeper than needed is Major because each level multiplies the work. |
+| Result bound | Drizzle applies **no** default limit — an unbounded query returns every row. Flag a Critical when a query over a table that grows with use has no `limit` (or pagination) and its result is rendered directly: the full table is dragged into memory and into the render. A fixed-size lookup table read is fine unbounded. |
 | Filter / predicate | Required when fetching anything other than "all of this collection". Visibility-restricted reads must filter out records the caller is not allowed to see, per the project's application-security requirements (access-control rules). |
 
 **Guidelines:**
 
 - MUST flag a Major when a data-layer read omits an explicit projection, depth bound, result limit, or filter where the API supports them.
-- MUST flag a Critical when a query removes an explicit shallow relationship depth while the consumer relies on populated relationships.
-- MUST flag a Major when a query sets relationship depth deeper than the consumer actually needs.
+- MUST flag a Critical when a query over a growing table is unbounded and its result set is rendered or held in memory directly.
+- MUST flag a Major when a query loads relations (`with`/joins) the consumer does not render, or nests them deeper than the consumer needs.
 - MUST require the appropriate visibility predicate (e.g., "only published / publicly-visible records") for reads that serve untrusted callers.
 
 ## N+1 Patterns to Reject
@@ -40,11 +40,11 @@ Opening a database connection carries real setup cost, and parallel connections 
 
 ## Pagination
 
-Silent truncation is invisible in development, where collections are small; in production, records simply stop appearing once the dataset outgrows the default limit.
+Unbounded growth is invisible in development, where tables hold a handful of rows; on a device that has accumulated months of data, the same query loads the whole table into memory on every render.
 
 **Guidelines:**
 
-- MUST flag a Critical when a new data-access function returns a result set directly without a comment about whether the total count exceeds the limit and will silently truncate. Either lift the limit, paginate, or document the intentional cap.
+- MUST flag a Critical when a new data-access function reads a growing table without a `limit`/pagination and its consumer renders the result directly. Either bound the query (paginate, window, or aggregate in SQL) or document why the table's size is inherently bounded.
 - SHOULD flag a Major when a new collection/table is queried without a defined sort — unsorted queries return records in storage-insertion order, which is not stable across data-layer schema migrations.
 
 ## Migration Cost

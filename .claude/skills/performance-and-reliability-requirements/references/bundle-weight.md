@@ -42,11 +42,11 @@ Lazy loading moves a unit's cost from every user's app startup to the moment the
 - SHOULD flag a Minor recommendation to lazy-load (`React.lazy` / dynamic `import()`) a new component that is large, only used on a single rarely-visited route, and not part of the startup path.
 - MUST flag a Major when startup-path code (root layout, initializers in `src/core/`) gains a heavyweight import that only one deep screen needs.
 
-## Tree-Shaking
+## Import Granularity
 
-Tree-shaking works by proving exports unused, and default or namespace imports of CommonJS-shaped modules make that proof impossible.
+Metro does not do general ESM tree-shaking (Expo's tree shaking is experimental/opt-in), so what keeps unused code out of the bundle is the module graph itself: modules that are never imported never ship.
 
 **Guidelines:**
 
-- MUST flag a Major when app code uses a default import (e.g., `import _ from "lib"`) instead of named imports for a tree-shakeable library. Default imports often defeat tree-shaking for CommonJS-shaped libraries.
-- SHOULD flag a Minor when a new icon or UI library is imported wholesale (e.g., `import * as Icons from "…"`). Import only the items used.
+- MUST flag a Major when a new icon or UI library is imported wholesale (e.g., `import * as Icons from "…"` or a top-level barrel entry) when per-item entry points exist — the whole index rides into the module graph. Import only the items used.
+- SHOULD flag a Minor when app code uses a default/namespace import of a large utility library where a scoped per-module entry point exists (e.g., `lodash/merge` over `lodash`).

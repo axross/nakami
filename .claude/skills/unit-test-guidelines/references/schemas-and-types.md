@@ -24,7 +24,7 @@ describe("RecordParametersBase", () => {
 describe("RecordResponse", () => {
 	it("decodes collection results when input is a paginated response", () => {
 		expect(
-			decode(RecordResponse, {
+			RecordResponse.parse({
 				totalItems: 1,
 				items: [{ id: 1, slug: "hello", status: "draft" }],
 			}),
@@ -67,13 +67,13 @@ describe("when index is invalid", () => {
 	it("rejects an empty index array", () => {
 		expect(() => {
 			RecordParameters.parse({ slug: "hello-world", index: [] });
-		}).toThrow(SchemaError);
+		}).toThrow(z.ZodError);
 	});
 
 	it("rejects fractional index values", () => {
 		expect(() => {
 			RecordParameters.parse({ slug: "hello-world", index: [1.5] });
-		}).toThrow(SchemaError);
+		}).toThrow(z.ZodError);
 	});
 });
 ```

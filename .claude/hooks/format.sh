@@ -9,9 +9,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." &
 # read the edited file path from the tool payload on stdin.
 FILE_PATH="$(jq -r '.tool_input.file_path // empty' 2>/dev/null || true)"
 
-# only format when a source file the formatter understands changed; skip the
-# rest. the case-pattern below is the CODE_FILE_GLOB token, e.g.
-# "*.ts | *.tsx | *.js | *.css".
+# only format when a source file Biome formats changed; skip the rest.
 case "$FILE_PATH" in
   *.ts | *.tsx | *.js | *.mjs | *.cjs | *.json) ;;
   *) exit 0 ;;

@@ -8,7 +8,7 @@ This project uses Sentry as its error-reporting service, initialized through the
 
 **Guidelines:**
 
-- MUST import error-reporting helpers from Sentry's SDK, not from an unrelated or lower-level package.
+- MUST import error reporting through the project's wrapper — `reportError`/`wrapRootComponent` from `~/core/helpers/error-reporting` — in app code; `@sentry/react-native` itself is imported only inside that helper module.
 - MUST consult the project's development guidelines (current-docs rules) before changing the error tracker's init/config files, source maps, or runtime options.
 - MUST consult the project's application-security requirements (privacy-and-exposure rules) before adding event context, tags, user identifiers, breadcrumbs, or request data.
 - SHOULD keep Sentry setup in the existing init/config files instead of scattering initialization across feature modules.
