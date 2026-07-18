@@ -35,7 +35,7 @@ The project restricts `process.env.*` access to a small set of whitelisted files
 
 ## Public / Client-Exposed Env-Var Boundary
 
-Most app frameworks expose a subset of env vars to the browser/client via a prefix convention (e.g., a `*_PUBLIC_*`-style prefix). Anything carrying that prefix is shipped to every client. Review focuses on critical-severity cases where a secret value is read via a client-exposed env var.
+Expo inlines every `EXPO_PUBLIC_*` env var into the JS bundle at build time — anything carrying that prefix ships to every user and is extractable from the binary. Review focuses on critical-severity cases where a secret value is read via a client-exposed env var.
 
 - The project legitimately uses a handful of client-exposed env vars for public-by-design values (environment name, build/commit identifier, error-tracker DSN, analytics token).
 
@@ -50,8 +50,8 @@ Every telemetry channel copies its payload into third-party retention the projec
 
 **Guidelines:**
 
-- MUST flag a Critical when a secret value (DSN, token, password, session ID, auth header) is interpolated into any `logger.info()` / `logger.warn()` call, any error-report extras, or any analytics event payload. Logs are captured by the hosting platform; the error tracker and analytics ship payloads off-server.
-- MUST account for a "send default PII" option being enabled in the error-tracker config (if the project enables it) because IP addresses, cookies, and request bodies may already be attached.
+- MUST flag a Critical when a secret value (token, password, session ID, auth header) is interpolated into any `logger.info()` / `logger.warn()` call or any error-report extras. Device logs are readable by other tooling; the error tracker ships payloads off-device.
+- MUST account for a "send default PII" option being enabled in the error-tracker config (this project sets `sendDefaultPii: false`) because device identifiers and request data would be attached automatically if it were flipped.
 - MUST flag a Major when a change adds explicitly sensitive context (e.g., a bearer token) on top of that default.
 
 ## `.env.example`

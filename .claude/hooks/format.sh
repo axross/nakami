@@ -2,11 +2,6 @@
 
 # posttooluse hook: formats the project after a code change so written files
 # stay consistent. fires on edit/write tools.
-#
-# TEMPLATE NOTE: this is an example Claude Code harness binding. During INIT,
-# replace the `{{...}}` tokens below with the project's real values, or delete this
-# hook (and its entry in .claude/settings.local-example.json) if the project
-# has no formatter.
 set -uo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -14,11 +9,9 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." &
 # read the edited file path from the tool payload on stdin.
 FILE_PATH="$(jq -r '.tool_input.file_path // empty' 2>/dev/null || true)"
 
-# only format when a source file the formatter understands changed; skip the
-# rest. the case-pattern below is the CODE_FILE_GLOB token, e.g.
-# "*.ts | *.tsx | *.js | *.css".
+# only format when a source file Biome formats changed; skip the rest.
 case "$FILE_PATH" in
-  {{CODE_FILE_GLOB}}) ;;
+  *.ts | *.tsx | *.js | *.mjs | *.cjs | *.json) ;;
   *) exit 0 ;;
 esac
 
@@ -33,7 +26,7 @@ fi
 
 # skip silently when the package manager is unavailable (e.g. a local shell
 # without the toolchain provisioned).
-command -v {{PACKAGE_MANAGER}} >/dev/null 2>&1 || exit 0
+command -v npm >/dev/null 2>&1 || exit 0
 
-{{FORMAT_CMD}} >/dev/null 2>&1 || true
+npm run format >/dev/null 2>&1 || true
 exit 0

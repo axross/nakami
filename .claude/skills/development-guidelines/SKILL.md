@@ -15,8 +15,7 @@ See [code-quality.md](./references/code-quality.md) for:
 
 - The formatter/linter format/lint workflow
 - Language compliance requirements
-<!-- INIT:OPTIONAL key=TYPED_LANGUAGE — keep the next bullet for a typed language OR delete it (and the "type-safety discipline" / "type casts" phrases in this file's frontmatter description) together with the marked section in ./references/code-quality.md. -->
-- Type-safety discipline (unchecked casts and non-null/force-unwrap assertions), for typed languages
+- Type-safety discipline (unchecked casts and non-null assertions)
 - Doc-comment and line-comment conventions in source files
 - Import hygiene
 
@@ -81,8 +80,9 @@ Consult the appropriate skill for detailed guidance on each area:
 |---|---|
 | Error handling, error-reporting, and logging | the project's observability guidelines |
 | End-to-end test structure, conventions, and commands | the project's end-to-end testing guidelines |
-
-Project-specific topic skills — covering repository structure, routing, UI components, visual design, the data/content layer, and any domain rules — are created per-project during INIT. Consult those skills when implementation touches the area they own, if they have been defined.
+| Repository layout, stack facts, and file placement | the project-structure skill |
+| Component composition, styling, and theming | the component-guidelines skill |
+| Route files, navigation, and deep links | the routing-guidelines skill |
 
 **Guidelines:**
 

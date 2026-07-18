@@ -1,13 +1,13 @@
 ---
 name: application-security-requirements
-description: The security and privacy review lens for code changes. Covers secrets/env vars, the framework's public/client-exposed env-var prefix, input validation, data-layer access control, public exposure, output-encoding/injection in rendered untrusted content, SSRF/outbound fetch of user-controlled URLs, auth/session settings, analytics/error-reporting data capture, and dependency supply-chain risk.
+description: The security and privacy review lens for code changes. Covers secrets/env vars, the framework's public/client-exposed env-var prefix, input validation, data-layer access control, public exposure, output-encoding/injection in rendered untrusted content, SSRF/outbound fetch of user-controlled URLs, auth/session settings, error-reporting data capture, and dependency supply-chain risk.
 when_to_use: Use when reviewing security or privacy implications of a change — "is this safe", "security", "auth", "admin", "secret", "privacy", "PII", "XSS", "SSRF", or dependency reviews.
 user-invocable: false
 ---
 
 # Application Security Requirements
 
-Apply these rules when reviewing the security implications of any code change in this project. The framing is OWASP Top 10 mapped onto this project's stack. Where a section names a concrete tool (the data/content layer, the hosting platform, the error tracker, an analytics service), treat it as a placeholder for whatever the project actually uses, and delete the section if the project has no such tool.
+Apply these rules when reviewing the security implications of any code change in this project. The framing is OWASP Top 10 mapped onto this project's stack: an Expo (React Native) app with an on-device Drizzle/expo-sqlite data layer, Zod validation, and Sentry error reporting.
 
 ## Secret and Environment-Variable Handling
 
@@ -15,7 +15,7 @@ See [secret-handling.md](./references/secret-handling.md) for:
 
 - No literal secret committed (any service credential, token, or test password)
 - `process.env.*` accessed only inside the project's whitelisted env-access files
-- The framework's public/client-exposed env-var prefix convention used only for values intentionally exposed to the browser/client
+- The `EXPO_PUBLIC_*` prefix convention used only for values intentionally compiled into the shipped app bundle
 - `.env.local` is gitignored; example only in `.env.example`
 
 ## Input Validation
@@ -31,19 +31,18 @@ See [input-validation.md](./references/input-validation.md) for:
 
 See [access-control.md](./references/access-control.md) for:
 
-- Each data-layer resource has explicit access rules appropriate for its data sensitivity
-- Unpublished / non-default content is gated so it is not served to unauthorized requests
-- The authentication system's lockout / rate-limit settings are not weakened
-- New mutation endpoints are protected against unauthenticated abuse
+- Credentials never land in the Drizzle database or plain key-value storage — only the platform keychain
+- Authorization for remote data stays with the backend; UI checks are affordances, not access control
+- Deep-linkable routes validate their parameters and never state-change without confirmation
 
 ## Privacy and Exposure Control
 
 See [privacy-and-exposure.md](./references/privacy-and-exposure.md) for:
 
-- Unpublished, preview, admin-only, and private content cannot leak through public routes, metadata, structured data, sitemap, robots, or media routes
-- Public media/asset URLs expose only intentionally public assets and do not reveal private storage tokens or internal identifiers
-- Analytics and error-reporting changes do not capture unnecessary PII, secrets, private content, or internal fields
-- Client-exposed environment variables, analytics event properties, and error context are intentionally public
+- Everything bundled in the binary — code, assets, `EXPO_PUBLIC_*` values — is treated as public; no secrets or privileged endpoints ship in it
+- Deep links and outbound requests carry no sensitive data beyond what the receiving side needs
+- Error-reporting changes do not capture unnecessary PII, secrets, private content, or internal fields
+- Log lines carry identifiers and metadata, never user content or credentials
 
 ## Injection in Rendered Untrusted Content
 
@@ -54,22 +53,22 @@ See [xss-in-markdown.md](./references/xss-in-markdown.md) for:
 - Custom render nodes only emit attributes that the rendering layer encodes safely
 - The framework's safe-encoding path is not bypassed (no manual string interpolation of untrusted content into markup)
 
-## SSRF and Outbound Fetch
+## Outbound Fetch and Remote Content
 
 See [ssrf-and-embeds.md](./references/ssrf-and-embeds.md) for:
 
-- Any code that `fetch`-es a user- or CMS-controlled URL cannot be steered at internal-network hosts in production
-- Image/asset rendering does not bypass the host allowlist for user-controlled URLs
-- New user-controlled URLs that flow into a `fetch` call go through an allowlist or a hostname check
-- New entries in the config allowlist of external hosts are tightly scoped
+- Externally-supplied URLs are validated (scheme, shape) before any `fetch`, and stored credentials only travel to the user's configured host
+- Remote images render through the sanctioned `expo-image` path with validated sources
+- Deep-link parameters never steer credentialed or outbound requests unvalidated
+- Outbound fetches carry timeouts
 
 ## Auth and Session Management
 
 See [auth-and-session.md](./references/auth-and-session.md) for:
 
-- Authentication lockout / rate-limit settings are not relaxed
-- Privileged / preview state is reachable only via the authentication path, not via a query-string bypass
+- Session material lives in the platform keychain, behind the project's single auth entry point (dormant until auth lands)
 - Error-tracker PII exposure is acknowledged when adding new identifiers/contexts
+- Dev-only code paths (`__DEV__` gates) have a production equivalent
 
 ## Supply Chain
 

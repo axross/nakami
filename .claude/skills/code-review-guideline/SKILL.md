@@ -41,9 +41,6 @@ See [severity.md](./references/severity.md) for:
 
 ## Repository Review Policy Overlay
 
-<!-- INIT:OPTIONAL key=INDEPENDENT_REVIEW — Fixed: the posted-review channel (REVIEW.md) is fixed infrastructure (INIT.md Step 4), so KEEP this section (and the marked bullets in ./references/severity.md, ./references/evidence.md, and ./references/escalation.md); just delete this marker and the italic note below. -->
-*This section is fixed — the posted-review channel is always present; adapt it during INIT rather than deleting it.*
-
 When the review output is a **posted** pull-request review — the CI
 reviewer or a managed review product —
 [`REVIEW.md`](../../../REVIEW.md) at the repo root is the authoritative policy
@@ -116,13 +113,13 @@ Consult the appropriate skill for detailed review checklists in each lens. These
 | OWASP-lens application security — secrets, input validation, access control, XSS, SSRF, auth, supply chain | the project's application-security requirements |
 | Data-layer query cost (N+1), server/client boundary cost, caching correctness, asset/image optimization, bundle weight, error and observability hooks | the project's performance-and-reliability requirements |
 
-In addition to the lenses above, the reviewer MUST also load the project's own topic-specific skills when they exist and overlap the diff — for example skills covering repository structure, components, routing, UI design, or the project's domain rules. These are project-specific skills created during INIT and are not part of this template; consult whichever ones the project defines.
+In addition to the lenses above, the reviewer MUST also load the project's own topic-specific skills when they overlap the diff: the project-structure skill (file placement), component-guidelines (composition/theming), and routing-guidelines (Expo Router conventions).
 
 **Guidelines:**
 
 - MUST choose every topic-specific lens that materially overlaps the diff before reporting findings.
 - SHOULD cite the owning lens when a finding depends on a specialized project rule.
-- MUST NOT treat this table as exhaustive when the diff has an obvious topic covered by a developer-facing skill below or by a project-specific skill defined during INIT.
+- MUST NOT treat this table as exhaustive when the diff has an obvious topic covered by a developer-facing skill below or by one of the project-specific skills (project-structure, component-guidelines, routing-guidelines).
 
 ## Developer-Facing Guidelines (defer, do not duplicate)
 
@@ -135,7 +132,7 @@ Developer-facing skills own how to write project-conforming code. The review ski
 | End-to-end test structure, conventions, and commands | the project's end-to-end testing guidelines |
 | Unit test structure, conventions, mocks/fixtures, and commands | the project's unit-test guidelines |
 
-In addition, the reviewer MUST defer to the project's own developer-facing skills when they exist — for example skills covering repository structure and file placement, routing/URL conventions, component conventions, or UI/visual design. These are project-specific skills created during INIT and are not part of this template; cite whichever ones the project defines instead of restating their rules.
+In addition, the reviewer MUST defer to the project's own developer-facing skills — project-structure (repository layout and file placement), component-guidelines (component composition, styling, theming), and routing-guidelines (Expo Router conventions) — citing them instead of restating their rules.
 
 **Guidelines:**
 

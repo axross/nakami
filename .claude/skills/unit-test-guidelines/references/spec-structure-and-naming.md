@@ -37,7 +37,7 @@ describe("deleteRecordTool", () => {
 
 **Guidelines:**
 
-- MUST import the test framework's APIs explicitly if {{UNIT_TEST_FRAMEWORK}} requires it; this includes setup/teardown hooks, the assertion entrypoint, the test-case function, and the mocking API used in the file.
+- MUST import the test framework's APIs explicitly if Jest (jest-expo) with React Native Testing Library requires it; this includes setup/teardown hooks, the assertion entrypoint, the test-case function, and the mocking API used in the file.
 - MUST use the project's chosen test-case function consistently and not mix it with an alternative spelling.
 - MUST group scenarios with `describe(...)` by the exported function, method, handler object, schema, codec, object contract, or type contract under test.
 - MUST suffix function, method, or callable handler names in `describe(...)` or test-case titles with `()`, such as `describe("formatTags()")`, `describe("deleteRecordTool()")`, or `it("calls sanitize()")`.
@@ -73,7 +73,7 @@ describe("RecordParameters", () => {
 	describe("when index is invalid", () => {
 		it("rejects fractional index values", () => {
 			expect(() => RecordParameters.parse({ id: "abc", index: [1.5] })).toThrow(
-				SchemaError,
+				z.ZodError,
 			);
 		});
 	});

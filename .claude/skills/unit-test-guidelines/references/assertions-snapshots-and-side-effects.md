@@ -5,7 +5,7 @@ Assertions should make the reason for failure obvious. A test with a precise ass
 **Good:**
 
 ```ts
-expect(decode(TagResponse, response)).toEqual({
+expect(TagResponse.parse(response)).toEqual({
 	totalItems: 1,
 	limit: undefined,
 	page: undefined,
@@ -17,7 +17,7 @@ expect(decode(TagResponse, response)).toEqual({
 **Avoid:**
 
 ```ts
-expect(decode(TagResponse, response)).toMatchSnapshot();
+expect(TagResponse.parse(response)).toMatchSnapshot();
 ```
 
 **Guidelines:**

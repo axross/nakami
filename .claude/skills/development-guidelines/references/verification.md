@@ -4,16 +4,16 @@ Apply these guidelines to confirm that any change produces the correct applicati
 
 ## Identifying Affected Output Surfaces
 
-Use this table to determine which output surfaces a change puts at risk. Adapt the "Changed area" entries to the project's actual file layout during INIT.
+Use this table to determine which output surfaces a change puts at risk.
 
 | Changed area | Output surface at risk |
 |---|---|
 | Page/view files and the components they render | Rendered pages/views |
 | Data-access functions or data-fetching logic | Rendered output, content fidelity |
 | Route/navigation definitions and error/not-found handlers | Routing and navigation |
-| Metadata generation, sitemap, robots, and social-preview assets | Metadata and discoverability |
+| Deep-link scheme, app config, and store metadata (`app.json`) | Linking and app identity |
 | Content-processing pipeline (if any) | Content fidelity |
-| {{ERROR_TRACKER}} config and {{LOGGER}} setup | Observability <!-- INIT:OPTIONAL key=ERROR_TRACKER_OR_LOGGER — fill the tokens OR trim/delete this row for the tool(s) the project lacks. --> |
+| Sentry config and react-native-logs setup | Observability |
 
 - Changes that touch none of the above — type definitions, data-layer config, migration files, or utilities with no UI call path — do not put any output surface at risk.
 
@@ -27,7 +27,7 @@ Manual verification is the first line of confirmation. Run it before the automat
 
 **Guidelines:**
 
-- MUST start the development server (`{{DEV_CMD}}`) and navigate to the affected route/view after every change that touches an output surface.
+- MUST start the development server (`npm run dev`) and navigate to the affected route/view after every change that touches an output surface.
 - MUST verify any non-default content state the data layer supports (e.g., a draft/preview state, if the project has one) in addition to the default state, when the surface displays data-layer-managed content.
 - MUST verify the not-found / error state renders when the change affects routing or error handling (e.g., navigate to a non-existent record).
 
@@ -37,11 +37,11 @@ The e2e suite drives the real application through the full render pipeline, so i
 
 **Guidelines:**
 
-- MUST run the full end-to-end test suite, when the project has one, after any change that touches an output surface:
+- MUST run the full end-to-end test suite after any change that touches an output surface:
   ```bash
-  {{E2E_TEST_CMD}}
+  npm run test:e2e
   ```
-- MUST follow the e2e authoring and coverage rules owned by the project's end-to-end testing guidelines and the project's quality-assurance guidelines (e2e-coverage rules) — new-route/feature coverage, stable test-targetable identifiers, and co-location under `{{TEST_DIR}}` — rather than restating them here.
+- MUST follow the e2e authoring and coverage rules owned by the project's end-to-end testing guidelines and the project's quality-assurance guidelines (e2e-coverage rules) — new-route/feature coverage, stable test-targetable identifiers, and co-location under `e2e` — rather than restating them here.
 
 ## E2E Tests vs Unit Tests
 

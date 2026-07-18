@@ -22,7 +22,7 @@ See [error-handling.md](./references/error-handling.md) for:
 
 See [error-tracking.md](./references/error-tracking.md) for:
 
-- {{ERROR_TRACKER}} initialization and runtime-specific configuration files
+- Sentry initialization and runtime-specific configuration files
 - The error-reporting capture call's import source, context, and privacy boundaries
 - PII settings and safe event context
 - Source map and instrumentation changes
@@ -32,6 +32,6 @@ See [error-tracking.md](./references/error-tracking.md) for:
 See [logging.md](./references/logging.md) for:
 
 - When operations are worth logging and when they are not
-- Which log level to use (`info` vs `warn`; `error` only when the project has no dedicated error tracker)
+- Which log level to use (`info` vs `warn`; never `error` — errors go to Sentry)
 - Creating module-scoped child loggers from a shared root logger
 - Structuring log calls with context objects and "Started / Completed" messages

@@ -1,5 +1,8 @@
 {
 	"effortLevel": "xhigh",
+	"enabledPlugins": {
+		"expo@claude-plugins-official": true
+	},
 	"hooks": {
 		"SessionStart": [
 			{
