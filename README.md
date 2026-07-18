@@ -35,6 +35,22 @@ feature directories under `src/`.
 5. Export release-shaped JS bundles: `npm run build`. Release binaries are
    built with EAS Build.
 
+## Service links and secrets
+
+The app is linked to Sentry (`axross/payload-mobile`, DSN committed in
+`.env`) and EAS (project `98f3d55e-93ca-4b3c-8564-adca02d5325c`, profiles in
+`eas.json`). Secrets configured as GitHub Actions secrets:
+
+| Secret | Used for |
+| ------ | -------- |
+| `SENTRY_ORG` / `SENTRY_PROJECT` | sentry-cli / source-map tooling in any workflow that builds the app |
+| `SENTRY_AUTH_TOKEN` | Authorizes Sentry source-map upload during builds |
+| `CLAUDE_CODE_OAUTH_TOKEN` | The `@claude review` CI reviewer (add when enabling it) |
+
+Builds started outside GitHub Actions (e.g. `eas build` locally or EAS's own
+CI) do not see Actions secrets — mirror `SENTRY_AUTH_TOKEN` as an EAS
+environment variable for those.
+
 ## Development workflow
 
 Development in this repository is agent-assisted via
