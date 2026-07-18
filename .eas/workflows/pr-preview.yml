@@ -1,0 +1,57 @@
+# PR preview builds. When a pull request is ready for review — opened or
+# reopened as non-draft, or flipped draft→ready — EAS builds installable
+# preview binaries (internal distribution) of that PR's code for both
+# platforms and posts install links/QR codes back on the PR, so the exact
+# change is testable on physical devices without a local build.
+#
+# Deliberate trade-off: later pushes to an already-ready PR do NOT
+# auto-rebuild (no `synchronize` trigger type), to keep build costs bounded.
+# Re-run the workflow from the EAS dashboard (or flip draft→ready again) for
+# a fresh build. For a debuggable dev client instead, dispatch
+# dev-client.yml — this project uses expo-dev-client custom builds; Expo Go
+# is not a supported runtime.
+#
+# Operator prerequisites (one-time; the workflow cannot run until done):
+#   1. Connect this GitHub repository to the EAS project:
+#      https://expo.dev/accounts/axross/projects/payload-mobile → GitHub
+#      settings.
+#   2. Configure iOS ad hoc distribution credentials: `eas credentials`
+#      (platform iOS). Preview builds install only on devices registered
+#      with `eas device:create`; the build below refreshes the ad hoc
+#      provisioning profile so newly registered devices are picked up.
+#   3. Configure Android keystore credentials (EAS can generate them):
+#      `eas credentials` (platform Android).
+
+name: PR Preview Builds
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+jobs:
+  build_android:
+    name: Build Android Preview
+    # `opened`/`reopened` also fire for draft PRs; build only once the PR is
+    # actually ready for review.
+    if: ${{ !github.event.pull_request.draft }}
+    type: build
+    params:
+      platform: android
+      profile: preview
+
+  build_ios:
+    name: Build iOS Preview
+    if: ${{ !github.event.pull_request.draft }}
+    type: build
+    params:
+      platform: ios
+      profile: preview
+      refresh_ad_hoc_provisioning_profile: true
+
+  comment:
+    name: Post Install Links on PR
+    if: ${{ !github.event.pull_request.draft }}
+    after: [build_android, build_ios]
+    type: github-comment
+    params:
+      message: "Preview builds for this pull request — install on a physical device via the links below."
