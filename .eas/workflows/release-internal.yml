@@ -1,0 +1,62 @@
+# Internal store release. Every push to `main` (i.e. every merged pull
+# request) builds production binaries for both platforms and submits them to
+# the internal testing channels — the Google Play internal track and
+# TestFlight (App Store Connect internal testing) — so testers always have
+# the latest merged state on their devices through the store channels.
+# Promotion beyond the internal channels stays manual.
+#
+# Version handling: eas.json sets `appVersionSource: "remote"` and the
+# production build profile sets `autoIncrement: true`, so EAS bumps the
+# build number on every run; no version edits are needed per merge.
+#
+# Operator prerequisites (one-time; submissions fail cleanly until done):
+#   1. Connect this GitHub repository to the EAS project:
+#      https://expo.dev/accounts/axross/projects/payload-mobile → GitHub
+#      settings.
+#   2. iOS: configure App Store distribution credentials and an App Store
+#      Connect API key via `eas credentials` (platform iOS), create the app
+#      record in App Store Connect, and replace the `ascAppId` placeholder
+#      in eas.json (`submit.production.ios.ascAppId`) with the app's numeric
+#      App Store Connect ID. TestFlight internal tester groups are managed
+#      in App Store Connect, not in this repo.
+#   3. Android: upload a Google Service Account key for Play submissions via
+#      `eas credentials` (platform Android), and upload the FIRST .aab to
+#      the Play Console manually — Google Play requires the initial upload
+#      to be done by hand before API submissions to the internal track work.
+
+name: Internal Store Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build_android:
+    name: Build Android
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  build_ios:
+    name: Build iOS
+    type: build
+    params:
+      platform: ios
+      profile: production
+
+  submit_android:
+    name: Submit to Google Play Internal Track
+    needs: [build_android]
+    type: submit
+    params:
+      build_id: ${{ needs.build_android.outputs.build_id }}
+      profile: production
+
+  submit_ios:
+    name: Submit to TestFlight
+    needs: [build_ios]
+    type: submit
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+      profile: production
