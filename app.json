@@ -2,6 +2,7 @@
 	"expo": {
 		"name": "payload-mobile",
 		"slug": "payload-mobile",
+		"owner": "axross",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/images/icon.png",
@@ -49,6 +50,11 @@
 		"experiments": {
 			"typedRoutes": true,
 			"reactCompiler": true
+		},
+		"extra": {
+			"eas": {
+				"projectId": "98f3d55e-93ca-4b3c-8564-adca02d5325c"
+			}
 		}
 	}
 }
