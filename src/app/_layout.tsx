@@ -15,7 +15,7 @@ initializeErrorReporter();
 function RootLayout(): JSX.Element {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Stack />
+			<Stack screenOptions={{ headerShown: false }} />
 			<StatusBar style="auto" />
 		</QueryClientProvider>
 	);

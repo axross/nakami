@@ -14,3 +14,5 @@ Remove rows only when the journey itself is removed from the product.
 | Scenario ID | Priority | Journey |
 | ----------- | -------- | ------- |
 | `app-launch` | must | The app cold-starts and reaches the home screen. |
+| `tab-navigation` | must | Switching bottom tabs reaches the Home, Collections, and Settings screens. |
+| `settings-menu` | must | The settings menu shows the About and Debug groups with technical details, and License pushes the Licenses screen. |
