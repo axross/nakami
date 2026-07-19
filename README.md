@@ -169,7 +169,7 @@ stopped.
 Comment **`@claude review`** on a pull request to run this repository's review
 policy ([`REVIEW.md`](./REVIEW.md)) — severity-tagged findings with `file:line`
 evidence and concrete fixes, posted as inline comments by the CI reviewer
-([`claude-review.yaml`](./.github/workflows/claude-review.yaml)). Use it for a
+([`claude-review.yml`](./.github/workflows/claude-review.yml)). Use it for a
 pre-merge check on a hand-written change or a second opinion before merging; the
 same review runs automatically against `/address` pull requests.
 
@@ -190,7 +190,7 @@ Unit tests (Jest via jest-expo, colocated with their subject) cover helpers,
 schemas, and component behavior; Maestro flows in `e2e/` assert whole user
 journeys on a simulator, tracked against the journey catalog in
 `e2e/scenarios.md`. Merges are gated by CI
-([`merge-checks.yaml`](./.github/workflows/merge-checks.yaml)), which runs on
+([`merge-checks.yml`](./.github/workflows/merge-checks.yml)), which runs on
 every PR update as four independent, parallel jobs — **Lint** (Biome), **Typecheck**
 (TypeScript), **Unit Tests** (Jest), and **E2E Scenario Coverage** — so a red
 check names exactly one failing tool.
@@ -235,7 +235,7 @@ human can verify the change on a physical device before merging.
   comments it on that PR. Requires the `ANDROID_*`, `FIREBASE_*`, and
   `SENTRY_AUTH_TOKEN` secrets above.
 - **Not a merge blocker (by design):** merges are gated only by the checks in
-  `merge-checks.yaml`. On-device sign-off on a preview build is a manual,
+  `merge-checks.yml`. On-device sign-off on a preview build is a manual,
   human-in-the-loop step before merging.
 
 Store/production builds and on-demand dev clients remain on EAS

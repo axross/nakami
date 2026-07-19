@@ -3,7 +3,7 @@
 Review **policy** for this repository — the highest-priority, review-only
 instructions. Every reviewer entry point reads this file: a managed review
 product (e.g. Claude Code's managed Code Review) natively, and the CI
-reviewer ([`claude-review.yaml`](.github/workflows/claude-review.yaml)) via a
+reviewer ([`claude-review.yml`](.github/workflows/claude-review.yml)) via a
 system-prompt bootstrap. This file overrides reviewer defaults and complements
 the review
 **methodology** in
@@ -71,7 +71,7 @@ only; internal self-review triage still flags these findings.
 
 - Anything CI already enforces — the Biome lint/format check, the TypeScript
   typecheck, the Jest unit-test run, and the e2e scenario-coverage gate run by
-  the merge-checks workflow (`.github/workflows/merge-checks.yaml`).
+  the merge-checks workflow (`.github/workflows/merge-checks.yml`).
 - Lockfiles and generated files (`package-lock.json`,
   `src/core/db/migrations/`).
 
