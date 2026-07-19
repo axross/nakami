@@ -5,15 +5,18 @@
 	},
 	"build": {
 		"development": {
+			"node": "22",
 			"environment": "development",
 			"developmentClient": true,
 			"distribution": "internal"
 		},
 		"preview": {
+			"node": "22",
 			"environment": "preview",
 			"distribution": "internal"
 		},
 		"production": {
+			"node": "22",
 			"environment": "production",
 			"autoIncrement": true
 		}
