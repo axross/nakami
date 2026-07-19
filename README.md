@@ -227,11 +227,13 @@ human can verify the change on a physical device before merging.
   branch), via `gh workflow run android-build.yml --ref <branch> -f pr=<number>`,
   or from an agent. The optional `pr` input makes the workflow comment the
   install link back on that PR; the link always appears in the run summary.
-- **Two jobs:** `prebuild` runs `expo prebuild` and caches the generated
+- **Three jobs:** `prebuild` runs `expo prebuild` and caches the generated
   `android/` project keyed by a checksum of `app.json` + `package-lock.json`
   (skipped on a cache hit), handing it to `build_android` via an artifact;
-  `build_android` signs the release APK and uploads it to Firebase. Requires the
-  `ANDROID_*`, `FIREBASE_*`, and `SENTRY_AUTH_TOKEN` secrets above.
+  `build_android` signs the release APK and uploads it to Firebase; and `report`
+  writes the install link to the run summary and, when the `pr` input is given,
+  comments it on that PR. Requires the `ANDROID_*`, `FIREBASE_*`, and
+  `SENTRY_AUTH_TOKEN` secrets above.
 - **Not a merge blocker (by design):** merges are gated only by the checks in
   `merge-checks.yaml`. On-device sign-off on a preview build is a manual,
   human-in-the-loop step before merging.
