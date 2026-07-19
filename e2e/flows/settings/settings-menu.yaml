@@ -1,4 +1,4 @@
-appId: dev.axross.payloadmobile
+appId: app.axross.payload
 name: settings-menu — settings groups render and License pushes the Licenses screen
 tags:
   - scenario:settings-menu
