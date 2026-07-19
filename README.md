@@ -51,6 +51,60 @@ Builds started outside GitHub Actions (e.g. `eas build` locally or EAS's own
 CI) do not see Actions secrets — mirror `SENTRY_AUTH_TOKEN` as an EAS
 environment variable for those.
 
+## Expo MCP
+
+The [Expo MCP server](https://docs.expo.dev/mcp/) gives AI-assisted tooling
+live access to Expo: on-demand documentation and SDK guidance, EAS build and
+workflow state, and TestFlight crash/feedback data. With a local dev server it
+also unlocks **local capabilities** — simulator automation, React Native
+DevTools, and project analysis. It complements the enabled
+`expo@claude-plugins-official` Claude Code plugin: the plugin teaches static
+known-good Expo patterns, while the MCP server provides live project and EAS
+access.
+
+[`.mcp.json`](./.mcp.json) registers the remote server for **Claude Code**
+(project scope, checked in). Other clients (VS Code, Cursor, Codex) are not
+wired up here — connect them with the per-client commands in the
+[Expo MCP docs](https://docs.expo.dev/mcp/).
+
+### Authenticate with `EXPO_TOKEN`
+
+The server requires an **Expo account**. Instead of the interactive OAuth
+browser flow (which cannot complete in a Claude Code cloud/web session), this
+repo authenticates with a **personal access token** sent in the `Authorization`
+header. `.mcp.json` references `${EXPO_TOKEN}` only — **the token is never
+committed**.
+
+1. Generate a **dedicated** token at
+   [Expo → Access tokens](https://expo.dev/settings/access-tokens) (Personal
+   access tokens → Create token).
+2. Make it available as a real environment variable named `EXPO_TOKEN`:
+   - **Claude Code on the web (cloud):** add `EXPO_TOKEN` to your
+     [environment's variables](https://code.claude.com/docs/en/claude-code-on-the-web#configure-your-environment).
+   - **Desktop / terminal:** export it from your shell profile
+     (`export EXPO_TOKEN=…`). Note: `.env` / `.env.local` files are **not**
+     auto-loaded into the MCP header expansion, so a value placed only in a
+     `.env` file will not be picked up — it must be an exported env var.
+3. In Claude Code, approve the project MCP server on first use; run `/mcp` to
+   check the connection.
+
+> **Security.** Claude Code cloud environments have no dedicated secrets store —
+> environment variables are visible to anyone who can edit the environment, and
+> an Expo token grants account access. Use a dedicated token (not a shared/CI
+> one), keep it in a **personal** environment, rotate it periodically, and
+> revoke it from the EAS dashboard if it leaks.
+
+### Local capabilities
+
+Run the dev server with local MCP capabilities enabled:
+
+```sh
+npm run dev:mcp   # EXPO_UNSTABLE_MCP_SERVER=1 expo start
+```
+
+Reconnect the MCP server after starting or stopping the dev server so the local
+tools register. Requires Expo SDK 54+ (this project is on SDK 57).
+
 ## Development workflow
 
 Development in this repository is agent-assisted via
