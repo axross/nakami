@@ -22,7 +22,7 @@ A companion mobile app for Payload CMS, built for iOS and Android with Expo (Rea
 
 ## Getting started
 
-1. Use the Node version pinned in `.nvmrc` (Node 22).
+1. Use Node 22 (the version specified in the CI workflows and `eas.json`).
 2. Install dependencies: `npm install`
 3. Optional: copy `.env.example` to `.env.local` for machine-local overrides. The committed `.env` already carries the public Sentry DSN (`axross/payload-mobile` on sentry.io); dev builds never send events.
 4. Start developing: `npm run dev`, then connect a dev build — or compile and launch one with `npm run ios` / `npm run android`.

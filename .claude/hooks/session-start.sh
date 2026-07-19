@@ -15,15 +15,15 @@ fi
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$PROJECT_DIR"
 
-# provision the Node version pinned in .nvmrc via mise. mise does not read
-# .nvmrc unless idiomatic version files are enabled, so the pin is passed
-# explicitly; best-effort, since the base image usually ships a usable Node.
+# provision Node 22 via mise — kept in step with the version specified in the CI
+# workflows (.github/workflows/*.yml) and eas.json; best-effort, since the base
+# image usually ships a usable Node.
 if ! command -v mise >/dev/null 2>&1; then
   curl -fsSL https://mise.run | sh
 fi
 export PATH="$HOME/.local/bin:$PATH"
 eval "$(mise activate bash)"
-mise use --global "node@$(cat .nvmrc)" || true
+mise use --global "node@22" || true
 eval "$(mise activate bash)"
 hash -r 2>/dev/null || true
 

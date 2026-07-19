@@ -1,6 +1,6 @@
 # Dev Commands
 
-Apply this reference when choosing which project command to run or when updating the command surface in the project's manifest. The project pins a minimum runtime version in `.nvmrc`; respect that pin when running or upgrading.
+Apply this reference when choosing which project command to run or when updating the command surface in the project's manifest. The project pins its runtime version (Node 22) in the CI workflows and `eas.json`; respect that pin when running or upgrading.
 
 ## Application Commands
 

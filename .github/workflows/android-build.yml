@@ -52,7 +52,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: "22"
           cache: npm
       - name: Restore prebuilt android project
         id: cache
@@ -86,7 +86,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: "22"
           cache: npm
       # node_modules is needed at build time too: Gradle's release-bundle task
       # runs Metro to bundle the JS, independent of the restored native project.
