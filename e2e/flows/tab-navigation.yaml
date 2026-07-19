@@ -1,0 +1,18 @@
+appId: dev.axross.payloadmobile
+name: tab-navigation — switching tabs reaches every tab's screen
+tags:
+  - scenario:tab-navigation
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "home-screen"
+- tapOn: "Collections"
+- assertVisible:
+    id: "collections-screen"
+- tapOn: "Settings"
+- assertVisible:
+    id: "settings-screen"
+- tapOn: "Home"
+- assertVisible:
+    id: "home-screen"

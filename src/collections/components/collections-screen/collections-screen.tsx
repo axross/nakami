@@ -1,19 +1,13 @@
-import { Stack } from "expo-router";
 import type { JSX } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
-export default function HomeRoute(): JSX.Element {
+export function CollectionsScreen(): JSX.Element {
 	return (
-		<>
-			<Stack.Screen options={{ title: "Payload Mobile" }} />
-			<View style={styles.root} testID="home-screen">
-				<Text style={styles.title}>Payload Mobile</Text>
-				<Text style={styles.subtitle}>
-					A companion mobile app for Payload MCP.
-				</Text>
-			</View>
-		</>
+		<View style={styles.root} testID="collections-screen">
+			<Text style={styles.title}>Collections</Text>
+			<Text style={styles.subtitle}>No collections yet.</Text>
+		</View>
 	);
 }
 
@@ -33,7 +27,7 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	title: {
 		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.xl,
+		fontSize: theme.fontSizes.lg,
 		fontWeight: "600",
 	},
 }));

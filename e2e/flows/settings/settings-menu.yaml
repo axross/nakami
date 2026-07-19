@@ -1,0 +1,22 @@
+appId: dev.axross.payloadmobile
+name: settings-menu — settings groups render and License pushes the Licenses screen
+tags:
+  - scenario:settings-menu
+---
+- launchApp:
+    clearState: true
+- tapOn: "Settings"
+- assertVisible:
+    id: "settings-screen"
+- assertVisible:
+    id: "settings-feedback-row"
+- assertVisible:
+    id: "settings-license-row"
+- assertVisible:
+    id: "settings-open-dev-menu-row"
+- assertVisible:
+    id: "settings-technical-details"
+- tapOn:
+    id: "settings-license-row"
+- assertVisible:
+    id: "licenses-screen"
