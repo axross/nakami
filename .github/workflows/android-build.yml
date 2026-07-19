@@ -23,7 +23,7 @@ name: Android Preview Build
 #   FIREBASE_SERVICE_ACCOUNT_JSON  service-account JSON for App Distribution
 #   SENTRY_AUTH_TOKEN              source-map upload during the release build
 # Optional:
-#   FIREBASE_GROUPS (repo variable)  comma-separated Firebase tester group(s)
+#   FIREBASE_GROUPS (repo variable)  comma-separated Firebase tester groups
 
 on:
   workflow_dispatch:
