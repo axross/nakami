@@ -7,7 +7,7 @@ user-invocable: false
 
 # Project Structure
 
-payload-mobile is a companion mobile app for Payload MCP, built with Expo (React Native) for iOS and Android. This skill owns *where files live*; how components are built belongs to Component Guidelines, and route-file conventions belong to Routing Guidelines (both resolved via the `AGENTS.md` skill index).
+payload-mobile is a companion mobile app for Payload CMS, built with Expo (React Native) for iOS and Android. This skill owns _where files live_; how components are built belongs to Component Guidelines, and route-file conventions belong to Routing Guidelines (both resolved via the `AGENTS.md` skill index).
 
 ## Stack
 
@@ -25,17 +25,17 @@ payload-mobile is a companion mobile app for Payload MCP, built with Expo (React
 
 ## Top-Level Layout
 
-| Path | Owns |
-| ---- | ---- |
-| `src/app/` | Expo Router routes — thin entry points only (see Routing Guidelines) |
-| `src/<feature>/` | One domain feature: `components/`, `queries/`, `mutations/`, `models/`, `helpers/`, `assets/` as needed |
-| `src/common/` | Code shared by ≥ 2 features: `components/`, `constants/`, `helpers/` |
-| `src/core/` | App bootstrap and infrastructure: `db/` (schema, client, migrations), `helpers/` (env, logging, error-reporting, query-client) |
-| `src/unistyles.ts` | Unistyles theme/breakpoint registration (imported first by the root layout) |
-| `e2e/` | Maestro flows (`flows/`), shared subflows (`helpers/`), scenario catalog (`scenarios.md`), coverage gate script |
-| `assets/` | App icons, splash, and other bundled binary assets |
-| `.claude/` | Agent skills, hooks, and harness settings |
-| `.github/workflows/` | Merge checks CI and the independent Claude reviewer |
+| Path                 | Owns                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `src/app/`           | Expo Router routes — thin entry points only (see Routing Guidelines)                                                           |
+| `src/<feature>/`     | One domain feature: `components/`, `queries/`, `mutations/`, `models/`, `helpers/`, `assets/` as needed                        |
+| `src/common/`        | Code shared by ≥ 2 features: `components/`, `constants/`, `helpers/`                                                           |
+| `src/core/`          | App bootstrap and infrastructure: `db/` (schema, client, migrations), `helpers/` (env, logging, error-reporting, query-client) |
+| `src/unistyles.ts`   | Unistyles theme/breakpoint registration (imported first by the root layout)                                                    |
+| `e2e/`               | Maestro flows (`flows/`), shared subflows (`helpers/`), scenario catalog (`scenarios.md`), coverage gate script                |
+| `assets/`            | App icons, splash, and other bundled binary assets                                                                             |
+| `.claude/`           | Agent skills, hooks, and harness settings                                                                                      |
+| `.github/workflows/` | Merge checks CI and the independent Claude reviewer                                                                            |
 
 ## File Placement
 
