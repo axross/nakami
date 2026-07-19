@@ -44,8 +44,15 @@ The app is linked to Sentry (`axross/payload-mobile`, DSN committed in
 | Secret | Used for |
 | ------ | -------- |
 | `SENTRY_ORG` / `SENTRY_PROJECT` | sentry-cli / source-map tooling in any workflow that builds the app |
-| `SENTRY_AUTH_TOKEN` | Authorizes Sentry source-map upload during builds |
+| `SENTRY_AUTH_TOKEN` | Authorizes Sentry source-map upload during builds (incl. the Fastlane Android preview build) |
 | `CLAUDE_CODE_OAUTH_TOKEN` | The `@claude review` CI reviewer (add when enabling it) |
+| `ANDROID_KEYSTORE_BASE64` | base64 of the release keystore (`.jks`) used to sign the Android preview build |
+| `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` | Release keystore credentials for signing |
+| `FIREBASE_ANDROID_APP_ID` | Firebase Android app id (`1:…:android:…`) the preview APK is distributed to |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Service-account JSON authorizing the Firebase App Distribution upload |
+
+An optional repo **variable** `FIREBASE_GROUPS` (comma-separated Firebase tester
+group names) targets the distribution at specific tester groups.
 
 Builds started outside GitHub Actions (e.g. `eas build` locally or EAS's own
 CI) do not see Actions secrets — mirror `SENTRY_AUTH_TOKEN` as an EAS
@@ -183,9 +190,16 @@ Unit tests (Jest via jest-expo, colocated with their subject) cover helpers,
 schemas, and component behavior; Maestro flows in `e2e/` assert whole user
 journeys on a simulator, tracked against the journey catalog in
 `e2e/scenarios.md`. Merges are gated by CI
-([`merge-checks.yaml`](./.github/workflows/merge-checks.yaml)): Biome
-lint/format, TypeScript typecheck, the unit suite, and the e2e
-scenario-coverage gate.
+([`merge-checks.yaml`](./.github/workflows/merge-checks.yaml)), which runs on
+every PR update as four independent, parallel jobs — **Lint** (Biome), **Typecheck**
+(TypeScript), **Unit Tests** (Jest), and **E2E Scenario Coverage** — so a red
+check names exactly one failing tool.
+
+> Branch protection: the `Lint` and `Unit Tests` check names are unchanged, but
+> `Typecheck` and `E2E Scenario Coverage` are now **separate** checks (they used
+> to be bundled into `Lint` and `Unit Tests` respectively). To keep gating merges
+> on them, add both to the required status checks under
+> Settings → Branches → branch protection for `main`.
 
 | Check | Command |
 | ----- | ------- |
@@ -199,6 +213,34 @@ scenario-coverage gate.
 Run format + lint after every change, and the suites relevant to the changed
 surface before opening a pull request — see the Verification section of
 [`AGENTS.md`](./AGENTS.md).
+
+## Preview builds
+
+Per-PR Android preview builds are produced on demand by
+[`android-build.yml`](./.github/workflows/android-build.yml) — a
+**manually-dispatched** Fastlane workflow, not a merge gate and not tied to
+`pull_request` events. Dispatch it when a PR looks ready for merge to get a
+signed, installable APK distributed via **Firebase App Distribution**, so a
+human can verify the change on a physical device before merging.
+
+- **How to run it:** from the Actions tab (**Run workflow** → pick the PR's
+  branch), via `gh workflow run android-build.yml --ref <branch> -f pr=<number>`,
+  or from an agent. The optional `pr` input makes the workflow comment the
+  install link back on that PR; the link always appears in the run summary.
+- **Three jobs:** `prebuild` runs `expo prebuild` and caches the generated
+  `android/` project keyed by a checksum of `app.json` + `package-lock.json`
+  (skipped on a cache hit), handing it to `build_android` via an artifact;
+  `build_android` signs the release APK and uploads it to Firebase; and `report`
+  writes the install link to the run summary and, when the `pr` input is given,
+  comments it on that PR. Requires the `ANDROID_*`, `FIREBASE_*`, and
+  `SENTRY_AUTH_TOKEN` secrets above.
+- **Not a merge blocker (by design):** merges are gated only by the checks in
+  `merge-checks.yaml`. On-device sign-off on a preview build is a manual,
+  human-in-the-loop step before merging.
+
+Store/production builds and on-demand dev clients remain on EAS
+([`release-internal.yml`](./.eas/workflows/release-internal.yml),
+[`dev-client.yml`](./.eas/workflows/dev-client.yml)).
 
 ## Related links
 

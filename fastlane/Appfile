@@ -1,0 +1,3 @@
+# Android application id — must match `expo.android.package` in app.json and the
+# app registered in Firebase App Distribution.
+package_name("dev.axross.payloadmobile")

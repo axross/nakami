@@ -1,10 +1,15 @@
 name: Merge Checks
 
 # The project's own CI: lint, typecheck, unit tests, and the e2e
-# scenario-coverage gate that gate merges to the default branch. This is the
+# scenario-coverage gate that gate merges to the default branch. Each check is
+# its OWN parallel job (never folded together) so a red check names exactly one
+# failing tool and branch protection can require each independently. This is the
 # CI the /address skill's tail polls after a push (see
-# .claude/skills/address/SKILL.md). Keep REVIEW.md's do-not-report list in
-# sync with exactly what these jobs enforce.
+# .claude/skills/address/SKILL.md). Keep REVIEW.md's do-not-report list in sync
+# with exactly what these jobs enforce.
+#
+# The per-PR Android build is intentionally NOT here — it is a separate,
+# manually-dispatched workflow (android-build.yml) and is not a merge gate.
 
 on:
   pull_request:
@@ -37,6 +42,20 @@ jobs:
         run: "npm ci"
       - name: Lint
         run: "npm run lint"
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Dependency Installation
+        run: "npm ci"
       - name: Typecheck
         run: "npm run typecheck"
 
@@ -55,5 +74,19 @@ jobs:
         run: "npm ci"
       - name: Unit Test Run
         run: "npm run test:unit"
+
+  e2e_coverage:
+    name: E2E Scenario Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Dependency Installation
+        run: "npm ci"
       - name: E2E Scenario-Coverage Gate
         run: "npm run test:e2e:coverage"

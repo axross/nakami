@@ -1,0 +1,49 @@
+# Fastlane lanes for payload-mobile.
+#
+# Only an Android `preview` lane exists today, driven by the manually-dispatched
+# .github/workflows/android-build.yml. It builds a signed release APK from the
+# `android/` project that `expo prebuild` generates (Continuous Native
+# Generation — the native project is never committed) and distributes it to
+# testers via Firebase App Distribution.
+#
+# All credentials arrive as environment variables set by the workflow from repo
+# secrets; nothing sensitive is stored here.
+
+default_platform(:android)
+
+platform :android do
+  desc "Build a signed release APK and distribute it via Firebase App Distribution"
+  lane :preview do
+    # Expo's generated release buildType is wired to the debug signingConfig, so
+    # we override signing at build time with AGP's injected-signing properties
+    # (these take precedence over the DSL signingConfig) rather than editing the
+    # generated, gitignored build.gradle.
+    gradle(
+      project_dir: "android",
+      task: "assemble",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV.fetch("ANDROID_KEYSTORE_PATH"),
+        "android.injected.signing.store.password" => ENV.fetch("ANDROID_KEYSTORE_PASSWORD"),
+        "android.injected.signing.key.alias" => ENV.fetch("ANDROID_KEY_ALIAS"),
+        "android.injected.signing.key.password" => ENV.fetch("ANDROID_KEY_PASSWORD"),
+      },
+    )
+
+    release = firebase_app_distribution(
+      app: ENV.fetch("FIREBASE_ANDROID_APP_ID"),
+      service_credentials_file: ENV.fetch("FIREBASE_SERVICE_ACCOUNT_PATH"),
+      android_artifact_type: "APK",
+      android_artifact_path: lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH],
+      # Optional Firebase tester group(s); distributes without a group if unset.
+      groups: ENV["FIREBASE_GROUPS"],
+    )
+
+    # Surface the tester install link as a step output so the workflow can put it
+    # in the run summary and (optionally) comment it on the PR.
+    testing_uri = release && (release["testingUri"] || release[:testingUri])
+    if testing_uri && ENV["GITHUB_OUTPUT"]
+      File.open(ENV["GITHUB_OUTPUT"], "a") { |file| file.puts("testing_uri=#{testing_uri}") }
+    end
+  end
+end

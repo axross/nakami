@@ -41,3 +41,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Fastlane run artifacts (see fastlane/Fastfile). The Appfile, Fastfile, and
+# Pluginfile are committed; these generated outputs are not.
+fastlane/report.xml
+fastlane/README.md
+fastlane/test_output/

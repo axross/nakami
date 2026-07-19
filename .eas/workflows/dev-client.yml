@@ -4,12 +4,13 @@
 # dashboard (or `eas workflow:run dev-client.yml`) to get debuggable dev
 # clients for physical devices; the client loads JS from a local dev server
 # (`npm run dev`), so it only needs rebuilding when native dependencies or
-# native config change — not per PR. Per-PR testable artifacts come from
-# pr-preview.yml instead.
+# native config change — not per PR. Per-PR testable Android artifacts come
+# from the manually-dispatched .github/workflows/android-build.yml (Fastlane +
+# Firebase App Distribution) instead.
 #
-# Operator prerequisites: same credential setup as pr-preview.yml (iOS ad
-# hoc distribution with registered devices via `eas device:create`, Android
-# keystore) — see that file's header comment.
+# Operator prerequisites: EAS credentials for these dev-client builds — iOS ad
+# hoc distribution with registered devices via `eas device:create`, and an
+# Android keystore via `eas credentials`.
 
 name: Development Client Builds
 
