@@ -1,6 +1,6 @@
 # Visual Design Options
 
-Apply this reference during `/address` Phase 1 whenever the run's work is UI-bearing. It defines how the plan's UI design section presents visual presentation options for the human to choose from, how the design record lives in the tracking issue, and how the chosen design stays findable through code review and later verification of the running app. The spec-level *content* of a UI design section — hierarchy, states, accessibility, responsive intent — stays owned by the project's product requirement guidelines, and design-system vocabulary — tokens, theming, component composition — stays owned by the project's component guidelines; this reference owns only the options exhibit and its lifecycle.
+Apply this reference during `/address` Phase 1 whenever the run's work is UI-bearing. It defines how the plan's UI design section presents visual presentation options for the human to choose from, how each round's published Artifact serves as the design source of truth with an account-free fallback recorded in the tracking issue, and how the chosen design stays findable through code review and later verification of the running app. The spec-level *content* of a UI design section — hierarchy, states, accessibility, responsive intent — stays owned by the project's product requirement guidelines, and design-system vocabulary — tokens, theming, component composition — stays owned by the project's component guidelines; this reference owns only the options exhibit and its lifecycle.
 
 ## When the Exhibit Is Required
 
@@ -23,7 +23,7 @@ Every design round is either an **options round** or a **confirmation round**, a
 
 - MUST classify a round as options-or-confirmation by what the human asked for: a request to compare candidates, examples, options, or alternatives at a fidelity or axis not yet decided is an options round (at least three candidates), regardless of whether a direction was already chosen at a lower fidelity.
 - MUST treat a round as a confirmation only when it renders the exact already-approved direction and no new fidelity or comparison decision is on the table.
-- **When in doubt whether a round is options or confirmation, present at least three candidates.** A superfluous option costs minutes; a missing one costs a round.
+- MUST, when in doubt whether a round is options or confirmation, present at least three candidates. A superfluous option costs minutes; a missing one costs a round.
 
 ## Constructing the Options
 
@@ -34,7 +34,7 @@ These rules govern an *options round*; see [Two Kinds of Design Round](#two-kind
 ```markdown
 #### Option B — Split header (Recommended)
 
-<sketch: fenced ASCII wireframe, Mermaid diagram, or attachment links>
+<sketch: fenced ASCII wireframe or Mermaid diagram; reference the round's Artifact URL beside it>
 
 Rationale: … (why this direction serves the requirement; why it is recommended)
 Trade-offs: … (what it costs relative to Options A and C)
@@ -52,13 +52,13 @@ Trade-offs: … (what it costs relative to Options A and C)
 
 ## Presenting Designs as Artifacts
 
-Every design round — wireframe and high fidelity alike — is shown to the human as a published **Artifact** (the harness's hosted-page feature; in Claude Code, the `Artifact` tool), so the human sees the design rendered rather than reading a raw sketch or waiting on a manual upload. The Artifact is the *presentation* surface only; the tracking issue stays the *durable record* (see [Recording the Choice and Revisions](#recording-the-choice-and-revisions)), because an Artifact is a private-by-default page that the independent reviewer's separate session and later agent sessions cannot open. The two always travel together: publish the Artifact to show the human, and keep the reviewer-accessible copy in the issue.
+Every design round — wireframe and high fidelity alike — is shown to the human as a published **Artifact** (the harness's hosted-page feature; in Claude Code, the `Artifact` tool), so the human sees the design rendered rather than reading a raw sketch. That published Artifact is the round's **design source of truth** — the durable, canonical record of the intended design. Because an Artifact is a private-by-default page that the independent reviewer's separate session and later agent sessions cannot open without a claude.ai account, every round also carries an **account-free fallback** embedded directly in the tracking issue — the round's ASCII/Mermaid wireframe (see [Wireframe Round](#wireframe-round)) — so a reviewer or on-device-verifying agent still sees the intended layout. The two always travel together: publish the Artifact as the source of truth, and keep the account-free fallback in the issue.
 
 **Guidelines:**
 
-- MUST present every design round as a published Artifact — at both wireframe and high fidelity, for options rounds and confirmation rounds alike — and consult the harness's artifact-design guidance (in Claude Code, the `artifact-design` skill) before building the page.
+- MUST present every design round as a published Artifact — at both wireframe and high fidelity, for options rounds and confirmation rounds alike — as the round's design source of truth, and consult the harness's artifact-design guidance (in Claude Code, the `artifact-design` skill) before building the page.
 - MUST shape the Artifact to the round: an options round renders its at-least-three candidates so they compare side by side, each labeled and carrying its rationale and trade-offs; a confirmation round renders the single already-approved direction. Cover both light and dark themes and the device sizes where the design differs, and hold a wireframe Artifact to the same breadboard fidelity as its embedded sketch — regions, hierarchy, flow, not colors or final type.
-- MUST keep the GitHub issue the durable record alongside the Artifact: embed the wireframe (ASCII or Mermaid) or attach the high-fidelity screenshot in the issue, and reference the Artifact URL from the UI design section next to it. An Artifact link alone does not satisfy the recording rules — the reviewer bot and later agent sessions must be able to see the design without a claude.ai account.
+- MUST keep the account-free fallback in the GitHub issue alongside every Artifact: embed the round's ASCII/Mermaid wireframe in the UI design section and reference the Artifact URL next to it. An Artifact link alone does not satisfy the recording rules — the reviewer bot and later agent sessions must be able to see the intended layout without a claude.ai account.
 - MUST NOT treat publishing or viewing the Artifact as design approval; the plan-approval gate always runs against the design recorded in the issue, per [Recording the Choice and Revisions](#recording-the-choice-and-revisions).
 
 ## Wireframe Round
@@ -83,28 +83,23 @@ The first options round is at wireframe fidelity unless the skip condition below
 
 **Guidelines:**
 
-- MUST embed every wireframe directly in the issue body, inside the UI design section, in a form GitHub renders without attachments: an ASCII sketch in a fenced code block or a Mermaid diagram (`flowchart` or `block-beta`), whichever draws the layout more clearly. This embedded sketch is the round's durable record; also publish the wireframe as an Artifact for presentation, per [Presenting Designs as Artifacts](#presenting-designs-as-artifacts).
+- MUST embed every wireframe directly in the issue body, inside the UI design section, in a form GitHub renders without attachments: an ASCII sketch in a fenced code block or a Mermaid diagram (`flowchart` or `block-beta`), whichever draws the layout more clearly. This embedded sketch is the round's account-free fallback; also publish the wireframe as an Artifact — the round's design source of truth — per [Presenting Designs as Artifacts](#presenting-designs-as-artifacts).
 - MUST keep wireframes at breadboard fidelity — regions, hierarchy, flow — in both the embedded sketch and the Artifact; MUST NOT spend the wireframe round on colors, exact typography, or final copy.
 - SHOULD add a one-line note per option on how its layout adapts across device sizes (small phones, large phones, tablets) when the options genuinely differ there.
 - MAY skip straight to a high-fidelity options round when the structural/layout pattern is already fixed (for example, the change restyles an existing arrangement) and the design-system/component context pins down what high fidelity looks like; MUST state in the UI design section that the wireframe round was skipped and why.
 
 ## High-Fidelity Round
 
-After the human decides the wireframe-level direction — or immediately, under the skip condition above — the run renders the direction at high fidelity, presented the same way: recorded in the issue, decided through the plan-approval gate. The default ladder is a **wireframe options round (at least three) → pick a direction → high-fidelity confirmation (one render of the chosen direction)**. But the high-fidelity round is equally a first-class **options round** — at least three rendered candidates — when the human wants to compare the real treatment (type, color, spacing, density) across directions before committing; wireframes deliberately hide exactly those, so this is often the fidelity where the comparison matters most. Which shape a given high-fidelity round takes follows [Two Kinds of Design Round](#two-kinds-of-design-round). The design is published as an Artifact for live presentation, per [Presenting Designs as Artifacts](#presenting-designs-as-artifacts), and the issue's durable record is a rendered image (a mockup, or a screenshot of a throwaway local render) — produced without touching the repository and attached by the human, because the session cannot upload issue attachments itself:
+After the human decides the wireframe-level direction — or immediately, under the skip condition above — the run renders the direction at high fidelity, presented the same way: published as an Artifact (the design source of truth), recorded in the issue, decided through the plan-approval gate. The default ladder is a **wireframe options round (at least three) → pick a direction → high-fidelity confirmation (one render of the chosen direction)**. But the high-fidelity round is equally a first-class **options round** — at least three rendered candidates — when the human wants to compare the real treatment (type, color, spacing, density) across directions before committing; wireframes deliberately hide exactly those, so this is often the fidelity where the comparison matters most. Which shape a given high-fidelity round takes follows [Two Kinds of Design Round](#two-kinds-of-design-round). The high-fidelity design is built and published as an Artifact — its canonical record — without touching the repository; the issue's account-free fallback stays the round's ASCII/Mermaid wireframe, so a reviewer or later agent session without a claude.ai account still sees the layout. There is no human upload step:
 
-1. Build the mockup as a self-contained page in a scratch location outside the repository checkout (the harness scratchpad), following the harness's artifact-design guidance.
-2. Publish it as an Artifact and present it to the human (in Claude Code, the `Artifact` tool) — the live presentation surface — covering both themes and the device sizes where the design differs.
-3. Screenshot the same page for the issue's durable record, then deliver the image files to the human through the harness's file-delivery mechanism (in Claude Code, send the files in the turn output) with self-describing filenames (`issue-42-option-b-dark-phone.png`), and in the same message ask the human to attach them to the tracking issue and resume with `/address continue` — pasting the generated attachment URLs in the resume message when the attachment landed anywhere other than the issue itself. (The Artifact URL is already known from step 2; the driver carries it forward without asking the human for it.)
-4. Set the status block to `awaiting attachment (design round N)` and end the turn — attachment is a human action; never poll or schedule a wake-up for it.
-5. On resume, collect the attachment URLs (from wherever in the issue the human attached them, or from the resume message), verify the set, and reference each URL — alongside the round's Artifact URL — from the UI design section under the option it belongs to.
+1. Build the mockup as a self-contained page in a scratch location outside the repository checkout (the harness scratchpad), following the harness's artifact-design guidance, covering both themes and the device sizes where the design differs.
+2. Publish it as an Artifact (in Claude Code, the `Artifact` tool) and present it to the human — this published Artifact is the round's design source of truth.
+3. Reference the Artifact URL from the UI design section under the option it belongs to, keeping the round's ASCII/Mermaid wireframe embedded in the issue as the account-free fallback, then re-enter the plan-approval gate.
 
 **Guidelines:**
 
-- MUST carry the high-fidelity durable record as GitHub issue attachments only; MUST NOT commit design mockups or renders to the repository on any branch, and MUST NOT leave mockup or render files in the working tree. (The published Artifact is the hosted-page presentation, not a repository file — publishing it is expected and is not a repository commit.)
-- MUST route attachment upload through the human by delivering the files and requesting the attachment in one turn output, then going dormant in the `awaiting attachment (design round N)` status-block state.
-- MUST treat a bare `/address continue` received in the awaiting-attachment state as "files attached" — collect and verify the URLs and update the issue — never as approval of a round that is not yet recorded there.
-- MUST verify the attached set against the delivered filenames, and re-request any missing or mismatched file before referencing the URLs.
-- MUST reference every attachment URL from the issue's UI design section under its option heading, and verify each referenced URL is a GitHub attachment URL that appears in the updated issue; an artifact only delivered in chat, or attached but never referenced, does not count as presented.
+- MUST carry the high-fidelity design as a published Artifact (its source of truth) plus the round's in-issue ASCII/Mermaid wireframe (the account-free fallback); MUST NOT commit design mockups or renders to the repository on any branch, and MUST NOT leave mockup or render files in the working tree. (The published Artifact is a hosted page, not a repository file — publishing it is expected and is not a repository commit.)
+- MUST reference the round's Artifact URL from the issue's UI design section under its option heading, alongside the account-free wireframe fallback; an Artifact only shown in chat, or published but never referenced from the issue, does not count as presented.
 - MUST re-enter the plan-approval gate once the round is recorded in the issue — high fidelity exists to be approved, not merely displayed.
 - MUST, at the wireframe-approval gate, tell the human that the next round will confirm the single chosen direction at high fidelity, and offer the alternative of a high-fidelity options round (at least three rendered candidates) — so the human opts into a single confirmation knowingly rather than by silent default.
 - MUST run the high-fidelity round as an options round (at least three rendered candidates, one marked `(Recommended)`, per [Constructing the Options](#constructing-the-options)) whenever the human asks to compare directions, candidates, or examples at high fidelity — even after choosing a direction at wireframe fidelity — and record and approve the choice by the same rules as any options round.
@@ -113,16 +108,16 @@ After the human decides the wireframe-level direction — or immediately, under 
 
 ## Recording the Choice and Revisions
 
-The issue is the single design record. Anyone — the maintainer, the independent reviewer, a later agent session verifying the app on a simulator — must be able to open the issue and see the current design, how it was chosen, and what it replaced.
+The issue records the design decision, its history, and the account-free wireframe fallback, so it stays the recovery point for anyone without a claude.ai account. Anyone — the maintainer, the independent reviewer, a later agent session verifying the app on a simulator — must be able to open the issue and see the current design (its Artifact URL and the in-issue wireframe), how it was chosen, and what it replaced.
 
 **Guidelines:**
 
-- MUST record the outcome in the UI design section when the human approves: mark the chosen option (`**Chosen:** Option B — <name>`) and keep its embedded sketch or attached render as the section's current design, with the round's Artifact URL referenced beside it.
+- MUST record the outcome in the UI design section when the human approves: mark the chosen option (`**Chosen:** Option B — <name>`) and keep its embedded ASCII/Mermaid wireframe (the account-free fallback) as the section's current design, with the round's Artifact URL — the design source of truth — referenced beside it.
 - MUST update the UI design section in place on every design revision during the plan phase, so the section always shows the current design state.
 - MUST move superseded options and rounds into one collapsed `<details>` subsection titled `Design history` inside the UI design section, labeled by round (`Round 1 — wireframes`, `Round 2 — high fidelity`), and MUST NOT delete them.
-- MUST keep the run's status block current with the pending design state (for example, `awaiting plan approval (design round 2: high fidelity)` or `awaiting attachment (design round 2)`).
+- MUST keep the run's status block current with the pending design state (for example, `awaiting plan approval (design round 2: high fidelity)`).
 - MUST re-enter the plan-approval gate after every plan-phase revision: update the issue first, then stop and wait for `/address continue`.
-- MUST apply these same recording rules when a design revision arises after the pull request exists (for example, from human review comments): update the issue's UI design section in place, preserve the history, route new renders through the human, update the Artifact so the linked page matches the current design, refresh the pull request's design links — and run the change as a Phase 4 round (back to draft if flipped, fresh independent review) rather than a plan-phase stop.
+- MUST apply these same recording rules when a design revision arises after the pull request exists (for example, from human review comments): update the issue's UI design section in place, preserve the history, re-publish the Artifact so the linked page matches the current design, refresh the pull request's design links (its Artifact URL and account-free wireframe fallback) — and run the change as a Phase 4 round (back to draft if flipped, fresh independent review) rather than a plan-phase stop.
 
 ## Design Links in the Pull Request
 
@@ -130,6 +125,6 @@ Code review checks the diff against the intended design; on-device and e2e verif
 
 **Guidelines:**
 
-- MUST link the chosen design from the pull request description when the plan presented the options exhibit: the tracking issue's UI design section, the chosen option's current attachment URL(s), and its Artifact URL. A plan whose exhibit was legitimately omitted has no design to link, and this section does not apply.
+- MUST link the chosen design from the pull request description when the plan presented the options exhibit: the tracking issue's UI design section, the chosen option's Artifact URL (the design source of truth), and its in-issue ASCII/Mermaid wireframe (the account-free fallback). A plan whose exhibit was legitimately omitted has no design to link, and this section does not apply.
 - MUST name the chosen option in the pull request body (for example, `Implements Option B — <name> from #<issue>`) so the reviewer knows which direction to hold the diff against.
 - MUST update those links whenever a later design revision changes the chosen design after the pull request exists.
