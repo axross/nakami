@@ -9,11 +9,11 @@
 		"scheme": "payloadmobile",
 		"userInterfaceStyle": "automatic",
 		"ios": {
-			"bundleIdentifier": "dev.axross.payloadmobile",
+			"bundleIdentifier": "app.axross.payload",
 			"icon": "./assets/expo.icon"
 		},
 		"android": {
-			"package": "dev.axross.payloadmobile",
+			"package": "app.axross.payload",
 			"adaptiveIcon": {
 				"backgroundColor": "#E6F4FE",
 				"foregroundImage": "./assets/images/android-icon-foreground.png",

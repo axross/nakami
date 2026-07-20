@@ -1,4 +1,4 @@
-appId: dev.axross.payloadmobile
+appId: app.axross.payload
 name: app-launch — cold start reaches the home screen
 tags:
   - scenario:app-launch

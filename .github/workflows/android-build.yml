@@ -19,11 +19,15 @@ name: Android Preview Build
 #   ANDROID_KEYSTORE_PASSWORD      keystore password
 #   ANDROID_KEY_ALIAS              signing key alias
 #   ANDROID_KEY_PASSWORD           signing key password
-#   FIREBASE_ANDROID_APP_ID        Firebase Android app id (1:...:android:...)
 #   FIREBASE_SERVICE_ACCOUNT_JSON  service-account JSON for App Distribution
 #   SENTRY_AUTH_TOKEN              source-map upload during the release build
-# Optional:
-#   FIREBASE_GROUPS (repo variable)  comma-separated Firebase tester groups
+# Repo variables (same screen, Variables tab) — not secrets:
+#   FIREBASE_ANDROID_APP_ID        Firebase Android app id (1:...:android:...).
+#                                  Kept as a variable, not a secret, so the
+#                                  tester install link (which embeds the app id)
+#                                  is not masked out of the run summary / PR
+#                                  comment by Actions' secret redaction.
+#   FIREBASE_GROUPS (optional)     comma-separated Firebase tester groups
 
 on:
   workflow_dispatch:
@@ -126,7 +130,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
           FIREBASE_SERVICE_ACCOUNT_PATH: ${{ runner.temp }}/firebase-service-account.json
           FIREBASE_GROUPS: ${{ vars.FIREBASE_GROUPS }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}

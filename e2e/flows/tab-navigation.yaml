@@ -1,4 +1,4 @@
-appId: dev.axross.payloadmobile
+appId: app.axross.payload
 name: tab-navigation — switching tabs reaches every tab's screen
 tags:
   - scenario:tab-navigation
