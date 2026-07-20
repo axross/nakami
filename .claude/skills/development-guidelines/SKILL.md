@@ -1,7 +1,7 @@
 ---
 name: development-guidelines
-description: The project's baseline working rules. Covers the format/lint loop, scoped change management, current-docs lookup triggers, run-script commands, type-safety discipline, source-comment and doc-comment conventions, verification requirements, data-layer/migration handling, end-to-end test expectations, Conventional Commits, and pull request descriptions.
-when_to_use: Apply at the start of EVERY task in this project, even when the user does not mention formatting, linting, testing, type casts, comments, doc-comments, dependencies, migrations, docs, commands, commit wording, or pull request bodies.
+description: The project's baseline working rules. Covers the format/lint loop, scoped change management, current-docs lookup triggers, run-script commands, type-safety discipline, source-comment and doc-comment conventions, verification requirements, the Android App Distribution preview environment, data-layer/migration handling, end-to-end test expectations, Conventional Commits, and pull request descriptions.
+when_to_use: Apply at the start of EVERY task in this project, even when the user does not mention formatting, linting, testing, type casts, comments, doc-comments, preview builds, dependencies, migrations, docs, commands, commit wording, or pull request bodies.
 user-invocable: false
 ---
 
@@ -36,6 +36,14 @@ See [verification.md](./references/verification.md) for:
 - Manual and automated verification steps
 - How to maintain test coverage and respond to failures
 - CI pipeline behavior
+
+## Preview Environments
+
+See [preview-environments.md](./references/preview-environments.md) for:
+
+- The Android App Distribution preview mechanism (`android-build.yml`): a manually-dispatched, signed APK
+- Dispatching a preview build and passing the `pr` input
+- Surfacing an existing preview safely — commit-matching the build to the branch head, the local `dev`-build fallback, and the mobile caveats
 
 ## Current External Documentation
 
