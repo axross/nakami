@@ -39,10 +39,14 @@ The app is linked to Sentry (`axross/payload-mobile`, DSN committed in `.env`) a
 | `CLAUDE_CODE_OAUTH_TOKEN`                                                  | The `@claude review` CI reviewer (add when enabling it)                                      |
 | `ANDROID_KEYSTORE_BASE64`                                                  | base64 of the release keystore (`.jks`) used to sign the Android preview build               |
 | `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` | Release keystore credentials for signing                                                     |
-| `FIREBASE_ANDROID_APP_ID`                                                  | Firebase Android app id (`1:…:android:…`) the preview APK is distributed to                  |
 | `FIREBASE_SERVICE_ACCOUNT_JSON`                                            | Service-account JSON authorizing the Firebase App Distribution upload                        |
 
-An optional repo **variable** `FIREBASE_GROUPS` (comma-separated Firebase tester group names) targets the distribution at specific tester groups.
+Repo **variables** (Settings → Secrets and variables → Actions → Variables), not secrets:
+
+| Variable                 | Used for                                                                                                                                                                                    |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FIREBASE_ANDROID_APP_ID` | Firebase Android app id (`1:…:android:…`) the preview APK is distributed to. A **variable, not a secret**, so the tester install link (which embeds the app id) is not redacted out of the run summary / PR comment. |
+| `FIREBASE_GROUPS` (optional) | Comma-separated Firebase tester group names to target the distribution at specific groups.                                                                                              |
 
 Builds started outside GitHub Actions (e.g. `eas build` locally or EAS's own CI) do not see Actions secrets — mirror `SENTRY_AUTH_TOKEN` as an EAS environment variable for those.
 
