@@ -38,7 +38,7 @@ A checklist that needs far more than a handful of criteria is usually a sign the
 **Guidelines:**
 
 - SHOULD right-size the checklist to roughly three to seven criteria; treat materially more as a signal to reconsider the change's scope rather than padding restatements of the same behavior.
-- MUST include the verification gates the change requires (format/lint, unit/e2e suites, build) as trailing checklist items, per [AGENTS.md › Verification](../../../../AGENTS.md#verification) (and the project's development guidelines (verification rules) for the e2e/manual side).
+- MAY include the change's verification gates (format/lint, unit/e2e suites, build) as trailing checklist items, but state *how* they are run — which checks exercise which surface — in the spec's separate **Verification strategy** section per [verification-strategy.md](./verification-strategy.md), not by expanding the acceptance-criteria list into a method plan.
 - MUST NOT restate the same observable behavior across multiple bullets.
 - MUST write each criterion as a plain bullet (`-`), not a GitHub task-list checkbox (`- [ ]`) — unless the project actually checks the boxes as part of its process, an unchecked box reads as perpetually incomplete.
 
