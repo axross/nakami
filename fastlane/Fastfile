@@ -22,30 +22,16 @@ platform :android do
     # we override signing at build time with AGP's injected-signing properties
     # (these take precedence over the DSL signingConfig) rather than editing the
     # generated, gitignored build.gradle.
-    properties = {
-      "android.injected.signing.store.file" => ENV.fetch("ANDROID_KEYSTORE_PATH"),
-      "android.injected.signing.store.password" => ENV.fetch("ANDROID_KEYSTORE_PASSWORD"),
-      "android.injected.signing.key.alias" => ENV.fetch("ANDROID_KEY_ALIAS"),
-      "android.injected.signing.key.password" => ENV.fetch("ANDROID_KEY_PASSWORD"),
-    }
-
-    # The workflow supplies a per-build version identifier (e.g. "1.0.0-pr-123"
-    # or "1.0.0-<short-sha>") so a tester can tell an installed preview APK apart
-    # by which PR/commit it was built from. Applied via AGP's injected
-    # versionName property at assemble time — the same override mechanism as the
-    # signing properties above — so the prebuilt native project stays
-    # version-agnostic and cache-reusable. When unset (a local `fastlane android
-    # build` or any non-preview build) the APK keeps the app.json versionName.
-    version_name = ENV["ANDROID_VERSION_NAME"]
-    unless version_name.nil? || version_name.empty?
-      properties["android.injected.version.name"] = version_name
-    end
-
     gradle(
       project_dir: "android",
       task: "assemble",
       build_type: "Release",
-      properties: properties,
+      properties: {
+        "android.injected.signing.store.file" => ENV.fetch("ANDROID_KEYSTORE_PATH"),
+        "android.injected.signing.store.password" => ENV.fetch("ANDROID_KEYSTORE_PASSWORD"),
+        "android.injected.signing.key.alias" => ENV.fetch("ANDROID_KEY_ALIAS"),
+        "android.injected.signing.key.password" => ENV.fetch("ANDROID_KEY_PASSWORD"),
+      },
     )
 
     # Surface the assembled APK path as a step output so the workflow can stage

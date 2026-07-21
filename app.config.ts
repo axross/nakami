@@ -25,16 +25,23 @@ function resolveCommitHash(): string | undefined {
 
 // Dynamic config extending the static app.json: Expo passes the static config
 // in as `config` and uses this function's return value as the final config
-// (https://docs.expo.dev/workflow/configuration/). Only `extra.commitHash` is
-// added — the documented channel for build-time values, read at runtime via
-// expo-constants' Constants.expoConfig.extra
-// (https://docs.expo.dev/versions/v57.0.0/sdk/constants/) — so the generated
-// native project is unchanged. name/slug are re-stated to satisfy the required
-// ExpoConfig fields the context types as optional.
+// (https://docs.expo.dev/workflow/configuration/). name/slug are re-stated to
+// satisfy the required ExpoConfig fields the context types as optional.
+//
+// `version` is overridden only when PREVIEW_VERSION_NAME is set — the Android
+// preview build (android-build.yml) sets it to a per-build identifier like
+// "1.0.0-pr-123" or "1.0.0-<short-sha>" so a tester can tell which PR/commit an
+// installed APK came from. It becomes the APK's versionName, baked into the
+// generated native project at `expo prebuild` time. AGP's assemble-time
+// `android.injected.version.name` property does NOT override versionName on the
+// AGP this project generates, so the value must be resolved here, at config
+// time, instead. Absent the env var (dev/run/local builds) `version` stays the
+// app.json value. Empty is treated as unset via `||`.
 export default ({ config }: ConfigContext): ExpoConfig => ({
 	...config,
 	name: config.name ?? "payload-mobile",
 	slug: config.slug ?? "payload-mobile",
+	version: process.env.PREVIEW_VERSION_NAME || config.version,
 	extra: {
 		...config.extra,
 		commitHash: resolveCommitHash(),

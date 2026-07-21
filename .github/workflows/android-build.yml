@@ -67,6 +67,8 @@ jobs:
   prebuild:
     name: Prebuild (cached)
     runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.version.outputs.name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,17 +77,53 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+      # Per-build versionName so a tester can identify which PR/commit an
+      # installed preview APK came from: "<semver>-pr-<n>" when dispatched for a
+      # PR, else "<semver>-<short-sha>". `semver` is the app's own version from
+      # app.json; the `pr` dispatch input is read as an env var (never
+      # interpolated into the script) so a crafted value cannot inject shell.
+      # `app.config.ts` bakes this into the generated native project's
+      # versionName via PREVIEW_VERSION_NAME below — the value has to be known
+      # before prebuild, so it is computed here and reused by the build job.
+      - name: Compute preview version name
+        id: version
+        env:
+          PR: ${{ github.event.inputs.pr }}
+        run: |
+          semver="$(node -p "require('./app.json').expo.version")"
+          if [ -n "$PR" ]; then
+            suffix="pr-$PR"
+          else
+            suffix="${GITHUB_SHA:0:7}"
+          fi
+          # Heredoc-delimited output write: the `pr` dispatch input flows into
+          # the value, so a newline in it must not be able to inject an extra
+          # `key=value` line into $GITHUB_OUTPUT (which, taking the last
+          # occurrence, could override `name`). The delimiter form is GitHub's
+          # recommendation for output values that may contain special characters.
+          {
+            echo "name<<VERSION_NAME_EOF"
+            echo "${semver}-${suffix}"
+            echo "VERSION_NAME_EOF"
+          } >> "$GITHUB_OUTPUT"
+      # The version is baked into the native project at prebuild, so it is part
+      # of the cache identity: without it, two dispatches sharing an app.json +
+      # lockfile would reuse each other's generated project (and versionName).
+      # A PR's identifier is stable across its commits, so PR builds still reuse
+      # the cache; a commit-hash identifier is unique per commit, as expected.
       - name: Restore prebuilt android project
         id: cache
         uses: actions/cache@v4
         with:
           path: android
-          key: android-prebuild-${{ hashFiles('app.json', 'package-lock.json') }}
+          key: android-prebuild-${{ hashFiles('app.json', 'package-lock.json') }}-${{ steps.version.outputs.name }}
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Expo prebuild (android)
         if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          PREVIEW_VERSION_NAME: ${{ steps.version.outputs.name }}
         run: npx expo prebuild --platform android --no-install
       - name: Upload android project
         uses: actions/upload-artifact@v4
@@ -134,33 +172,11 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
-      # Per-build versionName so a tester can identify which PR/commit an
-      # installed preview APK came from: "<semver>-pr-<n>" when dispatched for a
-      # PR, else "<semver>-<short-sha>". `semver` is the app's own version from
-      # app.json; the `pr` dispatch input is read as an env var (never
-      # interpolated into the script) so a crafted value cannot inject shell.
-      - name: Compute preview version name
-        id: version
-        env:
-          PR: ${{ github.event.inputs.pr }}
-        run: |
-          semver="$(node -p "require('./app.json').expo.version")"
-          if [ -n "$PR" ]; then
-            suffix="pr-$PR"
-          else
-            suffix="${GITHUB_SHA:0:7}"
-          fi
-          # Heredoc-delimited output write: the `pr` dispatch input flows into
-          # the value, so a newline in it must not be able to inject an extra
-          # `key=value` line into $GITHUB_OUTPUT (which, taking the last
-          # occurrence, could override `name` and the EXPECTED the verify step
-          # reads from it). The delimiter form is GitHub's recommendation for
-          # output values that may contain special characters.
-          {
-            echo "name<<VERSION_NAME_EOF"
-            echo "${semver}-${suffix}"
-            echo "VERSION_NAME_EOF"
-          } >> "$GITHUB_OUTPUT"
+      # Gradle re-runs Metro to bundle the JS, which resolves app.config.ts
+      # again; pass the same identifier so the build-time config (and anything
+      # derived from it, e.g. the Sentry release) matches the versionName baked
+      # into the native project at prebuild, rather than falling back to the
+      # plain app.json version.
       - name: Build signed APK
         id: fastlane
         env:
@@ -168,7 +184,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_VERSION_NAME: ${{ steps.version.outputs.name }}
+          PREVIEW_VERSION_NAME: ${{ needs.prebuild.outputs.version_name }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -177,15 +193,16 @@ jobs:
       # reference a deterministic download path instead of guessing the filename.
       - name: Stage APK for upload
         run: cp "${{ steps.fastlane.outputs.apk_path }}" "$RUNNER_TEMP/preview.apk"
-      # Confirm AGP's injected versionName actually landed in the assembled APK,
-      # rather than trusting that the `android.injected.version.name` property
-      # took effect. Reads the compiled manifest back with aapt2 and fails the
-      # build on a mismatch, so a silently-ignored override surfaces loudly here
-      # instead of shipping a mislabeled preview. Skips (warns only) if aapt2 is
-      # absent, so missing tooling never masquerades as a version mismatch.
-      - name: Verify injected versionName
+      # Confirm the per-build versionName baked in at prebuild actually landed
+      # in the assembled APK, rather than trusting the prebuild/config path took
+      # effect. Reads the compiled manifest back with aapt2 and fails the build
+      # on a mismatch, so a regression (e.g. the config override silently not
+      # applying) surfaces loudly here instead of shipping a mislabeled preview.
+      # Skips (warns only) if aapt2 is absent, so missing tooling never
+      # masquerades as a version mismatch.
+      - name: Verify APK versionName
         env:
-          EXPECTED: ${{ steps.version.outputs.name }}
+          EXPECTED: ${{ needs.prebuild.outputs.version_name }}
         run: |
           aapt2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f 2>/dev/null | sort -V | tail -n1)"
           if [ -z "$aapt2" ]; then
@@ -202,7 +219,7 @@ jobs:
           echo "Expected versionName: $EXPECTED"
           echo "Actual   versionName: $actual"
           if [ "$actual" != "$EXPECTED" ]; then
-            echo "::error::Assembled APK versionName '$actual' does not match the injected '$EXPECTED' — the AGP versionName override did not take effect."
+            echo "::error::Assembled APK versionName '$actual' does not match the expected '$EXPECTED' — the prebuild versionName override did not take effect."
             exit 1
           fi
       - name: Upload APK
