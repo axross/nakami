@@ -1,6 +1,8 @@
-// Jest mock for react-native-reanimated, wired in via jest.config.cjs for both
-// the bare specifier and the `/mock` subpath expo-router requires. The
-// package's published v4 `/mock` entry is broken (it requires an absent
+// Jest mock for react-native-reanimated, wired in via jest.config.cjs for the
+// `react-native-reanimated/mock` subpath expo-router's testing-library
+// requires (see that file for why only `/mock`, not the bare specifier, is
+// mapped). The package's published v4 `/mock` entry is broken (it requires an
+// absent
 // `./src/mock`), so expo-router's testing-library otherwise falls back to an
 // empty module, dropping hooks like useReducedMotion. This reduces the
 // animation helpers to synchronous pass-throughs and renders an animated view
