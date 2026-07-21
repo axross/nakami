@@ -3,20 +3,17 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 
 /**
  * Resolves the full commit hash of the source this build is produced from,
- * evaluated at Expo config resolution (build) time. Preference order: EAS
- * Build's commit env var, GitHub Actions' commit env var, then a local `git`
- * call for on-machine `dev`/`run` builds.
+ * evaluated at Expo config resolution (build) time. Prefers GitHub Actions'
+ * `GITHUB_SHA` (the CI build), then a local `git` call for on-machine
+ * `dev`/`run` builds.
  *
  * @returns the 40-character commit hash, or `undefined` when none resolves (the
  * app then shows "Unknown"). Never throws — a missing `git` is caught.
  */
 function resolveCommitHash(): string | undefined {
-	// `||`, not `??`: an empty-string env var must fall through to the next
-	// source so the EAS -> GitHub Actions -> git precedence holds exactly.
-	const fromEnv =
-		process.env.EAS_BUILD_GIT_COMMIT_HASH || process.env.GITHUB_SHA;
-	if (fromEnv) {
-		return fromEnv;
+	// Truthiness, not `??`, so an empty GITHUB_SHA falls through to git.
+	if (process.env.GITHUB_SHA) {
+		return process.env.GITHUB_SHA;
 	}
 
 	try {
