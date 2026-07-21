@@ -1,0 +1,240 @@
+import { useRouter } from "expo-router";
+import { type JSX, useCallback, useState } from "react";
+import {
+	KeyboardAvoidingView,
+	Platform,
+	Pressable,
+	ScrollView,
+	Text,
+	TextInput,
+	View,
+} from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
+import { PayloadRequestError } from "~/auth/helpers/payload-client";
+import { normalizeServerUrl } from "~/auth/helpers/server-url";
+import { useSignIn } from "~/auth/mutations/use-sign-in";
+
+const DEFAULT_COLLECTION = "users";
+
+function messageForError(error: unknown): string {
+	if (error instanceof PayloadRequestError) {
+		if (error.kind === "auth") {
+			return "Incorrect email or password.";
+		}
+		if (error.kind === "network") {
+			return "Couldn't reach the server. Check the URL and try again.";
+		}
+	}
+
+	return "Something went wrong. Please try again.";
+}
+
+/**
+ * The Payload sign-in form: server URL, auth collection (defaulted), email, and
+ * password. On success it persists the session (via the sign-in mutation) and
+ * dismisses back to Home; failures surface inline without leaving the screen.
+ */
+export function SignInScreen(): JSX.Element {
+	const router = useRouter();
+	const { theme } = useUnistyles();
+	const { mutate, isPending, error, reset } = useSignIn();
+
+	const [serverUrl, setServerUrl] = useState("");
+	const [collection, setCollection] = useState(DEFAULT_COLLECTION);
+	const [editingCollection, setEditingCollection] = useState(false);
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [validationError, setValidationError] = useState<string | null>(null);
+
+	// Clears any prior error as soon as the user changes an input.
+	const clearErrors = useCallback(() => {
+		setValidationError(null);
+		if (error) {
+			reset();
+		}
+	}, [error, reset]);
+
+	const onSubmit = useCallback(() => {
+		const normalizedUrl = normalizeServerUrl(serverUrl);
+		if (normalizedUrl === null) {
+			setValidationError(
+				"Enter a valid server URL, e.g. https://cms.example.com.",
+			);
+			return;
+		}
+
+		const collectionSlug = collection.trim();
+		if (collectionSlug === "") {
+			setValidationError("Enter the auth collection slug.");
+			return;
+		}
+
+		const trimmedEmail = email.trim();
+		if (trimmedEmail === "" || password === "") {
+			setValidationError("Enter your email and password.");
+			return;
+		}
+
+		setValidationError(null);
+		mutate(
+			{
+				serverUrl: normalizedUrl,
+				collectionSlug,
+				email: trimmedEmail,
+				password,
+			},
+			{ onSuccess: () => router.back() },
+		);
+	}, [serverUrl, collection, email, password, mutate, router]);
+
+	const message = validationError ?? (error ? messageForError(error) : null);
+	const canSubmit =
+		!isPending &&
+		serverUrl.trim() !== "" &&
+		email.trim() !== "" &&
+		password !== "";
+
+	return (
+		<KeyboardAvoidingView
+			behavior={Platform.OS === "ios" ? "padding" : undefined}
+			style={styles.root}
+		>
+			<ScrollView
+				contentContainerStyle={styles.content}
+				keyboardShouldPersistTaps="handled"
+				testID="sign-in-screen"
+			>
+				<View style={styles.field}>
+					<Text style={styles.label}>Server URL</Text>
+					<TextInput
+						accessibilityLabel="Server URL"
+						autoCapitalize="none"
+						autoCorrect={false}
+						inputMode="url"
+						onChangeText={(next) => {
+							setServerUrl(next);
+							clearErrors();
+						}}
+						placeholder="https://cms.example.com"
+						placeholderTextColor={theme.colors.textSecondary}
+						style={styles.input}
+						testID="sign-in-server-url"
+						value={serverUrl}
+					/>
+				</View>
+
+				<SignInCollectionField
+					editing={editingCollection}
+					onChangeText={(next) => {
+						setCollection(next);
+						clearErrors();
+					}}
+					onEdit={() => setEditingCollection(true)}
+					value={collection}
+				/>
+
+				<View style={styles.field}>
+					<Text style={styles.label}>Email</Text>
+					<TextInput
+						accessibilityLabel="Email"
+						autoCapitalize="none"
+						autoCorrect={false}
+						inputMode="email"
+						onChangeText={(next) => {
+							setEmail(next);
+							clearErrors();
+						}}
+						placeholder="you@example.com"
+						placeholderTextColor={theme.colors.textSecondary}
+						style={styles.input}
+						testID="sign-in-email"
+						value={email}
+					/>
+				</View>
+
+				<View style={styles.field}>
+					<Text style={styles.label}>Password</Text>
+					<TextInput
+						accessibilityLabel="Password"
+						autoCapitalize="none"
+						autoCorrect={false}
+						onChangeText={(next) => {
+							setPassword(next);
+							clearErrors();
+						}}
+						placeholderTextColor={theme.colors.textSecondary}
+						secureTextEntry
+						style={styles.input}
+						testID="sign-in-password"
+						value={password}
+					/>
+				</View>
+
+				{message !== null ? (
+					<Text style={styles.error} testID="sign-in-error">
+						{message}
+					</Text>
+				) : null}
+
+				<Pressable
+					accessibilityRole="button"
+					accessibilityState={{ disabled: !canSubmit }}
+					disabled={!canSubmit}
+					onPress={onSubmit}
+					style={({ pressed }) => styles.submit(pressed, canSubmit)}
+					testID="sign-in-submit"
+				>
+					<Text style={styles.submitLabel}>
+						{isPending ? "Signing in…" : "Sign in"}
+					</Text>
+				</Pressable>
+			</ScrollView>
+		</KeyboardAvoidingView>
+	);
+}
+
+const styles = StyleSheet.create((theme) => ({
+	content: {
+		padding: theme.gapSizes.x16,
+		rowGap: theme.gapSizes.x16,
+	},
+	error: {
+		color: theme.colors.danger,
+		fontSize: theme.fontSizes.sm,
+	},
+	field: {
+		rowGap: theme.gapSizes.x8,
+	},
+	input: {
+		backgroundColor: theme.colors.backgroundElevated,
+		borderColor: theme.colors.border,
+		borderRadius: theme.radiusSizes.md,
+		borderWidth: 1,
+		color: theme.colors.textPrimary,
+		fontSize: theme.fontSizes.md,
+		minHeight: 48,
+		paddingHorizontal: theme.gapSizes.x12,
+	},
+	label: {
+		color: theme.colors.textSecondary,
+		fontSize: theme.fontSizes.sm,
+	},
+	root: {
+		backgroundColor: theme.colors.background,
+		flex: 1,
+	},
+	submit: (pressed: boolean, enabled: boolean) => ({
+		alignItems: "center",
+		backgroundColor: theme.colors.accent,
+		borderRadius: theme.radiusSizes.md,
+		justifyContent: "center",
+		minHeight: 50,
+		opacity: !enabled ? 0.5 : pressed ? 0.7 : 1,
+	}),
+	submitLabel: {
+		color: theme.colors.accentContrast,
+		fontSize: theme.fontSizes.md,
+		fontWeight: "600",
+	},
+}));

@@ -45,7 +45,8 @@
 					"project": "payload-mobile",
 					"url": "https://sentry.io/"
 				}
-			]
+			],
+			"expo-secure-store"
 		],
 		"experiments": {
 			"typedRoutes": true,

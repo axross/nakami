@@ -1,6 +1,8 @@
-import { describe, expect, it, jest } from "@jest/globals";
+import { afterEach, describe, expect, it, jest } from "@jest/globals";
 import { fireEvent } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
+import type { Session } from "~/auth/models/session";
+import { useAuthStore } from "~/auth/stores/auth-store";
 import { SettingsScreen } from "./settings-screen";
 
 jest.mock("@sentry/react-native", () => ({
@@ -10,6 +12,22 @@ jest.mock("@sentry/react-native", () => ({
 jest.mock("expo-dev-client", () => ({
 	openMenu: jest.fn(),
 }));
+
+jest.mock("~/auth/mutations/use-sign-out", () => ({
+	useSignOut: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+
+const session: Session = {
+	serverUrl: "https://cms.example.com",
+	collectionSlug: "users",
+	token: "jwt-token",
+	exp: 1_800_000_000,
+	user: { id: "1", email: "you@example.com" },
+};
+
+afterEach(() => {
+	useAuthStore.setState({ status: "loading", session: null });
+});
 
 describe("<SettingsScreen>", () => {
 	it("renders the About and Debug groups with their rows", () => {
@@ -64,5 +82,32 @@ describe("<SettingsScreen>", () => {
 		fireEvent.press(getByTestId("settings-open-dev-menu-row"));
 
 		expect(openMenu).toHaveBeenCalledTimes(1);
+	});
+
+	it("hides the Account group when unauthenticated", () => {
+		useAuthStore.setState({ status: "unauthenticated", session: null });
+
+		const { queryByTestId } = renderRouter(
+			{ index: SettingsScreen },
+			{ initialUrl: "/" },
+		);
+
+		expect(queryByTestId("settings-account-row")).toBeNull();
+		expect(queryByTestId("settings-sign-out-row")).toBeNull();
+	});
+
+	it("shows the Account group with the user email and Sign out when authenticated", () => {
+		useAuthStore.setState({ status: "authenticated", session });
+
+		const { getByTestId, getByText } = renderRouter(
+			{ index: SettingsScreen },
+			{ initialUrl: "/" },
+		);
+
+		expect(getByTestId("settings-account-row")).toBeTruthy();
+		expect(getByText("you@example.com")).toBeTruthy();
+		expect(getByText("https://cms.example.com")).toBeTruthy();
+		expect(getByTestId("settings-sign-out-row")).toBeTruthy();
+		expect(getByText("Sign out")).toBeTruthy();
 	});
 });

@@ -1,10 +1,33 @@
-import { describe, expect, it } from "@jest/globals";
-import { render } from "@testing-library/react-native";
+import { afterEach, describe, expect, it } from "@jest/globals";
+import { renderRouter } from "expo-router/testing-library";
+import { useAuthStore } from "~/auth/stores/auth-store";
 import { HomeScreen } from "./home-screen";
 
+afterEach(() => {
+	useAuthStore.setState({ status: "loading", session: null });
+});
+
 describe("<HomeScreen>", () => {
-	it("renders the app title and subtitle", () => {
-		const { getByTestId, getByText } = render(<HomeScreen />);
+	it("shows the empty state with a sign-in call to action when unauthenticated", () => {
+		useAuthStore.setState({ status: "unauthenticated", session: null });
+
+		const { getByTestId, getByText } = renderRouter(
+			{ index: HomeScreen },
+			{ initialUrl: "/" },
+		);
+
+		expect(getByTestId("home-screen")).toBeTruthy();
+		expect(getByText("Connect to Payload")).toBeTruthy();
+		expect(getByTestId("home-sign-in-button")).toBeTruthy();
+	});
+
+	it("shows the app placeholder when authenticated", () => {
+		useAuthStore.setState({ status: "authenticated", session: null });
+
+		const { getByTestId, getByText } = renderRouter(
+			{ index: HomeScreen },
+			{ initialUrl: "/" },
+		);
 
 		expect(getByTestId("home-screen")).toBeTruthy();
 		expect(getByText("Payload Mobile")).toBeTruthy();

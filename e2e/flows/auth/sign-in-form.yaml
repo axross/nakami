@@ -1,0 +1,34 @@
+appId: app.axross.payload
+name: auth-sign-in-form — the sign-in form toggles Collection and reports an unreachable server
+tags:
+  - scenario:auth-sign-in-form
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "home-sign-in-button"
+- assertVisible:
+    id: "sign-in-screen"
+# Collection starts as plain text with an edit affordance, then becomes an input.
+- assertVisible:
+    id: "sign-in-collection-value"
+- tapOn:
+    id: "sign-in-collection-edit"
+- assertVisible:
+    id: "sign-in-collection-input"
+# An unreachable server surfaces the inline reachability error.
+- tapOn:
+    id: "sign-in-server-url"
+- inputText: "http://127.0.0.1:9"
+- tapOn:
+    id: "sign-in-email"
+- inputText: "you@example.com"
+- tapOn:
+    id: "sign-in-password"
+- inputText: "wrong-password"
+- tapOn:
+    id: "sign-in-submit"
+- extendedWaitUntil:
+    visible:
+      id: "sign-in-error"
+    timeout: 20000
