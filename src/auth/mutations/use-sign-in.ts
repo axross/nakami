@@ -25,8 +25,10 @@ export function useSignIn() {
 	return useMutation<Session, unknown, SignInInput>({
 		mutationFn: async ({ serverUrl, collectionSlug, email, password }) => {
 			const server = { serverUrl, collectionSlug };
-			// Log the endpoint and collection only — never the email or password.
-			logger.info("Started signing in.", { serverUrl, collectionSlug });
+			// Routine bracket-open at debug; the completion below is the
+			// user-significant milestone at info. Log the endpoint and collection
+			// only — never the email or password.
+			logger.debug("Started signing in.", { serverUrl, collectionSlug });
 
 			const result = await login(server, { email, password });
 

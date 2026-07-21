@@ -70,15 +70,15 @@ The root logger's transport mirrors **every** log line onto the error tracker's 
 
 ## Structured Log Format
 
-react-native-logs log methods accept multiple arguments and append them to the line — objects are stringified by the transport. Pass the message string first, then one context object with the searchable fields.
+react-native-logs log methods accept multiple arguments and append them to the line — objects are stringified by the transport. Pass the message string first, then one context object with the searchable fields. (The level shown here follows [Log Levels](#log-levels): routine per-operation bracketing is `debug`; a user-significant milestone would be `info`.)
 
 ```typescript
 // No context needed
-logger.info("Started fetching records.");
+logger.debug("Started fetching records.");
 
 // With context
-logger.info("Started fetching record.", { id });
-logger.info("Completed fetching record.", {
+logger.debug("Started fetching record.", { id });
+logger.debug("Completed fetching record.", {
 	id,
 	duration: performance.now() - startedAt,
 });
@@ -102,10 +102,10 @@ Log messages SHOULD follow a consistent past-tense / gerund-phrase pattern that 
 | Recoverable skip / partial failure | Descriptive past tense | `"Skipped a record due to parse error."` |
 
 ```typescript
-// CORRECT
-logger.info("Started fetching external metadata.", { url });
+// CORRECT — routine bracketing at debug (see Log Levels)
+logger.debug("Started fetching external metadata.", { url });
 // ... operation ...
-logger.info("Completed fetching external metadata.", { url, duration });
+logger.debug("Completed fetching external metadata.", { url, duration });
 
 // CORRECT — warn on recoverable skip
 logger.warn("Skipped a record due to parse error.", {
@@ -114,8 +114,8 @@ logger.warn("Skipped a record due to parse error.", {
 });
 
 // WRONG — vague, not scannable
-logger.info("done");
-logger.info("error fetching record");
+logger.debug("done");
+logger.debug("error fetching record");
 ```
 
 **Guidelines:**
