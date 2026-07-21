@@ -1,0 +1,111 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { type JSX, useCallback } from "react";
+import { Text, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useSignOut } from "~/auth/mutations/use-sign-out";
+import { useAuthSession } from "~/auth/stores/auth-store";
+import { SettingMenuGroup } from "~/settings/components/setting-menu-group/setting-menu-group";
+import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/setting-menu-group-body";
+import { SettingMenuGroupHeading } from "~/settings/components/setting-menu-group/setting-menu-group-heading";
+import { SettingMenuGroupItem } from "~/settings/components/setting-menu-group/setting-menu-group-item";
+import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
+
+/**
+ * The signed-in Account section: the current user's email and server, plus a
+ * Sign out action. Rendered only while authenticated (the parent gates it), so
+ * the session is always present here.
+ */
+export function SettingsAccountGroup(): JSX.Element | null {
+	const { theme } = useUnistyles();
+	const session = useAuthSession();
+	const { mutate: signOut, isPending } = useSignOut();
+
+	const onSignOutPress = useCallback(() => {
+		signOut();
+	}, [signOut]);
+
+	if (session === null) {
+		return null;
+	}
+
+	return (
+		<SettingMenuGroup>
+			<SettingMenuGroupHeading>Account</SettingMenuGroupHeading>
+
+			<SettingMenuGroupBody>
+				<View style={styles.accountRow} testID="settings-account-row">
+					<View style={styles.avatar}>
+						<MaterialCommunityIcons
+							color={theme.colors.accent}
+							name="account-outline"
+							size={22}
+						/>
+					</View>
+					<View style={styles.accountText}>
+						<Text numberOfLines={1} style={styles.email}>
+							{session.user.email}
+						</Text>
+						<Text numberOfLines={1} style={styles.server}>
+							{session.serverUrl}
+						</Text>
+					</View>
+				</View>
+
+				<SettingMenuGroupItem
+					accessibilityRole="button"
+					accessibilityState={{ disabled: isPending }}
+					disabled={isPending}
+					last
+					onPress={onSignOutPress}
+					testID="settings-sign-out-row"
+				>
+					<MaterialCommunityIcons
+						color={theme.colors.danger}
+						name="logout"
+						size={24}
+					/>
+					<SettingMenuGroupItemLabel style={styles.signOutLabel}>
+						Sign out
+					</SettingMenuGroupItemLabel>
+				</SettingMenuGroupItem>
+			</SettingMenuGroupBody>
+		</SettingMenuGroup>
+	);
+}
+
+const styles = StyleSheet.create((theme) => ({
+	accountRow: {
+		alignItems: "center",
+		backgroundColor: theme.colors.backgroundElevated,
+		borderTopLeftRadius: theme.radiusSizes.md,
+		borderTopRightRadius: theme.radiusSizes.md,
+		columnGap: theme.gapSizes.x16,
+		flexDirection: "row",
+		minHeight: 48,
+		paddingHorizontal: theme.gapSizes.x16,
+		paddingVertical: theme.gapSizes.x8,
+	},
+	accountText: {
+		flexShrink: 1,
+		rowGap: theme.gapSizes.x4,
+	},
+	avatar: {
+		alignItems: "center",
+		aspectRatio: 1,
+		backgroundColor: theme.colors.background,
+		borderRadius: theme.radiusSizes.lg,
+		justifyContent: "center",
+		width: 36,
+	},
+	email: {
+		color: theme.colors.textPrimary,
+		fontSize: theme.fontSizes.md,
+	},
+	server: {
+		color: theme.colors.textSecondary,
+		fontSize: theme.fontSizes.sm,
+	},
+	signOutLabel: {
+		color: theme.colors.danger,
+	},
+}));

@@ -1,0 +1,12 @@
+appId: app.axross.payload
+name: auth-signed-out — signed-out Home guides to sign in and hides Collections
+tags:
+  - scenario:auth-signed-out
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "home-screen"
+- assertVisible:
+    id: "home-sign-in-button"
+- assertNotVisible: "Collections"
