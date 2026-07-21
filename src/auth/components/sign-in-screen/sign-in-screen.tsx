@@ -33,7 +33,9 @@ function messageForError(error: unknown): string {
 
 /**
  * The Payload sign-in form: server URL, auth collection (defaulted), email, and
- * password. On success it persists the session (via the sign-in mutation) and
+ * password. The Server URL field pre-fills on mount with the last successful
+ * sign-in's endpoint (kept in the keychain) so a returning user need not retype
+ * it. On success it persists the session (via the sign-in mutation) and
  * dismisses back to Home; failures surface inline without leaving the screen.
  */
 export function SignInScreen(): JSX.Element {
