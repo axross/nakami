@@ -335,9 +335,11 @@
   .wc-tabseg .t.on { border-bottom: 2px solid var(--accent); margin-bottom: -1px; } .wc-tabseg .t.on .l { background: var(--wire-solid); }
   .wc-pagerow { display: flex; gap: 5px; align-items: center; }
   .wc-pagerow .pg { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--wire-line); background: var(--wire-fill); } .wc-pagerow .pg.on { background: var(--accent); border-color: var(--accent); }
-  .wc-tip { position: relative; background: var(--wire-ink); border-radius: 6px; padding: 7px 9px; width: max-content; }
-  .wc-tip .l { height: 6px; width: 44px; border-radius: 3px; background: var(--panel); opacity: 0.85; }
-  .wc-tip::after { content: ""; position: absolute; bottom: -5px; left: 14px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--wire-ink); }
+  .wc-tipwrap { display: flex; flex-direction: column; align-items: center; }
+  .wc-tip { position: relative; background: var(--wire-ink); border-radius: 7px; padding: 7px 11px; width: max-content; margin-bottom: 6px; }
+  .wc-tip .l { height: 6px; width: 48px; border-radius: 3px; background: #fff; opacity: 0.9; }
+  .wc-tip::after { content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid var(--wire-ink); }
+  .wc-tip-target { width: 26px; height: 26px; border-radius: 7px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); }
   .wc-toaststack { display: flex; flex-direction: column; gap: 6px; width: 100%; }
   .wc-toast { border: 1px solid var(--wire-line); border-radius: 9px; background: var(--panel); padding: 9px; display: flex; gap: 8px; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
   .wc-toast .ic { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); flex: none; } .wc-toast .col { flex: 1; display: flex; flex-direction: column; gap: 5px; }
@@ -512,7 +514,7 @@
     </div></div></div>
     <div class="el-card"><span class="el-tag">button group</span><div class="el-stage"><div class="wc-btngroup"><span class="b on"></span><span class="b"></span><span class="b"></span></div></div></div>
     <div class="el-card"><span class="el-tag">dropdown menu</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><div class="wc-select" style="width:60%"><span class="ph"></span><span class="wc-cv"></span></div><div class="wc-menu"><span class="mi w70"></span><span class="mi w50"></span><span class="sep"></span><span class="mi w60"></span></div></div></div></div>
-    <div class="el-card"><span class="el-tag">tooltip</span><div class="el-stage"><span class="wc-tip"><span class="l"></span></span></div></div>
+    <div class="el-card"><span class="el-tag">tooltip</span><div class="el-stage"><div class="wc-tipwrap"><span class="wc-tip"><span class="l"></span></span><span class="wc-tip-target"></span></div></div></div>
     <div class="el-card"><span class="el-tag">progress</span><div class="el-stage"><div class="wc-states">
       <div class="wc-strow"><span class="wc-stlab">partial</span><div class="wc-prog"><span class="fill"></span></div></div>
       <div class="wc-strow"><span class="wc-stlab">complete</span><div class="wc-prog"><span class="fill" style="width:100%"></span></div></div>
