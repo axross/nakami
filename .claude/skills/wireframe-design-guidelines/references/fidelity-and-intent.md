@@ -2,7 +2,7 @@
 
 Why low fidelity earns its place, how rough to keep the aesthetic, and holding the whole set at one finish level.
 
-Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Principles below are distilled from reputable design sources; the MUST/SHOULD rules in `SKILL.md` remain authoritative.
+Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Each principle below is distilled from reputable design sources; the guideline bullets are the normative takeaways, and the MUST/SHOULD rules in `SKILL.md` remain authoritative.
 
 ## Match fidelity to the question you are currently answering
 
@@ -12,9 +12,20 @@ Map the axes to the stage of thinking. Low-fi (regions, hierarchy, and flow — 
 
 The common failure mode is coupling the axes: reaching for a full-color, fully-styled comp to answer a question that was really about flow or hierarchy. This wastes hours on visuals that the next round of structural feedback will invalidate, and it anchors reviewers and stakeholders on surface polish — they debate the shade of a button while the navigation model quietly stays broken. The inverse failure also exists: staying low-fi to evaluate a decision that actually depends on visual weight, contrast, or real content length, where a wireframe simply cannot answer the question and gives false confidence. The check before adding any fidelity: write down the decision this artifact must unblock, and if a given axis does not change that decision, keep it low.
 
-**Do:** To test whether a three-step onboarding flow feels too long, build all three screens as gray-box wireframes with placeholder labels and working tap-through, but no color, real copy, or images — the only axes raised (interactivity and scope) are the ones the "does this flow drag" question depends on.
+**Good Example:**
 
-**Don't:** Producing a fully branded, pixel-perfect color comp of the settings screen just to decide where the "Log out" item should sit in the menu — a pure hierarchy question — so reviewers spend the session debating the accent color while the actual placement decision goes unmade.
+> To test whether a three-step onboarding flow feels too long, build all three screens as gray-box wireframes with placeholder labels and working tap-through, but no color, real copy, or images — the only axes raised (interactivity and scope) are the ones the "does this flow drag" question depends on.
+
+**Bad Example:**
+
+> Producing a fully branded, pixel-perfect color comp of the settings screen just to decide where the "Log out" item should sit in the menu — a pure hierarchy question — so reviewers spend the session debating the accent color while the actual placement decision goes unmade.
+
+**Guidelines:**
+
+- MUST write down the single decision this artifact must unblock before raising any fidelity axis, and leave every axis that does not change that decision at low fidelity.
+- MUST keep interactivity, visual refinement, functional scope, and content as independent axes, raising only the one or two the current question depends on rather than polishing them together.
+- MUST NOT apply brand color, final type, real copy, or pixel-accurate spacing to answer a flow, hierarchy, or information-architecture question.
+- SHOULD reserve high-fidelity real tokens and real content for the specific screens where a visual, branding, or content-length decision is genuinely on the table, or for usability tests needing realistic system response.
 
 Sources: [UX Prototypes: Low Fidelity vs. High Fidelity — Nielsen Norman Group](https://www.nngroup.com/articles/ux-prototype-hi-lo-fidelity/) · [IA-Based View of Prototype Fidelity — Nielsen Norman Group](https://www.nngroup.com/articles/ia-view-prototype/) · [What Kind of Prototype Should You Create? — Interaction Design Foundation (IxDF)](https://ixdf.org/literature/article/what-kind-of-prototype-should-you-create) · [Low-Fidelity Prototyping: The Fastest Way to Make Better Design Decisions — Balsamiq](https://balsamiq.com/blog/low-fidelity-prototyping/) · [Wireframing: The Perfectionist's Guide — Smashing Magazine](https://www.smashingmagazine.com/2016/11/wireframe-perfectionist-guide/) · [Making Prototypes — GOV.UK Service Manual](https://www.gov.uk/service-manual/design/making-prototypes)
 
@@ -28,9 +39,20 @@ Note one deliberate exception. Rough aesthetics apply to the styling layer, not 
 
 The common failure mode is fidelity creep: someone drops in the real brand blue "just to see it," aligns everything to a precise grid, or swaps gray blocks for the actual component library — and the review instantly shifts to "that's not our teal" and "the padding is off," burying the structural questions the wireframe was meant to surface. A close cousin is over-polishing a single option so it visibly out-competes the rougher alternatives beside it, biasing the comparison by finish rather than merit. If a stakeholder starts critiquing color or type on a wireframe, that is the signal the artifact looked too done, not that the feedback was wrong.
 
-**Do:** A checkout flow shown as three gray-box screens in a hand-drawn sketch skin — greeked labels, a single dark-gray fill marking the primary "Pay" button, no logo or product photos — so the review centers on whether the address step should come before or after shipping options.
+**Good Example:**
 
-**Don't:** Rendering that same checkout in the real brand palette with the actual button component and a precise 8pt grid, which turns the review into "the blue is too saturated" and "the card padding is uneven" while nobody questions the step order.
+> A checkout flow shown as three gray-box screens in a hand-drawn sketch skin — greeked labels, a single dark-gray fill marking the primary "Pay" button, no logo or product photos — so the review centers on whether the address step should come before or after shipping options.
+
+**Bad Example:**
+
+> Rendering that same checkout in the real brand palette with the actual button component and a precise 8pt grid, which turns the review into "the blue is too saturated" and "the card padding is uneven" while nobody questions the step order.
+
+**Guidelines:**
+
+- MUST render wireframes in grayscale only, reserving a single accent shade to mark the active or primary element and never to stand in for brand color.
+- MUST NOT introduce real logos, production icon sets, photographs, the actual component library, or a pixel-exact grid into a low-fidelity wireframe.
+- SHOULD apply a sketch or hand-drawn skin and greeked placeholder copy so the surface reads as provisional, except where the exact wording is what the review must judge.
+- MUST hold every compared option at the same rough fidelity so the review weighs structure and flow rather than finish.
 
 Sources: [UX Prototypes: Low Fidelity vs. High Fidelity — Nielsen Norman Group](https://www.nngroup.com/articles/ux-prototype-hi-lo-fidelity/) · [How to Draw a Wireframe (Even if You Can't Draw) — Nielsen Norman Group](https://www.nngroup.com/articles/draw-wireframe-even-if-you-cant-draw/) · [Low-Fidelity Prototyping: The Fastest Way to Make Better Design Decisions — Balsamiq](https://balsamiq.com/blog/low-fidelity-prototyping/) · [Practical Tips for Creating Better Wireframes — Balsamiq](https://balsamiq.com/learn/articles/practical-tips-for-better-wireframes/) · [Wireframes are More than Greeking Text and Gray Boxes — GovWebworks](https://www.govwebworks.com/2017/03/07/wireframes-are-more-than-greeking-text-and-gray-boxes/) · [Low-Fidelity Prototyping: What Is It and How Can It Help? — Figma](https://www.figma.com/resource-library/low-fidelity-prototyping/)
 
@@ -42,9 +64,20 @@ Practically, "complete in structure" means the artifact resolves the flow's logi
 
 The common failure mode is jumping to the wrong level of fidelity — reaching for the pixel tool before the structure is solved, which is easy because polished output feels like progress. The tell is that you are adjusting alignment, corner radius, or shades of grey while a whole branch of the flow (the error path, the second screen, the back-navigation) is still missing. The opposite failure is real but rarer at this stage: a sketch so vague it dodges the structural question it was supposed to answer. Match fidelity to the risk you are retiring — if the 2D arrangement is itself the unsolved problem, a fat-marker sketch is right; if only the sequence of steps is at stake, breadboard it and skip the layout entirely.
 
-**Do:** A checkout flow drawn as four grey-box screens (cart, address, payment, confirmation) with arrows between them and explicit empty-cart and payment-declined branches sketched in, all in a marker stroke too thick to render final type — every path is resolved, no color or font is decided.
+**Good Example:**
 
-**Don't:** A single pixel-perfect "payment" screen in brand blue with a real type scale and aligned card icons, while the declined-payment and post-purchase screens don't exist yet — polished on the one region, silent on the structure that actually carries risk.
+> A checkout flow drawn as four grey-box screens (cart, address, payment, confirmation) with arrows between them and explicit empty-cart and payment-declined branches sketched in, all in a marker stroke too thick to render final type — every path is resolved, no color or font is decided.
+
+**Bad Example:**
+
+> A single pixel-perfect "payment" screen in brand blue with a real type scale and aligned card icons, while the declined-payment and post-purchase screens don't exist yet — polished on the one region, silent on the structure that actually carries risk.
+
+**Guidelines:**
+
+- MUST resolve every screen, state, and branch the flow requires — empty, loading, error, and success paths plus the navigation and back-paths between them — before refining any single region.
+- MUST NOT decide brand color, final copy, or a type scale, instead rendering regions as greyscale boxes and labels with placeholder or Latin text and at most one or two weights.
+- MUST NOT adjust alignment, corner radius, or shades of grey while any required branch, second screen, or back-navigation is still missing from the artifact.
+- SHOULD match fidelity to the risk being retired — breadboard as places and connection lines when only the step sequence is unsolved, and reserve fat-marker sketches for when the 2D arrangement is itself the open question.
 
 Sources: [Shape Up — Chapter 4: Find the Elements (Breadboarding & Fat Marker Sketches) — Basecamp (Ryan Singer)](https://basecamp.com/shapeup/1.3-chapter-04) · [Shape Up — Chapter 5: Risks and Rabbit Holes — Basecamp (Ryan Singer)](https://basecamp.com/shapeup/1.4-chapter-05) · [How To Succeed In Wireframe Design — Smashing Magazine](https://www.smashingmagazine.com/2020/04/wireframe-design-success/) · [How detailed should wireframes be? A guide to wireframe fidelity — Pixelfridge](https://www.pixelfridge.com/latest/how-detailed-should-wireframes-be-a-guide-to-wireframe-fidelity/)
 
@@ -56,8 +89,19 @@ Enforce this at the primitive level rather than per-screen: one neutral gray ram
 
 When a region really is unfinished or undecided, say so explicitly instead of leaving a blank or a half-drawn guess that reads as either "done" or "forgotten." Mark it — an "under construction" hatch, a labeled placeholder ("[chart TBD]", "content pending"), or a call-out — so its ambiguity is intentional and legible. This is the same instinct behind including distractor or filler content when testing a partial prototype: the deliberate marker prevents viewers from over-reading a gap. Uniform fidelity does not mean uniform completeness; it means the level of finish never accidentally implies more certainty than you have.
 
-**Do:** Every screen in the set uses the same gray ramp, boxed images, and one placeholder type weight; the not-yet-designed reports panel carries a hatched "under construction — layout TBD" block so its emptiness reads as intentional.
+**Good Example:**
 
-**Don't:** Nine grayscale wireframes plus one screen with the real brand-blue primary button and a photographic hero, so the review spends its time reacting to that screen's color and imagery instead of the navigation model.
+> Every screen in the set uses the same gray ramp, boxed images, and one placeholder type weight; the not-yet-designed reports panel carries a hatched "under construction — layout TBD" block so its emptiness reads as intentional.
+
+**Bad Example:**
+
+> Nine grayscale wireframes plus one screen with the real brand-blue primary button and a photographic hero, so the review spends its time reacting to that screen's color and imagery instead of the navigation model.
+
+**Guidelines:**
+
+- MUST hold every screen to one shared primitive set — a single neutral gray ramp, one placeholder type weight with no real headlines, and boxed or greeked images — so no screen reads as more decided than the rest.
+- MUST NOT introduce a real brand color, photographic asset, production icon set, logo, or pasted high-fidelity screenshot into any screen of a wireframe set.
+- MUST mark an unresolved region with an explicit placeholder — a hatched "under construction" block or a labeled call-out like "[chart TBD]" — rather than leaving a blank or a half-drawn guess.
+- SHOULD audit imported assets and fragments copied from prior high-fidelity work before shipping the set, removing any element whose finish exceeds the schematic baseline.
 
 Sources: [Paper Prototyping: A Cutout Kit — Nielsen Norman Group](https://www.nngroup.com/articles/paper-prototyping-cutout-kit/) · [IA-Based View of Prototype Fidelity — Nielsen Norman Group](https://www.nngroup.com/articles/ia-view-prototype/) · [Creating Polished Wireframes — Balsamiq](https://balsamiq.com/blog/polished-wireframes/)

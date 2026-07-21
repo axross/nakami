@@ -2,7 +2,7 @@
 
 Focus, motion, assistive-technology semantics, reducing choices, and aesthetic integrity.
 
-Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Principles below are distilled from reputable design sources; the MUST/SHOULD rules in `SKILL.md` remain authoritative.
+Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Each principle below is distilled from reputable design sources; the guideline bullets are the normative takeaways, and the MUST/SHOULD rules in `SKILL.md` remain authoritative.
 
 ## Provide a visible, high-contrast focus indicator and a logical focus order
 
@@ -12,9 +12,20 @@ Implement it as a solid outline of at least 2px (double to ~4px if you use a das
 
 Focus order (SC 2.4.3) is the second half: keyboard traversal must follow the visual reading order and preserve meaning, which means DOM/source order has to match the layout you designed. When a mockup uses CSS grid/flex order, absolute positioning, or a visually-reordered two-column layout, the tab sequence silently diverges from what the eye follows — a user tabs from a field to something across the screen, then back. The common failure modes are removing the outline for aesthetics without an equivalent replacement (outline: none with nothing behind it), a ring so thin or low-contrast it disappears on a busy or dark surface, positive tabindex values that hijack the natural order, and reordering boxes visually while leaving source order untouched.
 
-**Do:** A primary button on a dark surface shows, on keyboard focus, a 2px solid ring offset 2px outside its rounded corners plus a thin contrasting inner halo (outline: 2px solid + box-shadow ring), driven by :focus-visible so it never flashes on mouse clicks — and its 3:1 contrast holds against both the button fill and the page behind it.
+**Good Example:**
 
-**Don't:** A designer sets outline: none on all inputs to keep the mockup clean, leaving no visible focus state; worse, the visually top-right "Submit" is early in the DOM, so tabbing jumps there before the fields above it, and a sticky footer covers the focused field at the bottom of the scroll.
+> A primary button on a dark surface shows, on keyboard focus, a 2px solid ring offset 2px outside its rounded corners plus a thin contrasting inner halo (outline: 2px solid + box-shadow ring), driven by :focus-visible so it never flashes on mouse clicks — and its 3:1 contrast holds against both the button fill and the page behind it.
+
+**Bad Example:**
+
+> A designer sets outline: none on all inputs to keep the mockup clean, leaving no visible focus state; worse, the visually top-right "Submit" is early in the DOM, so tabbing jumps there before the fields above it, and a sticky footer covers the focused field at the bottom of the scroll.
+
+**Guidelines:**
+
+- MUST render a keyboard focus indicator on every interactive control via :focus-visible, and MUST NOT set outline: none without substituting an equivalent visible ring.
+- MUST specify the ring as a real token at least 2px thick (roughly 4px when dashed or dotted), offset outside the element with a shape that clears its rounded corners, so its contrasting area and 3:1 focused-versus-unfocused change meet SC 2.4.13.
+- SHOULD pair two contrasting layers — e.g. a solid outline plus an offset box-shadow halo — so the indicator holds 3:1 against both the component and the ground behind it on light and dark surfaces.
+- MUST match DOM/source order to the visual reading order and reserve positive tabindex values, and MUST leave scroll padding so sticky headers, toolbars, or banners never obscure the focused element.
 
 Sources: [A Guide to Designing Accessible, WCAG-Conformant Focus Indicators — Sara Soueidan](https://www.sarasoueidan.com/blog/focus-indicators/) · [Understanding SC 2.4.13: Focus Appearance — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html) · [Understanding SC 2.4.3: Focus Order — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html) · [Understanding SC 2.4.11: Focus Not Obscured (Minimum) — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html) · [Button States: Communicate Interaction — Nielsen Norman Group](https://www.nngroup.com/articles/button-states-communicate-interaction/)
 
@@ -26,9 +37,20 @@ Three WCAG numbers anchor the safe defaults. SC 2.2.2 (Pause, Stop, Hide, AA) re
 
 Practically, default to safe animation primitives — opacity, color, and small transforms under about 200–300 ms with standard easing — and treat large-distance, parallax, and continuous looping motion as opt-in effects that degrade gracefully. In the mockup, show both states side by side: the full-motion transition and its reduced-motion counterpart, plus the visible pause/stop control on any auto-playing surface, so reviewers can see that the reduced path still conveys hierarchy, direction, and feedback. The common failure mode is treating reduced motion as an afterthought — either killing all animation (losing feedback) or, worse, respecting the query on decorative flourishes while leaving the one nauseating full-screen parallax transition untouched because it was "the brand moment."
 
-**Do:** A modal that slides up 24px and fades in over 200ms collapses under prefers-reduced-motion to a same-duration cross-fade with a 2% scale-in, so the open/close still reads without vertical travel; the auto-rotating hero carousel ships with a visible pause control and stops on focus or hover.
+**Good Example:**
 
-**Don't:** A global `@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } }` that also kills the button-press and loading-spinner feedback, paired with a full-screen parallax page transition that ignores the query entirely because it's the signature interaction.
+> A modal that slides up 24px and fades in over 200ms collapses under prefers-reduced-motion to a same-duration cross-fade with a 2% scale-in, so the open/close still reads without vertical travel; the auto-rotating hero carousel ships with a visible pause control and stops on focus or hover.
+
+**Bad Example:**
+
+> A global `@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important } }` that also kills the button-press and loading-spinner feedback, paired with a full-screen parallax page transition that ignores the query entirely because it's the signature interaction.
+
+**Guidelines:**
+
+- MUST specify each animation's duration, easing, distance, and trigger as named tokens in the mockup rather than leaving motion unspecified.
+- MUST render both the full-motion transition and its prefers-reduced-motion counterpart side by side, where the reduced path keeps the timing and state change but swaps translation, parallax, spin, and zoom for a cross-fade or a roughly 2-3% scale.
+- MUST NOT collapse reduced-motion into a blanket `animation: none` / `transition: none` rule that strips press, loading, and focus feedback.
+- MUST attach a visible pause, stop, or hide control to any surface that auto-plays, auto-advances, or loops longer than five seconds, and keep looping or flashing regions below three flashes per second.
 
 Sources: [Animation and Motion — web.dev Learn Accessibility (Google)](https://web.dev/learn/accessibility/motion) · [Designing With Reduced Motion For Motion Sensitivities — Smashing Magazine (Val Head)](https://www.smashingmagazine.com/2020/09/design-reduced-motion-sensitivities/) · [Understanding Success Criterion 2.2.2: Pause, Stop, Hide — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html) · [Understanding Success Criterion 2.3.3: Animation from Interactions — W3C WAI](https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions)
 
@@ -40,9 +62,20 @@ Every interactive control needs a programmatically determinable accessible name 
 
 Structure carries meaning too. Use one logical <h1> per view and a properly nested heading outline (never skipping levels for visual sizing) plus landmark regions (header, nav, main, footer or their ARIA equivalents) so assistive-tech users can navigate by heading and region rather than reading top to bottom. Critically, the DOM/source order must match the visual reading order, because screen readers and Tab traversal follow the source, not CSS-repositioned layout — a common failure is using order, grid placement, or absolute positioning to move a block visually while it stays early or late in the source, producing a reading and focus order that contradicts what the eye follows. When native semantics genuinely fall short (a custom combobox, tabs, a modal), follow the matching ARIA Authoring Practices Guide pattern completely, including its specified keyboard interaction and focus behavior, and verify with an actual screen reader rather than trusting the visual alone.
 
-**Do:** A filter control is a native <select> (or a menu button that follows the APG menu-button pattern with full arrow-key support), each field has a visible <label for> that stays on screen, and the icon-only "Delete" button carries aria-label="Delete invoice" so it is announced and reachable by voice command.
+**Good Example:**
 
-**Don't:** A styled <div onclick> plays the role of a button with no keyboard handler or role, and the search field relies on a "Search…" placeholder as its only label — so keyboard users can't reach it and screen readers announce a nameless "edit text."
+> A filter control is a native <select> (or a menu button that follows the APG menu-button pattern with full arrow-key support), each field has a visible <label for> that stays on screen, and the icon-only "Delete" button carries aria-label="Delete invoice" so it is announced and reachable by voice command.
+
+**Bad Example:**
+
+> A styled <div onclick> plays the role of a button with no keyboard handler or role, and the search field relies on a "Search…" placeholder as its only label — so keyboard users can't reach it and screen readers announce a nameless "edit text."
+
+**Guidelines:**
+
+- MUST render each interactive control as the native element that carries its role, state, and keyboard behavior — button for actions, anchor for navigation, real checkbox/radio/select inputs, headings and lists — and reserve generic-element-plus-ARIA rebuilds for cases where no native element fits.
+- MUST NOT declare an ARIA role such as role="button" or role="tab" without also building the complete keyboard interaction its APG pattern obligates — Enter/Space activation, arrow-key roving tabindex, and focus management — since incomplete ARIA overrides the real semantics with a broken contract.
+- MUST give every control a programmatically determinable accessible name from a durable source — a visible associated <label>, aria-label, or aria-labelledby, never a placeholder or title tooltip alone — and include the visible label text in that name so voice-control users can address the control by what they see.
+- MUST match DOM/source order to the visual reading order and structure each view with one logical <h1>, a heading outline that never skips levels for visual sizing, and landmark regions (header, nav, main, footer).
 
 Sources: [ARIA Authoring Practices Guide (APG) — W3C Web Accessibility Initiative (WAI)](https://www.w3.org/WAI/ARIA/apg/) · [Read Me First — ARIA Authoring Practices Guide — W3C WAI](https://www.w3.org/WAI/ARIA/apg/practices/read-me-first/) · [Designing for Screen Reader Compatibility — WebAIM](https://webaim.org/techniques/screenreader/) · [Labeling Controls — W3C Web Accessibility Initiative (WAI)](https://www.w3.org/WAI/tutorials/forms/labels/) · [Understanding Success Criterion 2.5.3: Label in Name — W3C WAI](https://www.w3.org/WAI/WCAG21/Understanding/label-in-name.html) · [Decoding Label and Name for Accessibility — WebAIM](https://webaim.org/articles/label-name/)
 
@@ -54,9 +87,20 @@ The concrete levers are chunking, progressive disclosure, and a defaulted path. 
 
 The failure mode is designing for yourself. Designers sit in roughly the top 5% for the domain and routinely underestimate real users' spare capacity (the top quartile performs ~2.4× better than the bottom), so a screen that feels clean to the team can read as a wall of equal-weight choices to a first-time user. Watch for the tells in a real-token comp: five buttons of identical visual weight, a settings screen exposing every toggle at once, dense forms with no grouping, or three competing calls-to-action. The counter-discipline is to prefer recognition over recall (show options and prior state rather than making users remember them), cap the choices any single moment demands, and verify that a stranger can find the one intended action within a couple of seconds. Note the one real tension: Hick's Law is about choices-per-decision, not raw item count — a long but scannable list a user filters (search, categories, recognition) is fine, whereas a handful of genuinely ambiguous, equal-weight options is not.
 
-**Do:** A mobile "create record" screen shows only the 3 required fields plus a single filled "Save" button, tucks optional metadata behind a "More options" accordion, and pre-fills status to the most common value — so the default path is one obvious tap.
+**Good Example:**
 
-**Don't:** A settings screen renders 14 toggles and 4 equal-weight outline buttons in one ungrouped column with no defaults and no visual hierarchy, forcing the user to read and weigh every option before doing the one thing they came to do.
+> A mobile "create record" screen shows only the 3 required fields plus a single filled "Save" button, tucks optional metadata behind a "More options" accordion, and pre-fills status to the most common value — so the default path is one obvious tap.
+
+**Bad Example:**
+
+> A settings screen renders 14 toggles and 4 equal-weight outline buttons in one ungrouped column with no defaults and no visual hierarchy, forcing the user to read and weigh every option before doing the one thing they came to do.
+
+**Guidelines:**
+
+- MUST render one high-emphasis filled button as the single primary action per screen and demote every other action to secondary or tertiary weight.
+- MUST group related fields, actions, and metadata into small labeled clusters rather than one flat equal-weight column, and pre-select the most common value for every defaultable control.
+- SHOULD move advanced or rarely-used options behind a secondary surface such as an accordion, "more options" toggle, or settings screen so the primary screen shows only what most users need most of the time.
+- MUST match iOS and Android platform conventions for navigation, control shapes, and gesture affordances, deviating only where the mockup documents a justification for the invented pattern.
 
 Sources: [Hick's Law — Laws of UX (Jon Yablonski)](https://lawsofux.com/hicks-law/) · [Laws of UX — Laws of UX (Jon Yablonski)](https://lawsofux.com/) · [10 Usability Heuristics for User Interface Design — Nielsen Norman Group](https://www.nngroup.com/articles/ten-usability-heuristics/) · [Short-Term Memory and Web Usability — Nielsen Norman Group](https://www.nngroup.com/articles/short-term-memory-and-web-usability/)
 
@@ -68,8 +112,19 @@ The trap is that the same effect is a measurement hazard. Attractive design forg
 
 Practically, keep form subordinate to function. A high-fidelity comp should never dial up visual richness to paper over a confusing information hierarchy, an ambiguous primary action, an unreachable control, or a state you have not designed (empty, loading, error, permission-denied). If accessibility fails — contrast below WCAG's 4.5:1 for body text or 3:1 for large text and UI components, targets under the ~44px/24px minimums, focus order that breaks — that is a usability failure that beauty cannot buy back, and it disproportionately harms exactly the users least able to compensate. The common failure mode is shipping a screen that demos beautifully and tests poorly: stakeholders sign off on the render, the aesthetic halo suppresses the objections, and the underlying task defect ships intact. Guard against it by validating the hard states and the real interaction, not just the hero view.
 
-**Do:** A settings screen tests beautifully but two of five users can't find "Delete account"; the team treats the failed task as the finding and restructures the hierarchy, keeping the polish but fixing the flow — then re-tests behavior, not opinion.
+**Good Example:**
 
-**Don't:** A high-fidelity dashboard wins stakeholder sign-off on its color and typography while its primary "Publish" action sits below the fold with 3:1 body contrast; the aesthetic halo suppresses objections and the unreachable, hard-to-read control ships as-is.
+> A settings screen tests beautifully but two of five users can't find "Delete account"; the team treats the failed task as the finding and restructures the hierarchy, keeping the polish but fixing the flow — then re-tests behavior, not opinion.
+
+**Bad Example:**
+
+> A high-fidelity dashboard wins stakeholder sign-off on its color and typography while its primary "Publish" action sits below the fold with 3:1 body contrast; the aesthetic halo suppresses objections and the unreachable, hard-to-read control ships as-is.
+
+**Guidelines:**
+
+- MUST invest full fidelity in the type scale, contrast ratios, spacing rhythm, and interaction states, because at high fidelity these change how the product is judged, not merely how it looks.
+- MUST design and render every hard state — empty, loading, error, and permission-denied — rather than dressing up only the hero view.
+- MUST NOT raise visual richness to compensate for a confusing hierarchy, an ambiguous or below-the-fold primary action, or an unreachable control.
+- MUST meet WCAG contrast (4.5:1 body text, 3:1 large text and UI components) and minimum target sizes (~44px touch, 24px pointer), treating any shortfall as a usability failure that polish cannot offset.
 
 Sources: [The Aesthetic-Usability Effect — Nielsen Norman Group](https://www.nngroup.com/articles/aesthetic-usability-effect/) · [Aesthetic-Usability Effect — Laws of UX (Jon Yablonski)](https://lawsofux.com/aesthetic-usability-effect/) · [Understanding SC 1.4.3: Contrast (Minimum) — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)

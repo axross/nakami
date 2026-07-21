@@ -2,7 +2,7 @@
 
 Where wireframing sits in the process — validating early, exploring alternatives, scoping, and collaborating.
 
-Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Principles below are distilled from reputable design sources; the MUST/SHOULD rules in `SKILL.md` remain authoritative.
+Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Each principle below is distilled from reputable design sources; the guideline bullets are the normative takeaways, and the MUST/SHOULD rules in `SKILL.md` remain authoritative.
 
 ## Test rough versions before you write code
 
@@ -12,9 +12,20 @@ You do not need production fidelity or a large sample to learn most of what matt
 
 Run the test on the questions the wireframe can answer and route the rest elsewhere: give a task, not a tour ("find and cancel your most recent order"), watch where people hesitate or tap the wrong region, and resist explaining the design — if you have to narrate it, that is the finding. The common failure mode is treating validation as a sign-off gate at the end rather than a cheap loop at the start: teams build the real screens first, then "usability test" a near-final product where every discovered problem is now expensive to fix and easy to rationalize away. By then the test can only confirm decisions, not change them, which defeats the reason to test rough versions before you write code.
 
-**Do:** Before building the checkout flow, print three gray-box wireframe variants of the payment screen, hand five people the task "pay for this order," and watch which layout gets them to the confirm button without hesitation — then implement only the winner.
+**Good Example:**
 
-**Don't:** Coding the fully styled, themed settings screen first and scheduling "usability testing" for the sprint before launch, so the discovered navigation problem now means reworking shipped components everyone is reluctant to touch.
+> Before building the checkout flow, print three gray-box wireframe variants of the payment screen, hand five people the task "pay for this order," and watch which layout gets them to the confirm button without hesitation — then implement only the winner.
+
+**Bad Example:**
+
+> Coding the fully styled, themed settings screen first and scheduling "usability testing" for the sprint before launch, so the discovered navigation problem now means reworking shipped components everyone is reluctant to touch.
+
+**Guidelines:**
+
+- MUST test each wireframe with real users before writing the code that implements its flow, while discarding and redrawing a screen still costs minutes rather than shipped components.
+- MUST give each tester a concrete task (e.g., "find and cancel your most recent order") instead of a guided tour, and treat hesitation or a wrong-region tap as the finding.
+- MUST NOT narrate, explain, or defend the layout during a test, and treat the need to narrate as a defect in the wireframe rather than a note for the tester.
+- SHOULD keep the tested prototype gray-box with no brand color or final copy and iterate in small rounds of about five testers, so critique lands on region and flow rather than fonts and pixels.
 
 Sources: [Why You Only Need to Test with 5 Users — Nielsen Norman Group](https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/) · [Paper Prototyping: Getting User Data Before You Code — Nielsen Norman Group](https://www.nngroup.com/articles/paper-prototyping/) · [UX Prototypes: Low Fidelity vs. High Fidelity — Nielsen Norman Group](https://www.nngroup.com/articles/ux-prototype-hi-lo-fidelity/) · [Guerrilla HCI: Using Discount Usability Engineering to Penetrate the Intimidation Barrier — Nielsen Norman Group](https://www.nngroup.com/articles/guerrilla-hci/) · [A Comprehensive Guide To Wireframing And Prototyping — Smashing Magazine](https://www.smashingmagazine.com/2018/03/guide-wireframing-prototyping/) · [Making Prototypes — GOV.UK Service Manual](https://www.gov.uk/service-manual/design/making-prototypes)
 
@@ -26,9 +37,20 @@ In practice, aim for roughly three to five distinct concepts per screen or flow 
 
 The common failure mode is false divergence: producing "options" that are cosmetic variants of one committed idea, or worse, sketching a single concept and then spending the iteration budget polishing it. Fixating early feels efficient but skips the exploration that generates the 56–70% gains — iteration refines a concept, it does not rescue the wrong one. The second trap is treating the round as a beauty contest that ends in one winner; if you never ask "what is the best part of the loser," you leave the merge value (the extra ~14 points from picking-best to merged) on the table.
 
-**Do:** For an inbox screen, sketch five rough wireframes that differ structurally — a dense list, a swipe-action list, a card feed, a folder-first split view, and a search-led blank state — dot-vote, then merge the winning list density with the search-led entry from a "losing" sketch into one converged wireframe.
+**Good Example:**
 
-**Don't:** Draw one wireframe of the inbox, then produce three "alternatives" that are the same layout with the FAB moved and the header recolored, pick the first one anyway, and pour the rest of the time into tidying its spacing.
+> For an inbox screen, sketch five rough wireframes that differ structurally — a dense list, a swipe-action list, a card feed, a folder-first split view, and a search-led blank state — dot-vote, then merge the winning list density with the search-led entry from a "losing" sketch into one converged wireframe.
+
+**Bad Example:**
+
+> Draw one wireframe of the inbox, then produce three "alternatives" that are the same layout with the FAB moved and the header recolored, pick the first one anyway, and pour the rest of the time into tidying its spacing.
+
+**Guidelines:**
+
+- MUST sketch at least three structurally distinct concepts per screen or flow before committing to one, where region layout, navigation model, or interaction pattern differs rather than element placement.
+- MUST NOT count cosmetic variants of a single committed layout as alternatives, and MUST NOT spend the iteration budget polishing one concept before divergence produces genuine options.
+- MUST converge by merging the strongest elements across concepts, naming the best part of each rejected sketch, rather than crowning one winner and discarding the rest.
+- SHOULD keep every alternative at the same low fidelity so concepts compete on structure and flow instead of finish.
 
 Sources: [Parallel & Iterative Design + Competitive Testing = High Usability — Nielsen Norman Group](https://www.nngroup.com/articles/parallel-and-iterative-design/) · [Parallel Design and Testing — Nielsen Norman Group](https://www.nngroup.com/articles/parallel-design/) · [Facilitating an Effective Design Studio Workshop — Nielsen Norman Group](https://www.nngroup.com/articles/facilitating-design-studio-workshop/) · [The Messy Art Of UX Sketching — Smashing Magazine](https://www.smashingmagazine.com/2011/12/the-messy-art-of-ux-sketching/) · [Crazy 8's — Google Design Sprint Kit](https://designsprintkit.withgoogle.com/methodology/phase3-sketch/crazy-8s)
 
@@ -40,9 +62,20 @@ The mechanism for finding the boundary is to walk the primary use cases in slow 
 
 Concretely, the deliverable at the end of a rough-design pass should carry three things: the elements of the solution, patches for the rabbit holes you found, and fences around the areas you have declared out of bounds. Write the out-of-scope list as a named artifact — a "Non-goals" or "No-gos" section on the wireframe or spec — not as tribal memory, because anything left implicit gets re-litigated by whoever touches the code next. The common failure mode is treating the exclusion list as optional or aspirational: teams enumerate what they will build in careful detail, then leave the boundary to intuition, and every ambiguous edge case silently defaults to "in," which is how the appetite gets spent before the core value ships.
 
-**Do:** On a "share a document" wireframe, annotate a Non-goals block directly on the flow: "v1 shares by direct link only — no group permissions, no expiring links, no per-recipient access. Those are out of bounds for this release." Then walk the happy path aloud, and when the "who can see this?" step surfaces the permissions rabbit hole, you patch it with the link-only decision rather than designing a permissions matrix.
+**Good Example:**
 
-**Don't:** The wireframe details every screen of the in-scope flow but says nothing about boundaries, so during build a developer hits the "notify the right people" step, decides group-notification "should probably work too," and spends a week on it — turning a scoped feature into an open-ended one because no fence was ever drawn.
+> On a "share a document" wireframe, annotate a Non-goals block directly on the flow: "v1 shares by direct link only — no group permissions, no expiring links, no per-recipient access. Those are out of bounds for this release." Then walk the happy path aloud, and when the "who can see this?" step surfaces the permissions rabbit hole, you patch it with the link-only decision rather than designing a permissions matrix.
+
+**Bad Example:**
+
+> The wireframe details every screen of the in-scope flow but says nothing about boundaries, so during build a developer hits the "notify the right people" step, decides group-notification "should probably work too," and spends a week on it — turning a scoped feature into an open-ended one because no fence was ever drawn.
+
+**Guidelines:**
+
+- MUST annotate a named Non-goals block on the wireframe that names the specific use cases, states, and permissions the release deliberately excludes, rather than leaving the boundary to intuition.
+- MUST walk each primary flow step by step at the rough stage and resolve every expensive or under-specified sub-problem it surfaces by either patching it with a concrete decision or fencing it as out of scope.
+- MUST NOT leave a discovered hard problem unnamed on the artifact, since an unlabeled sub-problem defaults to in-scope during build.
+- SHOULD phrase each excluded case as a decision the stakeholder can confirm against the appetite ("if it did only this, would that solve the problem?") before implementation begins.
 
 Sources: [Shape Up — Chapter 5: Risks and Rabbit Holes (Basecamp, Ryan Singer)](https://basecamp.com/shapeup/1.4-chapter-05) · [Shape Up — Chapter 4: Find the Elements (Basecamp, Ryan Singer)](https://basecamp.com/shapeup/1.3-chapter-04) · [Breadboarding: A Simple Way to Prototype — SEP](https://sep.com/blog/breadboarding-a-simple-way-to-prototype/) · [IA-Based View of Prototype Fidelity — Nielsen Norman Group](https://www.nngroup.com/articles/ia-view-prototype/)
 
@@ -54,9 +87,20 @@ The second half of the principle is testing the layout with real users before yo
 
 The tie that binds both halves is that the decision rule is evidence, not taste. Rough artifacts plus early collaborators plus a handful of real users exist so that structural choices get settled by what a PM flags as infeasible, what a content strategist knows won't fit, and what a test participant cannot find — not by whose opinion is loudest or most senior. The common failure mode is polishing before you collaborate and test: teams jump to high-fidelity color and type, which quietly recruits stakeholders into debating button shades instead of navigation, anchors the team to a layout that is now expensive to change, and makes user feedback drift toward "I don't like the blue" rather than "I couldn't tell these were two different sections."
 
-**Do:** Run a 60-minute design studio where a PM, two engineers, and a content strategist each sketch the checkout flow on paper, converge on one breadboard, then put that grayscale wireframe in front of five representative users the same week — reordering the regions based on where people got stuck, not on which sketch looked nicest.
+**Good Example:**
 
-**Don't:** Skip collaborators, build one polished high-fidelity comp with brand colors and final type, and circulate it for sign-off — so stakeholders debate the accent color, the engineer only then mentions the layout can't load that data, and the one user you show it to says "looks nice" instead of revealing they couldn't find the primary action.
+> Run a 60-minute design studio where a PM, two engineers, and a content strategist each sketch the checkout flow on paper, converge on one breadboard, then put that grayscale wireframe in front of five representative users the same week — reordering the regions based on where people got stuck, not on which sketch looked nicest.
+
+**Bad Example:**
+
+> Skip collaborators, build one polished high-fidelity comp with brand colors and final type, and circulate it for sign-off — so stakeholders debate the accent color, the engineer only then mentions the layout can't load that data, and the one user you show it to says "looks nice" instead of revealing they couldn't find the primary action.
+
+**Guidelines:**
+
+- MUST keep the artifact grayscale and box-level — no brand color, final type, or imagery — so critique targets structure and stakeholders cannot debate visual polish.
+- MUST gather engineers and content owners around the wireframe before visual design begins, and reorder regions when they surface a feasibility or real-content constraint.
+- MUST validate each flow with about five representative users per population before committing the layout, resolving where they got stuck rather than what looked nicest.
+- SHOULD split the testing budget across three iterate-and-retest rounds of five users instead of one large single round, redesigning between rounds.
 
 Sources: [Why You Only Need to Test with 5 Users — Nielsen Norman Group](https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/) · [Facilitating an Effective Design Studio Workshop — Nielsen Norman Group](https://www.nngroup.com/articles/facilitating-design-studio-workshop/) · [Low-Fidelity Prototyping: The Fastest Way to Make Better Design Decisions — Balsamiq](https://balsamiq.com/blog/low-fidelity-prototyping/) · [Low-Fidelity Prototyping: What Is It and How Can It Help? — Figma](https://www.figma.com/resource-library/low-fidelity-prototyping/) · [Wireframing With Real Content for More Intentional Experiences — Adobe](https://blog.adobe.com/en/publish/2022/01/27/using-real-content-in-wireframes-prototypes) · [The Value Of Concept Testing As Part Of Product Design — Smashing Magazine](https://www.smashingmagazine.com/2021/11/concept-testing-part-of-product-design/) · [Parallel & Iterative Design + Competitive Testing = High Usability — Nielsen Norman Group](https://www.nngroup.com/articles/parallel-and-iterative-design/)
 
@@ -68,8 +112,19 @@ Run fidelity as a staged escalation rather than one big reveal. Start low-fi and
 
 The common failure mode is fidelity outrunning certainty: dropping real brand color, final type, and real copy into a wireframe whose flow is still a guess. It reads as "done," so reviewers stop critiquing the idea and start admiring (or bikeshedding) the finish, you get sign-off on a structure nobody actually pressure-tested, and the expensive rework surfaces later. The inverse failure also exists — staying hand-drawn and grayscale long after the structure is settled makes stakeholders think the work has stalled and undersells a decision that is actually ready to advance. Match the signal to the state in both directions.
 
-**Do:** Open the concept review with hand-sketched gray boxes and placeholder labels so the room debates whether the checkout flow needs a guest path at all; only after that is agreed do you bring cleaner low-fi frames to the next check-in, and real color and type to the round after that.
+**Good Example:**
 
-**Don't:** Presenting a first-draft flow already dressed in the brand's real colors, final typeface, and polished copy — the stakeholders spend the meeting arguing the button's shade of blue and never notice the flow skips a required confirmation step.
+> Open the concept review with hand-sketched gray boxes and placeholder labels so the room debates whether the checkout flow needs a guest path at all; only after that is agreed do you bring cleaner low-fi frames to the next check-in, and real color and type to the round after that.
+
+**Bad Example:**
+
+> Presenting a first-draft flow already dressed in the brand's real colors, final typeface, and polished copy — the stakeholders spend the meeting arguing the button's shade of blue and never notice the flow skips a required confirmation step.
+
+**Guidelines:**
+
+- MUST match render polish to the certainty of the underlying flow, keeping strokes hand-drawn or sketchy while structure is still open and moving to clean grayscale boxes-and-labels only once the structure is settled.
+- MUST NOT introduce real brand color, final typeface, or final copy into a frame whose region layout or flow is still unvalidated.
+- MUST hold the regions, hierarchy, and flow identical across fidelity steps, changing only surface polish so escalation never alters the structure under review.
+- SHOULD escalate to medium or high fidelity only after the core flow and region layout are agreed and the open questions shift to look-and-feel or micro-interactions.
 
 Sources: [Low-fidelity prototyping: The fastest way to make better design decisions — Balsamiq](https://balsamiq.com/blog/low-fidelity-prototyping/) · [Creating Polished Wireframes — Balsamiq](https://balsamiq.com/blog/polished-wireframes/) · [How To Succeed In Wireframe Design — Smashing Magazine](https://www.smashingmagazine.com/2020/04/wireframe-design-success/) · [Wireframing: The Perfectionist's Guide — Smashing Magazine](https://www.smashingmagazine.com/2016/11/wireframe-perfectionist-guide/) · [Low Fidelity vs. High Fidelity Prototypes: Make the Decision at the Right Time — Miro](https://miro.com/prototyping/low-fidelity-vs-high-fidelity-prototypes/)

@@ -2,7 +2,7 @@
 
 Touch targets, interactive affordances, complete state sets, disabled-vs-error, and response-time-matched feedback.
 
-Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Principles below are distilled from reputable design sources; the MUST/SHOULD rules in `SKILL.md` remain authoritative.
+Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Each principle below is distilled from reputable design sources; the guideline bullets are the normative takeaways, and the MUST/SHOULD rules in `SKILL.md` remain authoritative.
 
 ## Size and space touch targets for real fingers
 
@@ -12,9 +12,20 @@ The number that matters is the tappable area, not the visible glyph. A 24dp icon
 
 Fitts's Law explains where to spend the extra size: acquisition time rises with distance and falls with target width, and screen edges/corners are effectively infinite-width because the finger can't overshoot them. So enlarge primary actions and place high-frequency or destructive controls where they're easy and safe to hit, while giving destructive actions extra separation from their neighbors so a fat-finger miss doesn't delete something. The common failure mode is a dense row of 24-32dp icon buttons — share/edit/delete crammed together — that measures fine visually but produces mistaps in the hand; the fix is 44-48 targets with 8dp gaps, even if the icons themselves stay small.
 
-**Do:** A toolbar's 24dp trash icon is wrapped in padding to a 48x48dp hit area, spaced 8dp from its neighbors, and the mockup annotates that 48dp box so the spec carries the tappable region, not just the glyph.
+**Good Example:**
 
-**Don't:** A card footer packs share, edit, and delete as three 28dp icon buttons butted together with ~2dp between them — visually tidy, but on-device the fingertip overlaps two targets at once and users mistap delete.
+> A toolbar's 24dp trash icon is wrapped in padding to a 48x48dp hit area, spaced 8dp from its neighbors, and the mockup annotates that 48dp box so the spec carries the tappable region, not just the glyph.
+
+**Bad Example:**
+
+> A card footer packs share, edit, and delete as three 28dp icon buttons butted together with ~2dp between them — visually tidy, but on-device the fingertip overlaps two targets at once and users mistap delete.
+
+**Guidelines:**
+
+- MUST size every interactive control to a tappable area of at least 44x44pt (iOS) or 48x48dp (Material), honoring the larger minimum when platform targets disagree and never treating WCAG's 24px floor as the design target.
+- MUST grow an icon or text control's hit area to the minimum target with padding or hitSlop when the visible glyph is smaller, and annotate that tappable box explicitly in the mockup so the spec carries the hit region rather than the drawn bounds.
+- MUST keep at least 8dp of clear space between adjacent targets, and give destructive actions extra separation from their neighbors so a fat-finger miss cannot trigger them.
+- SHOULD enlarge primary actions and anchor high-frequency or destructive controls to screen edges and corners per Fitts's Law, rather than cramming equal-weight icon buttons into a dense row.
 
 Sources: [Touch Targets on Touchscreens — Nielsen Norman Group](https://www.nngroup.com/articles/touch-target-size/) · [UI Design Dos and Don'ts — Apple Developer (Human Interface Guidelines)](https://developer.apple.com/design/tips/) · [Touch target size — Google / Android Accessibility Help](https://support.google.com/accessibility/android/answer/7101858?hl=en) · [Accessibility designing — Material Design 3](https://m3.material.io/foundations/designing/structure) · [Understanding SC 2.5.8: Target Size (Minimum) — W3C Web Accessibility Initiative (WAI)](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html) · [Accessible Target Sizes Cheatsheet — Smashing Magazine](https://www.smashingmagazine.com/2023/04/accessible-tap-target-sizes-rage-taps-clicks/) · [How to Use Tappability Affordances — Interaction Design Foundation (IxDF)](https://www.interaction-design.org/literature/article/how-to-use-tappability-affordances) · [Fitts's Law — Laws of UX (Jon Yablonski)](https://lawsofux.com/fittss-law/)
 
@@ -26,9 +37,20 @@ The rule has a symmetric second half that is the more common failure: interactiv
 
 Looking interactive is necessary but not sufficient — the target must also be operable, which is where hard numbers apply. WCAG 2.2 SC 2.5.8 (Target Size, Minimum, Level AA) sets a floor of 24×24 CSS pixels, or smaller targets with 24px of spacing between them; platform guidance is more generous, with Apple HIG asking for 44×44 pt and Material Design for 48×48 dp minimum touch targets. Fitts's Law explains why generosity pays: acquisition time falls as target size grows and distance shrinks, so a primary action that looks tappable but presents an 18px hit area is still a broken affordance. Extend the tappable region (padding, an invisible hit-slop) rather than shrinking the visible glyph, and ensure the focus/hover/pressed states are visible so keyboard and pointer users get the same "this responds" confirmation that a tap gives.
 
-**Do:** A high-fidelity screen uses one filled accent-color pill with a text label for the primary action and underlined link-blue for inline links, gives every icon-only button an accessible label plus a visible pressed/hover state, and sizes each hit area to at least 44×44 pt — while headings and status badges use weight and a muted surface tint that never borrows the button or link tokens.
+**Good Example:**
 
-**Don't:** A section heading is given a rounded, filled background so it looks like a tappable button but does nothing, while an actual "Edit" action sits as plain gray body text with no color, underline, or icon — so users tap the dead heading, get no response, and never find the real control.
+> A high-fidelity screen uses one filled accent-color pill with a text label for the primary action and underlined link-blue for inline links, gives every icon-only button an accessible label plus a visible pressed/hover state, and sizes each hit area to at least 44×44 pt — while headings and status badges use weight and a muted surface tint that never borrows the button or link tokens.
+
+**Bad Example:**
+
+> A section heading is given a rounded, filled background so it looks like a tappable button but does nothing, while an actual "Edit" action sits as plain gray body text with no color, underline, or icon — so users tap the dead heading, get no response, and never find the real control.
+
+**Guidelines:**
+
+- MUST carry every interactive control with at least two concurrent signifiers — a button or link token plus a text label or accessible name — and give icon-only controls both an accessible name and a visible hover, focus, and pressed state.
+- MUST reserve button and link tokens strictly for elements that perform an action, and render non-interactive emphasis such as headings and status badges with weight, size, or a muted surface tint that never borrows a button or link fill.
+- MUST size every tappable target to at least 44×44 pt (24×24 CSS px absolute floor), extending the hit area with padding or hit-slop rather than shrinking the visible glyph, so no control's hit area is smaller than its interactive appearance implies.
+- SHOULD apply each interactive treatment identically across the mockup so one token consistently signals "interactive", reinforced by position and container context such as a nav bar or toolbar.
 
 Sources: [Beyond Blue Links: Making Clickable Elements Recognizable — Nielsen Norman Group](https://www.nngroup.com/articles/clickable-elements/) · [What are Affordances? (and Signifiers) — Interaction Design Foundation (IxDF)](https://www.interaction-design.org/literature/topics/affordances) · [Fitts's Law — Laws of UX (Jon Yablonski)](https://lawsofux.com/fittss-law/) · [Understanding SC 2.5.8: Target Size (Minimum) — W3C WAI / WCAG 2.2](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)
 
@@ -42,9 +64,20 @@ Focus deserves real-token specificity because it is an accessibility gate, not d
 
 The recurring failure mode is shipping a mockup with only enabled and disabled, discovering during build that pressed, hover, and focus were never specified, and letting each engineer improvise — producing inconsistent cues, focus rings that fail contrast on half the surfaces, and buttons whose "did it work?" feedback arrives only after the screen transitions. Specify the full set as tokens up front, render them side by side in the exhibit, and the implementation becomes lookup rather than invention.
 
-**Do:** Define a single state-layer overlay scale (hover 8%, focus 10%, pressed 10%, disabled = 38% content / 12% container) plus one focus-ring token at ≥3:1 against every surface, then render each control showing enabled, hover, focus, pressed, and disabled in both light and dark so the same cue is visibly consistent across button, list row, and icon button.
+**Good Example:**
 
-**Don't:** Mock up only the resting and disabled looks, let pressed feedback wait for the navigation/network call to finish (so taps feel dead for 300ms), and reuse the hover color as the focus indicator — leaving keyboard users unsure where focus is and a ring that disappears on the accent-colored button.
+> Define a single state-layer overlay scale (hover 8%, focus 10%, pressed 10%, disabled = 38% content / 12% container) plus one focus-ring token at ≥3:1 against every surface, then render each control showing enabled, hover, focus, pressed, and disabled in both light and dark so the same cue is visibly consistent across button, list row, and icon button.
+
+**Bad Example:**
+
+> Mock up only the resting and disabled looks, let pressed feedback wait for the navigation/network call to finish (so taps feel dead for 300ms), and reuse the hover color as the focus indicator — leaving keyboard users unsure where focus is and a ring that disappears on the accent-colored button.
+
+**Guidelines:**
+
+- MUST define one reusable state-layer overlay scale (defaulting to ~8% hover, ~10% focus and pressed, ~38% content / ~12% container disabled) and apply the identical tokens to button, list row, and icon button so a state reads the same on every control.
+- MUST render each control's enabled, hover, focus, pressed, and disabled states side by side in both light and dark in the exhibit, never shipping only the resting and disabled looks.
+- MUST size the focus-ring token to at least 3:1 contrast against every surface it composites over — including accent-colored and elevated backgrounds — and MUST NOT reuse the hover color as the focus indicator.
+- MUST NOT gate the pressed state on navigation or network completion, and MUST render it within roughly 100ms of the tap as the immediate acknowledgment.
 
 Sources: [Button States: Communicate Interaction — Nielsen Norman Group](https://www.nngroup.com/articles/button-states-communicate-interaction/) · [States (Material Design 3) — Google Material Design](https://m3.material.io/foundations/interaction/states) · [Response Time Limits: The 3 Important Limits — Nielsen Norman Group](https://www.nngroup.com/articles/response-times-3-important-limits/) · [Understanding Success Criterion 2.4.11: Focus Appearance — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html) · [What's New in WCAG 2.2 — W3C Web Accessibility Initiative](https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/)
 
@@ -58,9 +91,20 @@ Reserve genuine disabling for the narrow cases where nothing the user can type w
 
 The common failure mode is the "silently disabled submit": a form whose button greys out until every field validates, with no indication of which field or rule is unmet. It is worst on long or multi-section forms where the offending field is scrolled out of view, and it compounds when the disabling logic itself is buggy — a whitespace-trimming or format mismatch leaves the button dead with no error to react to, and the user has no affordance to trigger the feedback that would explain it.
 
-**Do:** A checkout form keeps "Place order" always tappable; pressing it with an invalid card scrolls to the card field, marks it with an inline message ("Card number looks incomplete"), and announces "1 error" — while a mid-submission press shows the button in a disabled loading state with a spinner labeled "Placing order…" to prevent a double charge.
+**Good Example:**
 
-**Don't:** A sign-up screen greys out "Create account" until all fields pass validation, so a user who typed a trailing space in their email sees a permanently dead, low-contrast button, no error message, and no way to find out what is wrong.
+> A checkout form keeps "Place order" always tappable; pressing it with an invalid card scrolls to the card field, marks it with an inline message ("Card number looks incomplete"), and announces "1 error" — while a mid-submission press shows the button in a disabled loading state with a spinner labeled "Placing order…" to prevent a double charge.
+
+**Bad Example:**
+
+> A sign-up screen greys out "Create account" until all fields pass validation, so a user who typed a trailing space in their email sees a permanently dead, low-contrast button, no error message, and no way to find out what is wrong.
+
+**Guidelines:**
+
+- MUST keep the primary submission control enabled and validate its form on press, surfacing what is wrong instead of greying the control out until every field passes.
+- MUST render each validation message inline beside its offending field, wire it via aria-describedby, and precede multi-error forms with a top summary that states the error count and links to the first field.
+- SHOULD validate a field on blur rather than on every keystroke, re-validating live only after that field has already shown an error so the user watches it clear.
+- MUST reserve a disabled state for an in-flight submission (paired with a spinner and a working-state label to block double-submit) or a genuinely unavailable item, and attach a perceivable reason and re-enable path in either case.
 
 Sources: [Usability Pitfalls of Disabled Buttons, and How To Avoid Them — Smashing Magazine](https://www.smashingmagazine.com/2021/08/frustrating-design-patterns-disabled-buttons/) · [Hidden vs. Disabled In UX — Smashing Magazine](https://www.smashingmagazine.com/2024/05/hidden-vs-disabled-ux/) · [Understanding Success Criterion 1.4.11: Non-text Contrast — W3C Web Accessibility Initiative (WAI)](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html)
 
@@ -72,9 +116,20 @@ Write the message in plain, specific, blame-free language that names what went w
 
 Because roughly 1 in 12 men has a color-vision deficiency, an error signaled only by turning a border red is invisible to many users and fails accessibility: pair color with a text message and a non-color cue such as an icon, and set the message text at readable contrast rather than thin low-contrast red. In design-token terms, define an explicit error/danger role (border, text, and a subtle tinted field background) and apply it consistently across states. Reserve blocking modal dialogs for genuinely critical, data-loss or irreversible situations; routine validation should stay inline and non-interrupting. A useful design smell: if a single form throws three or more errors per attempt, the problem is usually the form's structure or unclear requirements up front, not the user — fix the form rather than piling on messages.
 
-**Do:** A required email field the user leaves blank shows, on blur, a red-and-icon marker directly below it reading "Enter your email address so we can send your receipt," the field keeps its red border plus a faint red tint, and everything else the user typed stays intact.
+**Good Example:**
 
-**Don't:** On submit the form scrolls to a top banner saying "Error: invalid input," turns two field borders red with no text, and wipes the password and card-number fields, forcing the user to guess which field failed and retype what they had already entered.
+> A required email field the user leaves blank shows, on blur, a red-and-icon marker directly below it reading "Enter your email address so we can send your receipt," the field keeps its red border plus a faint red tint, and everything else the user typed stays intact.
+
+**Bad Example:**
+
+> On submit the form scrolls to a top banner saying "Error: invalid input," turns two field borders red with no text, and wipes the password and card-number fields, forcing the user to guess which field failed and retype what they had already entered.
+
+**Guidelines:**
+
+- MUST render each validation message inline and adjacent to the field it concerns, triggered on blur rather than mid-keystroke or only in a top-of-form submit summary.
+- MUST word error text in plain, blame-free language that names the violated constraint and the accepted format, as in "Enter a valid email, like name@example.com" rather than "Invalid input."
+- MUST signal every error with a text message plus a non-color cue such as an icon, applying a dedicated error token (border, readable-contrast text, and tinted field background) and never color alone.
+- MUST preserve every value the user already entered on a failed submit, and reserve blocking modal dialogs for data-loss or irreversible situations instead of routine field validation.
 
 Sources: [10 Design Guidelines for Reporting Errors in Forms — Nielsen Norman Group](https://www.nngroup.com/articles/errors-forms-design-guidelines/) · [Error-Message Guidelines — Nielsen Norman Group](https://www.nngroup.com/articles/error-message-guidelines/) · [10 Usability Heuristics for User Interface Design — Nielsen Norman Group](https://www.nngroup.com/articles/ten-usability-heuristics/) · [Understanding Success Criterion 3.3.1: Error Identification — W3C WAI](https://www.w3.org/WAI/WCAG21/Understanding/error-identification.html) · [Understanding Success Criterion 3.3.3: Error Suggestion — W3C WAI](https://www.w3.org/WAI/WCAG21/Understanding/error-suggestion.html)
 
@@ -88,8 +143,19 @@ Two refinements matter in high-fidelity work. First, skeleton screens outperform
 
 The common failure mode is decorating fast interactions and under-communicating slow ones: a full-screen spinner over an instant toggle, or a bare spinner that runs for 30 seconds with no estimate so the user assumes a freeze and force-quits. Both break the flow the thresholds are meant to protect.
 
-**Do:** A collection list that usually loads in ~600ms renders a skeleton of the row layout after a 300ms delay; a bulk publish that typically runs 15s shows a determinate bar reading "Publishing 6 of 40…" with the affected rows dimmed.
+**Good Example:**
 
-**Don't:** Tapping a toggle triggers a 2-second full-screen modal spinner (the toggle already resolved in 40ms), while a 30-second export shows only an endless indeterminate spinner with no count or estimate, so users assume it hung and kill the app.
+> A collection list that usually loads in ~600ms renders a skeleton of the row layout after a 300ms delay; a bulk publish that typically runs 15s shows a determinate bar reading "Publishing 6 of 40…" with the affected rows dimmed.
+
+**Bad Example:**
+
+> Tapping a toggle triggers a 2-second full-screen modal spinner (the toggle already resolved in 40ms), while a 30-second export shows only an endless indeterminate spinner with no count or estimate, so users assume it hung and kill the app.
+
+**Guidelines:**
+
+- MUST size each state's loading treatment to its realistic p90 latency rather than the operation's label, mapping sub-1s waits to no indicator (only the updated result), 2-10s waits to a skeleton or busy cue, and past-10s waits to a determinate percent-done indicator carrying an estimate.
+- MUST NOT overlay a spinner, modal, or full-screen busy cue on interactions that resolve under ~100ms, and MUST render each cue as a real component state (default, loading, success, error) from the token set rather than an ad-hoc overlay.
+- SHOULD gate any busy indicator behind a ~300-500ms delay so responses that usually return under a second never flash-and-vanish, and SHOULD render a layout skeleton instead of a bare spinner for waits in the ~1-3s range.
+- MUST reserve determinate progress bars for genuinely measurable long work, reporting real percentage and count, and MUST NOT display faked progress that stalls near completion.
 
 Sources: [Response Time Limits: The 3 Important Limits — Nielsen Norman Group](https://www.nngroup.com/articles/response-times-3-important-limits/) · [10 Usability Heuristics for User Interface Design — Nielsen Norman Group](https://www.nngroup.com/articles/ten-usability-heuristics/) · [Skeleton Screens 101 — Nielsen Norman Group](https://www.nngroup.com/articles/skeleton-screens/) · [Progress indicators — Material Design 3](https://m3.material.io/components/progress-indicators/overview)

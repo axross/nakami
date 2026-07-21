@@ -2,7 +2,7 @@
 
 Contrast minimums recalculated per theme, and never encoding meaning in color alone.
 
-Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Principles below are distilled from reputable design sources; the MUST/SHOULD rules in `SKILL.md` remain authoritative.
+Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Each principle below is distilled from reputable design sources; the guideline bullets are the normative takeaways, and the MUST/SHOULD rules in `SKILL.md` remain authoritative.
 
 ## Meet contrast minimums for text and non-text UI, per theme
 
@@ -12,9 +12,20 @@ Recalculate every pairing separately for light and dark; a token set that passes
 
 Treat APCA (the WCAG 3 research method) as supplementary readability guidance, useful for catching pairings that technically pass WCAG 2 yet read poorly — especially thin weights, small type, and mid-tone-on-mid-tone — but keep WCAG 2 AA as the pass/fail baseline the mockup is measured against. The common failure mode is checking one representative screen in one theme against the base background and declaring the palette compliant, then shipping placeholder gray captions, icon-only controls, focus rings, and disabled-looking-but-active states that quietly fall below 3:1 or 4.5:1 in the theme nobody re-measured.
 
-**Do:** Verifying a caption token both ways: #6B7280 secondary text reads 4.83:1 on the light base and 5.1:1 on the lightest elevated card surface it can sit on, and its dark-theme counterpart is recalculated separately to 4.6:1 — plus the focus ring and the checkbox's checked-state fill are each confirmed at 3:1 against their adjacent colors.
+**Good Example:**
 
-**Don't:** Sampling one hero screen in light mode, seeing body text at 4.5:1, and calling the whole palette accessible — while the same gray caption lands at 3.9:1 on an elevated sheet, the dark theme's muted text sits at 3.2:1, and the icon-only toolbar buttons never get measured at all.
+> Verifying a caption token both ways: #6B7280 secondary text reads 4.83:1 on the light base and 5.1:1 on the lightest elevated card surface it can sit on, and its dark-theme counterpart is recalculated separately to 4.6:1 — plus the focus ring and the checkbox's checked-state fill are each confirmed at 3:1 against their adjacent colors.
+
+**Bad Example:**
+
+> Sampling one hero screen in light mode, seeing body text at 4.5:1, and calling the whole palette accessible — while the same gray caption lands at 3.9:1 on an elevated sheet, the dark theme's muted text sits at 3.2:1, and the icon-only toolbar buttons never get measured at all.
+
+**Guidelines:**
+
+- MUST recalculate every text and non-text color pairing separately for light and dark, since a token that clears the floor in one theme routinely fails in the inverted-luminance other.
+- MUST clear WCAG 2 AA floors as hard thresholds — 4.5:1 for normal text, 3:1 for large text (18pt/24px, or 14pt bold/18.67px and heavier) — and 3:1 for the boundary, icon, and state indicators that identify or operate a control, without rounding a below-floor ratio up to pass.
+- MUST measure text against the lightest elevated surface a card, sheet, or menu can produce and recheck each hover, focus, active, and muted state on its own ground, exempting only truly disabled controls under 1.4.11.
+- MAY consult APCA as supplementary readability guidance for thin weights, small type, and mid-tone-on-mid-tone pairings, while keeping WCAG 2 AA as the pass/fail baseline.
 
 Sources: [Understanding Success Criterion 1.4.3: Contrast (Minimum) — W3C Web Accessibility Initiative (WAI)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html) · [Understanding Success Criterion 1.4.11: Non-text Contrast — W3C Web Accessibility Initiative (WAI)](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html) · [Contrast and Color Accessibility — WebAIM](https://webaim.org/articles/contrast/) · [The Easy Intro to the APCA Contrast Method — APCA / Myndex](https://git.apcacontrast.com/documentation/APCAeasyIntro.html) · [5 Visual Treatments that Improve Accessibility — Nielsen Norman Group](https://www.nngroup.com/articles/visual-treatments-accessibility/) · [Color — Human Interface Guidelines — Apple](https://developer.apple.com/design/human-interface-guidelines/color)
 
@@ -26,8 +37,19 @@ There is one measurable escape hatch worth knowing precisely. When two elements 
 
 The concrete how-to for a high-fidelity round: build every status, validation, selection, and interactive-affordance state with its non-color signal already in place, then run a grayscale test on the full mockup (desaturate the artboard or view it through a color-blindness simulator for protanopia, deuteranopia, and tritanopia). Anything that becomes ambiguous when hue is removed — a selected chip that only changes fill color, a required field marked by red asterisk color alone, a chart with a red line and a green line — is a defect to fix before handoff. The common failure mode is the two-line chart and the traffic-light status dot: both read perfectly to the designer with full color vision and collapse into identical grays for a meaningful slice of users. Fix them with dash patterns, marker shapes, or direct labels; and with an icon plus text beside the dot.
 
-**Do:** A form field in the error state shows a red border AND a red-tinted X icon AND helper text ("Enter a valid email") below it — desaturate the screen and the field still reads as broken via the icon, the text, and the border weight change.
+**Good Example:**
 
-**Don't:** A status dashboard shows service health as colored dots only — green, amber, red — with no label or icon, so a deuteranopic viewer (or anyone on a grayscale display) sees three near-identical gray dots and cannot tell which service is down.
+> A form field in the error state shows a red border AND a red-tinted X icon AND helper text ("Enter a valid email") below it — desaturate the screen and the field still reads as broken via the icon, the text, and the border weight change.
+
+**Bad Example:**
+
+> A status dashboard shows service health as colored dots only — green, amber, red — with no label or icon, so a deuteranopic viewer (or anyone on a grayscale display) sees three near-identical gray dots and cannot tell which service is down.
+
+**Guidelines:**
+
+- MUST pair every color that carries status, validation, selection, or interactive-affordance meaning with a second non-color channel — an icon, text label, shape, border, weight, or fill pattern — in the mockup itself.
+- MUST run a grayscale or color-blindness-simulator pass (protanopia, deuteranopia, tritanopia) over the full artboard before handoff and fix any status dot, selected chip, required-field marker, or multi-line chart that becomes ambiguous once hue is removed.
+- MUST NOT rely on a 3:1 hue-and-lightness difference to convey a specific color's meaning, reserving that allowance only for signaling that two elements differ.
+- SHOULD distinguish chart series and traffic-light statuses with dash patterns, marker shapes, or direct labels rather than line or dot color alone.
 
 Sources: [Understanding SC 1.4.1: Use of Color (WCAG 2.1) — W3C/WAI](https://www.w3.org/WAI/WCAG21/Understanding/use-of-color.html) · [5 Visual Treatments that Improve Accessibility — Nielsen Norman Group](https://www.nngroup.com/articles/visual-treatments-accessibility/) · [Error-Message Guidelines — Nielsen Norman Group](https://www.nngroup.com/articles/error-message-guidelines/) · [Colour — GOV.UK Design System](https://design-system.service.gov.uk/styles/colour/) · [Don't use color alone to convey information (colorblind) — Access Guide](https://www.accessguide.io/guide/colorblind)

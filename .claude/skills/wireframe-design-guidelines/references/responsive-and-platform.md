@@ -2,7 +2,7 @@
 
 Device scale, thumb reach, content-driven breakpoints, and per-platform navigation.
 
-Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Principles below are distilled from reputable design sources; the MUST/SHOULD rules in `SKILL.md` remain authoritative.
+Part of the research-grounded best-practices set for this skill (see the skill's `SKILL.md` for the full routing). Each principle below is distilled from reputable design sources; the guideline bullets are the normative takeaways, and the MUST/SHOULD rules in `SKILL.md` remain authoritative.
 
 ## Wireframe mobile-first at real device scale
 
@@ -12,9 +12,20 @@ Place the primary action in the thumb's natural reach zone. Steven Hoober's obse
 
 Validate touch-target size on paper before going digital, because a box that looks tappable in a sketch can be too small once it is a real 44px hit area. Use ~44pt as the working floor: Apple's HIG specifies 44×44 pt, Material Design 3 recommends 48×48 dp, and WCAG 2.2's Target Size (Minimum, 2.5.8) sets a Level AA floor of 24×24 CSS px with adequate spacing, rising to 44×44 for Level AAA (2.5.5). Just as important, spacing between adjacent targets affects error rate more than raw size once you clear roughly 40 pt, so sketch the gaps too, not just the buttons. The common failure mode is designing the phone screen last — laying out a spacious desktop composition and then reflowing it down — which produces cramped tap targets, primary actions marooned in the top red zone, and more content than the fold can hold; wireframing mobile-first at real scale catches all three while they are still cheap to move.
 
-**Do:** On a phone-sized frame you sketch a single-column list with a bottom tab bar holding the primary "Create" action in the lower-center green zone, size the tab hit areas to a penciled ~44pt grid with visible gaps between them, and confirm only three list rows plus a header fit above the fold — then widen the same regions into a two-column tablet layout.
+**Good Example:**
 
-**Don't:** You design the desktop screen first at half-scale on a laptop canvas with a top navigation bar and eight dense toolbar icons, then shrink it to phone width — pushing the main action into the top-right red zone, collapsing the icons into 20px targets with no spacing, and burying half the content below a fold you never actually measured.
+> On a phone-sized frame you sketch a single-column list with a bottom tab bar holding the primary "Create" action in the lower-center green zone, size the tab hit areas to a penciled ~44pt grid with visible gaps between them, and confirm only three list rows plus a header fit above the fold — then widen the same regions into a two-column tablet layout.
+
+**Bad Example:**
+
+> You design the desktop screen first at half-scale on a laptop canvas with a top navigation bar and eight dense toolbar icons, then shrink it to phone width — pushing the main action into the top-right red zone, collapsing the icons into 20px targets with no spacing, and burying half the content below a fold you never actually measured.
+
+**Guidelines:**
+
+- MUST sketch each mobile screen inside a 1:1 real-device frame and start from the smallest target viewport, widening the same regions up to tablet and desktop rather than shrinking a desktop composition down.
+- MUST place primary navigation and the main call-to-action in the bottom-center green reach zone, and reserve the top corners for destructive or rarely-used controls.
+- MUST size penciled touch targets to a ~44pt working floor and draw the spacing between adjacent targets, not the buttons alone.
+- MUST count the rows, header, and one primary action that fit above the fold on the device frame before committing the layout, keeping every element a grey box or placeholder label with no brand color or final type.
 
 Sources: [The Thumb Zone: Designing For Mobile Users — Smashing Magazine](https://www.smashingmagazine.com/2016/09/the-thumb-zone-designing-for-mobile-users/) · [Mobile UX: Study Guide — Nielsen Norman Group](https://www.nngroup.com/articles/mobile-ux-study-guide/) · [Creating Content Wireframes For Responsive Design — Smashing Magazine](https://www.smashingmagazine.com/2016/02/create-content-wireframes-for-responsive-design/) · [UX Sketching And Wireframing Templates For Mobile Projects — Smashing Magazine](https://www.smashingmagazine.com/2012/09/free-download-ux-sketching-wireframing-templates-mobile/) · [Practical Tips for Creating Better Wireframes — Balsamiq](https://balsamiq.com/learn/articles/practical-tips-for-better-wireframes/) · [Understanding SC 2.5.8: Target Size (Minimum) — W3C WAI](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html) · [Foundations: layout and touch target sizing — Material Design 3](https://m3.material.io/foundations/designing/structure)
 
@@ -26,8 +37,19 @@ Navigation adapts on the same width axis, and in a wireframe you show it as a la
 
 The dominant failure mode is hiding navigation behind a hamburger on screens with room to show it. NN/g's research repeatedly finds hidden navigation lowers discoverability, slows task completion, and reduces engagement versus visible or partially visible navigation; a hamburger is a last resort for genuinely compact widths, not a default. The second failure mode is designing to devices — a single "tablet" breakpoint that ignores foldables, split-screen multitasking, browser windows dragged to arbitrary sizes, and large-text/zoom users whose effective width shrinks. Ranges survive all of those; device names do not. In a low-fidelity wireframe, annotate each breakpoint with the content reason ("second pane appears here because the list + detail both fit above ~840dp") rather than a device name, and sketch the compact, medium, and expanded states as separate frames so the reflow is explicit.
 
-**Do:** A dashboard wireframe drawn as three frames: compact shows one scrolling column with a 4-item bottom tab bar; at ~600dp the tabs become a left icon rail and a filter pane appears; at ~840dp the rail expands to a labeled sidebar and a detail pane opens beside the list — each transition annotated with the content reason, not a device name.
+**Good Example:**
 
-**Don't:** A wireframe with two states labeled "iPhone" and "iPad," both tucking all navigation behind a top-left hamburger, and a body text column that runs the full window width (~120 characters per line) on the larger frame because no readability-based breakpoint was set.
+> A dashboard wireframe drawn as three frames: compact shows one scrolling column with a 4-item bottom tab bar; at ~600dp the tabs become a left icon rail and a filter pane appears; at ~840dp the rail expands to a labeled sidebar and a detail pane opens beside the list — each transition annotated with the content reason, not a device name.
+
+**Bad Example:**
+
+> A wireframe with two states labeled "iPhone" and "iPad," both tucking all navigation behind a top-left hamburger, and a body text column that runs the full window width (~120 characters per line) on the larger frame because no readability-based breakpoint was set.
+
+**Guidelines:**
+
+- MUST set each breakpoint at the width where a content column stops reading well — collapsing below roughly 45 characters per line and adding a pane or breakpoint before body text exceeds about 66 (Bringhurst's measure), never past the 80-character WCAG AAA ceiling.
+- MUST sketch the compact, medium, and expanded states as separate frames starting single-column at the smallest width, and annotate each transition with the content reason ("second pane fits above ~840dp") rather than a device name.
+- MUST keep the 3-5 primary destinations persistently visible across breakpoints — a bottom or tab bar on compact, a navigation rail on medium, a labeled sidebar on expanded — changing only the container, not the destination set.
+- MUST NOT hide primary navigation behind a hamburger on medium or expanded widths, reserving it for genuinely compact frames where the destinations cannot stay visible.
 
 Sources: [Optimal Line Length for Readability: The 50–75 Character Rule — UXPin](https://www.uxpin.com/studio/blog/optimal-line-length-for-readability/) · [Readability: The Optimal Line Length — Baymard Institute](https://baymard.com/blog/line-length-readability) · [WCAG 2.1 Understanding SC 1.4.8: Visual Presentation (line width ≤ 80 characters) — W3C/WAI](https://www.w3.org/WAI/WCAG21/Understanding/visual-presentation.html) · [Logical Breakpoints For Responsive Design — Smashing Magazine](https://www.smashingmagazine.com/2013/03/logical-breakpoints-responsive-design/) · [Responsive web design basics — Google web.dev](https://web.dev/articles/responsive-web-design-basics) · [Breakpoints & Window Size Classes — Material Design 3](https://m3.material.io/foundations/layout/breakpoints/medium) · [Navigation rail — Material Design 3](https://m3.material.io/components/navigation-rail/guidelines) · [Navigation bar guidelines — Material Design 3](https://m3.material.io/components/navigation-bar/guidelines) · [Layout — GOV.UK Design System](https://design-system.service.gov.uk/styles/layout/) · [Basic Patterns for Mobile Navigation: A Primer — Nielsen Norman Group](https://www.nngroup.com/articles/mobile-navigation-patterns/) · [Tab Bars — Human Interface Guidelines — Apple](https://developer.apple.com/design/human-interface-guidelines/tab-bars) · [Hamburger Menus and Hidden Navigation Hurt UX Metrics — Nielsen Norman Group](https://www.nngroup.com/articles/hamburger-menus/) · [Left-Side Vertical Navigation on Desktop — Nielsen Norman Group](https://www.nngroup.com/articles/vertical-nav/)
