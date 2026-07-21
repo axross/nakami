@@ -1,10 +1,14 @@
 # Fastlane lanes for payload-mobile.
 #
-# Only an Android `preview` lane exists today, driven by the manually-dispatched
-# .github/workflows/android-build.yml. It builds a signed release APK from the
-# `android/` project that `expo prebuild` generates (Continuous Native
-# Generation — the native project is never committed) and distributes it to
-# testers via Firebase App Distribution.
+# Only Android lanes exist today, driven by the manually-dispatched
+# .github/workflows/android-build.yml. The preview build is split into two
+# lanes so the workflow can run them as separate jobs and re-run only the failed
+# phase:
+#   - `build`   assembles a signed release APK from the `android/` project that
+#               `expo prebuild` generates (Continuous Native Generation — the
+#               native project is never committed).
+#   - `publish` distributes an already-built APK to testers via Firebase App
+#               Distribution.
 #
 # All credentials arrive as environment variables set by the workflow from repo
 # secrets; nothing sensitive is stored here.
@@ -12,8 +16,8 @@
 default_platform(:android)
 
 platform :android do
-  desc "Build a signed release APK and distribute it via Firebase App Distribution"
-  lane :preview do
+  desc "Assemble a signed release APK from the prebuilt android/ project"
+  lane :build do
     # Expo's generated release buildType is wired to the debug signingConfig, so
     # we override signing at build time with AGP's injected-signing properties
     # (these take precedence over the DSL signingConfig) rather than editing the
@@ -30,13 +34,27 @@ platform :android do
       },
     )
 
+    # Surface the assembled APK path as a step output so the workflow can stage
+    # and upload it as an artifact for the separate `publish` job to consume.
+    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    if apk_path && ENV["GITHUB_OUTPUT"]
+      File.open(ENV["GITHUB_OUTPUT"], "a") { |file| file.puts("apk_path=#{apk_path}") }
+    end
+  end
+
+  desc "Distribute an already-built APK via Firebase App Distribution"
+  lane :publish do
     release = firebase_app_distribution(
       app: ENV.fetch("FIREBASE_ANDROID_APP_ID"),
       service_credentials_file: ENV.fetch("FIREBASE_SERVICE_ACCOUNT_PATH"),
       android_artifact_type: "APK",
-      android_artifact_path: lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH],
+      android_artifact_path: ENV.fetch("ANDROID_APK_PATH"),
       # Optional Firebase tester group(s); distributes without a group if unset.
       groups: ENV["FIREBASE_GROUPS"],
+      # Comma-separated tester emails added to (and, if new, invited to) every
+      # build. The workflow always supplies yo@axross.dev so the tester can
+      # install without waiting on a manual Firebase invitation.
+      testers: ENV["FIREBASE_TESTERS"],
     )
 
     # Surface the tester install link as a step output so the workflow can put it
