@@ -69,7 +69,7 @@ See [error-handling.md](./references/error-handling.md) for:
 
 See [testing.md](./references/testing.md) for:
 
-- rendering an option-factory consumer under a `QueryClientProvider`, or mocking `useQuery`/`useMutation`
-- injecting `mutate`/`isPending`/`error` state without a live client
+- rendering an option-factory consumer under a `QueryClientProvider` with a fresh, isolated `QueryClient`
+- asserting the real query/mutation result against mocked data-layer fixtures, never a mocked hook or client method
 - mocking the data-layer/API dependency a factory calls
 - what to assert on an option factory versus its consuming component
