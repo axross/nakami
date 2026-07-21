@@ -1,67 +1,52 @@
-import { type JSX, useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, View } from "react-native";
+import type { JSX } from "react";
+import { useEffect } from "react";
+import { View } from "react-native";
+import Animated, {
+	cancelAnimation,
+	useAnimatedStyle,
+	useReducedMotion,
+	useSharedValue,
+	withRepeat,
+	withSequence,
+	withTiming,
+} from "react-native-reanimated";
 import { StyleSheet } from "react-native-unistyles";
 
 // Placeholder name-bar widths per row, so the skeleton reads as varied content
 // rather than a repeated block.
 const ROW_WIDTHS = [70, 96, 58, 84, 66, 78];
 
-/** Tracks the OS "reduce motion" setting so the pulse can be disabled. */
-function useReduceMotion(): boolean {
-	const [reduced, setReduced] = useState(false);
-
-	useEffect(() => {
-		let active = true;
-		AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-			if (active) {
-				setReduced(value);
-			}
-		});
-		const subscription = AccessibilityInfo.addEventListener(
-			"reduceMotionChanged",
-			setReduced,
-		);
-		return () => {
-			active = false;
-			subscription.remove();
-		};
-	}, []);
-
-	return reduced;
-}
+const PULSE_DURATION_MS = 700;
 
 /**
  * The Collections loading state: placeholder rows in the same inset card as the
- * loaded list, gently pulsing. Honors the OS "reduce motion" setting by holding
- * a steady opacity instead of animating.
+ * loaded list, gently pulsing. Honors the OS "reduce motion" setting (via
+ * reanimated's `useReducedMotion`) by holding a steady opacity instead of
+ * animating.
  */
 export function CollectionListSkeleton(): JSX.Element {
-	const reduceMotion = useReduceMotion();
-	const opacity = useRef(new Animated.Value(0.5)).current;
+	const reduceMotion = useReducedMotion();
+	const opacity = useSharedValue(0.5);
 
 	useEffect(() => {
 		if (reduceMotion) {
-			opacity.setValue(0.6);
+			opacity.value = 0.6;
 			return;
 		}
 
-		const loop = Animated.loop(
-			Animated.sequence([
-				Animated.timing(opacity, {
-					toValue: 1,
-					duration: 700,
-					useNativeDriver: true,
-				}),
-				Animated.timing(opacity, {
-					toValue: 0.4,
-					duration: 700,
-					useNativeDriver: true,
-				}),
-			]),
+		opacity.value = withRepeat(
+			withSequence(
+				withTiming(1, { duration: PULSE_DURATION_MS }),
+				withTiming(0.4, { duration: PULSE_DURATION_MS }),
+			),
+			-1,
+			false,
 		);
-		loop.start();
-		return () => loop.stop();
+
+		return () => cancelAnimation(opacity);
 	}, [reduceMotion, opacity]);
+
+	const pulse = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
 	return (
 		<View style={styles.root}>
@@ -73,8 +58,8 @@ export function CollectionListSkeleton(): JSX.Element {
 			>
 				{ROW_WIDTHS.map((width, index) => (
 					<View key={width} style={styles.row(index > 0)}>
-						<Animated.View style={[styles.monogram, { opacity }]} />
-						<Animated.View style={[styles.name(width), { opacity }]} />
+						<Animated.View style={[styles.monogram, pulse]} />
+						<Animated.View style={[styles.name(width), pulse]} />
 					</View>
 				))}
 			</View>
