@@ -390,7 +390,7 @@
 
   /* ---- component state variants (labeled rows within a card) ---- */
   .wc-states { display: flex; flex-direction: column; gap: 9px; width: 100%; }
-  .wc-strow { display: flex; align-items: center; gap: 9px; }
+  .wc-strow { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
   .wc-stlab { font-family: var(--mono); font-size: 9px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--wire-ink); flex: none; width: 56px; }
   .wc-strow > :not(.wc-stlab) { flex: 1; min-width: 0; }
   .wc-strow.inline > :not(.wc-stlab) { flex: none; }
@@ -404,6 +404,13 @@
   .wc-pagerow .pg.is-disabled { opacity: 0.4; }
   .wc-table .trow.sel { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
   .wc-table .cbx.on { background: var(--accent); border-color: var(--accent); }
+  /* variant axes: importance / tone / size / loading */
+  .btn.ghost { background: transparent; border: 1px solid var(--wire-line); } .btn.ghost .cap { background: var(--wire-ink); opacity: 0.7; }
+  .btn.sm { height: 24px; } .btn.lg { height: 36px; }
+  .wc-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--panel) 55%, transparent); border-top-color: transparent; }
+  .wc-av.sm { width: 24px; height: 24px; } .wc-av.lg { width: 42px; height: 42px; }
+  .wc-av.fallback { display: flex; align-items: center; justify-content: center; } .wc-av.fallback::after { content: ""; width: 12px; height: 9px; border-radius: 2px; background: var(--wire-ink); opacity: 0.5; }
+  .wc-badge.outline { background: transparent; border: 1px solid var(--wire-line); }
 
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
@@ -432,7 +439,7 @@
        ======================================================================= -->
 
   <h2 class="section">UI elements — component palette</h2>
-  <p class="lead-note">Individual components in isolation, to assemble a screen when no archetype fits. The wireframe component library below is breadboard greys (regions, hierarchy, flow — no color or final type); the high-fidelity palette that follows uses the app's real tokens. The library models the common shadcn-UI components in this project's mobile vocabulary, and shows each component's common states (default, filled, focus, invalid, selected, disabled, …) for clarity. <!-- FILL: keep only the components and states your screen(s) use. --></p>
+  <p class="lead-note">Individual components in isolation, to assemble a screen when no archetype fits. The wireframe component library below is breadboard greys (regions, hierarchy, flow — no color or final type); the high-fidelity palette that follows uses the app's real tokens. The library models the common shadcn-UI components in this project's mobile vocabulary, and shows each component's common states and variant axes for clarity — states (default, filled, focus, invalid, selected, disabled), and where they apply importance (primary/secondary/tertiary), tone (neutral/accent/destructive), size (sm/md/lg), and loading. <!-- FILL: keep only the components, states, and variants your screen(s) use. --></p>
 
   <p class="shared-label" style="margin-bottom:6px">Wireframe component library — breadboard</p>
 
@@ -440,8 +447,12 @@
   <div class="el-grid">
     <div class="el-card"><span class="el-tag">heading / label</span><div class="el-stage"><div class="w-h lg w100"></div></div></div>
     <div class="el-card"><span class="el-tag">body text</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px"><div class="w-t w80"></div><div class="w-t w60"></div></div></div></div>
-    <div class="el-card"><span class="el-tag">avatar</span><div class="el-stage"><div style="display:flex;align-items:center;gap:10px"><span class="wc-av"></span><span class="wc-avstack"><span class="wc-av"></span><span class="wc-av"></span><span class="wc-av"></span></span></div></div></div>
-    <div class="el-card"><span class="el-tag">badge</span><div class="el-stage"><div style="display:flex;gap:10px;align-items:center"><span class="wc-badge"></span><span class="wc-badge accent"></span><span class="wc-badge danger"></span></div></div></div>
+    <div class="el-card wide"><span class="el-tag">avatar</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow inline"><span class="wc-stlab">sizes</span><span class="wc-av sm"></span><span class="wc-av"></span><span class="wc-av lg"></span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">fallback</span><span class="wc-av fallback"></span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">group</span><span class="wc-avstack"><span class="wc-av"></span><span class="wc-av"></span><span class="wc-av"></span></span></div>
+    </div></div></div>
+    <div class="el-card"><span class="el-tag">badge — tone / style</span><div class="el-stage"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="wc-badge"></span><span class="wc-badge accent"></span><span class="wc-badge danger"></span><span class="wc-badge outline"></span></div></div></div>
     <div class="el-card"><span class="el-tag">divider</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:12px"><span class="wc-div"></span><span class="wc-divlbl"><span class="wc-div"></span><span class="t"></span><span class="wc-div"></span></span></div></div></div>
     <div class="el-card"><span class="el-tag">skeleton</span><div class="el-stage"><div class="wc-skel"><span class="b"></span><span class="b"></span><span class="b w60"></span></div></div></div>
   </div>
@@ -491,11 +502,11 @@
 
   <p class="el-sub">Buttons &amp; menus</p>
   <div class="el-grid">
-    <div class="el-card"><span class="el-tag">button</span><div class="el-stage"><div class="wc-states">
-      <div class="wc-strow"><span class="wc-stlab">primary</span><div class="btn primary"><span class="cap"></span></div></div>
-      <div class="wc-strow"><span class="wc-stlab">default</span><div class="btn"><span class="cap"></span></div></div>
-      <div class="wc-strow"><span class="wc-stlab">destructive</span><div class="btn danger"><span class="cap"></span></div></div>
-      <div class="wc-strow"><span class="wc-stlab">disabled</span><div class="btn primary is-disabled"><span class="cap"></span></div></div>
+    <div class="el-card wide3"><span class="el-tag">button — variant axes</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow inline"><span class="wc-stlab">importance</span><div class="btn primary" style="width:70px"><span class="cap"></span></div><div class="btn" style="width:70px"><span class="cap"></span></div><div class="btn ghost" style="width:70px"><span class="cap"></span></div><span class="wc-hint">primary · secondary · tertiary</span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">tone</span><div class="btn" style="width:70px"><span class="cap"></span></div><div class="btn primary" style="width:70px"><span class="cap"></span></div><div class="btn danger" style="width:70px"><span class="cap"></span></div><span class="wc-hint">neutral · accent · destructive</span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">size</span><div class="btn primary sm" style="width:56px"><span class="cap"></span></div><div class="btn primary" style="width:70px"><span class="cap"></span></div><div class="btn primary lg" style="width:84px"><span class="cap"></span></div><span class="wc-hint">sm · md · lg</span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">state</span><div class="btn primary" style="width:70px"><span class="cap"></span></div><div class="btn primary" style="width:70px"><span class="wc-spin"></span></div><div class="btn primary is-disabled" style="width:70px"><span class="cap"></span></div><span class="wc-hint">default · loading · disabled</span></div>
     </div></div></div>
     <div class="el-card"><span class="el-tag">button group</span><div class="el-stage"><div class="wc-btngroup"><span class="b on"></span><span class="b"></span><span class="b"></span></div></div></div>
     <div class="el-card"><span class="el-tag">dropdown menu</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><div class="wc-select" style="width:60%"><span class="ph"></span><span class="wc-cv"></span></div><div class="wc-menu"><span class="mi w70"></span><span class="mi w50"></span><span class="sep"></span><span class="mi w60"></span></div></div></div></div>
