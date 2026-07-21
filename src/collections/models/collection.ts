@@ -42,6 +42,7 @@ export const accessResponseSchema = z.object({
 	collections: z.record(z.string(), collectionAccessSchema),
 });
 
+/** The parsed, validated `GET /api/access` response (see accessResponseSchema). */
 export type AccessResponse = z.infer<typeof accessResponseSchema>;
 
 // Payload's own internal collections (preferences, migrations, locked
