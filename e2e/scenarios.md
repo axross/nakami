@@ -15,7 +15,7 @@ Remove rows only when the journey itself is removed from the product.
 | ----------- | -------- | ------- |
 | `app-launch` | must | The app cold-starts and reaches the home screen (the signed-out empty state). |
 | `tab-navigation` | must | Switching bottom tabs reaches the Home and Settings screens available while signed out. |
-| `settings-menu` | must | The settings menu shows the About and Debug groups with technical details, and License pushes the Licenses screen. |
+| `settings-menu` | must | The settings menu shows the About group with technical details, and License pushes the Licenses screen. (The Debug group's Open Dev Menu row renders only in development-mode builds, so it is not asserted by a build-agnostic flow.) |
 | `auth-signed-out` | must | Signed out, Home shows the sign-in call to action and the Collections tab is hidden. |
 | `auth-sign-in-form` | must | The sign-in screen opens with its fields, the Collection value toggles to an editable input, and an unreachable server surfaces an inline error. |
 | `auth-settings-sign-in` | must | Signed out, the Settings screen shows a Sign in row that opens the sign-in screen. |

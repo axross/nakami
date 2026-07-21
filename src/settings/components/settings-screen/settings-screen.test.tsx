@@ -84,6 +84,26 @@ describe("<SettingsScreen>", () => {
 		expect(openMenu).toHaveBeenCalledTimes(1);
 	});
 
+	it("hides the Debug group and Open Dev Menu row in a release build", () => {
+		// __DEV__ is a const-typed global, so cast to a writable shape to
+		// simulate a release build (__DEV__ === false), then restore it.
+		const devFlag = globalThis as unknown as { __DEV__: boolean };
+		const wasDev = devFlag.__DEV__;
+		devFlag.__DEV__ = false;
+
+		try {
+			const { queryByText, queryByTestId } = renderRouter(
+				{ index: SettingsScreen },
+				{ initialUrl: "/" },
+			);
+
+			expect(queryByText("Debug")).toBeNull();
+			expect(queryByTestId("settings-open-dev-menu-row")).toBeNull();
+		} finally {
+			devFlag.__DEV__ = wasDev;
+		}
+	});
+
 	it("shows a Sign in row in place of the Account group when unauthenticated", () => {
 		useAuthStore.setState({ status: "unauthenticated", session: null });
 

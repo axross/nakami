@@ -74,22 +74,26 @@ export function SettingsScreen(): JSX.Element {
 				</SettingMenuGroupBody>
 			</SettingMenuGroup>
 
-			<SettingMenuGroup>
-				<SettingMenuGroupHeading>Debug</SettingMenuGroupHeading>
+			{__DEV__ ? (
+				<SettingMenuGroup>
+					<SettingMenuGroupHeading>Debug</SettingMenuGroupHeading>
 
-				<SettingMenuGroupBody>
-					<SettingMenuGroupItem
-						accessibilityRole="button"
-						first
-						last
-						onPress={onOpenDevMenuPress}
-						testID="settings-open-dev-menu-row"
-					>
-						<SettingMenuGroupItemIcon name="console" />
-						<SettingMenuGroupItemLabel>Open Dev Menu</SettingMenuGroupItemLabel>
-					</SettingMenuGroupItem>
-				</SettingMenuGroupBody>
-			</SettingMenuGroup>
+					<SettingMenuGroupBody>
+						<SettingMenuGroupItem
+							accessibilityRole="button"
+							first
+							last
+							onPress={onOpenDevMenuPress}
+							testID="settings-open-dev-menu-row"
+						>
+							<SettingMenuGroupItemIcon name="console" />
+							<SettingMenuGroupItemLabel>
+								Open Dev Menu
+							</SettingMenuGroupItemLabel>
+						</SettingMenuGroupItem>
+					</SettingMenuGroupBody>
+				</SettingMenuGroup>
+			) : null}
 
 			<Text style={styles.technicalDetails} testID="settings-technical-details">
 				{technicalInfo.join("\n")}
