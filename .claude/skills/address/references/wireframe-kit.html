@@ -278,12 +278,14 @@
      reuse the same real-token classes the screens use (.input, .item, .tab …)
      on shared .el-surface token grounds, so nothing here forks the tokens.
      ========================================================================= */
-  .el-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  /* Flexbox (not grid) so cards grow to fill each row — no narrow orphans or trailing gaps. */
+  .el-grid { display: flex; flex-wrap: wrap; gap: 14px; }
+  .el-grid > .el-card { flex: 1 1 240px; }
   .el-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
   .el-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
   .el-stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 54px; padding: 10px; background: var(--wire-fill); border: 1px solid var(--wire-line); border-radius: 8px; }
   .el-stage > .w100 { width: 100%; }
-  .el-card.wide { grid-column: span 2; } .el-card.wide3 { grid-column: span 3; }
+  .el-card.wide { flex: 2 1 500px; } .el-card.wide3 { flex: 3 1 760px; }
   .el-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin: 26px 0 12px; }
 
   /* ---- wireframe component specimens (breadboard greys) ---- */
