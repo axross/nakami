@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Link } from "expo-router";
-import type { JSX } from "react";
+import { useRouter } from "expo-router";
+import { type JSX, useCallback } from "react";
 import { Pressable, Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Collection } from "~/collections/models/collection";
@@ -8,42 +8,46 @@ import type { Collection } from "~/collections/models/collection";
 /**
  * A single collection row: a monogram of the collection's initial, its name,
  * and a chevron. Pressing it opens the collection's (placeholder) detail
- * screen.
+ * screen. Navigation goes through `router.push` on a plain `Pressable` rather
+ * than a `Link asChild` wrapper: wrapping a Unistyles-styled `Pressable`
+ * directly in `Link asChild` drops the row's computed style (the clone takes
+ * the ref Unistyles applies styles through), collapsing the horizontal layout.
  */
 export function CollectionListItem({
 	collection,
 }: Readonly<{ collection: Collection }>): JSX.Element {
 	const { theme } = useUnistyles();
+	const router = useRouter();
 	const initial = collection.label.charAt(0).toUpperCase() || "#";
 
+	const onPress = useCallback(() => {
+		router.push({
+			pathname: "/collections/[slug]",
+			params: { slug: collection.slug },
+		});
+	}, [router, collection.slug]);
+
 	return (
-		<Link
-			asChild
-			href={{
-				pathname: "/collections/[slug]",
-				params: { slug: collection.slug },
-			}}
+		<Pressable
+			accessibilityLabel={collection.label}
+			accessibilityRole="button"
+			onPress={onPress}
+			style={({ pressed }) => styles.row(pressed)}
+			testID={`collection-list-item-${collection.slug}`}
 		>
-			<Pressable
-				accessibilityLabel={collection.label}
-				accessibilityRole="button"
-				style={({ pressed }) => styles.row(pressed)}
-				testID={`collection-list-item-${collection.slug}`}
-			>
-				<View style={styles.monogram}>
-					<Text style={styles.monogramText}>{initial}</Text>
-				</View>
-				<Text numberOfLines={1} style={styles.label}>
-					{collection.label}
-				</Text>
-				<View style={styles.spring} />
-				<MaterialCommunityIcons
-					color={theme.colors.textSecondary}
-					name="chevron-right"
-					size={22}
-				/>
-			</Pressable>
-		</Link>
+			<View style={styles.monogram}>
+				<Text style={styles.monogramText}>{initial}</Text>
+			</View>
+			<Text numberOfLines={1} style={styles.label}>
+				{collection.label}
+			</Text>
+			<View style={styles.spring} />
+			<MaterialCommunityIcons
+				color={theme.colors.textSecondary}
+				name="chevron-right"
+				size={22}
+			/>
+		</Pressable>
 	);
 }
 
