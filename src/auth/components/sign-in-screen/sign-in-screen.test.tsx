@@ -1,11 +1,21 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { fireEvent } from "@testing-library/react-native";
+import { fireEvent, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
+import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
 import { useSignIn } from "~/auth/mutations/use-sign-in";
 import { SignInScreen } from "./sign-in-screen";
 
 jest.mock("~/auth/mutations/use-sign-in", () => ({ useSignIn: jest.fn() }));
+jest.mock("~/auth/helpers/last-server-url", () => ({
+	readLastServerUrl: jest.fn(),
+}));
+// The collection field's icon loads its font asynchronously and setStates; stub
+// it so the async-`waitFor` tests below don't emit spurious act(...) warnings.
+jest.mock("@expo/vector-icons/MaterialCommunityIcons", () => ({
+	__esModule: true,
+	default: () => null,
+}));
 
 const mutate = jest.fn();
 const reset = jest.fn();
@@ -22,6 +32,7 @@ function mockSignIn(overrides: { isPending?: boolean; error?: unknown } = {}) {
 beforeEach(() => {
 	jest.clearAllMocks();
 	mockSignIn();
+	jest.mocked(readLastServerUrl).mockResolvedValue(null);
 });
 
 describe("<SignInScreen>", () => {
@@ -90,5 +101,32 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-error").props.children).toBe(
 			"Incorrect email or password.",
 		);
+	});
+
+	it("pre-fills the server URL with the last-used endpoint", async () => {
+		jest.mocked(readLastServerUrl).mockResolvedValue("https://cms.example.com");
+
+		const { getByTestId } = renderRouter(
+			{ "sign-in": SignInScreen },
+			{ initialUrl: "/sign-in" },
+		);
+
+		await waitFor(() => {
+			expect(getByTestId("sign-in-server-url").props.value).toBe(
+				"https://cms.example.com",
+			);
+		});
+	});
+
+	it("leaves the server URL empty when none has been stored", async () => {
+		const { getByTestId } = renderRouter(
+			{ "sign-in": SignInScreen },
+			{ initialUrl: "/sign-in" },
+		);
+
+		await waitFor(() => {
+			expect(readLastServerUrl).toHaveBeenCalled();
+		});
+		expect(getByTestId("sign-in-server-url").props.value).toBe("");
 	});
 });

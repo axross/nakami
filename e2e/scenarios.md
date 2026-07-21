@@ -18,4 +18,6 @@ Remove rows only when the journey itself is removed from the product.
 | `settings-menu` | must | The settings menu shows the About and Debug groups with technical details, and License pushes the Licenses screen. |
 | `auth-signed-out` | must | Signed out, Home shows the sign-in call to action and the Collections tab is hidden. |
 | `auth-sign-in-form` | must | The sign-in screen opens with its fields, the Collection value toggles to an editable input, and an unreachable server surfaces an inline error. |
+| `auth-settings-sign-in` | must | Signed out, the Settings screen shows a Sign in row that opens the sign-in screen. |
 | `auth-session` | should | After signing in, the Collections tab and the Settings Account section appear and Sign out returns to the signed-out state. Requires a live Payload server, so it is covered by unit/component tests and manual/on-device verification rather than an automated flow. |
+| `auth-last-server-url` | should | After a successful sign-in and sign-out, reopening the sign-in screen pre-fills the Server URL field with the last-used endpoint. Requires a prior successful sign-in against a live Payload server, so it is covered by unit/component tests and manual/on-device verification rather than an automated flow. |

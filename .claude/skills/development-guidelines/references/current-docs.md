@@ -11,7 +11,6 @@ Use current official docs before changing behavior governed by fast-moving frame
 | Expo (React Native) | Routing (Expo Router), app config and config plugins, native module APIs, asset/image behavior. Expo has breaking changes between SDKs — use the exact versioned docs for the installed SDK (currently <https://docs.expo.dev/versions/v57.0.0/>) |
 | Drizzle ORM over expo-sqlite | Schema/table definitions, column types, query APIs, relation helpers, drizzle-kit migration generation, the expo-sqlite driver and runtime migrator |
 | Sentry | SDK setup (`@sentry/react-native` + its Expo config plugin), instrumentation, source maps, event capture, PII behavior |
-| EAS (Expo Application Services) | Deployment/runtime behavior, asset optimization, storage, environment variables |
 | Maestro | Test runner configuration, snapshot behavior, locator/assertion APIs |
 | Biome | Formatter/linter configuration, suppression syntax, rule names |
 
@@ -32,5 +31,4 @@ Some project areas are especially sensitive because a small API mismatch can pro
 - MUST refresh Expo (React Native) docs — at the installed SDK's versioned URL — before changing routing, `app.json`/config plugins, native module usage, or framework configuration files.
 - MUST refresh Drizzle ORM over expo-sqlite docs before changing schemas, migrations, or driver integration.
 - MUST refresh Sentry docs before changing its initialization/instrumentation files, event-capture behavior, source maps, or PII settings.
-- MUST refresh EAS (Expo Application Services) docs before changing deployment/runtime assumptions, storage usage, or environment-variable exposure.
 - SHOULD refresh Maestro or Biome docs before changing their configuration files, snapshot behavior, or suppression syntax.

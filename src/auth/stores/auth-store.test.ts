@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { writeLastServerUrl } from "~/auth/helpers/last-server-url";
 import { fetchMe, PayloadRequestError } from "~/auth/helpers/payload-client";
 import {
 	clearSession,
@@ -12,6 +13,10 @@ jest.mock("~/auth/helpers/session-storage", () => ({
 	readSession: jest.fn(),
 	writeSession: jest.fn(async () => undefined),
 	clearSession: jest.fn(async () => undefined),
+}));
+
+jest.mock("~/auth/helpers/last-server-url", () => ({
+	writeLastServerUrl: jest.fn(async () => undefined),
 }));
 
 jest.mock("~/auth/helpers/payload-client", () => {
@@ -96,14 +101,15 @@ describe("hydrate", () => {
 });
 
 describe("authenticate / deauthenticate / applyRefresh", () => {
-	it("persists and marks authenticated on authenticate", async () => {
+	it("persists the session and remembers the server URL on authenticate", async () => {
 		await useAuthStore.getState().authenticate(session);
 
 		expect(useAuthStore.getState().status).toBe("authenticated");
 		expect(writeSession).toHaveBeenCalledWith(session);
+		expect(writeLastServerUrl).toHaveBeenCalledWith(session.serverUrl);
 	});
 
-	it("clears and marks unauthenticated on deauthenticate", async () => {
+	it("clears the session but keeps the remembered server URL on deauthenticate", async () => {
 		useAuthStore.setState({ status: "authenticated", session });
 
 		await useAuthStore.getState().deauthenticate();
@@ -111,6 +117,8 @@ describe("authenticate / deauthenticate / applyRefresh", () => {
 		expect(useAuthStore.getState().status).toBe("unauthenticated");
 		expect(useAuthStore.getState().session).toBeNull();
 		expect(clearSession).toHaveBeenCalled();
+		// The last-used URL survives sign-out, so nothing clears it here.
+		expect(writeLastServerUrl).not.toHaveBeenCalled();
 	});
 
 	it("replaces the token and expiry on applyRefresh", async () => {

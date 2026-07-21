@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { writeLastServerUrl } from "~/auth/helpers/last-server-url";
 import { fetchMe, PayloadRequestError } from "~/auth/helpers/payload-client";
 import {
 	clearSession,
@@ -97,6 +98,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
 	async authenticate(session) {
 		await writeSession(session);
+		// Remember the endpoint so the next sign-in can pre-fill it; best-effort
+		// inside the helper, so it never blocks authentication. Sign-out clears
+		// the session but deliberately leaves this value in place.
+		await writeLastServerUrl(session.serverUrl);
 		set({ status: "authenticated", session });
 	},
 
