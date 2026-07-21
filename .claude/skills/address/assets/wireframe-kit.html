@@ -336,10 +336,11 @@
   .wc-pagerow { display: flex; gap: 5px; align-items: center; }
   .wc-pagerow .pg { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--wire-line); background: var(--wire-fill); } .wc-pagerow .pg.on { background: var(--accent); border-color: var(--accent); }
   .wc-tipwrap { display: flex; flex-direction: column; align-items: center; }
-  .wc-tip { position: relative; background: var(--wire-ink); border-radius: 7px; padding: 7px 11px; width: max-content; margin-bottom: 6px; }
-  .wc-tip .l { height: 6px; width: 48px; border-radius: 3px; background: #fff; opacity: 0.9; }
-  .wc-tip::after { content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid var(--wire-ink); }
-  .wc-tip-target { width: 26px; height: 26px; border-radius: 7px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); }
+  .wc-tip { position: relative; background: var(--wire-ink); border-radius: 8px; padding: 11px 16px; width: max-content; margin-bottom: 9px; }
+  .wc-tip .l { height: 7px; width: 60px; border-radius: 3px; background: #fff; opacity: 0.9; }
+  /* diamond tail — same background as the bubble, so tip and balloon are one colour */
+  .wc-tip::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 12px; height: 12px; background: var(--wire-ink); border-radius: 2px; transform: translateX(-50%) rotate(45deg); }
+  .wc-tip-target { width: 28px; height: 28px; border-radius: 8px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); }
   .wc-toaststack { display: flex; flex-direction: column; gap: 6px; width: 100%; }
   .wc-toast { border: 1px solid var(--wire-line); border-radius: 9px; background: var(--panel); padding: 9px; display: flex; gap: 8px; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
   .wc-toast .ic { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); flex: none; } .wc-toast .col { flex: 1; display: flex; flex-direction: column; gap: 5px; }
