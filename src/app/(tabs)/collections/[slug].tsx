@@ -7,6 +7,10 @@ import { humanizeSlug } from "~/collections/helpers/humanize-slug";
 // Deep-link params are untrusted; validate before use.
 const paramsSchema = z.object({ slug: z.string().min(1) });
 
+/**
+ * Validates the deep-linked `slug` param and renders the collection's
+ * placeholder detail screen, titling the stack header with its humanized name.
+ */
 export default function CollectionDetailRoute(): JSX.Element {
 	const params = useLocalSearchParams();
 	const parsed = paramsSchema.safeParse(params);
