@@ -25,6 +25,7 @@ export function useSignIn() {
 	return useMutation<Session, unknown, SignInInput>({
 		mutationFn: async ({ serverUrl, collectionSlug, email, password }) => {
 			const server = { serverUrl, collectionSlug };
+			const startedAt = performance.now();
 			// Routine bracket-open at debug; the completion below is the
 			// user-significant milestone at info. Log the endpoint and collection
 			// only — never the email or password.
@@ -39,7 +40,10 @@ export function useSignIn() {
 				user: result.user,
 			};
 			await authenticate(session);
-			logger.info("Completed signing in.", { serverUrl });
+			logger.info("Completed signing in.", {
+				serverUrl,
+				duration: performance.now() - startedAt,
+			});
 			return session;
 		},
 	});

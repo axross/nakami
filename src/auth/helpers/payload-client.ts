@@ -56,6 +56,7 @@ async function request(
 ): Promise<unknown> {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+	const startedAt = performance.now();
 
 	// Routine per-request lifecycle → debug (dev-only). The operation label
 	// identifies the call; the URL and body are omitted to keep credentials out.
@@ -74,7 +75,11 @@ async function request(
 		clearTimeout(timeout);
 	}
 
-	logger.debug("Completed request.", { operation, status: response.status });
+	logger.debug("Completed request.", {
+		operation,
+		status: response.status,
+		duration: performance.now() - startedAt,
+	});
 
 	if (response.status === 401 || response.status === 403) {
 		throw new PayloadRequestError(

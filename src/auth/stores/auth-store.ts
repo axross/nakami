@@ -45,6 +45,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 	session: null,
 
 	async hydrate() {
+		const startedAt = performance.now();
+
 		try {
 			logger.debug("Started session hydration.");
 
@@ -53,6 +55,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 			if (stored === null) {
 				logger.debug("Completed session hydration.", {
 					status: "unauthenticated",
+					duration: performance.now() - startedAt,
 				});
 				set({ status: "unauthenticated", session: null });
 				return;
@@ -73,6 +76,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				if (me.user === null) {
 					logger.debug("Completed session hydration.", {
 						status: "unauthenticated",
+						duration: performance.now() - startedAt,
 					});
 					await get().deauthenticate();
 					return;
@@ -88,11 +92,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				set({ status: "authenticated", session: verified });
 				logger.debug("Completed session hydration.", {
 					status: "authenticated",
+					duration: performance.now() - startedAt,
 				});
 			} catch (error) {
 				if (error instanceof PayloadRequestError && error.kind === "auth") {
 					logger.debug("Completed session hydration.", {
 						status: "unauthenticated",
+						duration: performance.now() - startedAt,
 					});
 					await get().deauthenticate();
 					return;
@@ -101,6 +107,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				// Unreachable/unexpected: keep the stored session (offline-tolerant).
 				logger.warn("Session verification deferred.", {
 					reason: error instanceof Error ? error.message : "unknown",
+				});
+				// Offline-tolerant terminal path: the optimistic session stays,
+				// so bracket it like the others for production breadcrumbs.
+				logger.debug("Completed session hydration.", {
+					status: "authenticated",
+					duration: performance.now() - startedAt,
 				});
 			}
 		} catch (error) {

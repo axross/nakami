@@ -2,9 +2,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { addBreadcrumb } from "~/core/helpers/error-reporting";
 import { createModuleLogger } from "./logging";
 
-jest.mock("~/core/helpers/error-reporting", () => ({
-	addBreadcrumb: jest.fn(),
-}));
+jest.mock("~/core/helpers/error-reporting");
 
 beforeEach(() => {
 	jest.clearAllMocks();
