@@ -18,6 +18,50 @@ describe("toCollectionList", () => {
 		]);
 	});
 
+	it("accepts read as a bare boolean (unconditional access)", () => {
+		const access = accessResponseSchema.parse({
+			collections: {
+				media: { read: true },
+				drafts: { read: false },
+			},
+		});
+
+		expect(
+			toCollectionList(access).map((collection) => collection.slug),
+		).toEqual(["media"]);
+	});
+
+	it("accepts read as a permission object with a where constraint", () => {
+		const access = accessResponseSchema.parse({
+			collections: {
+				comments: {
+					read: { permission: true, where: { status: { equals: "approved" } } },
+				},
+				secrets: { read: { permission: false } },
+			},
+		});
+
+		expect(
+			toCollectionList(access).map((collection) => collection.slug),
+		).toEqual(["comments"]);
+	});
+
+	it("handles a response mixing boolean and object read shapes", () => {
+		const access = accessResponseSchema.parse({
+			collections: {
+				media: { read: true },
+				posts: { read: { permission: true } },
+				pages: { read: false },
+				"payload-preferences": { read: true },
+			},
+		});
+
+		expect(toCollectionList(access)).toEqual([
+			{ slug: "media", label: "Media" },
+			{ slug: "posts", label: "Posts" },
+		]);
+	});
+
 	it("excludes collections the user cannot read", () => {
 		const access = accessResponseSchema.parse({
 			collections: {

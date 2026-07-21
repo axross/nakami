@@ -29,7 +29,7 @@ describe("fetchAccess", () => {
 		// Trailing slash on the server URL is normalized away.
 		const access = await fetchAccess("https://cms.example.com/", "jwt-token");
 
-		expect(access.collections.posts?.read?.permission).toBe(true);
+		expect(access.collections.posts?.read).toEqual({ permission: true });
 		const [url, init] = fetchMock.mock.calls[0] as unknown as [
 			string,
 			RequestInit,

@@ -12,14 +12,26 @@ export interface Collection {
 }
 
 /**
- * One collection entry in `GET /api/access`. Payload also returns
- * `create`/`update`/`delete`/`fields`; only `read` gates whether the user can
- * browse the collection, so the rest is tolerated (stripped). `read` is
- * optional so a shape without it is treated as not-readable rather than a parse
- * failure.
+ * One operation's access result in `GET /api/access`. Payload serializes it as
+ * a bare boolean when access is unconditional (`"read": true`), or as
+ * `{ permission, where }` when a constraint applies; the constraint (`where`, …)
+ * is tolerated (stripped) since only the boolean verdict matters here.
+ */
+const operationAccessSchema = z.union([
+	z.boolean(),
+	z.object({ permission: z.boolean() }),
+]);
+
+type OperationAccess = z.infer<typeof operationAccessSchema>;
+
+/**
+ * One collection entry in `GET /api/access`. Only `read` gates whether the user
+ * can browse the collection; the other operations and `fields` are tolerated
+ * (stripped). `read` is optional so an entry without it is treated as
+ * not-readable rather than a parse failure.
  */
 const collectionAccessSchema = z.object({
-	read: z.object({ permission: z.boolean() }).optional(),
+	read: operationAccessSchema.optional(),
 });
 
 /**
@@ -39,6 +51,11 @@ function isSystemCollection(slug: string): boolean {
 	return slug.startsWith("payload-");
 }
 
+/** Whether an operation-access result grants the user access. */
+function grantsAccess(access: OperationAccess | undefined): boolean {
+	return access === true || (typeof access === "object" && access.permission);
+}
+
 /**
  * Derives the display list from an access response: the collections the user
  * can read, excluding Payload's internal system collections, each with a
@@ -47,8 +64,7 @@ function isSystemCollection(slug: string): boolean {
 export function toCollectionList(access: AccessResponse): Collection[] {
 	return Object.entries(access.collections)
 		.filter(
-			([slug, entry]) =>
-				entry.read?.permission === true && !isSystemCollection(slug),
+			([slug, entry]) => grantsAccess(entry.read) && !isSystemCollection(slug),
 		)
 		.map(([slug]) => ({ slug, label: humanizeSlug(slug) }))
 		.sort((a, b) => a.label.localeCompare(b.label));
