@@ -1,20 +1,13 @@
 <!--
-  Payload Mobile — Wireframe Kit
-  ==============================
-  A self-contained, theme-aware template for building /address design-exhibit
-  Artifacts. Copy this file to the harness scratchpad, delete the mode you are
-  NOT presenting, fill the archetypes/options for the screen(s) at hand, then
-  publish the result as an Artifact. See wireframe-kit.md for how to fill it.
-
-  Two modes live on this one page as a visual reference:
-    • WIREFRAME MODE  — grey breadboard primitives (regions, hierarchy, flow).
-                        Use for wireframe rounds. No app color, no final type.
-    • HIGH-FIDELITY   — the same layouts rendered with the app's real tokens,
-      MODE              in light AND dark. Use for high-fidelity rounds.
-
-  Self-contained: no external fetches (no CDN fonts/scripts/images). System
-  font stacks only, so it renders offline and inside the Artifact sandbox.
-
+  Payload Mobile — Wireframe Kit (low fidelity)
+  =============================================
+  A self-contained, theme-aware template for the WIREFRAME round of an /address
+  design exhibit: grey breadboard primitives, a component library, screen
+  archetypes, and the options-round layout. Regions, hierarchy, and flow only —
+  no app color, no final type. For the HIGH-FIDELITY round, use hifi-kit.html.
+  Copy this file to the harness scratchpad, fill it for the screen(s) at hand,
+  and publish as an Artifact. See wireframe-kit.md for how to fill it.
+  Self-contained: no external fetches; system font stacks only.
   Fill-in points are marked with "FILL:" comments throughout.
 -->
 <title>Payload Mobile — Wireframe Kit</title>
@@ -103,7 +96,6 @@
   .note.tradeoff::before { content: "Trade-offs"; display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wire-ink); margin-bottom: 3px; }
   .note.responsive::before { content: "Responsive"; display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--wire-ink); margin-bottom: 3px; }
   .caption { text-align: center; font-family: var(--mono); font-size: 10.5px; color: var(--wire-ink); letter-spacing: 0.04em; margin: 2px 0 0; }
-
   /* =========================================================================
      WIREFRAME MODE — grey breadboard phone + primitives.
      A wireframe shows places, affordances, and flow — regions and their
@@ -175,110 +167,7 @@
   .sw { width: 26px; height: 15px; border-radius: 4px; border: 1px solid var(--wire-line); }
   .sw.solid { background: var(--wire-solid); } .sw.dashed { background: var(--wire-fill); border-style: dashed; }
   .sw.accent { background: var(--accent); border-color: var(--accent); } .sw.danger { background: transparent; border-color: var(--danger); }
-
-  /* =========================================================================
-     HIGH-FIDELITY MODE — device rendered with the app's REAL tokens.
-     -------------------------------------------------------------------------
-     SYNC SOURCE OF TRUTH: src/common/constants/style.ts
-     The values below MIRROR that module (a static HTML file cannot import the
-     TypeScript). Before a high-fidelity round, RE-READ style.ts and reconcile
-     any drift — colors, radii (8/12/16), and the 13/16/20/28 type scale.
-     Do NOT treat this block as the source of truth; style.ts is.
-     ========================================================================= */
-  .theme-band { margin-top: 40px; }
-  .theme-band > h3.band { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 18px; padding-bottom: 9px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
-  .theme-band > h3.band .dotL, .theme-band > h3.band .dotD { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--line); }
-  .dotL { background: #fdfdfd; } .dotD { background: #111113; }
-  .rail { display: flex; gap: 26px; overflow-x: auto; padding: 6px 2px 18px; }
-  .frameblock { flex: none; display: flex; flex-direction: column; gap: 10px; }
-  .frameblock .cap { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-soft); text-align: center; }
-
-  /* Shared real-token block — the phone (.device) and the isolated element
-     surfaces (.el-surface) both consume it, so the style.ts mirror stays
-     single-point. Edit tokens HERE, never per-component. */
-  .device, .el-surface {
-    /* light tokens — mirror lightColors + radiusSizes in style.ts */
-    --bg: #fdfdfd; --elev: #ffffff; --txt: #1c2024; --txt2: #60646c;
-    --line-d: #d9d9e0; --accent-d: #0588f0; --accentC: #ffffff; --danger-d: #dc3e42;
-    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --tabInactive: #8a8f98;
-  }
-  .device.dark, .el-surface.dark {
-    /* dark tokens — mirror darkColors in style.ts */
-    --bg: #111113; --elev: #19191b; --txt: #edeef0; --txt2: #b0b4ba;
-    --line-d: #3a3a44; --accent-d: #3b9eff; --accentC: #ffffff; --danger-d: #ec5d5e;
-    --tabInactive: #8b8f98;
-  }
-  .device {
-    width: 288px; border-radius: 40px; padding: 11px; background: #d7d9de;
-    box-shadow: 0 18px 40px -20px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.12);
-  }
-  .device.dark {
-    background: #2a2b2f;
-    box-shadow: 0 18px 44px -20px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.35);
-  }
-  .scr { position: relative; border-radius: 30px; overflow: hidden; background: var(--bg); height: 560px; display: flex; flex-direction: column; }
-  .statusbar { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 12px; font-weight: 600; color: var(--txt); }
-  .statusbar .dots i { width: 15px; height: 9px; border: 1.4px solid var(--txt); border-radius: 2px; display: inline-block; opacity: 0.85; }
-  .nav { height: 44px; display: flex; align-items: center; padding: 0 8px; background: var(--elev); border-bottom: 1px solid var(--line-d); }
-  .nav .back { color: var(--accent-d); font-size: 17px; display: flex; align-items: center; width: 64px; }
-  .nav .back::before { content: "\2039"; font-size: 26px; line-height: 1; margin-top: -2px; }
-  .nav .navtitle { flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: var(--txt); }  /* fontSizes.md */
-  .nav .navspace { width: 64px; }
-  .content { flex: 1; overflow: hidden; }
-
-  .empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px; }
-  .mark { width: 66px; height: 66px; border-radius: var(--r-lg); background: color-mix(in srgb, var(--accent-d) 14%, var(--bg)); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
-  .mark svg { width: 34px; height: 34px; color: var(--accent-d); }
-  .empty h4 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; color: var(--txt); }  /* fontSizes.lg */
-  .empty p { margin: 0; font-size: 16px; color: var(--txt2); max-width: 24ch; line-height: 1.45; }
-  .cta { margin-top: 22px; width: 100%; height: 50px; border-radius: var(--r-md); background: var(--accent-d); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
-
-  .placeholder { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px; }
-  .placeholder h4 { margin: 0; font-size: 28px; font-weight: 600; color: var(--txt); letter-spacing: -0.01em; }  /* fontSizes.xl */
-  .placeholder p { margin: 0; font-size: 16px; color: var(--txt2); }
-
-  .form { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
-  .form .field { gap: 0; }
-  .form label { display: block; font-size: 13px; font-weight: 500; color: var(--txt2); margin: 0 0 6px 2px; }  /* fontSizes.sm */
-  .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font-size: 16px; color: var(--txt); }
-  .input.ph { color: var(--txt2); }
-  .input .dotpw { letter-spacing: 3px; }
-  .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font-size: 14px; margin-top: -4px; border: 0; }
-  .form .err svg, .el-surface .err svg { width: 16px; height: 16px; flex: none; }
-  .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-d); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }
-  .submit.busy { opacity: 0.75; }
-  .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45); border-top-color: #fff; }
-
-  .settings { padding: 20px 0; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
-  .grp { display: flex; flex-direction: column; gap: 9px; }
-  .grp .gh { font-size: 16px; font-weight: 700; color: var(--txt); padding: 0 16px; }
-  .grp .rows { margin: 0 16px; border: 0; background: transparent; }
-  .item { min-height: 48px; background: var(--elev); display: flex; align-items: center; gap: 14px; padding: 9px 14px; border: 0; }
-  .item + .item { border-top: 1px solid var(--line-d); }
-  .grp .rows .item:first-child { border-top-left-radius: var(--r-md); border-top-right-radius: var(--r-md); }
-  .grp .rows .item:last-child { border-bottom-left-radius: var(--r-md); border-bottom-right-radius: var(--r-md); }
-  .item .avatar { width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--accent-d) 16%, var(--elev)); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex: none; }
-  .item .ico { width: 22px; height: 22px; color: var(--txt2); flex: none; display: flex; }
-  .item .ico svg { width: 22px; height: 22px; }
-  .item .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .item .txt .a { font-size: 16px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item .txt .b { font-size: 13px; color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item .lbl { flex: 1; font-size: 16px; color: var(--txt); }
-  .item.signout .ico, .item.signout .lbl { color: var(--danger-d); }
-  .item .chev::after { content: "\203A"; color: var(--line-d); font-size: 20px; }
-
-  .tabs { height: 52px; background: var(--elev); border-top: 1px solid var(--line-d); display: flex; padding-bottom: 2px; }
-  .tabs .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--tabInactive); font-size: 10px; font-weight: 500; }
-  .tabs .tab.on { color: var(--accent-d); }
-  .tabs .tab svg { width: 24px; height: 24px; }
-
-  /* =========================================================================
-     UI ELEMENTS PALETTE — individual components in isolation, both fidelities.
-     Wireframe specimens use the breadboard greys; high-fidelity specimens
-     reuse the same real-token classes the screens use (.input, .item, .tab …)
-     on shared .el-surface token grounds, so nothing here forks the tokens.
-     ========================================================================= */
-  /* Flexbox (not grid) so cards grow to fill each row — no narrow orphans or trailing gaps. */
+  /* Component-library layout: flexbox so cards grow to fill each row. */
   .el-grid { display: flex; flex-wrap: wrap; gap: 14px; }
   .el-grid > .el-card { flex: 1 1 240px; }
   .el-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
@@ -287,7 +176,6 @@
   .el-stage > .w100 { width: 100%; }
   .el-card.wide { flex: 2 1 500px; } .el-card.wide3 { flex: 3 1 760px; }
   .el-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin: 26px 0 12px; }
-
   /* ---- wireframe component specimens (breadboard greys) ---- */
   .wc-lbl { height: 7px; border-radius: 3px; background: var(--wire-fill-2); }
   .wc-solid { height: 8px; border-radius: 3px; background: var(--wire-solid); }
@@ -378,23 +266,6 @@
   .wc-btabs .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .wc-btabs .tab .ic { width: 16px; height: 16px; border-radius: 5px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); } .wc-btabs .tab .tl { height: 6px; width: 60%; border-radius: 3px; background: var(--wire-fill-2); }
   .wc-btabs .tab.on .ic { background: var(--accent); border-color: var(--accent); } .wc-btabs .tab.on .tl { background: var(--accent); }
-
-  .el-surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
-  .el-surface { border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: var(--bg); display: flex; flex-direction: column; gap: 18px; }
-  .el-surface > .el-band { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
-  .el-surface > .el-band .dotL, .el-surface > .el-band .dotD { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line-d); }
-  .el-spec { display: flex; flex-direction: column; gap: 8px; }
-  .el-spec > .el-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt2); }
-  .el-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-
-  .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font-size: 16px; font-weight: 600; }
-  .el-btn.primary { background: var(--accent-d); color: var(--accentC); }
-  .el-btn.secondary { background: transparent; color: var(--accent-d); border: 1px solid var(--line-d); }
-  .el-btn.busy { background: var(--accent-d); color: var(--accentC); opacity: 0.75; }
-  .input.focus { border-color: var(--accent-d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-d) 18%, transparent); }
-  .input.error { border-color: var(--danger-d); }
-  .caret { width: 1.5px; height: 20px; background: var(--accent-d); margin-left: 1px; display: inline-block; }
-
   /* ---- component state variants (labeled rows within a card) ---- */
   .wc-states { display: flex; flex-direction: column; gap: 9px; width: 100%; }
   .wc-strow { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
@@ -419,37 +290,24 @@
   .wc-av.sm { width: 24px; height: 24px; } .wc-av.lg { width: 42px; height: 42px; }
   .wc-av.fallback { display: flex; align-items: center; justify-content: center; } .wc-av.fallback::after { content: ""; width: 12px; height: 9px; border-radius: 2px; background: var(--wire-ink); opacity: 0.5; }
   .wc-badge.outline { background: transparent; border: 1px solid var(--wire-line); } .wc-badge.outline .t { background: var(--wire-ink); opacity: 0.6; }
-
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 </style>
 
 <div class="wrap">
   <header class="masthead">
-    <p class="eyebrow">Payload Mobile · Wireframe Kit</p>
-    <h1>Screen-mockup vocabulary for /address design exhibits</h1>
-    <p class="lede">A copy-and-fill template with two modes — a grey <b>breadboard wireframe</b> and a real-token <b>high-fidelity</b> render (light + dark). It opens with a <b>UI-elements palette</b> (components in isolation, both fidelities) to compose a novel screen when no archetype fits, then the <b>screen showcase</b> (archetypes, the options-round layout, and full rendered screens). Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. See <code>wireframe-kit.md</code> for the primitives, the fidelity contract, and how to fill each round.</p>
+    <p class="eyebrow">Payload Mobile · Wireframe Kit · Low fidelity</p>
+    <h1>Breadboard vocabulary for /address wireframe rounds</h1>
+    <p class="lede">Grey <b>breadboard</b> building blocks for a wireframe round — a component library, screen archetypes, and the options-round layout. Regions, hierarchy, and flow only; no app color or final type. For the high-fidelity round, use <code>hifi-kit.html</code>. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. See <code>wireframe-kit.md</code>.</p>
     <div class="meta">
-      <span class="tag"><strong>Palette</strong> elements · screens</span>
-      <span class="tag"><strong>Modes</strong> wireframe · high-fidelity</span>
-      <span class="tag"><strong>Tokens</strong> mirror src/common/constants/style.ts</span>
+      <span class="tag"><strong>Fidelity</strong> wireframe · breadboard</span>
+      <span class="tag"><strong>Includes</strong> components · archetypes · options layout</span>
       <span class="tag">Self-contained · theme-aware</span>
     </div>
   </header>
 
-  <!-- =======================================================================
-       UI ELEMENTS PALETTE — components in isolation, both fidelities.
-       Atoms first, so an author can compose a novel screen from parts when no
-       archetype fits. Wireframe specimens use the breadboard greys; the
-       high-fidelity specimens reuse the same real-token classes as the screens
-       (.input / .item / .tab / .el-btn on .el-surface grounds) and are built by
-       the script into a light and a dark surface so the two stay in lockstep.
-       ======================================================================= -->
-
-  <h2 class="section">UI elements — component palette</h2>
-  <p class="lead-note">Individual components in isolation, to assemble a screen when no archetype fits. The wireframe component library below is breadboard greys (regions, hierarchy, flow — no color or final type); the high-fidelity palette that follows uses the app's real tokens. The library models the common shadcn-UI components in this project's mobile vocabulary, and shows each component's common states and variant axes for clarity — states (default, filled, focus, invalid, selected, disabled), and where they apply importance (primary/secondary/tertiary), tone (neutral/accent/destructive), size (sm/md/lg), and loading. <!-- FILL: keep only the components, states, and variants your screen(s) use. --></p>
-
-  <p class="shared-label" style="margin-bottom:6px">Wireframe component library — breadboard</p>
+  <h2 class="section">Wireframe component library</h2>
+  <p class="lead-note">The common shadcn-UI components in this project's mobile vocabulary, at breadboard fidelity (regions, hierarchy, flow — no color or final type). Each shows its common states and variant axes for clarity — states (default, filled, focus, invalid, selected, disabled), and where they apply importance (primary/secondary/tertiary), tone (neutral/accent/destructive), size (sm/md/lg), and loading. <!-- FILL: keep only the components, states, and variants your screen(s) use. --></p>
 
   <p class="el-sub">Foundations</p>
   <div class="el-grid">
@@ -555,19 +413,6 @@
     <div class="el-card wide"><span class="el-tag">bottom sheet (drawer)</span><div class="el-stage"><div class="wc-frame"><div class="dimbody"><span class="w-h"></span><span class="w-t w80"></span></div><div class="scrim"></div><div class="wc-sheet"><span class="grab"></span><span class="wc-solid" style="width:45%"></span><span class="wc-lbl" style="width:85%"></span><span class="btn primary" style="margin-top:2px"><span class="cap"></span></span></div></div></div></div>
     <div class="el-card wide"><span class="el-tag">bottom tabs (mobile)</span><div class="el-stage"><div class="wc-frame" style="height:96px"><div class="dimbody"><span class="w-t w60"></span><span class="w-t w40"></span></div><div class="wc-btabs"><div class="tab on"><span class="ic"></span><span class="tl"></span></div><div class="tab"><span class="ic"></span><span class="tl"></span></div><div class="tab"><span class="ic"></span><span class="tl"></span></div></div></div></div></div>
   </div>
-
-  <p class="shared-label" style="margin:28px 0 12px">High fidelity — real tokens (light + dark)</p>
-  <div class="el-surfaces">
-    <div class="el-surface" id="elLight"></div>
-    <div class="el-surface dark" id="elDark"></div>
-  </div>
-
-  <!-- =======================================================================
-       WIREFRAME MODE
-       Below: (1) the archetype gallery (optional starting points), and
-       (2) an options-round layout showing the side-by-side comparison with
-       Recommended badge, rationale, trade-offs, and legend.
-       ======================================================================= -->
 
   <h2 class="section">Wireframe mode — archetypes (optional starting points)</h2>
   <p class="lead-note">Assembled breadboards you can copy and adapt. They are <b>starting points, not mandatory</b> — reach for a primitive directly when an archetype does not fit, and never let the catalog flatten distinct screens into the same shape.</p>
@@ -763,147 +608,7 @@
     <span><span class="sw danger"></span> danger (destructive / error)</span>
   </div>
 
-  <!-- =======================================================================
-       HIGH-FIDELITY MODE
-       The same layouts rendered with the app's real tokens, in light AND dark
-       rails. Build this for a high-fidelity round (confirmation of one chosen
-       direction, or an options round of >=3 rendered candidates). The screens
-       are assembled by the script at the bottom so light and dark stay in
-       lockstep — edit the template strings there to change what renders.
-       ======================================================================= -->
-
-  <h2 class="section">High-fidelity mode — real-token render</h2>
-  <p class="lead-note">A faithful rendering using the app's real tokens (colors, radii, and the <code>13 / 16 / 20 / 28</code> type scale), in both themes. <b>Re-read <code>src/common/constants/style.ts</code> before each hi-fi round</b> and reconcile any drift with the mirrored values in this file's CSS. Nothing here is committed to the repo.</p>
-
-  <!-- SVG icon symbols (inline; no external fetches). Swap for the app's real icons where they matter. -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-home" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 11.5 12 5l8 6.5M6 10.5V19h12v-8.5"/></symbol>
-    <symbol id="i-stack" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 4 3.5 8.2 12 12.4l8.5-4.2L12 4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="m4 12 8 4 8-4M4 15.7l8 4 8-4"/></symbol>
-    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 3v2.2M12 18.8V21M4.2 7l1.9 1.1M17.9 15.9 19.8 17M4.2 17l1.9-1.1M17.9 8.1 19.8 7"/></symbol>
-    <symbol id="i-logout" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2M9 12h11m0 0-3-3m3 3-3 3"/></symbol>
-    <symbol id="i-mark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3 4 6.8v6.4c0 4 3.4 6.6 8 7.8 4.6-1.2 8-3.8 8-7.8V6.8L12 3Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M9.5 12.2h5M12 9.7v5"/></symbol>
-    <symbol id="i-warn" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 4 2.8 20h18.4L12 4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4m0 3h.01"/></symbol>
-  </svg>
-
-  <section class="theme-band">
-    <h3 class="band"><span class="dotL"></span> Light theme</h3>
-    <div class="rail" id="lightRail"></div>
-  </section>
-  <section class="theme-band">
-    <h3 class="band"><span class="dotD"></span> Dark theme</h3>
-    <div class="rail" id="darkRail"></div>
-  </section>
-
   <footer>
-    Wireframe Kit for Payload Mobile /address exhibits. High-fidelity tokens mirror <code>src/common/constants/style.ts</code> — that module is the source of truth. Fill guidance: <code>wireframe-kit.md</code>. Nothing here is committed to the repo.
+    Wireframe Kit (low fidelity) for Payload Mobile /address exhibits — breadboard only. For the high-fidelity render, see <code>hifi-kit.html</code>. Fill guidance: <code>wireframe-kit.md</code>. Nothing here is committed to the repo.
   </footer>
 </div>
-
-<script>
-  // High-fidelity screens are assembled once and rendered into both the light
-  // and dark rails, so the two themes never drift. Edit these template strings
-  // to change what the hi-fi round shows. <!-- FILL: swap copy/screens for your round. -->
-  const statusbar = `<div class="statusbar"><span>9:41</span><span class="dots"><i></i></span></div>`;
-  const tabs = (active, authed) => `
-    <div class="tabs">
-      <div class="tab ${active==='home'?'on':''}"><svg><use href="#i-home"/></svg><span>Home</span></div>
-      ${authed ? `<div class="tab ${active==='col'?'on':''}"><svg><use href="#i-stack"/></svg><span>Collections</span></div>` : ``}
-      <div class="tab ${active==='set'?'on':''}"><svg><use href="#i-gear"/></svg><span>Settings</span></div>
-    </div>`;
-
-  const emptyState = `
-    ${statusbar}
-    <div class="content"><div class="empty">
-      <div class="mark"><svg viewBox="0 0 24 24"><use href="#i-mark"/></svg></div>
-      <h4>Headline</h4>
-      <p>Supporting sentence that explains the empty state and its call to action.</p>
-      <div class="cta">Primary action</div>
-    </div></div>
-    ${tabs('home', false)}`;
-
-  const form = (variant) => `
-    ${statusbar}
-    <div class="nav"><span class="back"></span><span class="navtitle">Form</span><span class="navspace"></span></div>
-    <div class="content"><div class="form">
-      <div class="field"><label>Label one</label><div class="input">value</div></div>
-      <div class="field"><label>Label two</label><div class="input ph">placeholder</div></div>
-      <div class="field"><label>Password</label><div class="input"><span class="dotpw">••••••••</span></div></div>
-      ${variant==='error' ? `<div class="err"><svg><use href="#i-warn"/></svg>An inline error message.</div>` : ``}
-      ${variant==='busy'
-        ? `<div class="submit busy"><span class="spinner"></span>Submitting…</div>`
-        : `<div class="submit">Submit</div>`}
-    </div></div>`;
-
-  const settings = `
-    ${statusbar}
-    <div class="nav"><span class="navspace"></span><span class="navtitle">Settings</span><span class="navspace"></span></div>
-    <div class="content"><div class="settings">
-      <div class="grp"><div class="gh">Group A</div><div class="rows">
-        <div class="item"><span class="avatar">Y</span><span class="txt"><span class="a">primary line</span><span class="b">secondary line</span></span></div>
-        <div class="item signout"><span class="ico"><svg><use href="#i-logout"/></svg></span><span class="lbl">Destructive action</span></div>
-      </div></div>
-      <div class="grp"><div class="gh">Group B</div><div class="rows">
-        <div class="item"><span class="ico"><svg><use href="#i-gear"/></svg></span><span class="lbl">Row with chevron</span><span class="chev"></span></div>
-      </div></div>
-    </div></div>
-    ${tabs('set', true)}`;
-
-  // <!-- FILL: list the screens/variants this round should present. -->
-  const screens = [
-    { cap: '1 · Empty state', body: emptyState },
-    { cap: '2 · Form — default', body: form('default') },
-    { cap: '3 · Form — error', body: form('error') },
-    { cap: '4 · Form — submitting', body: form('busy') },
-    { cap: '5 · Settings', body: settings },
-  ];
-
-  function build(rail, cls) {
-    document.getElementById(rail).innerHTML = screens.map(s => `
-      <div class="frameblock">
-        <div class="device ${cls}"><div class="scr">${s.body}</div></div>
-        <div class="cap">${s.cap}</div>
-      </div>`).join('');
-  }
-  build('lightRail', 'light');
-  build('darkRail', 'dark');
-
-  // High-fidelity element specimens — rendered into BOTH the light and dark
-  // .el-surface grounds from one template so the themes never drift.
-  // <!-- FILL: keep only the elements your screen(s) use. -->
-  const band = (theme) => `<p class="el-band"><span class="${theme==='dark'?'dotD':'dotL'}"></span> ${theme==='dark'?'Dark':'Light'} theme</p>`;
-  const elementSpecimens = `
-    <div class="el-spec"><span class="el-lbl">Buttons</span>
-      <div class="el-row">
-        <div class="el-btn primary">Primary</div>
-        <div class="el-btn secondary">Secondary</div>
-        <div class="el-btn busy"><span class="spinner"></span>Working…</div>
-      </div>
-    </div>
-    <div class="el-spec"><span class="el-lbl">Text input — default · placeholder · focused</span>
-      <div class="input">https://cms.example.com</div>
-      <div class="input ph">you@example.com</div>
-      <div class="input focus">users<span class="caret"></span></div>
-    </div>
-    <div class="el-spec"><span class="el-lbl">Text input — error</span>
-      <div class="input error"><span class="dotpw">••••••••</span></div>
-      <div class="err"><svg><use href="#i-warn"/></svg>Incorrect email or password.</div>
-    </div>
-    <div class="el-spec"><span class="el-lbl">List item</span>
-      <div class="grp"><div class="rows">
-        <div class="item"><span class="ico"><svg><use href="#i-gear"/></svg></span><span class="lbl">Row with chevron</span><span class="chev"></span></div>
-      </div></div>
-    </div>
-    <div class="el-spec"><span class="el-lbl">Destructive row</span>
-      <div class="grp"><div class="rows">
-        <div class="item signout"><span class="ico"><svg><use href="#i-logout"/></svg></span><span class="lbl">Sign out</span></div>
-      </div></div>
-    </div>
-    <div class="el-spec"><span class="el-lbl">Tab bar — active / inactive</span>
-      <div class="tabs" style="border-radius:var(--r-md);border:1px solid var(--line-d)">
-        <div class="tab on"><svg><use href="#i-home"/></svg><span>Home</span></div>
-        <div class="tab"><svg><use href="#i-gear"/></svg><span>Settings</span></div>
-      </div>
-    </div>`;
-  document.getElementById('elLight').innerHTML = band('light') + elementSpecimens;
-  document.getElementById('elDark').innerHTML = band('dark') + elementSpecimens;
-</script>

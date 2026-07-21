@@ -1,0 +1,347 @@
+<!--
+  Payload Mobile — Hi-Fi Kit (high fidelity)
+  ==========================================
+  A self-contained, theme-aware template for the HIGH-FIDELITY round of an
+  /address design exhibit: the app's components and screens rendered with the
+  real design tokens, in light AND dark. For the WIREFRAME round, use
+  wireframe-kit.html.
+  SYNC SOURCE OF TRUTH: src/common/constants/style.ts — the tokens below MIRROR
+  that module (a static file cannot import the TS). Re-read it before each hi-fi
+  round and reconcile drift. See hifi-kit.md for how to fill it.
+  Self-contained: no external fetches; system fonts + inline SVG only.
+  Fill-in points are marked with "FILL:" comments throughout.
+-->
+<title>Payload Mobile — Hi-Fi Kit</title>
+<style>
+  /* =========================================================================
+     PAGE CHROME (theme-aware) — the surface the mockups sit on.
+     This is general Artifact page craft (see the harness artifact-design
+     guidance), NOT the app's tokens. Keep it neutral so the device mockups
+     read as the subject. The device tokens below are what mirror the app.
+     ========================================================================= */
+  :root {
+    --ground: #f4f5f7;
+    --panel: #ffffff;
+    --ink: #1c2024;
+    --ink-soft: #60646c;
+    --line: #d9d9e0;
+    --accent: #0588f0;
+    --danger: #dc3e42;
+    --radius: 14px;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Breadboard greys — WIREFRAME MODE only. Deliberately colorless. */
+    --wire-fill: #e7e8ec;
+    --wire-fill-2: #dfe1e6;
+    --wire-line: #b9bcc4;
+    --wire-ink: #7a7f88;
+    --wire-solid: #c3c6cd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #0e0f11; --panel: #17181b; --ink: #edeef0; --ink-soft: #b0b4ba;
+      --line: #2c2e33; --accent: #3b9eff; --danger: #ec5d5e;
+      --wire-fill: #232529; --wire-fill-2: #2a2c31; --wire-line: #43464d;
+      --wire-ink: #8b8f98; --wire-solid: #3a3d43;
+    }
+  }
+  /* The Artifact sandbox stamps data-theme on <html> when the viewer toggles
+     the theme; these overrides must win in both directions. */
+  :root[data-theme="light"] {
+    --ground: #f4f5f7; --panel: #ffffff; --ink: #1c2024; --ink-soft: #60646c;
+    --line: #d9d9e0; --accent: #0588f0; --danger: #dc3e42;
+    --wire-fill: #e7e8ec; --wire-fill-2: #dfe1e6; --wire-line: #b9bcc4;
+    --wire-ink: #7a7f88; --wire-solid: #c3c6cd;
+  }
+  :root[data-theme="dark"] {
+    --ground: #0e0f11; --panel: #17181b; --ink: #edeef0; --ink-soft: #b0b4ba;
+    --line: #2c2e33; --accent: #3b9eff; --danger: #ec5d5e;
+    --wire-fill: #232529; --wire-fill-2: #2a2c31; --wire-line: #43464d;
+    --wire-ink: #8b8f98; --wire-solid: #3a3d43;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--sans); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 44px 24px 80px; }
+  a { color: var(--accent); }
+
+  header.masthead { margin-bottom: 8px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+  h1 { font-size: clamp(26px, 3.4vw, 38px); line-height: 1.1; margin: 0 0 14px; letter-spacing: -0.02em; text-wrap: balance; }
+  .lede { max-width: 64ch; color: var(--ink-soft); font-size: 16px; margin: 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 18px; font-family: var(--mono); font-size: 12px; }
+  .tag { border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; color: var(--ink-soft); background: var(--panel); }
+  .tag strong { color: var(--ink); font-weight: 600; }
+
+  h2.section { font-size: 13px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); margin: 56px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .lead-note { max-width: 66ch; color: var(--ink-soft); font-size: 14.5px; margin: -6px 0 22px; }
+  .lead-note code { font-family: var(--mono); font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+  /* =========================================================================
+     HIGH-FIDELITY MODE — device rendered with the app's REAL tokens.
+     -------------------------------------------------------------------------
+     SYNC SOURCE OF TRUTH: src/common/constants/style.ts
+     The values below MIRROR that module (a static HTML file cannot import the
+     TypeScript). Before a high-fidelity round, RE-READ style.ts and reconcile
+     any drift — colors, radii (8/12/16), and the 13/16/20/28 type scale.
+     Do NOT treat this block as the source of truth; style.ts is.
+     ========================================================================= */
+  .theme-band { margin-top: 40px; }
+  .theme-band > h3.band { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 18px; padding-bottom: 9px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+  .theme-band > h3.band .dotL, .theme-band > h3.band .dotD { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--line); }
+  .dotL { background: #fdfdfd; } .dotD { background: #111113; }
+  .rail { display: flex; gap: 26px; overflow-x: auto; padding: 6px 2px 18px; }
+  .frameblock { flex: none; display: flex; flex-direction: column; gap: 10px; }
+  .frameblock .cap { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-soft); text-align: center; }
+
+  /* Shared real-token block — the phone (.device) and the isolated element
+     surfaces (.el-surface) both consume it, so the style.ts mirror stays
+     single-point. Edit tokens HERE, never per-component. */
+  .device, .el-surface {
+    /* light tokens — mirror lightColors + radiusSizes in style.ts */
+    --bg: #fdfdfd; --elev: #ffffff; --txt: #1c2024; --txt2: #60646c;
+    --line-d: #d9d9e0; --accent-d: #0588f0; --accentC: #ffffff; --danger-d: #dc3e42;
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --tabInactive: #8a8f98;
+  }
+  .device.dark, .el-surface.dark {
+    /* dark tokens — mirror darkColors in style.ts */
+    --bg: #111113; --elev: #19191b; --txt: #edeef0; --txt2: #b0b4ba;
+    --line-d: #3a3a44; --accent-d: #3b9eff; --accentC: #ffffff; --danger-d: #ec5d5e;
+    --tabInactive: #8b8f98;
+  }
+  .device {
+    width: 288px; border-radius: 40px; padding: 11px; background: #d7d9de;
+    box-shadow: 0 18px 40px -20px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.12);
+  }
+  .device.dark {
+    background: #2a2b2f;
+    box-shadow: 0 18px 44px -20px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.35);
+  }
+  .scr { position: relative; border-radius: 30px; overflow: hidden; background: var(--bg); height: 560px; display: flex; flex-direction: column; }
+  .statusbar { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 12px; font-weight: 600; color: var(--txt); }
+  .statusbar .dots i { width: 15px; height: 9px; border: 1.4px solid var(--txt); border-radius: 2px; display: inline-block; opacity: 0.85; }
+  .nav { height: 44px; display: flex; align-items: center; padding: 0 8px; background: var(--elev); border-bottom: 1px solid var(--line-d); }
+  .nav .back { color: var(--accent-d); font-size: 17px; display: flex; align-items: center; width: 64px; }
+  .nav .back::before { content: "\2039"; font-size: 26px; line-height: 1; margin-top: -2px; }
+  .nav .navtitle { flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: var(--txt); }  /* fontSizes.md */
+  .nav .navspace { width: 64px; }
+  .content { flex: 1; overflow: hidden; }
+
+  .empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px; }
+  .mark { width: 66px; height: 66px; border-radius: var(--r-lg); background: color-mix(in srgb, var(--accent-d) 14%, var(--bg)); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .mark svg { width: 34px; height: 34px; color: var(--accent-d); }
+  .empty h4 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; color: var(--txt); }  /* fontSizes.lg */
+  .empty p { margin: 0; font-size: 16px; color: var(--txt2); max-width: 24ch; line-height: 1.45; }
+  .cta { margin-top: 22px; width: 100%; height: 50px; border-radius: var(--r-md); background: var(--accent-d); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+
+  .placeholder { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px; }
+  .placeholder h4 { margin: 0; font-size: 28px; font-weight: 600; color: var(--txt); letter-spacing: -0.01em; }  /* fontSizes.xl */
+  .placeholder p { margin: 0; font-size: 16px; color: var(--txt2); }
+
+  .form { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+  .form .field { gap: 0; }
+  .form label { display: block; font-size: 13px; font-weight: 500; color: var(--txt2); margin: 0 0 6px 2px; }  /* fontSizes.sm */
+  .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font-size: 16px; color: var(--txt); }
+  .input.ph { color: var(--txt2); }
+  .input .dotpw { letter-spacing: 3px; }
+  .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font-size: 14px; margin-top: -4px; border: 0; }
+  .form .err svg, .el-surface .err svg { width: 16px; height: 16px; flex: none; }
+  .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-d); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }
+  .submit.busy { opacity: 0.75; }
+  .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45); border-top-color: #fff; }
+
+  .settings { padding: 20px 0; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
+  .grp { display: flex; flex-direction: column; gap: 9px; }
+  .grp .gh { font-size: 16px; font-weight: 700; color: var(--txt); padding: 0 16px; }
+  .grp .rows { margin: 0 16px; border: 0; background: transparent; }
+  .item { min-height: 48px; background: var(--elev); display: flex; align-items: center; gap: 14px; padding: 9px 14px; border: 0; }
+  .item + .item { border-top: 1px solid var(--line-d); }
+  .grp .rows .item:first-child { border-top-left-radius: var(--r-md); border-top-right-radius: var(--r-md); }
+  .grp .rows .item:last-child { border-bottom-left-radius: var(--r-md); border-bottom-right-radius: var(--r-md); }
+  .item .avatar { width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--accent-d) 16%, var(--elev)); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex: none; }
+  .item .ico { width: 22px; height: 22px; color: var(--txt2); flex: none; display: flex; }
+  .item .ico svg { width: 22px; height: 22px; }
+  .item .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .item .txt .a { font-size: 16px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .txt .b { font-size: 13px; color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .lbl { flex: 1; font-size: 16px; color: var(--txt); }
+  .item.signout .ico, .item.signout .lbl { color: var(--danger-d); }
+  .item .chev::after { content: "\203A"; color: var(--line-d); font-size: 20px; }
+
+  .tabs { height: 52px; background: var(--elev); border-top: 1px solid var(--line-d); display: flex; padding-bottom: 2px; }
+  .tabs .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--tabInactive); font-size: 10px; font-weight: 500; }
+  .tabs .tab.on { color: var(--accent-d); }
+  .tabs .tab svg { width: 24px; height: 24px; }
+  .el-surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+  .el-surface { border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: var(--bg); display: flex; flex-direction: column; gap: 18px; }
+  .el-surface > .el-band { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
+  .el-surface > .el-band .dotL, .el-surface > .el-band .dotD { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line-d); }
+  .el-spec { display: flex; flex-direction: column; gap: 8px; }
+  .el-spec > .el-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt2); }
+  .el-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font-size: 16px; font-weight: 600; }
+  .el-btn.primary { background: var(--accent-d); color: var(--accentC); }
+  .el-btn.secondary { background: transparent; color: var(--accent-d); border: 1px solid var(--line-d); }
+  .el-btn.busy { background: var(--accent-d); color: var(--accentC); opacity: 0.75; }
+  .input.focus { border-color: var(--accent-d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-d) 18%, transparent); }
+  .input.error { border-color: var(--danger-d); }
+  .caret { width: 1.5px; height: 20px; background: var(--accent-d); margin-left: 1px; display: inline-block; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
+  footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Payload Mobile · Hi-Fi Kit · High fidelity</p>
+    <h1>Real-token render for /address high-fidelity rounds</h1>
+    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, radii, and the 13 / 16 / 20 / 28 type scale from <code>src/common/constants/style.ts</code>), in light <b>and</b> dark. For the wireframe round, use <code>wireframe-kit.html</code>. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. See <code>hifi-kit.md</code>.</p>
+    <div class="meta">
+      <span class="tag"><strong>Fidelity</strong> high · real tokens</span>
+      <span class="tag"><strong>Tokens</strong> mirror src/common/constants/style.ts</span>
+      <span class="tag">Light + dark · self-contained</span>
+    </div>
+  </header>
+
+  <h2 class="section">Element palette — real tokens (light + dark)</h2>
+  <p class="lead-note">The app's components in isolation, rendered on paired light and dark grounds that consume the mirrored <code>src/common/constants/style.ts</code> tokens. Built from one template so the two themes never drift. <!-- FILL: keep only the elements your screen(s) use. --></p>
+  <div class="el-surfaces">
+    <div class="el-surface" id="elLight"></div>
+    <div class="el-surface dark" id="elDark"></div>
+  </div>
+
+  <h2 class="section">Screen render — real tokens (light + dark)</h2>
+  <p class="lead-note">Full screens rendered with the app's real tokens in both themes. <b>Re-read <code>src/common/constants/style.ts</code> before each hi-fi round</b> and reconcile any drift with the mirrored values in this file's CSS. Nothing here is committed to the repo.</p>
+
+  <!-- SVG icon symbols (inline; no external fetches). Swap for the app's real icons where they matter. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 11.5 12 5l8 6.5M6 10.5V19h12v-8.5"/></symbol>
+    <symbol id="i-stack" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 4 3.5 8.2 12 12.4l8.5-4.2L12 4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="m4 12 8 4 8-4M4 15.7l8 4 8-4"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 3v2.2M12 18.8V21M4.2 7l1.9 1.1M17.9 15.9 19.8 17M4.2 17l1.9-1.1M17.9 8.1 19.8 7"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2M9 12h11m0 0-3-3m3 3-3 3"/></symbol>
+    <symbol id="i-mark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3 4 6.8v6.4c0 4 3.4 6.6 8 7.8 4.6-1.2 8-3.8 8-7.8V6.8L12 3Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M9.5 12.2h5M12 9.7v5"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 4 2.8 20h18.4L12 4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4m0 3h.01"/></symbol>
+  </svg>
+
+  <section class="theme-band">
+    <h3 class="band"><span class="dotL"></span> Light theme</h3>
+    <div class="rail" id="lightRail"></div>
+  </section>
+  <section class="theme-band">
+    <h3 class="band"><span class="dotD"></span> Dark theme</h3>
+    <div class="rail" id="darkRail"></div>
+  </section>
+
+  <footer>
+    Hi-Fi Kit (high fidelity) for Payload Mobile /address exhibits. Tokens mirror <code>src/common/constants/style.ts</code> — that module is the source of truth. For the wireframe round, see <code>wireframe-kit.html</code>. Fill guidance: <code>hifi-kit.md</code>. Nothing here is committed to the repo.
+  </footer>
+</div>
+
+<script>
+  // High-fidelity screens are assembled once and rendered into both the light
+  // and dark rails, so the two themes never drift. Edit these template strings
+  // to change what the hi-fi round shows. <!-- FILL: swap copy/screens for your round. -->
+  const statusbar = `<div class="statusbar"><span>9:41</span><span class="dots"><i></i></span></div>`;
+  const tabs = (active, authed) => `
+    <div class="tabs">
+      <div class="tab ${active==='home'?'on':''}"><svg><use href="#i-home"/></svg><span>Home</span></div>
+      ${authed ? `<div class="tab ${active==='col'?'on':''}"><svg><use href="#i-stack"/></svg><span>Collections</span></div>` : ``}
+      <div class="tab ${active==='set'?'on':''}"><svg><use href="#i-gear"/></svg><span>Settings</span></div>
+    </div>`;
+
+  const emptyState = `
+    ${statusbar}
+    <div class="content"><div class="empty">
+      <div class="mark"><svg viewBox="0 0 24 24"><use href="#i-mark"/></svg></div>
+      <h4>Headline</h4>
+      <p>Supporting sentence that explains the empty state and its call to action.</p>
+      <div class="cta">Primary action</div>
+    </div></div>
+    ${tabs('home', false)}`;
+
+  const form = (variant) => `
+    ${statusbar}
+    <div class="nav"><span class="back"></span><span class="navtitle">Form</span><span class="navspace"></span></div>
+    <div class="content"><div class="form">
+      <div class="field"><label>Label one</label><div class="input">value</div></div>
+      <div class="field"><label>Label two</label><div class="input ph">placeholder</div></div>
+      <div class="field"><label>Password</label><div class="input"><span class="dotpw">••••••••</span></div></div>
+      ${variant==='error' ? `<div class="err"><svg><use href="#i-warn"/></svg>An inline error message.</div>` : ``}
+      ${variant==='busy'
+        ? `<div class="submit busy"><span class="spinner"></span>Submitting…</div>`
+        : `<div class="submit">Submit</div>`}
+    </div></div>`;
+
+  const settings = `
+    ${statusbar}
+    <div class="nav"><span class="navspace"></span><span class="navtitle">Settings</span><span class="navspace"></span></div>
+    <div class="content"><div class="settings">
+      <div class="grp"><div class="gh">Group A</div><div class="rows">
+        <div class="item"><span class="avatar">Y</span><span class="txt"><span class="a">primary line</span><span class="b">secondary line</span></span></div>
+        <div class="item signout"><span class="ico"><svg><use href="#i-logout"/></svg></span><span class="lbl">Destructive action</span></div>
+      </div></div>
+      <div class="grp"><div class="gh">Group B</div><div class="rows">
+        <div class="item"><span class="ico"><svg><use href="#i-gear"/></svg></span><span class="lbl">Row with chevron</span><span class="chev"></span></div>
+      </div></div>
+    </div></div>
+    ${tabs('set', true)}`;
+
+  // <!-- FILL: list the screens/variants this round should present. -->
+  const screens = [
+    { cap: '1 · Empty state', body: emptyState },
+    { cap: '2 · Form — default', body: form('default') },
+    { cap: '3 · Form — error', body: form('error') },
+    { cap: '4 · Form — submitting', body: form('busy') },
+    { cap: '5 · Settings', body: settings },
+  ];
+
+  function build(rail, cls) {
+    document.getElementById(rail).innerHTML = screens.map(s => `
+      <div class="frameblock">
+        <div class="device ${cls}"><div class="scr">${s.body}</div></div>
+        <div class="cap">${s.cap}</div>
+      </div>`).join('');
+  }
+  build('lightRail', 'light');
+  build('darkRail', 'dark');
+
+  // High-fidelity element specimens — rendered into BOTH the light and dark
+  // .el-surface grounds from one template so the themes never drift.
+  // <!-- FILL: keep only the elements your screen(s) use. -->
+  const band = (theme) => `<p class="el-band"><span class="${theme==='dark'?'dotD':'dotL'}"></span> ${theme==='dark'?'Dark':'Light'} theme</p>`;
+  const elementSpecimens = `
+    <div class="el-spec"><span class="el-lbl">Buttons</span>
+      <div class="el-row">
+        <div class="el-btn primary">Primary</div>
+        <div class="el-btn secondary">Secondary</div>
+        <div class="el-btn busy"><span class="spinner"></span>Working…</div>
+      </div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Text input — default · placeholder · focused</span>
+      <div class="input">https://cms.example.com</div>
+      <div class="input ph">you@example.com</div>
+      <div class="input focus">users<span class="caret"></span></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Text input — error</span>
+      <div class="input error"><span class="dotpw">••••••••</span></div>
+      <div class="err"><svg><use href="#i-warn"/></svg>Incorrect email or password.</div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">List item</span>
+      <div class="grp"><div class="rows">
+        <div class="item"><span class="ico"><svg><use href="#i-gear"/></svg></span><span class="lbl">Row with chevron</span><span class="chev"></span></div>
+      </div></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Destructive row</span>
+      <div class="grp"><div class="rows">
+        <div class="item signout"><span class="ico"><svg><use href="#i-logout"/></svg></span><span class="lbl">Sign out</span></div>
+      </div></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Tab bar — active / inactive</span>
+      <div class="tabs" style="border-radius:var(--r-md);border:1px solid var(--line-d)">
+        <div class="tab on"><svg><use href="#i-home"/></svg><span>Home</span></div>
+        <div class="tab"><svg><use href="#i-gear"/></svg><span>Settings</span></div>
+      </div>
+    </div>`;
+  document.getElementById('elLight').innerHTML = band('light') + elementSpecimens;
+  document.getElementById('elDark').innerHTML = band('dark') + elementSpecimens;
+</script>
