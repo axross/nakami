@@ -46,6 +46,28 @@ This project distinguishes two skill archetypes and sets these fields by archety
 - MUST declare `arguments` only when the skill's invocation takes discrete single-token parameters; a free-form or multi-word target MUST keep `$ARGUMENTS` instead, because shell-style quoting would otherwise split it across positional arguments.
 - SHOULD reserve `disable-model-invocation: true` for skills that must never run without an explicit human invocation; this project's entry points instead stay model-invocable and draw the boundary with a do-not-invoke clause in `when_to_use`.
 
+## Workflow-Script Delegation
+
+A workflow entry-point skill MAY delegate a compute-heavy, session-context-free phase to a named Workflow-tool script at `.claude/workflows/<name>.js`. The script is a harness orchestration file, not a skill: it carries `export const meta` instead of frontmatter and gets no skill-index row, but the harness lists it beside skills for discovery, so its meta text needs the same care as frontmatter.
+
+**Example:**
+
+```js
+export const meta = {
+	name: "address-selfcheck", // MUST match the filename
+	description: "Multi-agent self-check for /address Phase 2: …",
+	whenToUse: "Launched by the /address skill … Not for ad-hoc review outside an /address run.",
+	phases: [{ title: "Scope", detail: "…" }],
+};
+```
+
+**Guidelines:**
+
+- MUST make the script's `meta.name` match its filename, and give it a `meta.description` plus a `meta.whenToUse` that carries the same do-not-invoke boundary as an entry point's `when_to_use`.
+- MUST keep every human gate, external write, and verification command in the delegating skill's own driver text; the script returns structured data only.
+- MUST state an inline fallback in the delegating skill for sessions without the Workflow tool, and treat a failed or malformed run as falling back — never as a pass.
+- MUST name the script, with its launch arguments, in the delegating skill's phase text so the contract stays auditable from the skill alone.
+
 ## Other Optional Fields
 
 Optional spec fields are useful only when they carry real runtime or distribution meaning. Most project-local skills need none of them.
