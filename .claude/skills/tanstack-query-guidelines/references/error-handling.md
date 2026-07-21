@@ -43,5 +43,5 @@ Retry and the log-versus-report split are deliberate choices, and two of them be
 
 **Guidelines:**
 
-- SHOULD inherit the shared client's `retry` default (2) and override it per-query or per-mutation only for a fast-fail or non-idempotent operation.
+- SHOULD inherit the shared client's query `retry` default (2) — set on `queries` in `~/core/helpers/query-client.ts` — and override it per-query only for a fast-fail or non-idempotent read; **mutations have no shared retry default** (TanStack's built-in `0` applies), so a mutation that should retry sets `retry` on its own factory.
 - MUST defer log-level and error-tracker-capture decisions to the project's observability guidelines, and cache-invalidation-on-write correctness to the project's performance-and-reliability guidelines; this reference does not restate either.
