@@ -17,6 +17,10 @@ jest.mock("~/auth/mutations/use-sign-out", () => ({
 	useSignOut: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
+jest.mock("~/settings/helpers/commit-hash", () => ({
+	getCommitHash: () => "9b05d81",
+}));
+
 const session: Session = {
 	serverUrl: "https://cms.example.com",
 	collectionSlug: "users",
@@ -54,7 +58,7 @@ describe("<SettingsScreen>", () => {
 
 		expect(technicalDetails.props.children).toContain("Version:");
 		expect(technicalDetails.props.children).toContain("Build:");
-		expect(technicalDetails.props.children).toContain("SHA: Unknown");
+		expect(technicalDetails.props.children).toContain("SHA: 9b05d81");
 	});
 
 	it("opens the Sentry feedback widget when the Feedback row is pressed", () => {

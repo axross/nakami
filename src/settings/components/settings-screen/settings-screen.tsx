@@ -14,11 +14,12 @@ import { SettingMenuGroupItemChevron } from "~/settings/components/setting-menu-
 import { SettingMenuGroupItemIcon } from "~/settings/components/setting-menu-group/setting-menu-group-item-icon";
 import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
 import { SettingsAccountGroup } from "~/settings/components/settings-account-group/settings-account-group";
+import { getCommitHash } from "~/settings/helpers/commit-hash";
 
 const technicalInfo = [
 	`Version: ${nativeApplicationVersion}`,
 	`Build: ${nativeBuildVersion}`,
-	"SHA: Unknown",
+	`SHA: ${getCommitHash()}`,
 ];
 
 export function SettingsScreen(): JSX.Element {
