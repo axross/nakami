@@ -15,11 +15,12 @@ import { SettingMenuGroupItemIcon } from "~/settings/components/setting-menu-gro
 import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
 import { SettingsAccountGroup } from "~/settings/components/settings-account-group/settings-account-group";
 import { SettingsSignInGroup } from "~/settings/components/settings-sign-in-group/settings-sign-in-group";
+import { getCommitHash } from "~/settings/helpers/commit-hash";
 
 const technicalInfo = [
 	`Version: ${nativeApplicationVersion}`,
 	`Build: ${nativeBuildVersion}`,
-	"SHA: Unknown",
+	`SHA: ${getCommitHash()}`,
 ];
 
 export function SettingsScreen(): JSX.Element {
