@@ -1,8 +1,8 @@
-# Hi-Fi Kit
+# Hi-Fi Design Kit
 
 Apply this reference when building the **Artifact** for an `/address` **high-fidelity round**. It owns rendering the app's components and screens with the **real design tokens**, in light and dark — the fidelity where real color, type, spacing, and density become the subject. The **wireframe round** uses the project's wireframe kit instead (see [wireframe-kit.md](./wireframe-kit.md)). The exhibit *lifecycle* — which round uses which kit, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft stays owned by the harness `artifact-design` guidance; the design-token *values* are owned by the project's component guidelines and `src/common/constants/style.ts`.
 
-The template is [hifi-kit.html](../assets/hifi-kit.html) — a self-contained, theme-aware page carrying an **element palette** (components in isolation on paired light/dark grounds) and a **screen render** (full screens in light and dark rails). Copy it to the harness scratchpad, fill it for the screen(s) at hand, and publish the result as an Artifact.
+The template is [hifi-design-kit.html](../assets/hifi-design-kit.html) — a self-contained, theme-aware page carrying an **element palette** (components in isolation on paired light/dark grounds) and a **screen render** (full screens in light and dark rails). Copy it to the harness scratchpad, fill it for the screen(s) at hand, and publish the result as an Artifact.
 
 ## How to Use the Template
 
@@ -10,7 +10,7 @@ A high-fidelity round produces one Artifact built from this kit; the wireframe r
 
 **Guidelines:**
 
-- MUST start a high-fidelity round's Artifact from [hifi-kit.html](../assets/hifi-kit.html) rather than reinventing the format.
+- MUST start a high-fidelity round's Artifact from [hifi-design-kit.html](../assets/hifi-design-kit.html) rather than reinventing the format.
 - MUST copy the template into the harness scratchpad (outside the repository checkout) and build there; MUST NOT commit the kit-derived render to the repository on any branch.
 - MUST keep the published page self-contained — no external fetches; the template uses system font stacks and inline SVG for exactly this reason.
 - MUST consult the harness `artifact-design` guidance for general page craft before publishing.
@@ -40,7 +40,7 @@ The mirrored tokens (as of the kit's authoring):
 
 **Guidelines:**
 
-- MUST re-read `src/common/constants/style.ts` before a high-fidelity round and reconcile any drift between it and the `.device` / `.device.dark` (and `.el-surface`) custom properties in [hifi-kit.html](../assets/hifi-kit.html).
+- MUST re-read `src/common/constants/style.ts` before a high-fidelity round and reconcile any drift between it and the `.device` / `.device.dark` (and `.el-surface`) custom properties in [hifi-design-kit.html](../assets/hifi-design-kit.html).
 - MUST treat `style.ts` as the source of truth for token values; MUST NOT present the kit's mirrored values as authoritative.
 - MUST keep the element palette on the same shared `.device, .el-surface` token block as the screen render — MUST NOT fork a second token set.
 - SHOULD ground high-fidelity type, spacing, and radii in the real tokens rather than eyeballed values, so the render stays faithful to the app.

@@ -1,12 +1,12 @@
 # Wireframe Kit
 
-Apply this reference when building the **Artifact** for an `/address` **wireframe round** (low fidelity). It owns the project's breadboard screen-mockup vocabulary: the phone frame, the breadboard primitives, the component library, the archetypes, and the option-grid comparison layout — regions, hierarchy, and flow, never app color or final type. The **high-fidelity round** uses the project's hi-fi kit instead (see [hifi-kit.md](./hifi-kit.md)). The exhibit *lifecycle* — which round uses which kit, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft (typography, palette, spacing rhythm) stays owned by the harness `artifact-design` guidance; the design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`.
+Apply this reference when building the **Artifact** for an `/address` **wireframe round** (low fidelity). It owns the project's breadboard screen-mockup vocabulary: the phone frame, the breadboard primitives, the component library, the archetypes, and the option-grid comparison layout — regions, hierarchy, and flow, never app color or final type. The **high-fidelity round** uses the project's hi-fi design kit instead (see [hifi-design-kit.md](./hifi-design-kit.md)). The exhibit *lifecycle* — which round uses which kit, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft (typography, palette, spacing rhythm) stays owned by the harness `artifact-design` guidance; the design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`.
 
 The template is [wireframe-kit.html](../assets/wireframe-kit.html) — a self-contained, theme-aware page carrying the breadboard component library, the archetypes, and the options-round layout. Copy it to the harness scratchpad, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish the result as an Artifact.
 
 ## How to Use the Template
 
-The template is a copy-and-fill starting point, not a library to import. A wireframe round produces one Artifact built from this kit; the high-fidelity round is built from the hi-fi kit instead.
+The template is a copy-and-fill starting point, not a library to import. A wireframe round produces one Artifact built from this kit; the high-fidelity round is built from the hi-fi design kit instead.
 
 **Guidelines:**
 
