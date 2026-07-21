@@ -2,6 +2,9 @@ import { useMutation } from "@tanstack/react-query";
 import { login } from "~/auth/helpers/payload-client";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
+import { createModuleLogger } from "~/core/helpers/logging";
+
+const logger = createModuleLogger("auth/use-sign-in");
 
 /** Input for a sign-in attempt; `serverUrl` is expected already normalized. */
 export interface SignInInput {
@@ -22,6 +25,9 @@ export function useSignIn() {
 	return useMutation<Session, unknown, SignInInput>({
 		mutationFn: async ({ serverUrl, collectionSlug, email, password }) => {
 			const server = { serverUrl, collectionSlug };
+			// Log the endpoint and collection only — never the email or password.
+			logger.info("Started signing in.", { serverUrl, collectionSlug });
+
 			const result = await login(server, { email, password });
 
 			const session: Session = {
@@ -31,6 +37,7 @@ export function useSignIn() {
 				user: result.user,
 			};
 			await authenticate(session);
+			logger.info("Completed signing in.", { serverUrl });
 			return session;
 		},
 	});

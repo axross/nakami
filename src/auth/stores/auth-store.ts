@@ -46,9 +46,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
 	async hydrate() {
 		try {
+			logger.debug("Started session hydration.");
+
 			const stored = await readSession();
 
 			if (stored === null) {
+				logger.debug("Completed session hydration.", {
+					status: "unauthenticated",
+				});
 				set({ status: "unauthenticated", session: null });
 				return;
 			}
@@ -66,6 +71,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				);
 
 				if (me.user === null) {
+					logger.debug("Completed session hydration.", {
+						status: "unauthenticated",
+					});
 					await get().deauthenticate();
 					return;
 				}
@@ -78,14 +86,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				};
 				await writeSession(verified);
 				set({ status: "authenticated", session: verified });
+				logger.debug("Completed session hydration.", {
+					status: "authenticated",
+				});
 			} catch (error) {
 				if (error instanceof PayloadRequestError && error.kind === "auth") {
+					logger.debug("Completed session hydration.", {
+						status: "unauthenticated",
+					});
 					await get().deauthenticate();
 					return;
 				}
 
 				// Unreachable/unexpected: keep the stored session (offline-tolerant).
-				logger.warn("Session verification deferred", {
+				logger.warn("Session verification deferred.", {
 					reason: error instanceof Error ? error.message : "unknown",
 				});
 			}

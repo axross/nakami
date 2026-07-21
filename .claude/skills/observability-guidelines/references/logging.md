@@ -8,19 +8,38 @@ A log line pays off during an incident, when the question is which operation was
 
 **Guidelines:**
 
-- SHOULD log the start and end of any operation that is slow, depends on an external system, or can fail (e.g., database queries, HTTP fetches, file or media processing).
-- SHOULD log unexpected-but-recoverable conditions (e.g., a record was skipped due to a parse error).
+- SHOULD log the start and end of any operation that is slow, depends on an external system, or can fail (e.g., database queries, HTTP fetches, sign-in requests, file or media processing).
+- SHOULD bracket an operation's internal step-by-step lifecycle at `debug` and surface only its user-significant milestone at `info` (see [Log Levels](#log-levels)) — trace the steps without burying the milestone.
+- SHOULD log unexpected-but-recoverable conditions (e.g., a record was skipped due to a parse error, an invariant was violated but execution continued).
 - SHOULD NOT log trivial or extremely frequent operations (e.g., individual UI renders, synchronous computations).
 
 ## Log Levels
 
-Levels are the filter operators reach for under pressure, so a message at the wrong level is either noise burying a signal or a signal buried in noise.
+Levels are the filter operators reach for under pressure, so a message at the wrong level is either noise burying a signal or a signal buried in noise. The root logger runs at `severity: __DEV__ ? "debug" : "info"` (see `src/core/helpers/logging.ts`), so `debug` lines appear only in development builds and are dropped from production, while `info` and `warn` survive into production. Pick the level from what the line is for and who needs to see it in production:
+
+| Level | Use for | In production? |
+|---|---|---|
+| `debug` | Routine, verbose, or high-frequency step-by-step tracing of an operation's internal lifecycle — valuable while developing or reproducing a problem, too noisy to keep in production. | Dropped |
+| `info` | Notable normal-progress milestones worth keeping in production — the completion of a cross-boundary or user-significant operation such as a sign-in or a session refresh, not each internal step of it. | Kept |
+| `warn` | Recoverable unexpected conditions — execution continues but something is worth investigating (a deferred refresh, a skipped record, a violated invariant). | Kept |
+| `error` | Never — report the error to Sentry via `reportError(...)` and let it propagate. | — |
 
 **Guidelines:**
 
-- SHOULD use `logger.info()` for informational messages that describe normal progress.
+- SHOULD use `logger.debug()` for routine lifecycle tracing — the per-step "started / completed" bracketing of an operation's internals — since the production logger suppresses it and it would otherwise bury production `info`.
+- SHOULD use `logger.info()` only for milestones that stay valuable in production: the completion of a user-significant or cross-system operation, not each internal step of it.
 - SHOULD use `logger.warn()` for recoverable unexpected conditions — cases where execution continues but something is worth investigating.
 - MUST NOT use `logger.error()` for errors — report the error to Sentry (via `reportError(...)`) and let it propagate. See [Error Handling](./error-handling.md).
+- SHOULD prefer `debug` over `info` when unsure: a routine trace that turns out to matter is cheap to promote later, whereas surplus production `info` is exactly the noise the level system exists to keep out.
+
+```typescript
+// Routine internal steps → debug (dev-only, dropped from production)
+logger.debug("Started login request.", { serverUrl });
+logger.debug("Completed login request.", { serverUrl, status });
+
+// User-significant milestone → info (kept in production)
+logger.info("Completed signing in.", { serverUrl });
+```
 
 ## Logger Setup
 
