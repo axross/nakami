@@ -4,7 +4,7 @@ Apply this reference when writing or reviewing a `mutationOptions()` factory or 
 
 ## Factory Shape
 
-A mutation factory returns `mutationOptions()` with a feature-scoped `mutationKey` and a `mutationFn`. TanStack treats the key as optional, but the project includes it so in-flight state is filterable (`useIsMutating`, `useMutationState`) and shared defaults have a target.
+A mutation factory returns `mutationOptions()` with a `mutationKey` (see Mutation Keys below) and a `mutationFn`. TanStack treats the key as optional, but the project includes it so in-flight state is filterable (`useIsMutating`, `useMutationState`) and shared defaults have a target.
 
 **Example:**
 
@@ -14,7 +14,7 @@ import { useAuthStore } from "~/auth/stores/auth-store";
 
 export function getSignOutMutationOptions() {
 	return mutationOptions({
-		mutationKey: ["auth", "sign-out"],
+		mutationKey: ["auth-session", "current", "sign-out"],
 		mutationFn: async (): Promise<void> => {
 			const { session, deauthenticate } = useAuthStore.getState();
 			// …best-effort remote logout, then always deauthenticate.
@@ -25,10 +25,30 @@ export function getSignOutMutationOptions() {
 
 **Guidelines:**
 
-- MUST return `mutationOptions({…})` from the factory, with a feature-scoped `mutationKey` and a typed `mutationFn`.
-- MUST keep a `mutationKey` **action-scoped** — `[feature, action]` such as `["auth", "sign-in"]` or `["collections", "create"]` — not a REST-path cache key like a `queryKey`; it exists for in-flight filtering (`useIsMutating`, `useMutationState`) and shared config, not cache reads.
+- MUST return `mutationOptions({…})` from the factory, with a `mutationKey` (see Mutation Keys) and a typed `mutationFn`.
 - MUST type the `mutationFn` variables and return value so `useMutation` infers `TVariables`/`TData` at the call site (`TError` defaults to `Error` in v5).
 - MUST keep the factory hook-free and side-effect-free at build time; calling it only constructs the options object.
+
+## Mutation Keys
+
+A `mutationKey` follows the same REST-path structure as a query key — the target resource's `[kind, id, …]` path — with the **action verb appended as the final segment**. It exists so in-flight state is filterable (`useIsMutating`, `useMutationState`) and shared defaults have a target; it is not a cache-read identity like a `queryKey`.
+
+**Example:**
+
+```ts
+["auth-session", "current", "sign-out"]   // end the current session
+["auth-session", "sign-in"]               // establish (create) the session
+["collections", "create"]                 // create a collection
+["collections", collectionSlug, "update"] // update one collection
+["collections", collectionSlug, "delete"] // delete one collection
+```
+
+**Guidelines:**
+
+- MUST build a `mutationKey` from the target resource's REST path — the same `[kind, id, …]` shape as its `queryKey` — with the action verb as the final segment.
+- MUST omit the identifier for a create (the resource does not exist yet) — `["collections", "create"]` — and include it for an action on an existing resource — `["collections", slug, "update"]`.
+- MUST key an action on the current auth session against the `auth-session` resource — `["auth-session", "current", "sign-out"]` to end it, `["auth-session", "sign-in"]` to establish it.
+- SHOULD keep the action verb a bare imperative (`create`, `update`, `delete`, `sign-in`, `sign-out`) naming what the `mutationFn` does.
 
 ## Non-Reactive Dependencies
 

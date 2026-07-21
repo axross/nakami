@@ -14,7 +14,7 @@ const logger = createModuleLogger("auth/sign-out-mutation");
  */
 export function getSignOutMutationOptions() {
 	return mutationOptions({
-		mutationKey: ["auth", "sign-out"],
+		mutationKey: ["auth-session", "current", "sign-out"],
 		mutationFn: async (): Promise<void> => {
 			const { session, deauthenticate } = useAuthStore.getState();
 

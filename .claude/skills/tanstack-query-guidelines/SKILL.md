@@ -51,7 +51,7 @@ See [query-options.md](./references/query-options.md) for:
 
 See [mutation-options.md](./references/mutation-options.md) for:
 
-- writing a `getXMutationOptions()` factory with `mutationOptions()` and a feature-scoped `mutationKey`
+- writing a `getXMutationOptions()` factory with `mutationOptions()` and a REST-path-plus-action `mutationKey`
 - reading the Zustand store at call time via `getState()` inside a `mutationFn`
 - splitting operation-intrinsic callbacks (factory) from view callbacks (call site)
 - invalidating affected queries with the imported `queryClient` and a factory's `queryKey`

@@ -21,7 +21,7 @@ export interface SignInInput {
  */
 export function getSignInMutationOptions() {
 	return mutationOptions({
-		mutationKey: ["auth", "sign-in"],
+		mutationKey: ["auth-session", "sign-in"],
 		mutationFn: async ({
 			serverUrl,
 			collectionSlug,
