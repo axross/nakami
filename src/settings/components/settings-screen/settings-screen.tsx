@@ -14,6 +14,7 @@ import { SettingMenuGroupItemChevron } from "~/settings/components/setting-menu-
 import { SettingMenuGroupItemIcon } from "~/settings/components/setting-menu-group/setting-menu-group-item-icon";
 import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
 import { SettingsAccountGroup } from "~/settings/components/settings-account-group/settings-account-group";
+import { SettingsSignInGroup } from "~/settings/components/settings-sign-in-group/settings-sign-in-group";
 
 const technicalInfo = [
 	`Version: ${nativeApplicationVersion}`,
@@ -38,7 +39,11 @@ export function SettingsScreen(): JSX.Element {
 			style={styles.root}
 			testID="settings-screen"
 		>
-			{status === "authenticated" ? <SettingsAccountGroup /> : null}
+			{status === "authenticated" ? (
+				<SettingsAccountGroup />
+			) : (
+				<SettingsSignInGroup />
+			)}
 
 			<SettingMenuGroup>
 				<SettingMenuGroupHeading>About</SettingMenuGroupHeading>
