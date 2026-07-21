@@ -134,6 +134,23 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+      # Per-build versionName so a tester can identify which PR/commit an
+      # installed preview APK came from: "<semver>-pr-<n>" when dispatched for a
+      # PR, else "<semver>-<short-sha>". `semver` is the app's own version from
+      # app.json; the `pr` dispatch input is read as an env var (never
+      # interpolated into the script) so a crafted value cannot inject shell.
+      - name: Compute preview version name
+        id: version
+        env:
+          PR: ${{ github.event.inputs.pr }}
+        run: |
+          semver="$(node -p "require('./app.json').expo.version")"
+          if [ -n "$PR" ]; then
+            suffix="pr-$PR"
+          else
+            suffix="$(echo "$GITHUB_SHA" | cut -c1-7)"
+          fi
+          echo "name=${semver}-${suffix}" >> "$GITHUB_OUTPUT"
       - name: Build signed APK
         id: fastlane
         env:
@@ -141,6 +158,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_NAME: ${{ steps.version.outputs.name }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
