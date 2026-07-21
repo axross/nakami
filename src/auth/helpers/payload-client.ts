@@ -67,6 +67,12 @@ async function request(
 		response = await fetch(url, { ...init, signal: controller.signal });
 	} catch {
 		// Network down, DNS failure, timeout/abort — the server was unreachable.
+		// Close the bracket at debug (callers report the failure at their own
+		// level) so the breadcrumb trail doesn't go quiet on the failure path.
+		logger.debug("Failed request.", {
+			operation,
+			duration: performance.now() - startedAt,
+		});
 		throw new PayloadRequestError(
 			"network",
 			"The server could not be reached.",

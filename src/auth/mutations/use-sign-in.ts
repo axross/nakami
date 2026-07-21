@@ -31,20 +31,31 @@ export function useSignIn() {
 			// only — never the email or password.
 			logger.debug("Started signing in.", { serverUrl, collectionSlug });
 
-			const result = await login(server, { email, password });
+			try {
+				const result = await login(server, { email, password });
 
-			const session: Session = {
-				...server,
-				token: result.token,
-				exp: result.exp,
-				user: result.user,
-			};
-			await authenticate(session);
-			logger.info("Completed signing in.", {
-				serverUrl,
-				duration: performance.now() - startedAt,
-			});
-			return session;
+				const session: Session = {
+					...server,
+					token: result.token,
+					exp: result.exp,
+					user: result.user,
+				};
+				await authenticate(session);
+				logger.info("Completed signing in.", {
+					serverUrl,
+					duration: performance.now() - startedAt,
+				});
+				return session;
+			} catch (error) {
+				// Close the bracket on the failure path so the breadcrumb trail
+				// reaches the sign-in failure. The message drives the form; no
+				// credentials are logged.
+				logger.warn("Failed signing in.", {
+					serverUrl,
+					duration: performance.now() - startedAt,
+				});
+				throw error;
+			}
 		},
 	});
 }
