@@ -1,10 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import type { JSX } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useAuthSession } from "~/auth/stores/auth-store";
 import { CollectionListItem } from "~/collections/components/collection-list-item/collection-list-item";
 import { CollectionListSkeleton } from "~/collections/components/collection-list-skeleton/collection-list-skeleton";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
-import { useCollections } from "~/collections/queries/use-collections";
+import { getCollectionListQueryOptions } from "~/collections/queries/collection-list-query";
 import type { MessageStateIconName } from "~/common/components/message-state/message-state";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 
@@ -66,7 +68,14 @@ function CollectionListDivider(): JSX.Element {
  */
 export function CollectionsScreen(): JSX.Element {
 	const { theme } = useUnistyles();
-	const { data, isPending, isError, error, refetch } = useCollections();
+	const session = useAuthSession();
+	const { data, isPending, isError, error, refetch } = useQuery({
+		...getCollectionListQueryOptions({
+			serverUrl: session?.serverUrl ?? "",
+			userId: session?.user.id ?? "",
+		}),
+		enabled: session !== null,
+	});
 
 	let content: JSX.Element;
 	if (isPending) {
