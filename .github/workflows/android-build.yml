@@ -148,7 +148,7 @@ jobs:
           if [ -n "$PR" ]; then
             suffix="pr-$PR"
           else
-            suffix="$(echo "$GITHUB_SHA" | cut -c1-7)"
+            suffix="${GITHUB_SHA:0:7}"
           fi
           echo "name=${semver}-${suffix}" >> "$GITHUB_OUTPUT"
       - name: Build signed APK
@@ -167,6 +167,34 @@ jobs:
       # reference a deterministic download path instead of guessing the filename.
       - name: Stage APK for upload
         run: cp "${{ steps.fastlane.outputs.apk_path }}" "$RUNNER_TEMP/preview.apk"
+      # Confirm AGP's injected versionName actually landed in the assembled APK,
+      # rather than trusting that the `android.injected.version.name` property
+      # took effect. Reads the compiled manifest back with aapt2 and fails the
+      # build on a mismatch, so a silently-ignored override surfaces loudly here
+      # instead of shipping a mislabeled preview. Skips (warns only) if aapt2 is
+      # absent, so missing tooling never masquerades as a version mismatch.
+      - name: Verify injected versionName
+        env:
+          EXPECTED: ${{ steps.version.outputs.name }}
+        run: |
+          aapt2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f 2>/dev/null | sort -V | tail -n1)"
+          if [ -z "$aapt2" ]; then
+            echo "::warning::aapt2 not found under \$ANDROID_HOME/build-tools; skipping versionName readback."
+            exit 0
+          fi
+          actual="$("$aapt2" dump badging "$RUNNER_TEMP/preview.apk" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")"
+          {
+            echo "### Preview APK versionName"
+            echo ""
+            echo "- expected: \`$EXPECTED\`"
+            echo "- actual: \`$actual\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Expected versionName: $EXPECTED"
+          echo "Actual   versionName: $actual"
+          if [ "$actual" != "$EXPECTED" ]; then
+            echo "::error::Assembled APK versionName '$actual' does not match the injected '$EXPECTED' — the AGP versionName override did not take effect."
+            exit 1
+          fi
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
