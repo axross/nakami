@@ -11,9 +11,11 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  * app then shows "Unknown"). Never throws — a missing `git` is caught.
  */
 function resolveCommitHash(): string | undefined {
+	// `||`, not `??`: an empty-string env var must fall through to the next
+	// source so the EAS -> GitHub Actions -> git precedence holds exactly.
 	const fromEnv =
-		process.env.EAS_BUILD_GIT_COMMIT_HASH ?? process.env.GITHUB_SHA;
-	if (fromEnv !== undefined && fromEnv !== "") {
+		process.env.EAS_BUILD_GIT_COMMIT_HASH || process.env.GITHUB_SHA;
+	if (fromEnv) {
 		return fromEnv;
 	}
 
@@ -24,10 +26,14 @@ function resolveCommitHash(): string | undefined {
 	}
 }
 
-// Dynamic config extending the static app.json (received as `config`); only
-// `extra.commitHash` is added here, so the generated native project is
-// unchanged. name/slug are re-stated to satisfy the required ExpoConfig fields
-// the context types as optional.
+// Dynamic config extending the static app.json: Expo passes the static config
+// in as `config` and uses this function's return value as the final config
+// (https://docs.expo.dev/workflow/configuration/). Only `extra.commitHash` is
+// added — the documented channel for build-time values, read at runtime via
+// expo-constants' Constants.expoConfig.extra
+// (https://docs.expo.dev/versions/v57.0.0/sdk/constants/) — so the generated
+// native project is unchanged. name/slug are re-stated to satisfy the required
+// ExpoConfig fields the context types as optional.
 export default ({ config }: ConfigContext): ExpoConfig => ({
 	...config,
 	name: config.name ?? "payload-mobile",

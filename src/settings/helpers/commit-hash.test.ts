@@ -19,7 +19,7 @@ function setEmbeddedCommitHash(value: unknown): void {
 	}
 }
 
-describe("getCommitHash", () => {
+describe("getCommitHash()", () => {
 	beforeEach(() => {
 		setEmbeddedCommitHash(undefined);
 	});
