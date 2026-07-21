@@ -27,6 +27,13 @@ export const meta = {
 	],
 };
 
+// The comments below tag "pattern F" cost-control steps S1–S6, which scale the
+// check's cost to the diff's risk: S1 risk-tiered fleet width · S2 a
+// cheap-finder -> strong-verifier cascade plus a deterministic pre-verify
+// prune · S3 delta re-review (sinceRef) · S4 a budget cap on multi-vote · S5 a
+// single scope agent for all AGENTS.md-dependent judgment · S6 in-tier
+// multi-vote adjudication for blocking findings on high-risk diffs.
+//
 // Driver contract: the /address skill passes a small args object; everything
 // else is read from the repository by the agents themselves. The workflow
 // returns structured data only — the driver owns all GitHub writes and gates.
@@ -409,14 +416,15 @@ const votesFor = (c) => (sevRank[c.severity] <= 1 ? blockingVotes : 1);
 // Adjudicate a candidate's vote set. A vote can be null (agent failure); it
 // counts as no vote cast. Three outcomes, never conflating infra failure with
 // a merit refutation: REFUTED needs a majority of the requested votes to
-// refute; a multi-vote candidate with too few valid votes stays PLAUSIBLE
-// (unverified); otherwise it survives with the most severe non-refuted
-// (re)grading.
+// refute; a candidate with too few valid votes stays PLAUSIBLE (unverified) —
+// this covers the single-vote path too, so a lone failed verifier is never
+// silently reported as kept; otherwise it survives with the most severe
+// non-refuted (re)grading.
 const adjudicate = (c, verdicts) => {
 	const need = Math.ceil(verdicts.length / 2);
 	const valid = verdicts.filter(Boolean);
 	const refutes = valid.filter((v) => v.verdict === "REFUTED").length;
-	if (verdicts.length >= 2 && valid.length < need) {
+	if (valid.length < need) {
 		return {
 			...c,
 			verdict: "PLAUSIBLE",
