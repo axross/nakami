@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
+import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { SettingsScreen } from "./settings-screen";
 
 jest.mock("@sentry/react-native", () => ({
@@ -11,16 +13,6 @@ jest.mock("@sentry/react-native", () => ({
 
 jest.mock("expo-dev-client", () => ({
 	openMenu: jest.fn(),
-}));
-
-// The Account group consumes the sign-out mutation options via `useMutation`;
-// stub the hook so the group renders without a real QueryClientProvider. The
-// rest of the library stays real.
-jest.mock("@tanstack/react-query", () => ({
-	...jest.requireActual<typeof import("@tanstack/react-query")>(
-		"@tanstack/react-query",
-	),
-	useMutation: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 jest.mock("~/settings/helpers/commit-hash", () => ({
@@ -35,16 +27,30 @@ const session: Session = {
 	user: { id: "1", email: "you@example.com" },
 };
 
+// The Account group consumes the sign-out mutation via `useMutation`, so render
+// under a fresh, isolated QueryClient — the mutation stays idle here (never
+// invoked), and the real store still drives the auth-gated rows.
+function renderSettingsScreen() {
+	const client = createTestQueryClient();
+	return renderRouter(
+		{
+			index: () => (
+				<QueryClientProvider client={client}>
+					<SettingsScreen />
+				</QueryClientProvider>
+			),
+		},
+		{ initialUrl: "/" },
+	);
+}
+
 afterEach(() => {
 	useAuthStore.setState({ status: "loading", session: null });
 });
 
 describe("<SettingsScreen>", () => {
 	it("renders the About and Debug groups with their rows", () => {
-		const { getByTestId, getByText } = renderRouter(
-			{ index: SettingsScreen },
-			{ initialUrl: "/" },
-		);
+		const { getByTestId, getByText } = renderSettingsScreen();
 
 		expect(getByTestId("settings-screen")).toBeTruthy();
 		expect(getByText("About")).toBeTruthy();
@@ -55,10 +61,7 @@ describe("<SettingsScreen>", () => {
 	});
 
 	it("renders the technical details readout", () => {
-		const { getByTestId } = renderRouter(
-			{ index: SettingsScreen },
-			{ initialUrl: "/" },
-		);
+		const { getByTestId } = renderSettingsScreen();
 
 		const technicalDetails = getByTestId("settings-technical-details");
 
@@ -71,10 +74,7 @@ describe("<SettingsScreen>", () => {
 		const { showFeedbackWidget } = jest.requireMock<
 			typeof import("@sentry/react-native")
 		>("@sentry/react-native");
-		const { getByTestId } = renderRouter(
-			{ index: SettingsScreen },
-			{ initialUrl: "/" },
-		);
+		const { getByTestId } = renderSettingsScreen();
 
 		fireEvent.press(getByTestId("settings-feedback-row"));
 
@@ -84,10 +84,7 @@ describe("<SettingsScreen>", () => {
 	it("opens the dev menu when the Open Dev Menu row is pressed", () => {
 		const { openMenu } =
 			jest.requireMock<typeof import("expo-dev-client")>("expo-dev-client");
-		const { getByTestId } = renderRouter(
-			{ index: SettingsScreen },
-			{ initialUrl: "/" },
-		);
+		const { getByTestId } = renderSettingsScreen();
 
 		fireEvent.press(getByTestId("settings-open-dev-menu-row"));
 
@@ -102,10 +99,7 @@ describe("<SettingsScreen>", () => {
 		devFlag.__DEV__ = false;
 
 		try {
-			const { queryByText, queryByTestId } = renderRouter(
-				{ index: SettingsScreen },
-				{ initialUrl: "/" },
-			);
+			const { queryByText, queryByTestId } = renderSettingsScreen();
 
 			expect(queryByText("Debug")).toBeNull();
 			expect(queryByTestId("settings-open-dev-menu-row")).toBeNull();
@@ -117,10 +111,7 @@ describe("<SettingsScreen>", () => {
 	it("shows a Sign in row in place of the Account group when unauthenticated", () => {
 		useAuthStore.setState({ status: "unauthenticated", session: null });
 
-		const { getByTestId, queryByTestId } = renderRouter(
-			{ index: SettingsScreen },
-			{ initialUrl: "/" },
-		);
+		const { getByTestId, queryByTestId } = renderSettingsScreen();
 
 		expect(getByTestId("settings-sign-in-button")).toBeTruthy();
 		expect(queryByTestId("settings-account-row")).toBeNull();
@@ -130,10 +121,7 @@ describe("<SettingsScreen>", () => {
 	it("shows the Account group with the user email and Sign out when authenticated", () => {
 		useAuthStore.setState({ status: "authenticated", session });
 
-		const { getByTestId, getByText, queryByTestId } = renderRouter(
-			{ index: SettingsScreen },
-			{ initialUrl: "/" },
-		);
+		const { getByTestId, getByText, queryByTestId } = renderSettingsScreen();
 
 		expect(getByTestId("settings-account-row")).toBeTruthy();
 		expect(getByText("you@example.com")).toBeTruthy();

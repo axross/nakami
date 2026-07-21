@@ -13,16 +13,16 @@ The factory doubles as the typed source of a query's cache key, which is what ma
 
 ```ts
 // src/collections/queries/collection-list-query.ts
-export function getCollectionListQueryOptions(serverUrl: string) {
+export function getCollectionListQueryOptions() {
 	return queryOptions({
-		queryKey: ["collections", "list", serverUrl],
-		queryFn: () => fetchCollections(serverUrl),
+		queryKey: ["collections"],
+		queryFn: () => fetchCollections(),
 	});
 }
 
 // wherever a write invalidates the list — the key is typed, derived from the factory:
 queryClient.invalidateQueries({
-	queryKey: getCollectionListQueryOptions(serverUrl).queryKey,
+	queryKey: getCollectionListQueryOptions().queryKey,
 });
 ```
 
@@ -42,7 +42,7 @@ See [file-organization.md](./references/file-organization.md) for:
 See [query-options.md](./references/query-options.md) for:
 
 - writing a `getXQueryOptions(input?)` factory with `queryOptions()`
-- structuring a hierarchical, feature-scoped query key from the factory's inputs
+- structuring a REST-path-mirroring query key (resource-kind / id segments, lists dropping the trailing id, filters in a trailing object)
 - reading stores and singletons non-reactively inside a `queryFn`
 - consuming with `useQuery()`, prefetching, and reading cache through the branded key
 - choosing `staleTime` against the shared client default

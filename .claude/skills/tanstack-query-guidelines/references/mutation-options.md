@@ -25,7 +25,8 @@ export function getSignOutMutationOptions() {
 
 **Guidelines:**
 
-- MUST return `mutationOptions({…})` from the factory, with a feature-scoped `mutationKey` (`["auth", "sign-in"]`) and a typed `mutationFn`.
+- MUST return `mutationOptions({…})` from the factory, with a feature-scoped `mutationKey` and a typed `mutationFn`.
+- MUST keep a `mutationKey` **action-scoped** — `[feature, action]` such as `["auth", "sign-in"]` or `["collections", "create"]` — not a REST-path cache key like a `queryKey`; it exists for in-flight filtering (`useIsMutating`, `useMutationState`) and shared config, not cache reads.
 - MUST type the `mutationFn` variables and return value so `useMutation` infers `TVariables`/`TData` at the call site (`TError` defaults to `Error` in v5).
 - MUST keep the factory hook-free and side-effect-free at build time; calling it only constructs the options object.
 
@@ -71,9 +72,9 @@ export function getCollectionCreateMutationOptions() {
 	return mutationOptions({
 		mutationKey: ["collections", "create"],
 		mutationFn: (input: CollectionInput) => createCollection(input),
-		onSuccess: (_data, input) => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({
-				queryKey: getCollectionListQueryOptions(input.serverUrl).queryKey,
+				queryKey: getCollectionListQueryOptions().queryKey,
 			});
 		},
 	});

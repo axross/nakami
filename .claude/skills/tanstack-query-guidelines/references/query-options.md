@@ -12,10 +12,10 @@ A query factory takes the inputs the query varies on and returns `queryOptions()
 import { queryOptions } from "@tanstack/react-query";
 import { fetchCollections } from "~/collections/helpers/payload-collections";
 
-export function getCollectionListQueryOptions(serverUrl: string) {
+export function getCollectionListQueryOptions() {
 	return queryOptions({
-		queryKey: ["collections", "list", serverUrl],
-		queryFn: () => fetchCollections(serverUrl),
+		queryKey: ["collections"],
+		queryFn: () => fetchCollections(),
 	});
 }
 ```
@@ -29,14 +29,27 @@ export function getCollectionListQueryOptions(serverUrl: string) {
 
 ## Query Keys
 
-The query key is the cache's identity. This skill owns its **structure**; the project's performance-and-reliability guidelines own key **completeness** as a review rule.
+The query key is the cache's identity, and it **mirrors the resource's REST path**: alternating resource-kind and identifier segments, the same way a URL path nests. A key then reads like the endpoint it stands for, and a broad prefix invalidation matches every nested key beneath it. This skill owns the key **structure**; the project's performance-and-reliability guidelines own key **completeness** as a review rule.
+
+**Example:**
+
+```ts
+["collections"]                                    // the collection list
+["collections", { sort: "-createdAt" }]            // a filtered/sorted list
+["collections", collectionSlug]                    // one collection
+["collections", collectionSlug, "documents"]       // that collection's documents (a list)
+["collections", collectionSlug, "documents", { status: "published" }] // a filtered nested list
+["collections", collectionSlug, "documents", documentId]              // one document
+```
 
 **Guidelines:**
 
-- MUST structure a key as a hierarchical, feature-scoped array from broad to narrow: `[feature, kind, …params]`, e.g. `["collections", "list", serverUrl]` or `["collections", "detail", id]`.
-- MUST include every `queryFn` input in the key; a missing input collides two different reads into one cache entry. The project's performance-and-reliability guidelines (caching-correctness) enforce this on review.
+- MUST shape a key as alternating resource-kind / identifier segments mirroring the resource's REST path — `[kind, id, subKind, subId, …]` (e.g. `["collections", collectionSlug, "documents", documentId]`) — so the key reads like the URL path and a broader prefix (`["collections", collectionSlug]`) invalidates every nested key beneath it.
+- MUST, for a **list**, end the key at the listed resource kind and omit its identifier — `["collections"]`, `["collections", collectionSlug, "documents"]` — so a list and a single item never collide.
+- MUST express any filter, sort, pagination, or scoping the query varies on as a single **object** placed after the listed resource kind — `["collections", { sort, filter }]` — never as loose positional segments.
+- MUST include every `queryFn` input in the key (an id, a filter field, a server/tenant context); a missing input collides two different reads into one cache entry. The project's performance-and-reliability guidelines (caching-correctness) enforce this on review.
 - MUST derive the key only inside the factory, so `getXQueryOptions(input).queryKey` is the one source used for `getQueryData`, `setQueryData`, and `invalidateQueries`.
-- SHOULD NOT put an unstable value (a fresh object literal, a timestamp) in a key; it explodes cache cardinality.
+- SHOULD keep identifier segments stable primitives (a slug, an id) and confine everything variable to the trailing object; an unstable value in an identifier position explodes cache cardinality.
 
 ## The queryFn
 
@@ -55,9 +68,7 @@ Components consume the factory directly; the shared client default governs lifet
 **Example:**
 
 ```ts
-const { data, isPending, error } = useQuery(
-	getCollectionListQueryOptions(serverUrl),
-);
+const { data, isPending, error } = useQuery(getCollectionListQueryOptions());
 ```
 
 **Guidelines:**
