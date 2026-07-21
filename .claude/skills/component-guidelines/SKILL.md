@@ -11,7 +11,7 @@ This skill owns *how UI surfaces are built*. Where component files live belongs 
 
 ## Component Catalog
 
-Shared components live under `src/common/components/`, one directory per component. The catalog is currently empty — the app is newly scaffolded. Keep this list current as components land:
+Shared components live under `src/common/components/`, one directory per component. Keep this list current as components land:
 
 | Component | Purpose |
 | --------- | ------- |
