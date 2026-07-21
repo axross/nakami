@@ -372,8 +372,6 @@
   .wc-btabs .tab .ic { width: 16px; height: 16px; border-radius: 5px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); } .wc-btabs .tab .tl { height: 6px; width: 60%; border-radius: 3px; background: var(--wire-fill-2); }
   .wc-btabs .tab.on .ic { background: var(--accent); border-color: var(--accent); } .wc-btabs .tab.on .tl { background: var(--accent); }
 
-  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
-
   .el-surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
   .el-surface { border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: var(--bg); display: flex; flex-direction: column; gap: 18px; }
   .el-surface > .el-band { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
@@ -389,6 +387,23 @@
   .input.focus { border-color: var(--accent-d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-d) 18%, transparent); }
   .input.error { border-color: var(--danger-d); }
   .caret { width: 1.5px; height: 20px; background: var(--accent-d); margin-left: 1px; display: inline-block; }
+
+  /* ---- component state variants (labeled rows within a card) ---- */
+  .wc-states { display: flex; flex-direction: column; gap: 9px; width: 100%; }
+  .wc-strow { display: flex; align-items: center; gap: 9px; }
+  .wc-stlab { font-family: var(--mono); font-size: 9px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--wire-ink); flex: none; width: 56px; }
+  .wc-strow > :not(.wc-stlab) { flex: 1; min-width: 0; }
+  .wc-strow.inline > :not(.wc-stlab) { flex: none; }
+  .is-disabled { opacity: 0.4; }
+  .field .box.focus { border-style: solid; border-color: var(--accent); }
+  .field .box.invalid { border-color: var(--danger); }
+  .wc-check.mixed { background: var(--accent); border-color: var(--accent); }
+  .wc-check.mixed::after { content: ""; position: absolute; left: 4px; right: 4px; top: 8px; height: 2px; width: auto; background: var(--panel); border: 0; transform: none; }
+  .wc-badge.accent { background: var(--accent); } .wc-badge.danger { background: var(--danger); opacity: 0.6; }
+  .btn.danger { background: var(--danger); opacity: 0.6; }
+  .wc-pagerow .pg.is-disabled { opacity: 0.4; }
+  .wc-table .trow.sel { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+  .wc-table .cbx.on { background: var(--accent); border-color: var(--accent); }
 
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
@@ -417,7 +432,7 @@
        ======================================================================= -->
 
   <h2 class="section">UI elements — component palette</h2>
-  <p class="lead-note">Individual components in isolation, to assemble a screen when no archetype fits. The wireframe component library below is breadboard greys (regions, hierarchy, flow — no color or final type); the high-fidelity palette that follows uses the app's real tokens. The library models the common shadcn-UI components in this project's mobile vocabulary. <!-- FILL: keep only the components your screen(s) use. --></p>
+  <p class="lead-note">Individual components in isolation, to assemble a screen when no archetype fits. The wireframe component library below is breadboard greys (regions, hierarchy, flow — no color or final type); the high-fidelity palette that follows uses the app's real tokens. The library models the common shadcn-UI components in this project's mobile vocabulary, and shows each component's common states (default, filled, focus, invalid, selected, disabled, …) for clarity. <!-- FILL: keep only the components and states your screen(s) use. --></p>
 
   <p class="shared-label" style="margin-bottom:6px">Wireframe component library — breadboard</p>
 
@@ -426,33 +441,69 @@
     <div class="el-card"><span class="el-tag">heading / label</span><div class="el-stage"><div class="w-h lg w100"></div></div></div>
     <div class="el-card"><span class="el-tag">body text</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px"><div class="w-t w80"></div><div class="w-t w60"></div></div></div></div>
     <div class="el-card"><span class="el-tag">avatar</span><div class="el-stage"><div style="display:flex;align-items:center;gap:10px"><span class="wc-av"></span><span class="wc-avstack"><span class="wc-av"></span><span class="wc-av"></span><span class="wc-av"></span></span></div></div></div>
-    <div class="el-card"><span class="el-tag">badge</span><div class="el-stage"><span class="wc-badge"></span></div></div>
+    <div class="el-card"><span class="el-tag">badge</span><div class="el-stage"><div style="display:flex;gap:10px;align-items:center"><span class="wc-badge"></span><span class="wc-badge accent"></span><span class="wc-badge danger"></span></div></div></div>
     <div class="el-card"><span class="el-tag">divider</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:12px"><span class="wc-div"></span><span class="wc-divlbl"><span class="wc-div"></span><span class="t"></span><span class="wc-div"></span></span></div></div></div>
     <div class="el-card"><span class="el-tag">skeleton</span><div class="el-stage"><div class="wc-skel"><span class="b"></span><span class="b"></span><span class="b w60"></span></div></div></div>
   </div>
 
   <p class="el-sub">Inputs &amp; controls</p>
   <div class="el-grid">
-    <div class="el-card"><span class="el-tag">text input — empty</span><div class="el-stage"><div class="field w100"><div class="box"><span class="ph"></span></div></div></div></div>
-    <div class="el-card"><span class="el-tag">text input — filled</span><div class="el-stage"><div class="field w100"><div class="box filled"><span class="ph"></span></div></div></div></div>
-    <div class="el-card"><span class="el-tag">textarea</span><div class="el-stage"><div class="wc-textarea"></div></div></div>
-    <div class="el-card"><span class="el-tag">select — web</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:5px"><div class="wc-select"><span class="ph"></span><span class="wc-cv"></span></div><span class="wc-hint">opens dropdown menu</span></div></div></div>
+    <div class="el-card"><span class="el-tag">text input</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow"><span class="wc-stlab">default</span><div class="field"><div class="box"><span class="ph"></span></div></div></div>
+      <div class="wc-strow"><span class="wc-stlab">filled</span><div class="field"><div class="box filled"><span class="ph"></span></div></div></div>
+      <div class="wc-strow"><span class="wc-stlab">focus</span><div class="field"><div class="box focus"><span class="ph"></span></div></div></div>
+      <div class="wc-strow"><span class="wc-stlab">invalid</span><div class="field"><div class="box invalid filled"><span class="ph"></span></div></div></div>
+      <div class="wc-strow"><span class="wc-stlab">disabled</span><div class="field is-disabled"><div class="box"><span class="ph"></span></div></div></div>
+    </div></div></div>
+    <div class="el-card"><span class="el-tag">textarea</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow"><span class="wc-stlab">default</span><div class="wc-textarea"></div></div>
+      <div class="wc-strow"><span class="wc-stlab">disabled</span><div class="wc-textarea is-disabled"></div></div>
+    </div></div></div>
+    <div class="el-card"><span class="el-tag">select — web</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow"><span class="wc-stlab">default</span><div class="wc-select"><span class="ph"></span><span class="wc-cv"></span></div></div>
+      <div class="wc-strow"><span class="wc-stlab">selected</span><div class="wc-select"><span class="wc-solid" style="width:45%"></span><span class="wc-cv"></span></div></div>
+      <div class="wc-strow"><span class="wc-stlab">disabled</span><div class="wc-select is-disabled"><span class="ph"></span><span class="wc-cv"></span></div></div>
+      <span class="wc-hint">opens dropdown menu</span>
+    </div></div></div>
     <div class="el-card"><span class="el-tag">select — mobile (native)</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:5px"><div class="wc-select"><span class="ph"></span><span class="wc-cv"></span></div><span class="wc-hint">opens OS wheel picker</span></div></div></div>
-    <div class="el-card"><span class="el-tag">checkbox</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><span class="wc-opt"><span class="wc-check on"></span><span class="wc-lbl"></span></span><span class="wc-opt"><span class="wc-check"></span><span class="wc-lbl"></span></span></div></div></div>
-    <div class="el-card"><span class="el-tag">radio group</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><span class="wc-opt"><span class="wc-radio on"></span><span class="wc-lbl"></span></span><span class="wc-opt"><span class="wc-radio"></span><span class="wc-lbl"></span></span></div></div></div>
-    <div class="el-card"><span class="el-tag">switch — on / off</span><div class="el-stage"><div style="display:flex;gap:12px;align-items:center"><span class="wc-switch on"></span><span class="wc-switch"></span></div></div></div>
-    <div class="el-card"><span class="el-tag">slider</span><div class="el-stage"><div class="wc-slider w100"><div class="track"><span class="fill"></span><span class="thumb"></span></div></div></div></div>
+    <div class="el-card"><span class="el-tag">checkbox</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow inline"><span class="wc-stlab">checked</span><span class="wc-check on"></span><span class="wc-lbl" style="width:64px"></span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">unchecked</span><span class="wc-check"></span><span class="wc-lbl" style="width:64px"></span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">mixed</span><span class="wc-check mixed"></span><span class="wc-lbl" style="width:64px"></span></div>
+      <div class="wc-strow inline is-disabled"><span class="wc-stlab">disabled</span><span class="wc-check"></span><span class="wc-lbl" style="width:64px"></span></div>
+    </div></div></div>
+    <div class="el-card"><span class="el-tag">radio group</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow inline"><span class="wc-stlab">selected</span><span class="wc-radio on"></span><span class="wc-lbl" style="width:64px"></span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">idle</span><span class="wc-radio"></span><span class="wc-lbl" style="width:64px"></span></div>
+      <div class="wc-strow inline is-disabled"><span class="wc-stlab">disabled</span><span class="wc-radio"></span><span class="wc-lbl" style="width:64px"></span></div>
+    </div></div></div>
+    <div class="el-card"><span class="el-tag">switch</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow inline"><span class="wc-stlab">on</span><span class="wc-switch on"></span></div>
+      <div class="wc-strow inline"><span class="wc-stlab">off</span><span class="wc-switch"></span></div>
+      <div class="wc-strow inline is-disabled"><span class="wc-stlab">disabled</span><span class="wc-switch on"></span></div>
+    </div></div></div>
+    <div class="el-card"><span class="el-tag">slider</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow"><span class="wc-stlab">default</span><div class="wc-slider"><div class="track"><span class="fill"></span><span class="thumb"></span></div></div></div>
+      <div class="wc-strow"><span class="wc-stlab">disabled</span><div class="wc-slider is-disabled"><div class="track"><span class="fill"></span><span class="thumb"></span></div></div></div>
+    </div></div></div>
     <div class="el-card"><span class="el-tag">date picker</span><div class="el-stage"><div class="wc-cal"><div class="chead"><span class="wc-lbl"></span><span class="wc-cv"></span></div><div class="cgrid"><span class="d"></span><span class="d"></span><span class="d"></span><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span></div></div></div></div>
   </div>
 
   <p class="el-sub">Buttons &amp; menus</p>
   <div class="el-grid">
-    <div class="el-card"><span class="el-tag">button</span><div class="el-stage"><div class="btn"><span class="cap"></span></div></div></div>
-    <div class="el-card"><span class="el-tag">button — primary</span><div class="el-stage"><div class="btn primary"><span class="cap"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">button</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow"><span class="wc-stlab">primary</span><div class="btn primary"><span class="cap"></span></div></div>
+      <div class="wc-strow"><span class="wc-stlab">default</span><div class="btn"><span class="cap"></span></div></div>
+      <div class="wc-strow"><span class="wc-stlab">destructive</span><div class="btn danger"><span class="cap"></span></div></div>
+      <div class="wc-strow"><span class="wc-stlab">disabled</span><div class="btn primary is-disabled"><span class="cap"></span></div></div>
+    </div></div></div>
     <div class="el-card"><span class="el-tag">button group</span><div class="el-stage"><div class="wc-btngroup"><span class="b on"></span><span class="b"></span><span class="b"></span></div></div></div>
     <div class="el-card"><span class="el-tag">dropdown menu</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><div class="wc-select" style="width:60%"><span class="ph"></span><span class="wc-cv"></span></div><div class="wc-menu"><span class="mi w70"></span><span class="mi w50"></span><span class="sep"></span><span class="mi w60"></span></div></div></div></div>
     <div class="el-card"><span class="el-tag">tooltip</span><div class="el-stage"><span class="wc-tip"><span class="l"></span></span></div></div>
-    <div class="el-card"><span class="el-tag">progress</span><div class="el-stage"><div class="wc-prog"><span class="fill"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">progress</span><div class="el-stage"><div class="wc-states">
+      <div class="wc-strow"><span class="wc-stlab">partial</span><div class="wc-prog"><span class="fill"></span></div></div>
+      <div class="wc-strow"><span class="wc-stlab">complete</span><div class="wc-prog"><span class="fill" style="width:100%"></span></div></div>
+    </div></div></div>
   </div>
 
   <p class="el-sub">Containers &amp; navigation</p>
@@ -460,7 +511,7 @@
     <div class="el-card"><span class="el-tag">card</span><div class="el-stage"><div class="wc-card"><div class="media"></div><div class="cbody"><span class="wc-solid" style="width:60%"></span><span class="wc-lbl" style="width:90%"></span><span class="wc-lbl" style="width:75%"></span></div><div class="cfoot"><span class="btn primary" style="height:24px;width:64px"><span class="cap"></span></span><span class="btn" style="height:24px;width:64px"><span class="cap"></span></span></div></div></div></div>
     <div class="el-card wide"><span class="el-tag">sectioned navigation (settings rows)</span><div class="el-stage"><div class="group w100"><div class="gh"></div><div class="rows"><div class="row"><span class="ic"></span><span class="col"><span class="a"></span><span class="b"></span></span><span style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--wire-ink)"></span></div><div class="row"><span class="ic"></span><span class="col"><span class="a"></span></span><span style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--wire-ink)"></span></div><div class="row danger"><span class="ic"></span><span class="lbl"></span></div></div></div></div></div>
     <div class="el-card"><span class="el-tag">tabs</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:9px"><div class="wc-tabseg"><span class="t on"><span class="l"></span></span><span class="t"><span class="l"></span></span><span class="t"><span class="l"></span></span></div><span class="wc-lbl" style="width:80%"></span></div></div></div>
-    <div class="el-card"><span class="el-tag">pagination</span><div class="el-stage"><div class="wc-pagerow"><span class="pg"></span><span class="pg on"></span><span class="pg"></span><span class="pg"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">pagination</span><div class="el-stage"><div class="wc-pagerow"><span class="pg is-disabled"></span><span class="pg"></span><span class="pg on"></span><span class="pg"></span><span class="pg"></span></div></div></div>
     <div class="el-card wide"><span class="el-tag">carousel</span><div class="el-stage"><div class="w100"><div class="wc-carousel"><span class="peek"></span><span class="slide"></span><span class="peek"></span></div><div class="wc-dots"><i class="on"></i><i></i><i></i></div></div></div></div>
     <div class="el-card"><span class="el-tag">empty state</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;align-items:center;gap:7px"><span class="w-mark"></span><span class="wc-solid" style="width:56%"></span><span class="wc-lbl" style="width:72%"></span><span class="btn primary" style="width:62%;margin-top:2px"><span class="cap"></span></span></div></div></div>
     <div class="el-card wide"><span class="el-tag">message (chat bubbles)</span><div class="el-stage"><div class="wc-msgs"><span class="wc-bubble in"><span class="l"></span><span class="l" style="width:52px"></span></span><span class="wc-bubble out"><span class="l"></span></span></div></div></div>
@@ -468,7 +519,7 @@
 
   <p class="el-sub">Data</p>
   <div class="el-grid">
-    <div class="el-card wide3"><span class="el-tag">table (data table)</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:6px"><div class="field" style="flex:1"><div class="box" style="height:26px"><span class="ph"></span></div></div><div class="btn" style="width:70px;height:26px"><span class="cap"></span></div></div><div class="wc-table"><div class="thead"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div></div><div style="display:flex;justify-content:space-between;align-items:center"><span class="wc-lbl" style="width:60px"></span><div class="wc-pagerow"><span class="pg"></span><span class="pg on"></span><span class="pg"></span></div></div></div></div></div>
+    <div class="el-card wide3"><span class="el-tag">table (data table)</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:6px"><div class="field" style="flex:1"><div class="box" style="height:26px"><span class="ph"></span></div></div><div class="btn" style="width:70px;height:26px"><span class="cap"></span></div></div><div class="wc-table"><div class="thead"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow sel"><span class="cbx on"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div></div><div style="display:flex;justify-content:space-between;align-items:center"><span class="wc-lbl" style="width:60px"></span><div class="wc-pagerow"><span class="pg"></span><span class="pg on"></span><span class="pg"></span></div></div></div></div></div>
   </div>
 
   <p class="el-sub">Feedback</p>

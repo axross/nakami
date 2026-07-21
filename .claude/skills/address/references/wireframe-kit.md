@@ -55,6 +55,7 @@ The grouped settings rows are named **sectioned navigation** consistently — th
 **Guidelines:**
 
 - SHOULD assemble a novel screen from the library's components when no archetype fits, rather than bending an archetype out of shape.
+- SHOULD show a component's relevant **states** (default, filled, focus, invalid/error, selected/checked, disabled, …) when they clarify the design; the library carries state variants as labeled rows, greys plus the single accent cue for selected/active and danger tint for invalid/destructive.
 - MUST keep the wireframe component library at breadboard fidelity (greys, the single accent cue for active/selected, danger tint for destructive) — never app color, final typography, or final copy.
 - MUST keep the high-fidelity specimens on the shared `.el-surface` token grounds — they consume the same mirrored `src/common/constants/style.ts` tokens as the `.device`; MUST NOT fork a second token set.
 - SHOULD delete the components a round does not use before publishing, the same as unused archetypes.
