@@ -13,8 +13,14 @@ jest.mock("expo-dev-client", () => ({
 	openMenu: jest.fn(),
 }));
 
-jest.mock("~/auth/mutations/use-sign-out", () => ({
-	useSignOut: () => ({ mutate: jest.fn(), isPending: false }),
+// The Account group consumes the sign-out mutation options via `useMutation`;
+// stub the hook so the group renders without a real QueryClientProvider. The
+// rest of the library stays real.
+jest.mock("@tanstack/react-query", () => ({
+	...jest.requireActual<typeof import("@tanstack/react-query")>(
+		"@tanstack/react-query",
+	),
+	useMutation: () => ({ mutate: jest.fn(), isPending: false }),
 }));
 
 jest.mock("~/settings/helpers/commit-hash", () => ({

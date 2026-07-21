@@ -1,12 +1,20 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { useMutation } from "@tanstack/react-query";
 import { fireEvent, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
-import { useSignIn } from "~/auth/mutations/use-sign-in";
 import { SignInScreen } from "./sign-in-screen";
 
-jest.mock("~/auth/mutations/use-sign-in", () => ({ useSignIn: jest.fn() }));
+// The screen consumes the sign-in mutation options via `useMutation`; stub the
+// hook so tests inject the mutate/reset/pending/error state the form reacts to,
+// without a real QueryClientProvider. The rest of the library stays real.
+jest.mock("@tanstack/react-query", () => ({
+	...jest.requireActual<typeof import("@tanstack/react-query")>(
+		"@tanstack/react-query",
+	),
+	useMutation: jest.fn(),
+}));
 jest.mock("~/auth/helpers/last-server-url", () => ({
 	readLastServerUrl: jest.fn(),
 }));
@@ -21,12 +29,12 @@ const mutate = jest.fn();
 const reset = jest.fn();
 
 function mockSignIn(overrides: { isPending?: boolean; error?: unknown } = {}) {
-	jest.mocked(useSignIn).mockReturnValue({
+	jest.mocked(useMutation).mockReturnValue({
 		mutate,
 		reset,
 		isPending: overrides.isPending ?? false,
 		error: overrides.error ?? null,
-	} as unknown as ReturnType<typeof useSignIn>);
+	} as unknown as ReturnType<typeof useMutation>);
 }
 
 beforeEach(() => {
