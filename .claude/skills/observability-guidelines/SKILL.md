@@ -1,6 +1,6 @@
 ---
 name: observability-guidelines
-description: Error-handling and logging conventions — `try`/`catch` placement, error-reporting capture calls, top-level error boundaries, structured-logger usage and module child loggers, log-level choice (`debug` for dev-only lifecycle tracing, `info` for production milestones, `warn` for recoverable conditions; never `error` — errors go to Sentry), and "Started / Completed" structured-log messages.
+description: Error-handling and logging conventions — `try`/`catch` placement, error-reporting capture calls, top-level error boundaries, structured-logger usage and module child loggers, log-level choice (`debug` for lifecycle tracing kept as breadcrumbs, `info` for production milestones, `warn` for recoverable conditions; never `error` — errors go to Sentry), breadcrumbs fed automatically from every log line, and "Started / Completed" structured-log messages.
 when_to_use: Use whenever writing, reviewing, or modifying code that throws, catches, reports, or logs — even when the user only mentions an error tracker, a logger, capturing an exception, error boundaries, log levels, or debugging an unhandled exception in this project.
 user-invocable: false
 ---
@@ -24,6 +24,7 @@ See [error-tracking.md](./references/error-tracking.md) for:
 
 - Sentry initialization and runtime-specific configuration files
 - The error-reporting capture call's import source, context, and privacy boundaries
+- Breadcrumbs — how the logger feeds the error tracker's trail and the PII rules that apply
 - PII settings and safe event context
 - Source map and instrumentation changes
 
@@ -32,6 +33,7 @@ See [error-tracking.md](./references/error-tracking.md) for:
 See [logging.md](./references/logging.md) for:
 
 - When operations are worth logging and when they are not
-- Which log level to use (`debug` for dev-only lifecycle tracing, `info` for production milestones, `warn` for recoverable conditions; never `error` — errors go to Sentry)
+- Which log level to use (`debug` for lifecycle tracing that stays out of the production console but is kept as breadcrumbs, `info` for production milestones, `warn` for recoverable conditions; never `error` — errors go to Sentry)
+- How every log line is mirrored onto the error tracker's breadcrumb trail
 - Creating module-scoped child loggers from a shared root logger
 - Structuring log calls with context objects and "Started / Completed" messages

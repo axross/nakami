@@ -15,14 +15,14 @@ A log line pays off during an incident, when the question is which operation was
 
 ## Log Levels
 
-Levels are the filter operators reach for under pressure, so a message at the wrong level is either noise burying a signal or a signal buried in noise. The root logger runs at `severity: __DEV__ ? "debug" : "info"` (see `src/core/helpers/logging.ts`), so `debug` lines appear only in development builds and are dropped from production, while `info` and `warn` survive into production. Pick the level from what the line is for and who needs to see it in production:
+Levels are the filter operators reach for under pressure, so a message at the wrong level is either noise burying a signal or a signal buried in noise. The root logger runs at `debug` severity in every build (see `src/core/helpers/logging.ts`) so that every level reaches the transports; the **console** output is what's gated to development, while **all** levels — `debug` included — are recorded as breadcrumbs on the error tracker (see [Breadcrumbs](#breadcrumbs)). Pick the level from what the line is for and how visible it should be:
 
-| Level | Use for | In production? |
-|---|---|---|
-| `debug` | Routine, verbose, or high-frequency step-by-step tracing of an operation's internal lifecycle — valuable while developing or reproducing a problem, too noisy to keep in production. | Dropped |
-| `info` | Notable normal-progress milestones worth keeping in production — the completion of a cross-boundary or user-significant operation such as a sign-in or a session refresh, not each internal step of it. | Kept |
-| `warn` | Recoverable unexpected conditions — execution continues but something is worth investigating (a deferred refresh, a skipped record, a violated invariant). | Kept |
-| `error` | Never — report the error to Sentry via `reportError(...)` and let it propagate. | — |
+| Level | Use for | Production console | Production breadcrumb |
+|---|---|---|---|
+| `debug` | Routine, verbose, or high-frequency step-by-step tracing of an operation's internal lifecycle — valuable while developing or reproducing a problem, too noisy to print in production. | No | Yes |
+| `info` | Notable normal-progress milestones worth surfacing in production — the completion of a cross-boundary or user-significant operation such as a sign-in or a session refresh, not each internal step of it. | Yes | Yes |
+| `warn` | Recoverable unexpected conditions — execution continues but something is worth investigating (a deferred refresh, a skipped record, a violated invariant). | Yes | Yes |
+| `error` | Never — report the error to Sentry via `reportError(...)` and let it propagate. | — | — |
 
 **Guidelines:**
 
@@ -33,11 +33,11 @@ Levels are the filter operators reach for under pressure, so a message at the wr
 - SHOULD prefer `debug` over `info` when unsure: a routine trace that turns out to matter is cheap to promote later, whereas surplus production `info` is exactly the noise the level system exists to keep out.
 
 ```typescript
-// Routine internal steps → debug (dev-only, dropped from production)
+// Routine internal steps → debug (no production console, still a breadcrumb)
 logger.debug("Started login request.", { serverUrl });
 logger.debug("Completed login request.", { serverUrl, status });
 
-// User-significant milestone → info (kept in production)
+// User-significant milestone → info (production console + breadcrumb)
 logger.info("Completed signing in.", { serverUrl });
 ```
 
@@ -57,6 +57,16 @@ const logger = createModuleLogger("data-fetch");
 ```
 
 - SHOULD choose a module name that represents the module's concern at a glance and is unique per module, so log lines can be filtered without reading the full path.
+
+## Breadcrumbs
+
+The root logger's transport mirrors **every** log line onto the error tracker's breadcrumb trail (via `addBreadcrumb` in `~/core/helpers/error-reporting`), so a later captured exception arrives with the lines that led up to it. Logging is therefore the breadcrumb mechanism — you get the trail for free by logging well. See [error-tracking.md](./error-tracking.md#breadcrumbs) for what breadcrumbs are and how they reach Sentry.
+
+**Guidelines:**
+
+- SHOULD rely on ordinary log calls to populate the breadcrumb trail rather than calling `addBreadcrumb` directly; reserve a direct call for a non-log event worth placing on the timeline.
+- MUST keep the trailing context object free of secrets and PII (restating the rule above) — it is copied verbatim into breadcrumb `data` and shipped to the error tracker alongside the next exception.
+- SHOULD log the `debug` steps that bracket an operation even though they are dropped from production console output: breadcrumbs are retained regardless of console severity, so those steps still enrich a captured exception.
 
 ## Structured Log Format
 

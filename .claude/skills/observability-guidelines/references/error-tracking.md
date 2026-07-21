@@ -25,6 +25,17 @@ Captured exceptions should represent unexpected failures or unexpected states th
 - SHOULD report non-thrown unexpected states with a descriptive `Error` object when they indicate a renderer, parser, or data-contract gap.
 - MUST NOT report expected user input validation failures as exceptions unless they indicate abuse or a system defect.
 
+## Breadcrumbs
+
+Breadcrumbs are the trail of recent events the error tracker attaches to the next captured exception, so a reported issue arrives with the sequence that led up to it — often the difference between a one-line stack trace and an actionable report. The structured logger feeds this trail automatically: its transport mirrors every log line (all levels, including `debug`) into Sentry via `addBreadcrumb`. Logging well is therefore how you get a useful breadcrumb trail.
+
+**Guidelines:**
+
+- SHOULD populate the breadcrumb trail through ordinary log calls rather than manual `addBreadcrumb` calls — bracketing operations at `debug` (see [logging.md](./logging.md)) is what makes a captured exception legible.
+- MUST import `addBreadcrumb` from the project's wrapper — `~/core/helpers/error-reporting` — never `@sentry/react-native` directly, and reserve direct calls for a non-log event worth placing on the timeline.
+- MUST keep breadcrumb `message`, `category`, and `data` free of secrets, tokens, raw request bodies, and PII; the same [Event Context and PII](#event-context-and-pii) rules apply, because breadcrumb data ships to Sentry with the exception.
+- SHOULD attach a public identifier (an entity `id`, `url`, module name) as breadcrumb `data` so the trail is filterable, mirroring the logging context rules.
+
 ## Event Context and PII
 
 Sentry context should explain the failure without copying private content into a third-party event.
