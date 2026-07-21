@@ -150,7 +150,17 @@ jobs:
           else
             suffix="${GITHUB_SHA:0:7}"
           fi
-          echo "name=${semver}-${suffix}" >> "$GITHUB_OUTPUT"
+          # Heredoc-delimited output write: the `pr` dispatch input flows into
+          # the value, so a newline in it must not be able to inject an extra
+          # `key=value` line into $GITHUB_OUTPUT (which, taking the last
+          # occurrence, could override `name` and the EXPECTED the verify step
+          # reads from it). The delimiter form is GitHub's recommendation for
+          # output values that may contain special characters.
+          {
+            echo "name<<VERSION_NAME_EOF"
+            echo "${semver}-${suffix}"
+            echo "VERSION_NAME_EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Build signed APK
         id: fastlane
         env:
