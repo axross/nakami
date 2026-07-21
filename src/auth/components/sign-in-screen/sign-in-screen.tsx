@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { type JSX, useCallback, useState } from "react";
+import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import {
 	KeyboardAvoidingView,
 	Platform,
@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
+import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
 import { normalizeServerUrl } from "~/auth/helpers/server-url";
 import { useSignIn } from "~/auth/mutations/use-sign-in";
@@ -46,6 +47,24 @@ export function SignInScreen(): JSX.Element {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [validationError, setValidationError] = useState<string | null>(null);
+	const serverUrlEdited = useRef(false);
+
+	// Pre-fill the server URL with the last successful sign-in's endpoint, but
+	// never overwrite input the user has already started typing before this
+	// keychain read resolves.
+	useEffect(() => {
+		let active = true;
+
+		void readLastServerUrl().then((stored) => {
+			if (active && stored !== null && !serverUrlEdited.current) {
+				setServerUrl(stored);
+			}
+		});
+
+		return () => {
+			active = false;
+		};
+	}, []);
 
 	// Clears any prior error as soon as the user changes an input.
 	const clearErrors = useCallback(() => {
@@ -113,6 +132,7 @@ export function SignInScreen(): JSX.Element {
 						autoCorrect={false}
 						inputMode="url"
 						onChangeText={(next) => {
+							serverUrlEdited.current = true;
 							setServerUrl(next);
 							clearErrors();
 						}}
