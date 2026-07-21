@@ -11,7 +11,7 @@ Apply these guidelines when producing a **low-fidelity wireframe** (breadboard m
 
 The template is [wireframe-kit.html](./assets/wireframe-kit.html) — a self-contained, theme-aware page carrying two device canvases, the breadboard component library, the archetypes, and the options-comparison layout. Copy it to a scratch location, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish or export the result.
 
-The normative rules below are grounded in the external field consensus captured in [best-practices.md](./references/best-practices.md) — 18 distilled principles cited to 50+ reputable sources (Nielsen Norman Group, the Interaction Design Foundation, Smashing Magazine, Basecamp's *Shape Up*, platform design systems). Consult it for the reasoning and citations behind the guidance here; the MUST/SHOULD rules in this document remain authoritative for the project.
+The normative rules below are grounded in the external field consensus distilled in this skill's **Research-Grounded Best Practices** references (the routing section at the end of this document) — 18 principles across five topic files, each expanded with reasoning, do/don't examples, and citations to reputable sources (Nielsen Norman Group, the Interaction Design Foundation, Smashing Magazine, Basecamp's *Shape Up*, platform design systems). The MUST/SHOULD rules in this document remain authoritative for the project.
 
 ## How to Use the Template
 
@@ -95,3 +95,36 @@ When a wireframe is presented as a set of options to choose between, the compari
 - SHOULD give every option a sketch, a rationale, and its trade-offs, and mark exactly one recommended.
 - SHOULD render screens shared across all options once, above the option grid, rather than repeating them in each card.
 - When used inside an `/address` design exhibit, MUST follow the project's `/address` delivery skill for how options rounds, the recommended marker, and the account-free issue fallback are recorded.
+
+## Research-Grounded Best Practices
+
+These references distill the external field consensus behind this skill's rules, one topic per file, each with expanded guidance, do/don't examples, and citations. The MUST/SHOULD rules elsewhere in this document remain authoritative.
+
+See [fidelity-and-intent.md](./references/fidelity-and-intent.md) for:
+
+- matching fidelity (interactivity, polish, scope, content) to the question you are answering
+- keeping the aesthetic deliberately rough so reviewers critique structure, not pixels
+- reaching 'rough but solved' and holding every screen at the same finish level
+
+See [process-and-collaboration.md](./references/process-and-collaboration.md) for:
+
+- testing rough versions before code and generating multiple alternatives before converging
+- declaring what is out of scope and involving cross-functional collaborators early
+- using progressive fidelity to manage stakeholder feedback and signal how settled the thinking is
+
+See [structure-and-content.md](./references/structure-and-content.md) for:
+
+- establishing information architecture and hierarchy first, and breadboarding flows with words
+- grouping with spacing and common region before adding enclosures
+- using real or realistic content instead of lorem ipsum
+
+See [flow-and-annotation.md](./references/flow-and-annotation.md) for:
+
+- designing connected flows rather than isolated screens
+- annotating intent as distinct, non-UI callouts
+- keeping a consistent, reusable visual shorthand across screens
+
+See [responsive-and-platform.md](./references/responsive-and-platform.md) for:
+
+- wireframing mobile-first at real device scale and thumb reach
+- setting breakpoints from content and adapting navigation per platform

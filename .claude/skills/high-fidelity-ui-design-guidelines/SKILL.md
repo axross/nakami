@@ -11,7 +11,7 @@ Apply these guidelines when producing a **high-fidelity** UI mockup — renderin
 
 The template is [hifi-design-kit.html](./assets/hifi-design-kit.html) — a self-contained, theme-aware page carrying an **element palette** (components in isolation on paired light/dark grounds) and a **screen render** (full screens in light and dark rails). It is tailored to this project's tokens; copy it to a scratch location, fill it for the screen(s) at hand, and publish or export the result.
 
-The normative rules below are grounded in the external field consensus captured in [best-practices.md](./references/best-practices.md) — 21 distilled principles cited to 60+ reputable sources (Nielsen Norman Group, Material Design 3, Apple Human Interface Guidelines, W3C/WAI WCAG, Laws of UX, shadcn/ui). Consult it for the reasoning and citations behind the guidance here; the MUST/SHOULD rules in this document remain authoritative, and design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`.
+The normative rules below are grounded in the external field consensus distilled in this skill's **Research-Grounded Best Practices** references (the routing section at the end of this document) — 21 principles across six topic files, each expanded with reasoning, do/don't examples, and citations to reputable sources (Nielsen Norman Group, Material Design 3, Apple Human Interface Guidelines, W3C/WAI WCAG, Laws of UX, shadcn/ui). The MUST/SHOULD rules in this document remain authoritative, and design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`.
 
 ## How to Use the Template
 
@@ -54,3 +54,40 @@ The mirrored tokens (as of the kit's authoring):
 - MUST keep the element palette on the same shared `.device, .el-surface` token block as the screen render — MUST NOT fork a second token set.
 - SHOULD ground high-fidelity type, spacing, and radii in the real tokens rather than eyeballed values, so the render stays faithful to the app.
 - SHOULD, when adapting this kit to a different project, repoint the mirrored token block at that project's design-system source and update the token list above.
+
+## Research-Grounded Best Practices
+
+These references distill the external field consensus behind this skill's rules, one topic per file, each with expanded guidance, do/don't examples, and citations. The MUST/SHOULD rules elsewhere in this document remain authoritative.
+
+See [tokens-and-theming.md](./references/tokens-and-theming.md) for:
+
+- driving every visual value through layered semantic design tokens
+- treating dark mode as a first-class, tone-based appearance
+
+See [layout-and-spacing.md](./references/layout-and-spacing.md) for:
+
+- building a deliberate visual hierarchy and validating it with a squint test
+- grouping with proximity, whitespace, and common region
+- anchoring layout to an 8px grid and respecting safe areas across device sizes
+
+See [typography.md](./references/typography.md) for:
+
+- building a semantic type scale instead of ad-hoc sizes
+- tuning body text for readability — size, measure, and leading
+
+See [color-and-contrast.md](./references/color-and-contrast.md) for:
+
+- meeting text and non-text contrast minimums, recalculated separately for each theme
+- never encoding meaning in color alone
+
+See [interaction-states-and-feedback.md](./references/interaction-states-and-feedback.md) for:
+
+- sizing and spacing touch targets, and making interactive elements look interactive
+- designing complete, differentiated interaction states and preferring error surfacing over disabled controls
+- writing clear error feedback and matching feedback to response-time thresholds
+
+See [accessibility-and-cognitive-load.md](./references/accessibility-and-cognitive-load.md) for:
+
+- providing a visible focus indicator with a logical focus order, and preference-aware motion
+- using native semantics and labels for assistive technology
+- reducing cognitive load and investing in visual quality without masking usability
