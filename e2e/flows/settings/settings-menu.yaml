@@ -12,8 +12,9 @@ tags:
     id: "settings-feedback-row"
 - assertVisible:
     id: "settings-license-row"
-- assertVisible:
-    id: "settings-open-dev-menu-row"
+# The Debug group (Open Dev Menu) renders only in development-mode builds
+# (__DEV__), so it is not asserted here — this flow runs against both dev-mode
+# and release-mode builds.
 - assertVisible:
     id: "settings-technical-details"
 - tapOn:

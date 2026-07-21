@@ -13,7 +13,7 @@ payload-mobile is a companion mobile app for Payload CMS, built with Expo (React
 
 - Runtime/framework: Expo SDK 57 (React Native 0.86, React 19) with Expo Router file-based routing; New Architecture and the React Compiler are enabled.
 - Language: TypeScript (strict), checked with `npx tsc` via `npm run typecheck`.
-- Package manager: npm; runtime version (Node 22) pinned in the CI workflows and `eas.json`.
+- Package manager: npm; runtime version (Node 22) pinned in the CI workflows.
 - Lint/format: Biome (`biome.json`), tabs + double quotes.
 - Directory convention: **by feature** — one directory per domain under `src/`, each owning its own components, queries, mutations, models, and helpers.
 - Business logic: React hooks; client state in Zustand stores, server/db cache in TanStack Query (`queryClient` in `src/core/helpers/query-client.ts`).

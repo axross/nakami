@@ -1,6 +1,6 @@
 # Dev Commands
 
-Apply this reference when choosing which project command to run or when updating the command surface in the project's manifest. The project pins its runtime version (Node 22) in the CI workflows and `eas.json`; respect that pin when running or upgrading.
+Apply this reference when choosing which project command to run or when updating the command surface in the project's manifest. The project pins its runtime version (Node 22) in the CI workflows; respect that pin when running or upgrading.
 
 ## Application Commands
 
@@ -10,7 +10,7 @@ These commands run the application locally or produce a release-shaped bundle.
 | ------- | ------- |
 | `npm run dev` | Starts the Expo dev server (connect with a dev build or simulator). |
 | `npm run ios` / `npm run android` | Compiles and runs the native dev build on a simulator/emulator or device. |
-| `npm run build` | Exports the production JS bundles for iOS and Android (`expo export`). Release binaries are built with EAS Build. |
+| `npm run build` | Exports the production JS bundles for iOS and Android (`expo export`). Signed, installable Android APKs are produced by the Fastlane preview workflow (`android-build.yml`). |
 
 **Guidelines:**
 
