@@ -310,7 +310,9 @@
   .wc-prog .fill { height: 100%; width: 62%; background: var(--accent); }
   .wc-av { width: 32px; height: 32px; border-radius: 50%; background: var(--wire-fill-2); border: 1px solid var(--wire-line); flex: none; }
   .wc-avstack { display: flex; } .wc-avstack .wc-av + .wc-av { margin-left: -9px; box-shadow: 0 0 0 2px var(--panel); }
-  .wc-badge { display: inline-block; height: 15px; min-width: 24px; border-radius: 999px; background: var(--wire-solid); }
+  .wc-badge { display: inline-flex; align-items: center; justify-content: center; height: 20px; min-width: 34px; padding: 0 10px; border-radius: 999px; background: var(--wire-solid); }
+  .wc-badge .t { height: 6px; width: 22px; border-radius: 3px; background: var(--wire-ink); opacity: 0.7; }
+  .wc-badge.count { min-width: 20px; width: 20px; height: 20px; padding: 0; } .wc-badge.count .t { width: 8px; }
   .wc-div { height: 1px; background: var(--wire-line); width: 100%; }
   .wc-divlbl { display: flex; align-items: center; gap: 8px; width: 100%; } .wc-divlbl .wc-div { flex: 1; } .wc-divlbl .t { height: 7px; width: 30px; border-radius: 3px; background: var(--wire-fill-2); }
   .wc-skel { display: flex; flex-direction: column; gap: 7px; width: 100%; } .wc-skel .b { height: 9px; border-radius: 4px; background: linear-gradient(90deg, var(--wire-fill-2), var(--wire-line), var(--wire-fill-2)); } .wc-skel .b.w60 { width: 60%; }
@@ -404,7 +406,8 @@
   .field .box.invalid { border-color: var(--danger); }
   .wc-check.mixed { background: var(--accent); border-color: var(--accent); }
   .wc-check.mixed::after { content: ""; position: absolute; left: 4px; right: 4px; top: 8px; height: 2px; width: auto; background: var(--panel); border: 0; transform: none; }
-  .wc-badge.accent { background: var(--accent); } .wc-badge.danger { background: var(--danger); opacity: 0.6; }
+  .wc-badge.accent { background: var(--accent); } .wc-badge.accent .t { background: #fff; opacity: 0.95; }
+  .wc-badge.danger { background: var(--danger); } .wc-badge.danger .t { background: #fff; opacity: 0.95; }
   .btn.danger { background: var(--danger); opacity: 0.6; }
   .wc-pagerow .pg.is-disabled { opacity: 0.4; }
   .wc-table .trow.sel { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
@@ -415,7 +418,7 @@
   .wc-spin { width: 12px; height: 12px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--panel) 55%, transparent); border-top-color: transparent; }
   .wc-av.sm { width: 24px; height: 24px; } .wc-av.lg { width: 42px; height: 42px; }
   .wc-av.fallback { display: flex; align-items: center; justify-content: center; } .wc-av.fallback::after { content: ""; width: 12px; height: 9px; border-radius: 2px; background: var(--wire-ink); opacity: 0.5; }
-  .wc-badge.outline { background: transparent; border: 1px solid var(--wire-line); }
+  .wc-badge.outline { background: transparent; border: 1px solid var(--wire-line); } .wc-badge.outline .t { background: var(--wire-ink); opacity: 0.6; }
 
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
@@ -457,7 +460,7 @@
       <div class="wc-strow inline"><span class="wc-stlab">fallback</span><span class="wc-av fallback"></span></div>
       <div class="wc-strow inline"><span class="wc-stlab">group</span><span class="wc-avstack"><span class="wc-av"></span><span class="wc-av"></span><span class="wc-av"></span></span></div>
     </div></div></div>
-    <div class="el-card"><span class="el-tag">badge — tone / style</span><div class="el-stage"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="wc-badge"></span><span class="wc-badge accent"></span><span class="wc-badge danger"></span><span class="wc-badge outline"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">badge — tone / style</span><div class="el-stage"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="wc-badge"><span class="t"></span></span><span class="wc-badge accent"><span class="t"></span></span><span class="wc-badge danger"><span class="t"></span></span><span class="wc-badge outline"><span class="t"></span></span><span class="wc-badge count accent"><span class="t"></span></span></div></div></div>
     <div class="el-card"><span class="el-tag">divider</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:12px"><span class="wc-div"></span><span class="wc-divlbl"><span class="wc-div"></span><span class="t"></span><span class="wc-div"></span></span></div></div></div>
     <div class="el-card"><span class="el-tag">skeleton</span><div class="el-stage"><div class="wc-skel"><span class="b"></span><span class="b"></span><span class="b w60"></span></div></div></div>
   </div>
