@@ -3,6 +3,7 @@ import type { JSX, ReactNode } from "react";
 import { type StyleProp, Text, View, type ViewStyle } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
+/** The icon glyph names {@link MessageState} accepts, from the MaterialCommunityIcons set. */
 export type MessageStateIconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 /**
