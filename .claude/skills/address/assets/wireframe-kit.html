@@ -84,8 +84,8 @@
   .lead-note { max-width: 66ch; color: var(--ink-soft); font-size: 14.5px; margin: -6px 0 22px; }
   .lead-note code { font-family: var(--mono); font-size: 12.5px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 
-  .grid-shared { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
-  .grid-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+  .grid-shared { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 20px; }
+  .grid-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 22px; }
 
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
   /* .card.rec highlights the (Recommended) option in an options round. */
@@ -374,7 +374,7 @@
   .wc-btabs .tab .ic { width: 16px; height: 16px; border-radius: 5px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); } .wc-btabs .tab .tl { height: 6px; width: 60%; border-radius: 3px; background: var(--wire-fill-2); }
   .wc-btabs .tab.on .ic { background: var(--accent); border-color: var(--accent); } .wc-btabs .tab.on .tl { background: var(--accent); }
 
-  .el-surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .el-surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
   .el-surface { border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: var(--bg); display: flex; flex-direction: column; gap: 18px; }
   .el-surface > .el-band { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
   .el-surface > .el-band .dotL, .el-surface > .el-band .dotD { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line-d); }

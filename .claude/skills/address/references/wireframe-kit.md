@@ -2,7 +2,7 @@
 
 Apply this reference when building the **Artifact** for an `/address` design round — wireframe or high fidelity. It owns the project's *screen-mockup vocabulary*: the phone frame, the breadboard primitives, the archetypes, the option-grid comparison layout, and the wireframe-vs-high-fidelity fidelity contract. The exhibit *lifecycle* — when a round triggers, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft (typography, palette, spacing rhythm) stays owned by the harness `artifact-design` guidance; the design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`. This kit sits between them and owns only what a Payload Mobile screen mockup looks like.
 
-The template is [wireframe-kit.html](./wireframe-kit.html) — a self-contained, theme-aware page carrying both modes. It opens with a **UI-elements palette** (components in isolation, both fidelities) and then the **screen showcase** (archetypes, the options-round layout, and full rendered screens). Copy it to the harness scratchpad, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish the result as an Artifact.
+The template is [wireframe-kit.html](../assets/wireframe-kit.html) — a self-contained, theme-aware page carrying both modes. It opens with a **UI-elements palette** (components in isolation, both fidelities) and then the **screen showcase** (archetypes, the options-round layout, and full rendered screens). Copy it to the harness scratchpad, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish the result as an Artifact.
 
 ## How to Use the Template
 
@@ -10,7 +10,7 @@ The template is a copy-and-fill starting point, not a library to import. Each ro
 
 **Guidelines:**
 
-- MUST start each round's Artifact from [wireframe-kit.html](./wireframe-kit.html) rather than reinventing the format, so exhibits stay visually consistent across runs and authors.
+- MUST start each round's Artifact from [wireframe-kit.html](../assets/wireframe-kit.html) rather than reinventing the format, so exhibits stay visually consistent across runs and authors.
 - MUST copy the template into the harness scratchpad (outside the repository checkout) and build there; MUST NOT commit the kit-derived mockup or any render to the repository on any branch, per [visual-design-options.md](./visual-design-options.md).
 - MUST keep the published page self-contained — no external fetches (no CDN fonts, scripts, or remote images); the template uses system font stacks and inline SVG for exactly this reason.
 - MUST consult the harness `artifact-design` guidance for general page craft before publishing; this kit governs the mockup vocabulary, not the whole page.
@@ -98,7 +98,7 @@ The mirrored tokens (as of the kit's authoring):
 
 **Guidelines:**
 
-- MUST re-read `src/common/constants/style.ts` before a high-fidelity round and reconcile any drift between it and the `.device` / `.device.dark` custom properties in [wireframe-kit.html](./wireframe-kit.html).
+- MUST re-read `src/common/constants/style.ts` before a high-fidelity round and reconcile any drift between it and the `.device` / `.device.dark` custom properties in [wireframe-kit.html](../assets/wireframe-kit.html).
 - MUST treat `style.ts` as the source of truth for token values; MUST NOT present the kit's mirrored values as authoritative.
 - MUST keep the light and dark renders in lockstep — the template assembles both rails from one set of screen templates so a change lands in both themes at once; preserve that structure.
 - SHOULD ground high-fidelity type, spacing, and radii in the real tokens rather than eyeballed values, so the render stays faithful to the app.
