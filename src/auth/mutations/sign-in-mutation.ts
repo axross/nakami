@@ -1,10 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { mutationOptions } from "@tanstack/react-query";
 import { login } from "~/auth/helpers/payload-client";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { createModuleLogger } from "~/core/helpers/logging";
 
-const logger = createModuleLogger("auth/use-sign-in");
+const logger = createModuleLogger("auth/sign-in-mutation");
 
 /** Input for a sign-in attempt; `serverUrl` is expected already normalized. */
 export interface SignInInput {
@@ -15,15 +15,22 @@ export interface SignInInput {
 }
 
 /**
- * Signs in against a Payload server: exchanges credentials for a token, then
- * persists the session and marks the app authenticated. The pending/error
- * state drives the sign-in form; the password never leaves this call.
+ * Mutation options for signing in against a Payload server: exchanges
+ * credentials for a token, then persists the session and marks the app
+ * authenticated. Consume with `useMutation(getSignInMutationOptions())`; the
+ * pending/error state drives the sign-in form and the password never leaves
+ * this call. The raw error is surfaced unwrapped so the screen can map a
+ * `PayloadRequestError` to a friendly message.
  */
-export function useSignIn() {
-	const authenticate = useAuthStore((state) => state.authenticate);
-
-	return useMutation<Session, unknown, SignInInput>({
-		mutationFn: async ({ serverUrl, collectionSlug, email, password }) => {
+export function getSignInMutationOptions() {
+	return mutationOptions({
+		mutationKey: ["auth-session", "sign-in"],
+		mutationFn: async ({
+			serverUrl,
+			collectionSlug,
+			email,
+			password,
+		}: SignInInput): Promise<Session> => {
 			const server = { serverUrl, collectionSlug };
 			const startedAt = performance.now();
 			// Routine bracket-open at debug; the completion below is the
@@ -40,7 +47,10 @@ export function useSignIn() {
 					exp: result.exp,
 					user: result.user,
 				};
-				await authenticate(session);
+				// Read imperatively: a mutation factory holds no hooks, and the
+				// store action is stable, so `getState()` is the correct
+				// non-reactive access.
+				await useAuthStore.getState().authenticate(session);
 				logger.info("Completed signing in.", {
 					serverUrl,
 					duration: performance.now() - startedAt,
