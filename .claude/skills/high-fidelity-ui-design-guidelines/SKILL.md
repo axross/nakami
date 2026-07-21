@@ -11,6 +11,8 @@ Apply these guidelines when producing a **high-fidelity** UI mockup — renderin
 
 The template is [hifi-design-kit.html](./assets/hifi-design-kit.html) — a self-contained, theme-aware page carrying an **element palette** (components in isolation on paired light/dark grounds) and a **screen render** (full screens in light and dark rails). It is tailored to this project's tokens; copy it to a scratch location, fill it for the screen(s) at hand, and publish or export the result.
 
+The normative rules below are grounded in the external field consensus captured in [best-practices.md](./references/best-practices.md) — 21 distilled principles cited to 60+ reputable sources (Nielsen Norman Group, Material Design 3, Apple Human Interface Guidelines, W3C/WAI WCAG, Laws of UX, shadcn/ui). Consult it for the reasoning and citations behind the guidance here; the MUST/SHOULD rules in this document remain authoritative, and design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`.
+
 ## How to Use the Template
 
 Produce one page per high-fidelity mockup. A high-fidelity mockup is reached only after the low-fidelity direction is chosen (per the wireframe design guidelines and, in an exhibit, the `/address` delivery skill's lifecycle).

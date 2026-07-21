@@ -11,6 +11,8 @@ Apply these guidelines when producing a **low-fidelity wireframe** (breadboard m
 
 The template is [wireframe-kit.html](./assets/wireframe-kit.html) — a self-contained, theme-aware page carrying two device canvases, the breadboard component library, the archetypes, and the options-comparison layout. Copy it to a scratch location, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish or export the result.
 
+The normative rules below are grounded in the external field consensus captured in [best-practices.md](./references/best-practices.md) — 18 distilled principles cited to 50+ reputable sources (Nielsen Norman Group, the Interaction Design Foundation, Smashing Magazine, Basecamp's *Shape Up*, platform design systems). Consult it for the reasoning and citations behind the guidance here; the MUST/SHOULD rules in this document remain authoritative for the project.
+
 ## How to Use the Template
 
 The template is a copy-and-fill starting point, not a library to import. Produce one page per wireframe you are presenting.
