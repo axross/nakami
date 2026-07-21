@@ -193,19 +193,27 @@
   .frameblock { flex: none; display: flex; flex-direction: column; gap: 10px; }
   .frameblock .cap { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-soft); text-align: center; }
 
-  .device {
+  /* Shared real-token block — the phone (.device) and the isolated element
+     surfaces (.el-surface) both consume it, so the style.ts mirror stays
+     single-point. Edit tokens HERE, never per-component. */
+  .device, .el-surface {
     /* light tokens — mirror lightColors + radiusSizes in style.ts */
     --bg: #fdfdfd; --elev: #ffffff; --txt: #1c2024; --txt2: #60646c;
     --line-d: #d9d9e0; --accent-d: #0588f0; --accentC: #ffffff; --danger-d: #dc3e42;
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --tabInactive: #8a8f98;
+  }
+  .device.dark, .el-surface.dark {
+    /* dark tokens — mirror darkColors in style.ts */
+    --bg: #111113; --elev: #19191b; --txt: #edeef0; --txt2: #b0b4ba;
+    --line-d: #3a3a44; --accent-d: #3b9eff; --accentC: #ffffff; --danger-d: #ec5d5e;
+    --tabInactive: #8b8f98;
+  }
+  .device {
     width: 288px; border-radius: 40px; padding: 11px; background: #d7d9de;
     box-shadow: 0 18px 40px -20px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.12);
   }
   .device.dark {
-    /* dark tokens — mirror darkColors in style.ts */
-    --bg: #111113; --elev: #19191b; --txt: #edeef0; --txt2: #b0b4ba;
-    --line-d: #3a3a44; --accent-d: #3b9eff; --accentC: #ffffff; --danger-d: #ec5d5e;
-    --tabInactive: #8b8f98; background: #2a2b2f;
+    background: #2a2b2f;
     box-shadow: 0 18px 44px -20px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.35);
   }
   .scr { position: relative; border-radius: 30px; overflow: hidden; background: var(--bg); height: 560px; display: flex; flex-direction: column; }
@@ -235,8 +243,8 @@
   .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font-size: 16px; color: var(--txt); }
   .input.ph { color: var(--txt2); }
   .input .dotpw { letter-spacing: 3px; }
-  .form .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font-size: 14px; margin-top: -4px; border: 0; }
-  .form .err svg { width: 16px; height: 16px; flex: none; }
+  .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font-size: 14px; margin-top: -4px; border: 0; }
+  .form .err svg, .el-surface .err svg { width: 16px; height: 16px; flex: none; }
   .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-d); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }
   .submit.busy { opacity: 0.75; }
   .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45); border-top-color: #fff; }
@@ -264,6 +272,124 @@
   .tabs .tab.on { color: var(--accent-d); }
   .tabs .tab svg { width: 24px; height: 24px; }
 
+  /* =========================================================================
+     UI ELEMENTS PALETTE — individual components in isolation, both fidelities.
+     Wireframe specimens use the breadboard greys; high-fidelity specimens
+     reuse the same real-token classes the screens use (.input, .item, .tab …)
+     on shared .el-surface token grounds, so nothing here forks the tokens.
+     ========================================================================= */
+  .el-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .el-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .el-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+  .el-stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 54px; padding: 10px; background: var(--wire-fill); border: 1px solid var(--wire-line); border-radius: 8px; }
+  .el-stage > .w100 { width: 100%; }
+  .el-card.wide { grid-column: span 2; } .el-card.wide3 { grid-column: span 3; }
+  .el-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin: 26px 0 12px; }
+
+  /* ---- wireframe component specimens (breadboard greys) ---- */
+  .wc-lbl { height: 7px; border-radius: 3px; background: var(--wire-fill-2); }
+  .wc-solid { height: 8px; border-radius: 3px; background: var(--wire-solid); }
+  .wc-check { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--wire-line); background: var(--wire-fill); position: relative; flex: none; }
+  .wc-check.on { background: var(--accent); border-color: var(--accent); }
+  .wc-check.on::after { content: ""; position: absolute; left: 5px; top: 2px; width: 4px; height: 8px; border: solid var(--panel); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .wc-radio { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--wire-line); background: var(--wire-fill); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .wc-radio.on { border-color: var(--accent); }
+  .wc-radio.on::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+  .wc-opt { display: flex; align-items: center; gap: 8px; } .wc-opt .wc-lbl { width: 60%; }
+  .wc-switch { width: 34px; height: 20px; border-radius: 999px; background: var(--wire-line); position: relative; flex: none; }
+  .wc-switch.on { background: var(--accent); }
+  .wc-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--panel); }
+  .wc-switch.on::after { left: 16px; }
+  .wc-slider { height: 18px; display: flex; align-items: center; }
+  .wc-slider .track { height: 4px; border-radius: 2px; background: var(--wire-line); flex: 1; position: relative; }
+  .wc-slider .fill { position: absolute; left: 0; top: 0; height: 100%; width: 55%; background: var(--accent); border-radius: 2px; }
+  .wc-slider .thumb { position: absolute; left: 55%; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: var(--panel); border: 1.5px solid var(--accent); }
+  .wc-prog { height: 6px; border-radius: 3px; background: var(--wire-line); overflow: hidden; width: 100%; }
+  .wc-prog .fill { height: 100%; width: 62%; background: var(--accent); }
+  .wc-av { width: 32px; height: 32px; border-radius: 50%; background: var(--wire-fill-2); border: 1px solid var(--wire-line); flex: none; }
+  .wc-avstack { display: flex; } .wc-avstack .wc-av + .wc-av { margin-left: -9px; box-shadow: 0 0 0 2px var(--panel); }
+  .wc-badge { display: inline-block; height: 15px; min-width: 24px; border-radius: 999px; background: var(--wire-solid); }
+  .wc-div { height: 1px; background: var(--wire-line); width: 100%; }
+  .wc-divlbl { display: flex; align-items: center; gap: 8px; width: 100%; } .wc-divlbl .wc-div { flex: 1; } .wc-divlbl .t { height: 7px; width: 30px; border-radius: 3px; background: var(--wire-fill-2); }
+  .wc-skel { display: flex; flex-direction: column; gap: 7px; width: 100%; } .wc-skel .b { height: 9px; border-radius: 4px; background: linear-gradient(90deg, var(--wire-fill-2), var(--wire-line), var(--wire-fill-2)); } .wc-skel .b.w60 { width: 60%; }
+  .wc-textarea { height: 52px; border-radius: 7px; border: 1px dashed var(--wire-line); background: var(--wire-fill); width: 100%; }
+  .wc-select { height: 28px; border-radius: 7px; border: 1px solid var(--wire-line); background: var(--wire-fill); display: flex; align-items: center; justify-content: space-between; padding: 0 9px; width: 100%; }
+  .wc-select .ph { height: 7px; width: 45%; border-radius: 3px; background: var(--wire-line); opacity: 0.6; }
+  .wc-cv { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--wire-ink); flex: none; }
+  .wc-hint { font-family: var(--mono); font-size: 9px; color: var(--wire-ink); letter-spacing: 0.03em; }
+
+  .wc-menu { border: 1px solid var(--wire-line); border-radius: 9px; background: var(--panel); padding: 5px; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 8px 18px rgba(0,0,0,0.12); width: 100%; }
+  .wc-menu .mi { height: 10px; border-radius: 3px; background: var(--wire-fill-2); } .wc-menu .mi.w70 { width: 70%; } .wc-menu .mi.w50 { width: 50%; } .wc-menu .sep { height: 1px; background: var(--wire-line); margin: 2px 0; }
+  .wc-card { border: 1px solid var(--wire-line); border-radius: 10px; background: var(--panel); overflow: hidden; display: flex; flex-direction: column; width: 100%; }
+  .wc-card .media { height: 38px; background: var(--wire-fill-2); }
+  .wc-card .cbody { padding: 9px; display: flex; flex-direction: column; gap: 6px; }
+  .wc-card .cfoot { padding: 9px; border-top: 1px solid var(--wire-line); display: flex; gap: 6px; }
+  .wc-alert { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--wire-line); border-radius: 8px; background: var(--wire-fill); padding: 9px; width: 100%; }
+  .wc-alert .ic { width: 14px; height: 14px; border-radius: 4px; background: var(--wire-solid); flex: none; margin-top: 1px; }
+  .wc-alert.danger { border-color: var(--danger); } .wc-alert.danger .ic { background: var(--danger); opacity: 0.6; }
+  .wc-alert .col { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .wc-tabseg { display: flex; gap: 10px; border-bottom: 1px solid var(--wire-line); width: 100%; }
+  .wc-tabseg .t { padding-bottom: 7px; } .wc-tabseg .t .l { height: 8px; width: 30px; border-radius: 3px; background: var(--wire-fill-2); }
+  .wc-tabseg .t.on { border-bottom: 2px solid var(--accent); margin-bottom: -1px; } .wc-tabseg .t.on .l { background: var(--wire-solid); }
+  .wc-pagerow { display: flex; gap: 5px; align-items: center; }
+  .wc-pagerow .pg { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--wire-line); background: var(--wire-fill); } .wc-pagerow .pg.on { background: var(--accent); border-color: var(--accent); }
+  .wc-tip { position: relative; background: var(--wire-ink); border-radius: 6px; padding: 7px 9px; width: max-content; }
+  .wc-tip .l { height: 6px; width: 44px; border-radius: 3px; background: var(--panel); opacity: 0.85; }
+  .wc-tip::after { content: ""; position: absolute; bottom: -5px; left: 14px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--wire-ink); }
+  .wc-toaststack { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .wc-toast { border: 1px solid var(--wire-line); border-radius: 9px; background: var(--panel); padding: 9px; display: flex; gap: 8px; align-items: center; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+  .wc-toast .ic { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); flex: none; } .wc-toast .col { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .wc-table { border: 1px solid var(--wire-line); border-radius: 8px; overflow: hidden; width: 100%; }
+  .wc-table .thead, .wc-table .trow { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-bottom: 1px solid var(--wire-line); } .wc-table .trow:last-child { border-bottom: 0; }
+  .wc-table .thead { background: var(--wire-fill); }
+  .wc-table .cell { height: 7px; border-radius: 3px; background: var(--wire-fill-2); flex: 1; } .wc-table .thead .cell { background: var(--wire-solid); } .wc-table .cell.sm { flex: 0 0 22px; }
+  .wc-table .cbx { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--wire-line); flex: none; }
+  .wc-cal { border: 1px solid var(--wire-line); border-radius: 8px; background: var(--panel); padding: 8px; width: 100%; }
+  .wc-cal .chead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; } .wc-cal .chead .wc-lbl { width: 46px; }
+  .wc-cal .cgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .wc-cal .d { aspect-ratio: 1; border-radius: 4px; background: var(--wire-fill-2); } .wc-cal .d.on { background: var(--accent); }
+  .wc-carousel { display: flex; gap: 8px; align-items: center; width: 100%; }
+  .wc-carousel .slide { flex: none; width: 62%; height: 54px; border-radius: 8px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); }
+  .wc-carousel .peek { flex: none; width: 16%; height: 42px; border-radius: 8px; background: var(--wire-fill); border: 1px solid var(--wire-line); }
+  .wc-dots { display: flex; gap: 4px; justify-content: center; margin-top: 7px; } .wc-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--wire-line); } .wc-dots i.on { background: var(--accent); }
+  .wc-btngroup { display: inline-flex; } .wc-btngroup .b { height: 28px; padding: 0 14px; background: var(--wire-solid); border-right: 1.5px solid var(--panel); } .wc-btngroup .b:first-child { border-radius: 8px 0 0 8px; } .wc-btngroup .b:last-child { border-radius: 0 8px 8px 0; border-right: 0; } .wc-btngroup .b.on { background: var(--accent); }
+  .wc-msgs { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .wc-bubble { max-width: 76%; border-radius: 12px; padding: 8px 9px; display: flex; flex-direction: column; gap: 4px; }
+  .wc-bubble.in { background: var(--wire-fill-2); align-self: flex-start; border-bottom-left-radius: 3px; }
+  .wc-bubble.out { background: var(--accent); align-self: flex-end; border-bottom-right-radius: 3px; }
+  .wc-bubble .l { height: 6px; width: 70px; border-radius: 3px; background: var(--wire-line); } .wc-bubble.out .l { background: var(--panel); opacity: 0.85; }
+
+  /* device-context specimens (overlays / mobile nav) live in a mini frame */
+  .wc-frame { position: relative; height: 150px; background: var(--panel); border: 1px solid var(--wire-line); border-radius: 10px; overflow: hidden; width: 100%; }
+  .wc-frame .dimbody { padding: 10px; display: flex; flex-direction: column; gap: 6px; opacity: 0.4; }
+  .wc-frame .scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--ink) 30%, transparent); }
+  .wc-dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 80%; background: var(--panel); border: 1px solid var(--wire-line); border-radius: 10px; padding: 11px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 12px 26px rgba(0,0,0,0.25); }
+  .wc-dialog .actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 2px; }
+  .wc-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--panel); border: 1px solid var(--wire-line); border-bottom: 0; border-radius: 14px 14px 0 0; padding: 8px 11px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .wc-sheet .grab { width: 34px; height: 4px; border-radius: 2px; background: var(--wire-line); align-self: center; margin-bottom: 2px; }
+  .wc-btabs { position: absolute; left: 0; right: 0; bottom: 0; display: flex; border-top: 1px solid var(--wire-line); background: var(--panel); padding: 7px 4px 5px; }
+  .wc-btabs .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .wc-btabs .tab .ic { width: 16px; height: 16px; border-radius: 5px; background: var(--wire-fill-2); border: 1px solid var(--wire-line); } .wc-btabs .tab .tl { height: 6px; width: 60%; border-radius: 3px; background: var(--wire-fill-2); }
+  .wc-btabs .tab.on .ic { background: var(--accent); border-color: var(--accent); } .wc-btabs .tab.on .tl { background: var(--accent); }
+
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
+
+  .el-surfaces { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .el-surface { border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: var(--bg); display: flex; flex-direction: column; gap: 18px; }
+  .el-surface > .el-band { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); display: flex; align-items: center; gap: 8px; }
+  .el-surface > .el-band .dotL, .el-surface > .el-band .dotD { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line-d); }
+  .el-spec { display: flex; flex-direction: column; gap: 8px; }
+  .el-spec > .el-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt2); }
+  .el-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font-size: 16px; font-weight: 600; }
+  .el-btn.primary { background: var(--accent-d); color: var(--accentC); }
+  .el-btn.secondary { background: transparent; color: var(--accent-d); border: 1px solid var(--line-d); }
+  .el-btn.busy { background: var(--accent-d); color: var(--accentC); opacity: 0.75; }
+  .input.focus { border-color: var(--accent-d); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-d) 18%, transparent); }
+  .input.error { border-color: var(--danger-d); }
+  .caret { width: 1.5px; height: 20px; background: var(--accent-d); margin-left: 1px; display: inline-block; }
+
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 </style>
@@ -272,13 +398,99 @@
   <header class="masthead">
     <p class="eyebrow">Payload Mobile · Wireframe Kit</p>
     <h1>Screen-mockup vocabulary for /address design exhibits</h1>
-    <p class="lede">A copy-and-fill template with two modes — a grey <b>breadboard wireframe</b> and a real-token <b>high-fidelity</b> render (light + dark). Delete the mode you are not presenting, fill the archetypes/options for your screen(s), and publish as an Artifact. See <code>wireframe-kit.md</code> for the primitives, the fidelity contract, and how to fill each round.</p>
+    <p class="lede">A copy-and-fill template with two modes — a grey <b>breadboard wireframe</b> and a real-token <b>high-fidelity</b> render (light + dark). It opens with a <b>UI-elements palette</b> (components in isolation, both fidelities) to compose a novel screen when no archetype fits, then the <b>screen showcase</b> (archetypes, the options-round layout, and full rendered screens). Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. See <code>wireframe-kit.md</code> for the primitives, the fidelity contract, and how to fill each round.</p>
     <div class="meta">
+      <span class="tag"><strong>Palette</strong> elements · screens</span>
       <span class="tag"><strong>Modes</strong> wireframe · high-fidelity</span>
       <span class="tag"><strong>Tokens</strong> mirror src/common/constants/style.ts</span>
       <span class="tag">Self-contained · theme-aware</span>
     </div>
   </header>
+
+  <!-- =======================================================================
+       UI ELEMENTS PALETTE — components in isolation, both fidelities.
+       Atoms first, so an author can compose a novel screen from parts when no
+       archetype fits. Wireframe specimens use the breadboard greys; the
+       high-fidelity specimens reuse the same real-token classes as the screens
+       (.input / .item / .tab / .el-btn on .el-surface grounds) and are built by
+       the script into a light and a dark surface so the two stay in lockstep.
+       ======================================================================= -->
+
+  <h2 class="section">UI elements — component palette</h2>
+  <p class="lead-note">Individual components in isolation, to assemble a screen when no archetype fits. The wireframe component library below is breadboard greys (regions, hierarchy, flow — no color or final type); the high-fidelity palette that follows uses the app's real tokens. The library models the common shadcn-UI components in this project's mobile vocabulary. <!-- FILL: keep only the components your screen(s) use. --></p>
+
+  <p class="shared-label" style="margin-bottom:6px">Wireframe component library — breadboard</p>
+
+  <p class="el-sub">Foundations</p>
+  <div class="el-grid">
+    <div class="el-card"><span class="el-tag">heading / label</span><div class="el-stage"><div class="w-h lg w100"></div></div></div>
+    <div class="el-card"><span class="el-tag">body text</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px"><div class="w-t w80"></div><div class="w-t w60"></div></div></div></div>
+    <div class="el-card"><span class="el-tag">avatar</span><div class="el-stage"><div style="display:flex;align-items:center;gap:10px"><span class="wc-av"></span><span class="wc-avstack"><span class="wc-av"></span><span class="wc-av"></span><span class="wc-av"></span></span></div></div></div>
+    <div class="el-card"><span class="el-tag">badge</span><div class="el-stage"><span class="wc-badge"></span></div></div>
+    <div class="el-card"><span class="el-tag">divider</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:12px"><span class="wc-div"></span><span class="wc-divlbl"><span class="wc-div"></span><span class="t"></span><span class="wc-div"></span></span></div></div></div>
+    <div class="el-card"><span class="el-tag">skeleton</span><div class="el-stage"><div class="wc-skel"><span class="b"></span><span class="b"></span><span class="b w60"></span></div></div></div>
+  </div>
+
+  <p class="el-sub">Inputs &amp; controls</p>
+  <div class="el-grid">
+    <div class="el-card"><span class="el-tag">text input — empty</span><div class="el-stage"><div class="field w100"><div class="box"><span class="ph"></span></div></div></div></div>
+    <div class="el-card"><span class="el-tag">text input — filled</span><div class="el-stage"><div class="field w100"><div class="box filled"><span class="ph"></span></div></div></div></div>
+    <div class="el-card"><span class="el-tag">textarea</span><div class="el-stage"><div class="wc-textarea"></div></div></div>
+    <div class="el-card"><span class="el-tag">select — web</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:5px"><div class="wc-select"><span class="ph"></span><span class="wc-cv"></span></div><span class="wc-hint">opens dropdown menu</span></div></div></div>
+    <div class="el-card"><span class="el-tag">select — mobile (native)</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:5px"><div class="wc-select"><span class="ph"></span><span class="wc-cv"></span></div><span class="wc-hint">opens OS wheel picker</span></div></div></div>
+    <div class="el-card"><span class="el-tag">checkbox</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><span class="wc-opt"><span class="wc-check on"></span><span class="wc-lbl"></span></span><span class="wc-opt"><span class="wc-check"></span><span class="wc-lbl"></span></span></div></div></div>
+    <div class="el-card"><span class="el-tag">radio group</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><span class="wc-opt"><span class="wc-radio on"></span><span class="wc-lbl"></span></span><span class="wc-opt"><span class="wc-radio"></span><span class="wc-lbl"></span></span></div></div></div>
+    <div class="el-card"><span class="el-tag">switch — on / off</span><div class="el-stage"><div style="display:flex;gap:12px;align-items:center"><span class="wc-switch on"></span><span class="wc-switch"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">slider</span><div class="el-stage"><div class="wc-slider w100"><div class="track"><span class="fill"></span><span class="thumb"></span></div></div></div></div>
+    <div class="el-card"><span class="el-tag">date picker</span><div class="el-stage"><div class="wc-cal"><div class="chead"><span class="wc-lbl"></span><span class="wc-cv"></span></div><div class="cgrid"><span class="d"></span><span class="d"></span><span class="d"></span><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span></div></div></div></div>
+  </div>
+
+  <p class="el-sub">Buttons &amp; menus</p>
+  <div class="el-grid">
+    <div class="el-card"><span class="el-tag">button</span><div class="el-stage"><div class="btn"><span class="cap"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">button — primary</span><div class="el-stage"><div class="btn primary"><span class="cap"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">button group</span><div class="el-stage"><div class="wc-btngroup"><span class="b on"></span><span class="b"></span><span class="b"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">dropdown menu</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><div class="wc-select" style="width:60%"><span class="ph"></span><span class="wc-cv"></span></div><div class="wc-menu"><span class="mi w70"></span><span class="mi w50"></span><span class="sep"></span><span class="mi w60"></span></div></div></div></div>
+    <div class="el-card"><span class="el-tag">tooltip</span><div class="el-stage"><span class="wc-tip"><span class="l"></span></span></div></div>
+    <div class="el-card"><span class="el-tag">progress</span><div class="el-stage"><div class="wc-prog"><span class="fill"></span></div></div></div>
+  </div>
+
+  <p class="el-sub">Containers &amp; navigation</p>
+  <div class="el-grid">
+    <div class="el-card"><span class="el-tag">card</span><div class="el-stage"><div class="wc-card"><div class="media"></div><div class="cbody"><span class="wc-solid" style="width:60%"></span><span class="wc-lbl" style="width:90%"></span><span class="wc-lbl" style="width:75%"></span></div><div class="cfoot"><span class="btn primary" style="height:24px;width:64px"><span class="cap"></span></span><span class="btn" style="height:24px;width:64px"><span class="cap"></span></span></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">sectioned navigation (settings rows)</span><div class="el-stage"><div class="group w100"><div class="gh"></div><div class="rows"><div class="row"><span class="ic"></span><span class="col"><span class="a"></span><span class="b"></span></span><span style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--wire-ink)"></span></div><div class="row"><span class="ic"></span><span class="col"><span class="a"></span></span><span style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid var(--wire-ink)"></span></div><div class="row danger"><span class="ic"></span><span class="lbl"></span></div></div></div></div></div>
+    <div class="el-card"><span class="el-tag">tabs</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:9px"><div class="wc-tabseg"><span class="t on"><span class="l"></span></span><span class="t"><span class="l"></span></span><span class="t"><span class="l"></span></span></div><span class="wc-lbl" style="width:80%"></span></div></div></div>
+    <div class="el-card"><span class="el-tag">pagination</span><div class="el-stage"><div class="wc-pagerow"><span class="pg"></span><span class="pg on"></span><span class="pg"></span><span class="pg"></span></div></div></div>
+    <div class="el-card wide"><span class="el-tag">carousel</span><div class="el-stage"><div class="w100"><div class="wc-carousel"><span class="peek"></span><span class="slide"></span><span class="peek"></span></div><div class="wc-dots"><i class="on"></i><i></i><i></i></div></div></div></div>
+    <div class="el-card"><span class="el-tag">empty state</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;align-items:center;gap:7px"><span class="w-mark"></span><span class="wc-solid" style="width:56%"></span><span class="wc-lbl" style="width:72%"></span><span class="btn primary" style="width:62%;margin-top:2px"><span class="cap"></span></span></div></div></div>
+    <div class="el-card wide"><span class="el-tag">message (chat bubbles)</span><div class="el-stage"><div class="wc-msgs"><span class="wc-bubble in"><span class="l"></span><span class="l" style="width:52px"></span></span><span class="wc-bubble out"><span class="l"></span></span></div></div></div>
+  </div>
+
+  <p class="el-sub">Data</p>
+  <div class="el-grid">
+    <div class="el-card wide3"><span class="el-tag">table (data table)</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:6px"><div class="field" style="flex:1"><div class="box" style="height:26px"><span class="ph"></span></div></div><div class="btn" style="width:70px;height:26px"><span class="cap"></span></div></div><div class="wc-table"><div class="thead"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div></div><div style="display:flex;justify-content:space-between;align-items:center"><span class="wc-lbl" style="width:60px"></span><div class="wc-pagerow"><span class="pg"></span><span class="pg on"></span><span class="pg"></span></div></div></div></div></div>
+  </div>
+
+  <p class="el-sub">Feedback</p>
+  <div class="el-grid">
+    <div class="el-card wide"><span class="el-tag">banner (alert)</span><div class="el-stage"><div class="wc-alert"><span class="ic"></span><span class="col"><span class="wc-solid" style="width:50%"></span><span class="wc-lbl" style="width:85%"></span></span></div></div></div>
+    <div class="el-card wide"><span class="el-tag">banner — destructive</span><div class="el-stage"><div class="wc-alert danger"><span class="ic"></span><span class="col"><span class="wc-solid" style="width:50%"></span><span class="wc-lbl" style="width:80%"></span></span></div></div></div>
+    <div class="el-card wide"><span class="el-tag">toast (sonner)</span><div class="el-stage"><div class="wc-toaststack"><div class="wc-toast"><span class="ic"></span><span class="col"><span class="wc-solid" style="width:45%"></span><span class="wc-lbl" style="width:75%"></span></span></div><div class="wc-toast"><span class="ic"></span><span class="col"><span class="wc-solid" style="width:40%"></span></span></div></div></div></div>
+  </div>
+
+  <p class="el-sub">Overlays &amp; mobile navigation (in device frames)</p>
+  <div class="el-grid">
+    <div class="el-card wide"><span class="el-tag">dialog</span><div class="el-stage"><div class="wc-frame"><div class="dimbody"><span class="w-h"></span><span class="w-t w80"></span><span class="w-t w60"></span></div><div class="scrim"></div><div class="wc-dialog"><span class="wc-solid" style="width:55%"></span><span class="wc-lbl" style="width:90%"></span><span class="wc-lbl" style="width:70%"></span><div class="actions"><span class="btn" style="height:24px;width:56px"><span class="cap"></span></span><span class="btn primary" style="height:24px;width:56px"><span class="cap"></span></span></div></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">alert dialog</span><div class="el-stage"><div class="wc-frame"><div class="scrim"></div><div class="wc-dialog"><span class="wc-av" style="width:26px;height:26px;border-radius:7px"></span><span class="wc-solid" style="width:60%"></span><span class="wc-lbl" style="width:88%"></span><div class="actions"><span class="btn" style="height:24px;width:56px"><span class="cap"></span></span><span class="btn" style="height:24px;width:56px;background:var(--danger);opacity:.6"><span class="cap"></span></span></div></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">bottom sheet (drawer)</span><div class="el-stage"><div class="wc-frame"><div class="dimbody"><span class="w-h"></span><span class="w-t w80"></span></div><div class="scrim"></div><div class="wc-sheet"><span class="grab"></span><span class="wc-solid" style="width:45%"></span><span class="wc-lbl" style="width:85%"></span><span class="btn primary" style="margin-top:2px"><span class="cap"></span></span></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">bottom tabs (mobile)</span><div class="el-stage"><div class="wc-frame" style="height:96px"><div class="dimbody"><span class="w-t w60"></span><span class="w-t w40"></span></div><div class="wc-btabs"><div class="tab on"><span class="ic"></span><span class="tl"></span></div><div class="tab"><span class="ic"></span><span class="tl"></span></div><div class="tab"><span class="ic"></span><span class="tl"></span></div></div></div></div></div>
+  </div>
+
+  <p class="shared-label" style="margin:28px 0 12px">High fidelity — real tokens (light + dark)</p>
+  <div class="el-surfaces">
+    <div class="el-surface" id="elLight"></div>
+    <div class="el-surface dark" id="elDark"></div>
+  </div>
 
   <!-- =======================================================================
        WIREFRAME MODE
@@ -584,4 +796,44 @@
   }
   build('lightRail', 'light');
   build('darkRail', 'dark');
+
+  // High-fidelity element specimens — rendered into BOTH the light and dark
+  // .el-surface grounds from one template so the themes never drift.
+  // <!-- FILL: keep only the elements your screen(s) use. -->
+  const band = (theme) => `<p class="el-band"><span class="${theme==='dark'?'dotD':'dotL'}"></span> ${theme==='dark'?'Dark':'Light'} theme</p>`;
+  const elementSpecimens = `
+    <div class="el-spec"><span class="el-lbl">Buttons</span>
+      <div class="el-row">
+        <div class="el-btn primary">Primary</div>
+        <div class="el-btn secondary">Secondary</div>
+        <div class="el-btn busy"><span class="spinner"></span>Working…</div>
+      </div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Text input — default · placeholder · focused</span>
+      <div class="input">https://cms.example.com</div>
+      <div class="input ph">you@example.com</div>
+      <div class="input focus">users<span class="caret"></span></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Text input — error</span>
+      <div class="input error"><span class="dotpw">••••••••</span></div>
+      <div class="err"><svg><use href="#i-warn"/></svg>Incorrect email or password.</div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">List item</span>
+      <div class="grp"><div class="rows">
+        <div class="item"><span class="ico"><svg><use href="#i-gear"/></svg></span><span class="lbl">Row with chevron</span><span class="chev"></span></div>
+      </div></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Destructive row</span>
+      <div class="grp"><div class="rows">
+        <div class="item signout"><span class="ico"><svg><use href="#i-logout"/></svg></span><span class="lbl">Sign out</span></div>
+      </div></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Tab bar — active / inactive</span>
+      <div class="tabs" style="border-radius:var(--r-md);border:1px solid var(--line-d)">
+        <div class="tab on"><svg><use href="#i-home"/></svg><span>Home</span></div>
+        <div class="tab"><svg><use href="#i-gear"/></svg><span>Settings</span></div>
+      </div>
+    </div>`;
+  document.getElementById('elLight').innerHTML = band('light') + elementSpecimens;
+  document.getElementById('elDark').innerHTML = band('dark') + elementSpecimens;
 </script>

@@ -2,7 +2,7 @@
 
 Apply this reference when building the **Artifact** for an `/address` design round — wireframe or high fidelity. It owns the project's *screen-mockup vocabulary*: the phone frame, the breadboard primitives, the archetypes, the option-grid comparison layout, and the wireframe-vs-high-fidelity fidelity contract. The exhibit *lifecycle* — when a round triggers, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft (typography, palette, spacing rhythm) stays owned by the harness `artifact-design` guidance; the design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`. This kit sits between them and owns only what a Payload Mobile screen mockup looks like.
 
-The template is [wireframe-kit.html](./wireframe-kit.html) — a self-contained, theme-aware page carrying both modes. Copy it to the harness scratchpad, delete the mode you are not presenting, fill it for the screen(s) at hand, and publish the result as an Artifact.
+The template is [wireframe-kit.html](./wireframe-kit.html) — a self-contained, theme-aware page carrying both modes. It opens with a **UI-elements palette** (components in isolation, both fidelities) and then the **screen showcase** (archetypes, the options-round layout, and full rendered screens). Copy it to the harness scratchpad, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish the result as an Artifact.
 
 ## How to Use the Template
 
@@ -14,7 +14,7 @@ The template is a copy-and-fill starting point, not a library to import. Each ro
 - MUST copy the template into the harness scratchpad (outside the repository checkout) and build there; MUST NOT commit the kit-derived mockup or any render to the repository on any branch, per [visual-design-options.md](./visual-design-options.md).
 - MUST keep the published page self-contained — no external fetches (no CDN fonts, scripts, or remote images); the template uses system font stacks and inline SVG for exactly this reason.
 - MUST consult the harness `artifact-design` guidance for general page craft before publishing; this kit governs the mockup vocabulary, not the whole page.
-- SHOULD delete the mode not in use and the unused archetypes before publishing, so the Artifact shows only the round's design.
+- SHOULD delete the mode not in use, the unused elements, and the unused archetypes before publishing, so the Artifact shows only the round's design.
 - MUST fill every `<!-- FILL: ... -->` point with the round's real content and remove leftover placeholder labels.
 
 ## Breadboard Primitives
@@ -42,6 +42,23 @@ A wireframe shows places, affordances, and flow — regions and their arrangemen
 - MUST include the legend when the wireframe uses the primitives, so the breadboard is self-explaining without a claude.ai account.
 - MUST signal destructive affordances with the danger primitive **and** an icon or label shape, never color alone, matching the app's accessibility intent.
 - SHOULD reach for a primitive directly when no archetype fits, rather than bending an archetype out of shape.
+
+## UI Elements Palette
+
+The template opens with the components laid out in isolation — the parts an author assembles into a screen when no archetype fits. It has two halves:
+
+- **Wireframe component library** (breadboard greys) — a grouped gallery modelling the common shadcn-UI components in this project's mobile vocabulary. Groups: *Foundations* (heading/label, body text, avatar + stack, badge, divider, skeleton); *Inputs & controls* (text input, textarea, select — web and native-mobile variants, checkbox, radio group, switch, slider, date picker); *Buttons & menus* (button, primary button, button group, dropdown menu, tooltip, progress); *Containers & navigation* (card, **sectioned navigation** — the grouped settings rows, tabs, pagination, carousel, empty state, message bubbles); *Data* (table / data table); *Feedback* (banner/alert incl. destructive, toast/sonner); *Overlays & mobile navigation* rendered inside mini device frames (dialog, alert dialog, bottom sheet/drawer, bottom tabs). Each specimen is a `.wc-*` breadboard part or a reuse of an existing primitive.
+- **High-fidelity palette** — a subset of the same components rendered on two `.el-surface` grounds (light and dark) that reuse the real-token screen classes (`.el-btn`, `.input` with default/placeholder/focused/error states, `.item`, `.tabs`). The two surfaces are built from one template by the page script, so light and dark never drift.
+
+The grouped settings rows are named **sectioned navigation** consistently — the same component the Settings archetype and screen use.
+
+**Guidelines:**
+
+- SHOULD assemble a novel screen from the library's components when no archetype fits, rather than bending an archetype out of shape.
+- MUST keep the wireframe component library at breadboard fidelity (greys, the single accent cue for active/selected, danger tint for destructive) — never app color, final typography, or final copy.
+- MUST keep the high-fidelity specimens on the shared `.el-surface` token grounds — they consume the same mirrored `src/common/constants/style.ts` tokens as the `.device`; MUST NOT fork a second token set.
+- SHOULD delete the components a round does not use before publishing, the same as unused archetypes.
+- MUST signal destructive components (destructive banner, alert-dialog danger action, sign-out row) with the danger tint **and** an icon or label shape, never color alone.
 
 ## Archetypes
 
