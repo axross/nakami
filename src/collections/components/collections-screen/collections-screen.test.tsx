@@ -3,6 +3,7 @@ import { fireEvent, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import CollectionDetailRoute from "~/app/(tabs)/collections/[slug]";
 import { useCollections } from "~/collections/queries/use-collections";
+import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { CollectionsScreen } from "./collections-screen";
 
 jest.mock("~/collections/queries/use-collections");
@@ -18,6 +19,7 @@ function setResult(
 		data: undefined,
 		isPending: false,
 		isError: false,
+		error: null,
 		refetch,
 		...result,
 	} as unknown as ReturnType<typeof useCollections>);
@@ -51,7 +53,10 @@ describe("<CollectionsScreen>", () => {
 	});
 
 	it("shows an error state with a retry that refetches", () => {
-		const refetch = setResult({ isError: true });
+		const refetch = setResult({
+			isError: true,
+			error: new PayloadRequestError("network", "unreachable"),
+		});
 
 		const { getByTestId, getByText } = renderScreen();
 
@@ -60,6 +65,19 @@ describe("<CollectionsScreen>", () => {
 
 		fireEvent.press(getByTestId("collections-retry-button"));
 		expect(refetch).toHaveBeenCalledTimes(1);
+	});
+
+	it("shows a permission message with no retry on an auth failure", () => {
+		setResult({
+			isError: true,
+			error: new PayloadRequestError("auth", "rejected", 403),
+		});
+
+		const { getByTestId, getByText, queryByTestId } = renderScreen();
+
+		expect(getByTestId("collections-error")).toBeTruthy();
+		expect(getByText("Can't access collections")).toBeTruthy();
+		expect(queryByTestId("collections-retry-button")).toBeNull();
 	});
 
 	it("shows the empty state when there are no collections", () => {
