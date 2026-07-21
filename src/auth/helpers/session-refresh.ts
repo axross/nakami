@@ -49,14 +49,14 @@ export async function refreshSessionIfDue(): Promise<void> {
 			session.token,
 		);
 		await applyRefresh(result.refreshedToken, result.exp, result.user);
-		logger.info("Refreshed session token");
+		logger.info("Refreshed session token.");
 	} catch (error) {
 		if (error instanceof PayloadRequestError && error.kind === "auth") {
 			await deauthenticate();
 			return;
 		}
 
-		logger.warn("Token refresh deferred", {
+		logger.warn("Token refresh deferred.", {
 			reason: error instanceof Error ? error.message : "unknown",
 		});
 	} finally {
