@@ -28,7 +28,7 @@ export function getSignOutMutationOptions() {
 						session.token,
 					);
 				} catch (error) {
-					logger.warn("Remote logout failed; signing out locally", {
+					logger.warn("Remote logout failed; signing out locally.", {
 						reason: error instanceof Error ? error.message : "unknown",
 					});
 				}

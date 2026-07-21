@@ -34,6 +34,26 @@ export function reportError(
 	Sentry.captureException(error, context);
 }
 
+/** Severity levels a breadcrumb may carry, mirroring the logger's levels. */
+export type BreadcrumbLevel = "debug" | "info" | "warning" | "error";
+
+/**
+ * Records a breadcrumb on the error tracker's timeline. Breadcrumbs are the
+ * trail of recent activity attached to the next captured exception, so a
+ * reported error arrives with the events that led up to it. The structured
+ * logger mirrors every log line through here automatically, so app code should
+ * rarely call this directly — log instead. Like log context, breadcrumb data
+ * must carry identifiers and metadata only, never secrets or raw content.
+ */
+export function addBreadcrumb(breadcrumb: {
+	message: string;
+	category?: string;
+	level?: BreadcrumbLevel;
+	data?: Record<string, unknown>;
+}): void {
+	Sentry.addBreadcrumb(breadcrumb);
+}
+
 /**
  * Wraps the root component with the error reporter's instrumentation
  * (touch tracking, profiling, error boundary).

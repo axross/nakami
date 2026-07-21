@@ -2,6 +2,9 @@ import { mutationOptions } from "@tanstack/react-query";
 import { login } from "~/auth/helpers/payload-client";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
+import { createModuleLogger } from "~/core/helpers/logging";
+
+const logger = createModuleLogger("auth/sign-in-mutation");
 
 /** Input for a sign-in attempt; `serverUrl` is expected already normalized. */
 export interface SignInInput {
@@ -29,18 +32,40 @@ export function getSignInMutationOptions() {
 			password,
 		}: SignInInput): Promise<Session> => {
 			const server = { serverUrl, collectionSlug };
-			const result = await login(server, { email, password });
+			const startedAt = performance.now();
+			// Routine bracket-open at debug; the completion below is the
+			// user-significant milestone at info. Log the endpoint and collection
+			// only — never the email or password.
+			logger.debug("Started signing in.", { serverUrl, collectionSlug });
 
-			const session: Session = {
-				...server,
-				token: result.token,
-				exp: result.exp,
-				user: result.user,
-			};
-			// Read imperatively: a mutation factory holds no hooks, and the store
-			// action is stable, so `getState()` is the correct non-reactive access.
-			await useAuthStore.getState().authenticate(session);
-			return session;
+			try {
+				const result = await login(server, { email, password });
+
+				const session: Session = {
+					...server,
+					token: result.token,
+					exp: result.exp,
+					user: result.user,
+				};
+				// Read imperatively: a mutation factory holds no hooks, and the
+				// store action is stable, so `getState()` is the correct
+				// non-reactive access.
+				await useAuthStore.getState().authenticate(session);
+				logger.info("Completed signing in.", {
+					serverUrl,
+					duration: performance.now() - startedAt,
+				});
+				return session;
+			} catch (error) {
+				// Close the bracket on the failure path so the breadcrumb trail
+				// reaches the sign-in failure. The message drives the form; no
+				// credentials are logged.
+				logger.warn("Failed signing in.", {
+					serverUrl,
+					duration: performance.now() - startedAt,
+				});
+				throw error;
+			}
 		},
 	});
 }
