@@ -1,6 +1,6 @@
 # Wireframe Kit
 
-Apply this reference when building the **Artifact** for an `/address` **wireframe round** (low fidelity). It owns the project's breadboard screen-mockup vocabulary: the phone frame, the breadboard primitives, the component library, the archetypes, and the option-grid comparison layout — regions, hierarchy, and flow, never app color or final type. The **high-fidelity round** uses the project's hi-fi design kit instead (see [hifi-design-kit.md](./hifi-design-kit.md)). The exhibit *lifecycle* — which round uses which kit, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft (typography, palette, spacing rhythm) stays owned by the harness `artifact-design` guidance; the design-token *values* stay owned by the project's component guidelines and `src/common/constants/style.ts`.
+Apply this reference when building the **Artifact** for an `/address` **wireframe round** (low fidelity). It owns a **project-agnostic** breadboard screen-mockup vocabulary usable for any client app — mobile or web/desktop: two device canvases (a mobile phone frame and a browser window), the breadboard primitives, the component library, the archetypes, and the option-comparison layout — regions, hierarchy, and flow, never brand color or final type. The **high-fidelity round** uses the project's hi-fi design kit instead (see [hifi-design-kit.md](./hifi-design-kit.md)). The exhibit *lifecycle* — which round uses which kit, options vs confirmation rounds, the fidelity ladder, recording the choice — stays owned by [visual-design-options.md](./visual-design-options.md); general page craft (typography, palette, spacing rhythm) stays owned by the harness `artifact-design` guidance.
 
 The template is [wireframe-kit.html](../assets/wireframe-kit.html) — a self-contained, theme-aware page carrying the breadboard component library, the archetypes, and the options-round layout. Copy it to the harness scratchpad, delete the parts you are not presenting, fill it for the screen(s) at hand, and publish the result as an Artifact.
 
@@ -35,6 +35,10 @@ A wireframe shows places, affordances, and flow — regions and their arrangemen
 | List / settings group | `.group` > `.rows` > `.row` (`.danger`) | grouped rows; `.danger` for destructive |
 | Modal sheet | `.modal-scrim` + `.sheet` (`.grabber`) | a bottom sheet over a dimmed screen |
 | Inline card | `.inline-card` | content embedded in a card on the primary surface |
+| Browser canvas | `.browser` (`.chrome`, `.win`) | a web/desktop window |
+| Top nav (web) | `.web-topnav` (`.brand`, `.links`, `.actions`) | a web top navigation bar |
+| Sidebar layout (web) | `.web-shell` (`.side`, `.main`) | a web app shell with a sidebar |
+| Side drawer (web) | `.web-drawer` + `.scrim` | a panel sliding in from the edge |
 
 **Guidelines:**
 
@@ -45,7 +49,7 @@ A wireframe shows places, affordances, and flow — regions and their arrangemen
 
 ## Component Library
 
-The template opens with the common shadcn-UI components in this project's mobile vocabulary, grouped and laid out in isolation — the parts an author assembles into a screen when no archetype fits. Groups: *Foundations* (heading/label, body text, avatar + stack, badge, divider, skeleton); *Inputs & controls* (text input, textarea, select — web and native-mobile variants, checkbox, radio group, switch, slider, date picker); *Buttons & menus* (button, button group, dropdown menu, tooltip, progress); *Containers & navigation* (card, **sectioned navigation** — the grouped settings rows, tabs, pagination, carousel, empty state, message bubbles); *Data* (table / data table); *Feedback* (banner/alert incl. destructive, toast/sonner); *Overlays & mobile navigation* rendered inside mini device frames (dialog, alert dialog, bottom sheet/drawer, bottom tabs). Each specimen is a `.wc-*` breadboard part or a reuse of an existing primitive.
+The template opens with the common UI components client apps share (the shadcn-UI / Material vocabulary), grouped and laid out in isolation — the parts an author assembles into a screen when no archetype fits. Groups: *Foundations* (heading/label, body text, avatar + stack, badge, divider, skeleton, **mobile + web canvas**); *Inputs & controls* (text input, textarea, select — web and native-mobile variants, checkbox, radio group, switch, slider, date picker); *Buttons & menus* (button, button group, dropdown menu, tooltip, progress); *Containers & navigation* (card, **sectioned navigation** — the grouped settings rows, tabs, pagination, carousel, empty state, message bubbles); *Data* (table / data table); *Feedback* (banner/alert incl. destructive, toast/sonner); *Navigation & overlays — mobile + web* rendered inside device/browser frames (dialog, alert dialog, bottom sheet/drawer, bottom tabs; **top nav bar, sidebar layout, side drawer** for web). Each specimen is a `.wc-*`/`.web-*` breadboard part or a reuse of an existing primitive.
 
 The grouped settings rows are named **sectioned navigation** consistently — the same component the Settings archetype and screen use.
 
@@ -58,14 +62,14 @@ The grouped settings rows are named **sectioned navigation** consistently — th
 
 ## Archetypes
 
-The template ships assembled breadboards for the screens this app tends to need — empty state, form (with error), settings/list group, tab-bar states, modal sheet, inline card. They are **optional starting points**, present to speed authoring, not a required catalog.
+The template ships assembled breadboards for common screens in **both canvases** — mobile (empty state, form with error, settings/list group, tab-bar states, modal sheet, inline card) and web/desktop (app shell with nav + sidebar, form page, table/list page, modal dialog). They are **optional starting points**, present to speed authoring, not a required catalog.
 
 **Guidelines:**
 
 - MAY start from an archetype and adapt it; MUST NOT let the catalog flatten genuinely different screens into the same shape.
 - MUST delete archetypes the round does not use before publishing.
 - SHOULD add a one-line caption under each screen naming its regions, as the template does, so the intent survives at breadboard fidelity.
-- SHOULD note per screen how its layout adapts across device sizes (small phones, large phones, tablets) when it materially differs — the app's breakpoints are `xs 0 / sm 380 / md 768`.
+- SHOULD note per screen how its layout adapts across device sizes (small phones, large phones, tablets, desktop widths) when it materially differs, using the target project's own breakpoints.
 
 ## Options-Round Layout
 

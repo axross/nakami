@@ -1,16 +1,17 @@
 <!--
-  Payload Mobile — Wireframe Kit (low fidelity)
-  =============================================
-  A self-contained, theme-aware template for the WIREFRAME round of an /address
-  design exhibit: grey breadboard primitives, a component library, screen
-  archetypes, and the options-round layout. Regions, hierarchy, and flow only —
-  no app color, no final type. For the HIGH-FIDELITY round, use hifi-design-kit.html.
-  Copy this file to the harness scratchpad, fill it for the screen(s) at hand,
-  and publish as an Artifact. See wireframe-kit.md for how to fill it.
+  Wireframe Kit (low fidelity) — a project-agnostic breadboard UI vocabulary
+  ==========================================================================
+  A self-contained, theme-aware template for low-fidelity wireframes of any
+  client app — mobile OR web/desktop. It carries grey breadboard primitives, a
+  component library, two device canvases (a mobile phone frame and a browser
+  window), screen archetypes for both, and an options-comparison layout.
+  Regions, hierarchy, and flow only — no brand color, no final type.
+  Copy this file to a scratch location, delete the parts you are not presenting,
+  fill it for the screen(s) at hand, and publish/export it. See wireframe-kit.md.
   Self-contained: no external fetches; system font stacks only.
   Fill-in points are marked with "FILL:" comments throughout.
 -->
-<title>Payload Mobile — Wireframe Kit</title>
+<title>Wireframe Kit — breadboard UI</title>
 <style>
   /* =========================================================================
      PAGE CHROME (theme-aware) — the surface the mockups sit on.
@@ -290,24 +291,42 @@
   .wc-av.sm { width: 24px; height: 24px; } .wc-av.lg { width: 42px; height: 42px; }
   .wc-av.fallback { display: flex; align-items: center; justify-content: center; } .wc-av.fallback::after { content: ""; width: 12px; height: 9px; border-radius: 2px; background: var(--wire-ink); opacity: 0.5; }
   .wc-badge.outline { background: transparent; border: 1px solid var(--wire-line); } .wc-badge.outline .t { background: var(--wire-ink); opacity: 0.6; }
+
+  /* ---- web / desktop canvas (browser window) + web navigation ---- */
+  .browser { background: var(--panel); border: 1.5px solid var(--wire-line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; width: 100%; }
+  .browser .chrome { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-bottom: 1px solid var(--wire-line); background: var(--ground); }
+  .browser .chrome .dots { display: flex; gap: 5px; } .browser .chrome .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--wire-line); display: inline-block; }
+  .browser .chrome .url { flex: 1; height: 15px; border-radius: 999px; background: var(--wire-fill); border: 1px solid var(--wire-line); }
+  .browser .win { position: relative; display: flex; flex-direction: column; min-height: 120px; }
+  .browser .win .scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--ink) 30%, transparent); }
+  .web-topnav { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--wire-line); }
+  .web-topnav .brand { width: 26px; height: 12px; border-radius: 3px; background: var(--wire-solid); flex: none; }
+  .web-topnav .links { display: flex; gap: 12px; flex: 1; } .web-topnav .links .nl { width: 34px; height: 7px; border-radius: 3px; background: var(--wire-fill-2); } .web-topnav .links .nl.on { background: var(--accent); }
+  .web-topnav .actions { display: flex; gap: 7px; align-items: center; }
+  .web-shell { display: flex; flex: 1; min-height: 100px; }
+  .web-shell .side { width: 32%; border-right: 1px solid var(--wire-line); padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--wire-fill); }
+  .web-shell .side .si { height: 8px; border-radius: 3px; background: var(--wire-fill-2); } .web-shell .side .si.on { background: var(--accent); }
+  .web-shell .main { flex: 1; padding: 11px; display: flex; flex-direction: column; gap: 9px; }
+  .web-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 58%; background: var(--panel); border-left: 1px solid var(--wire-line); padding: 11px; display: flex; flex-direction: column; gap: 8px; }
+
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 </style>
 
 <div class="wrap">
   <header class="masthead">
-    <p class="eyebrow">Payload Mobile · Wireframe Kit · Low fidelity</p>
-    <h1>Breadboard vocabulary for /address wireframe rounds</h1>
-    <p class="lede">Grey <b>breadboard</b> building blocks for a wireframe round — a component library, screen archetypes, and the options-round layout. Regions, hierarchy, and flow only; no app color or final type. For the high-fidelity round, use <code>hifi-design-kit.html</code>. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. See <code>wireframe-kit.md</code>.</p>
+    <p class="eyebrow">Wireframe Kit · Low fidelity · Project-agnostic</p>
+    <h1>Breadboard vocabulary for client-app wireframes</h1>
+    <p class="lede">Grey <b>breadboard</b> building blocks for wireframing any client app — <b>mobile or web/desktop</b>. A component library, two device canvases (a phone frame and a browser window), screen archetypes for both, and an options-comparison layout. Regions, hierarchy, and flow only; no brand color or final type. Delete the parts you are not presenting, fill in your screen(s), and publish or export the result. See <code>wireframe-kit.md</code>.</p>
     <div class="meta">
       <span class="tag"><strong>Fidelity</strong> wireframe · breadboard</span>
-      <span class="tag"><strong>Includes</strong> components · archetypes · options layout</span>
+      <span class="tag"><strong>Canvases</strong> mobile · web/desktop</span>
       <span class="tag">Self-contained · theme-aware</span>
     </div>
   </header>
 
   <h2 class="section">Wireframe component library</h2>
-  <p class="lead-note">The common shadcn-UI components in this project's mobile vocabulary, at breadboard fidelity (regions, hierarchy, flow — no color or final type). Each shows its common states and variant axes for clarity — states (default, filled, focus, invalid, selected, disabled), and where they apply importance (primary/secondary/tertiary), tone (neutral/accent/destructive), size (sm/md/lg), and loading. <!-- FILL: keep only the components, states, and variants your screen(s) use. --></p>
+  <p class="lead-note">The common UI components client apps share (the shadcn-UI / Material vocabulary), at breadboard fidelity (regions, hierarchy, flow — no color or final type). Each shows its common states and variant axes for clarity — states (default, filled, focus, invalid, selected, disabled), and where they apply importance (primary/secondary/tertiary), tone (neutral/accent/destructive), size (sm/md/lg), and loading. <!-- FILL: keep only the components, states, and variants your screen(s) use. --></p>
 
   <p class="el-sub">Foundations</p>
   <div class="el-grid">
@@ -321,6 +340,10 @@
     <div class="el-card"><span class="el-tag">badge — tone / style</span><div class="el-stage"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="wc-badge"><span class="t"></span></span><span class="wc-badge accent"><span class="t"></span></span><span class="wc-badge danger"><span class="t"></span></span><span class="wc-badge outline"><span class="t"></span></span><span class="wc-badge count accent"><span class="t"></span></span></div></div></div>
     <div class="el-card"><span class="el-tag">divider</span><div class="el-stage"><div class="w100" style="display:flex;flex-direction:column;gap:12px"><span class="wc-div"></span><span class="wc-divlbl"><span class="wc-div"></span><span class="t"></span><span class="wc-div"></span></span></div></div></div>
     <div class="el-card"><span class="el-tag">skeleton</span><div class="el-stage"><div class="wc-skel"><span class="b"></span><span class="b"></span><span class="b w60"></span></div></div></div>
+    <div class="el-card wide"><span class="el-tag">canvas — mobile &amp; web</span><div class="el-stage"><div style="display:flex;gap:14px;width:100%;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:center;flex:none"><div class="phone" style="max-width:78px;aspect-ratio:9/16;padding:5px;border-radius:12px"><div class="screen" style="border-radius:8px"><div class="navbar" style="padding:4px 6px"></div><div class="body" style="padding:5px;gap:4px"><span class="w-t w80"></span><span class="w-t w60"></span></div><div class="tabbar" style="padding:3px"><div class="tab"><span class="ic" style="width:9px;height:9px"></span></div><div class="tab"><span class="ic" style="width:9px;height:9px"></span></div></div></div></div><span class="wc-hint">mobile</span></div>
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:center;flex:1"><div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win" style="min-height:0"><div class="web-topnav" style="padding:6px 8px"><span class="brand"></span><span class="links"><span class="nl on"></span><span class="nl"></span></span></div><div style="padding:8px;display:flex;flex-direction:column;gap:5px"><span class="w-t w80"></span><span class="w-t w60"></span></div></div></div><span class="wc-hint">web / desktop</span></div>
+    </div></div></div>
   </div>
 
   <p class="el-sub">Inputs &amp; controls</p>
@@ -406,16 +429,21 @@
     <div class="el-card wide"><span class="el-tag">toast (sonner)</span><div class="el-stage"><div class="wc-toaststack"><div class="wc-toast"><span class="ic"></span><span class="col"><span class="wc-solid" style="width:45%"></span><span class="wc-lbl" style="width:75%"></span></span></div><div class="wc-toast"><span class="ic"></span><span class="col"><span class="wc-solid" style="width:40%"></span></span></div></div></div></div>
   </div>
 
-  <p class="el-sub">Overlays &amp; mobile navigation (in device frames)</p>
+  <p class="el-sub">Navigation &amp; overlays — mobile + web (in device / browser frames)</p>
   <div class="el-grid">
     <div class="el-card wide"><span class="el-tag">dialog</span><div class="el-stage"><div class="wc-frame"><div class="dimbody"><span class="w-h"></span><span class="w-t w80"></span><span class="w-t w60"></span></div><div class="scrim"></div><div class="wc-dialog"><span class="wc-solid" style="width:55%"></span><span class="wc-lbl" style="width:90%"></span><span class="wc-lbl" style="width:70%"></span><div class="actions"><span class="btn" style="height:24px;width:56px"><span class="cap"></span></span><span class="btn primary" style="height:24px;width:56px"><span class="cap"></span></span></div></div></div></div></div>
     <div class="el-card wide"><span class="el-tag">alert dialog</span><div class="el-stage"><div class="wc-frame"><div class="scrim"></div><div class="wc-dialog"><span class="wc-av" style="width:26px;height:26px;border-radius:7px"></span><span class="wc-solid" style="width:60%"></span><span class="wc-lbl" style="width:88%"></span><div class="actions"><span class="btn" style="height:24px;width:56px"><span class="cap"></span></span><span class="btn" style="height:24px;width:56px;background:var(--danger);opacity:.6"><span class="cap"></span></span></div></div></div></div></div>
     <div class="el-card wide"><span class="el-tag">bottom sheet (drawer)</span><div class="el-stage"><div class="wc-frame"><div class="dimbody"><span class="w-h"></span><span class="w-t w80"></span></div><div class="scrim"></div><div class="wc-sheet"><span class="grab"></span><span class="wc-solid" style="width:45%"></span><span class="wc-lbl" style="width:85%"></span><span class="btn primary" style="margin-top:2px"><span class="cap"></span></span></div></div></div></div>
     <div class="el-card wide"><span class="el-tag">bottom tabs (mobile)</span><div class="el-stage"><div class="wc-frame" style="height:96px"><div class="dimbody"><span class="w-t w60"></span><span class="w-t w40"></span></div><div class="wc-btabs"><div class="tab on"><span class="ic"></span><span class="tl"></span></div><div class="tab"><span class="ic"></span><span class="tl"></span></div><div class="tab"><span class="ic"></span><span class="tl"></span></div></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">top nav bar (web)</span><div class="el-stage"><div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win" style="min-height:0"><div class="web-topnav"><span class="brand"></span><span class="links"><span class="nl on"></span><span class="nl"></span><span class="nl"></span></span><span class="actions"><span class="btn primary" style="width:44px;height:22px"><span class="cap"></span></span><span class="wc-av" style="width:20px;height:20px"></span></span></div></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">sidebar layout (web)</span><div class="el-stage"><div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win"><div class="web-shell"><div class="side"><span class="si on"></span><span class="si"></span><span class="si"></span><span class="si"></span></div><div class="main"><span class="wc-solid" style="width:42%"></span><span class="w-t w80"></span><span class="w-t w60"></span></div></div></div></div></div></div>
+    <div class="el-card wide"><span class="el-tag">side drawer (web)</span><div class="el-stage"><div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win"><div style="padding:10px;display:flex;flex-direction:column;gap:6px;opacity:.4"><span class="w-t w80"></span><span class="w-t w60"></span></div><div class="scrim"></div><div class="web-drawer"><span class="wc-solid" style="width:55%"></span><span class="wc-lbl" style="width:85%"></span><span class="wc-lbl" style="width:70%"></span><span class="btn primary" style="margin-top:2px"><span class="cap"></span></span></div></div></div></div></div>
   </div>
 
-  <h2 class="section">Wireframe mode — archetypes (optional starting points)</h2>
-  <p class="lead-note">Assembled breadboards you can copy and adapt. They are <b>starting points, not mandatory</b> — reach for a primitive directly when an archetype does not fit, and never let the catalog flatten distinct screens into the same shape.</p>
+  <h2 class="section">Screen archetypes — mobile &amp; web (optional starting points)</h2>
+  <p class="lead-note">Assembled breadboards you can copy and adapt, in a mobile phone canvas and a web/desktop browser canvas. They are <b>starting points, not mandatory</b> — reach for a primitive directly when an archetype does not fit, and never let the catalog flatten distinct screens into the same shape.</p>
+
+  <p class="el-sub">Mobile</p>
   <div class="grid-shared">
 
     <!-- Archetype: empty state -->
@@ -537,8 +565,40 @@
     </div>
   </div>
 
-  <h2 class="section">Wireframe mode — options round layout</h2>
-  <p class="lead-note">An options round presents <b>at least three</b> distinct candidates side by side. Give each a label, a sketch, a rationale, and its trade-offs; mark exactly one <code>(Recommended)</code>. Screens shared across all options render once above the grid (omitted here). <!-- FILL: replace the three options below with your real candidates. --></p>
+  <p class="el-sub">Web / desktop</p>
+  <div class="grid-shared">
+
+    <!-- Web archetype: app shell -->
+    <div class="card">
+      <p class="shared-label">App shell (nav + sidebar)</p>
+      <div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win"><div class="web-topnav"><span class="brand"></span><span class="links"><span class="nl on"></span><span class="nl"></span><span class="nl"></span></span><span class="actions"><span class="wc-av" style="width:20px;height:20px"></span></span></div><div class="web-shell"><div class="side"><span class="si on"></span><span class="si"></span><span class="si"></span><span class="si"></span></div><div class="main"><span class="wc-solid" style="width:40%"></span><span class="w-t w80"></span><span class="w-t w60"></span><span class="w-t w80"></span></div></div></div></div>
+      <p class="caption">top nav · sidebar · content</p>
+    </div>
+
+    <!-- Web archetype: form page -->
+    <div class="card">
+      <p class="shared-label">Form page</p>
+      <div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win"><div class="web-topnav"><span class="brand"></span><span class="links"><span class="nl on"></span><span class="nl"></span></span></div><div style="padding:12px;display:flex;flex-direction:column;gap:9px"><span class="wc-solid" style="width:45%"></span><div class="field"><span class="lbl"></span><span class="box"><span class="ph"></span></span></div><div class="field"><span class="lbl"></span><span class="box filled"><span class="ph"></span></span></div><div class="err"><span class="dot"></span><span class="ln"></span></div><div class="btn primary" style="width:40%"><span class="cap"></span></div></div></div></div>
+      <p class="caption">form · labeled fields · error · submit</p>
+    </div>
+
+    <!-- Web archetype: table page -->
+    <div class="card">
+      <p class="shared-label">Table / list page</p>
+      <div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win"><div class="web-topnav"><span class="brand"></span><span class="links"><span class="nl"></span><span class="nl on"></span></span></div><div style="padding:11px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:6px;align-items:center"><span class="wc-solid" style="width:28%"></span><span style="flex:1"></span><div class="field" style="width:38%"><div class="box" style="height:24px"><span class="ph"></span></div></div><div class="btn primary" style="width:58px;height:24px"><span class="cap"></span></div></div><div class="wc-table"><div class="thead"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow sel"><span class="cbx on"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div><div class="trow"><span class="cbx"></span><span class="cell"></span><span class="cell"></span><span class="cell"></span><span class="cell sm"></span></div></div></div></div></div>
+      <p class="caption">toolbar · data table · row selection</p>
+    </div>
+
+    <!-- Web archetype: modal -->
+    <div class="card">
+      <p class="shared-label">Modal dialog</p>
+      <div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win" style="min-height:140px"><div style="padding:10px;display:flex;flex-direction:column;gap:6px;opacity:.35"><span class="w-t w80"></span><span class="w-t w60"></span><span class="w-t w80"></span></div><div class="scrim"></div><div class="wc-dialog" style="width:72%"><span class="wc-solid" style="width:50%"></span><span class="wc-lbl" style="width:90%"></span><span class="wc-lbl" style="width:75%"></span><div class="actions"><span class="btn" style="height:24px;width:56px"><span class="cap"></span></span><span class="btn primary" style="height:24px;width:56px"><span class="cap"></span></span></div></div></div></div>
+      <p class="caption">centered dialog over a dimmed page</p>
+    </div>
+  </div>
+
+  <h2 class="section">Options-comparison layout</h2>
+  <p class="lead-note">An options round presents <b>at least three</b> distinct candidates side by side, in whichever canvas the project uses (mobile or web). Give each a label, a sketch, a rationale, and its trade-offs; mark exactly one <code>(Recommended)</code>. Screens shared across all options render once above the grid (omitted here). <!-- FILL: replace the three options below with your real candidates. --></p>
   <div class="grid-options">
 
     <!-- OPTION A (Recommended) -->
@@ -579,24 +639,11 @@
       <p class="note tradeoff">What it costs relative to Options A and C.</p>
     </div>
 
-    <!-- OPTION C -->
+    <!-- OPTION C (shown on the web canvas — options can compare either form factor) -->
     <div class="card">
-      <div class="card-head"><div><span class="opt">Option C</span><h3>Short name</h3></div></div>
-      <div class="phone"><div class="screen">
-        <div class="body" style="gap:10px;justify-content:center">
-          <div class="w-h lg" style="align-self:center"></div>
-          <div class="inline-card">
-            <div class="field"><span class="lbl"></span><span class="box"><span class="ph"></span></span></div>
-            <div class="field"><span class="lbl"></span><span class="box filled"><span class="ph"></span></span></div>
-            <div class="btn primary"><span class="cap"></span></div>
-          </div>
-        </div>
-        <div class="tabbar">
-          <div class="tab active"><span class="ic"></span><span class="tl"></span></div>
-          <div class="tab"><span class="ic"></span><span class="tl"></span></div>
-        </div>
-      </div></div>
-      <p class="note rationale">Differs from A and B on a structural axis — hierarchy, layout, or treatment.</p>
+      <div class="card-head"><div><span class="opt">Option C</span><h3>Short name (web)</h3></div></div>
+      <div class="browser"><div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"></span></div><div class="win"><div class="web-topnav"><span class="brand"></span><span class="links"><span class="nl on"></span><span class="nl"></span></span></div><div class="web-shell"><div class="side"><span class="si on"></span><span class="si"></span><span class="si"></span></div><div class="main"><span class="wc-solid" style="width:40%"></span><span class="w-t w80"></span><span class="w-t w60"></span></div></div></div></div>
+      <p class="note rationale">Differs from A and B on a structural axis — hierarchy, layout, or treatment. Shown on the web canvas to make the point that options can compare either form factor.</p>
       <p class="note tradeoff">What it costs relative to Options A and B.</p>
     </div>
   </div>
@@ -609,6 +656,6 @@
   </div>
 
   <footer>
-    Wireframe Kit (low fidelity) for Payload Mobile /address exhibits — breadboard only. For the high-fidelity render, see <code>hifi-design-kit.html</code>. Fill guidance: <code>wireframe-kit.md</code>. Nothing here is committed to the repo.
+    Wireframe Kit (low fidelity) — a project-agnostic breadboard UI vocabulary for mobile and web/desktop client apps. Regions, hierarchy, and flow only; no brand color or final type. Fill guidance: <code>wireframe-kit.md</code>.
   </footer>
 </div>
