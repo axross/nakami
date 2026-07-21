@@ -1,6 +1,16 @@
 # Problem Framing and Scope
 
-Apply this reference when drafting or reviewing the part of a spec that states what is needed and why — before any UI, system-design, or implementation detail. Sourced from PRD- and requirements-writing practice: [Perforce's PRD guide](https://www.perforce.com/blog/alm/how-write-product-requirements-document-prd), [ProductPlan's problem-statement guide](https://www.productplan.com/learn/guide-to-writing-an-effective-problem-statement), [Intercom's "start with a problem statement"](https://www.intercom.com/blog/how-to-write-problem-statements/), [Product Talk on product outcomes](https://www.producttalk.org/product-outcomes/), and [Google's design-docs practice](https://www.industrialempathy.com/posts/design-docs-at-google/).
+Apply this reference when drafting or reviewing the parts of a spec that state what is needed and why — the **Summary**, the **Background** (with Goals, Non-goals, and Assumptions), and the **Open questions** — before any UI, system-design, or implementation detail. Sourced from PRD- and requirements-writing practice: [Perforce's PRD guide](https://www.perforce.com/blog/alm/how-write-product-requirements-document-prd), [ProductPlan's problem-statement guide](https://www.productplan.com/learn/guide-to-writing-an-effective-problem-statement), [Intercom's "start with a problem statement"](https://www.intercom.com/blog/how-to-write-problem-statements/), [Product Talk on product outcomes](https://www.producttalk.org/product-outcomes/), and [Google's design-docs practice](https://www.industrialempathy.com/posts/design-docs-at-google/).
+
+## Summary
+
+The Summary is one standalone paragraph at the top of the spec that a reader can grasp without the rest of the document — what the change is and the outcome it produces. It is an abstract, not a table of contents: it states the result, not a walk through the sections that follow. Google's design-doc practice opens with exactly this kind of short context paragraph so a reader can decide in seconds whether to read on.
+
+**Guidelines:**
+
+- MUST open the spec with a one-paragraph Summary that states what the change is and the outcome it produces, readable on its own without the later sections.
+- MUST keep the Summary to the result, not a description of the document's structure or a restatement of every section below it.
+- SHOULD frame the Summary around the outcome per [Outcome Before Solution](#outcome-before-solution), not the artifact being shipped.
 
 ## Outcome Before Solution
 
@@ -12,6 +22,16 @@ A requirement earns its solution once the problem is on the page. PRD guidance c
 - MUST keep "how" out of this section; system design, UI mechanics, and implementation belong to their owning skills, not here.
 - SHOULD frame the outcome as a change in behavior or capability, not as the artifact being built.
 - SHOULD ground the problem in the underlying need it serves rather than a literal feature request, so the requirement stays stable if the chosen solution changes.
+
+## Goals
+
+The Background section pairs the problem with **Goals** — the specific outcomes this change intends to achieve — so the Non-goals below them read as deliberate exclusions from a stated ambition rather than an open-ended list. A goal is an outcome, not a task: "a reviewer can find the intended design without opening the issue thread" is a goal; "add a link to the PR body" is the task that serves it.
+
+**Guidelines:**
+
+- MUST state Goals as the outcomes the change intends to achieve, phrased as results rather than the tasks that produce them.
+- SHOULD keep each goal checkable enough that a later Acceptance criterion can trace back to it, per [Concrete, Checkable Language](#concrete-checkable-language).
+- SHOULD pair every Goals list with an equally visible Non-goals list below it.
 
 ## Non-Goals and Out-of-Scope
 
@@ -27,11 +47,15 @@ Non-goals are a decision, not a disclaimer. Design-doc practice at Google treats
 
 Assumptions and open questions are easy to conflate but serve different readers. An assumption is a stated belief the plan relies on and would need to revisit if wrong; an open question is an unresolved item that blocks confident planning until answered.
 
+The two live in different sections of the canonical structure: assumptions sit under **Background**, while unresolved decisions collect in the required **Open questions** section at the end. Open questions is required precisely so a spec cannot hide an unresolved decision by omitting the section — when nothing is outstanding, it says "None" and why, rather than disappearing.
+
 **Guidelines:**
 
-- MUST state assumptions and constraints the plan relies on, distinct from open questions.
-- MUST NOT embed an unresolved product, scope, or platform decision silently as an assumption; ask it instead, per AGENTS.md's rule to ask a concrete question when progress depends on a product, platform, privacy, compatibility, or scope decision.
+- MUST state assumptions and constraints the plan relies on under Background, distinct from open questions.
+- MUST NOT embed an unresolved product, scope, or platform decision silently as an assumption; move it to Open questions and ask it, per AGENTS.md's rule to ask a concrete question when progress depends on a product, platform, privacy, compatibility, or scope decision.
+- MUST keep the Open questions section present even when empty — state "None" with a short reason (e.g. "scope is fully settled") rather than dropping the section.
 - SHOULD flag an assumption the reader is likely to disagree with rather than build around it unstated.
+- SHOULD promote an assumption to an open question once the plan's correctness genuinely depends on it being right.
 
 ## Right-Sizing Scope
 

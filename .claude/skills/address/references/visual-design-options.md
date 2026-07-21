@@ -112,7 +112,7 @@ The issue records the design decision, its history, and the account-free wirefra
 
 **Guidelines:**
 
-- MUST record the outcome in the UI design section when the human approves: mark the chosen option (`**Chosen:** Option B — <name>`) and keep its embedded ASCII/Mermaid wireframe (the account-free fallback) as the section's current design, with the round's Artifact URL — the design source of truth — referenced beside it.
+- MUST record the outcome of every design round in the UI design section when the human approves it: mark that round's chosen option (`**Chosen:** Option B — <name>`) and keep its embedded ASCII/Mermaid wireframe (the account-free fallback) as the section's current design, with the round's Artifact URL — the design source of truth — referenced beside it — so both the wireframe round's selection and the high-fidelity round's selection each leave a durable per-round record.
 - MUST update the UI design section in place on every design revision during the plan phase, so the section always shows the current design state.
 - MUST move superseded options and rounds into one collapsed `<details>` subsection titled `Design history` inside the UI design section, labeled by round (`Round 1 — wireframes`, `Round 2 — high fidelity`), and MUST NOT delete them.
 - MUST keep the run's status block current with the pending design state (for example, `awaiting plan approval (design round 2: high fidelity)`).
@@ -125,6 +125,6 @@ Code review checks the diff against the intended design; on-device and e2e verif
 
 **Guidelines:**
 
-- MUST link the chosen design from the pull request description when the plan presented the options exhibit: the tracking issue's UI design section, the chosen option's Artifact URL (the design source of truth), and its in-issue ASCII/Mermaid wireframe (the account-free fallback). A plan whose exhibit was legitimately omitted has no design to link, and this section does not apply.
+- MUST link the chosen design from the pull request description when the plan presented the options exhibit: the tracking issue's UI design section, and — for both fidelities that ran — each round's Artifact URL (the design source of truth) alongside its in-issue ASCII/Mermaid wireframe (the account-free fallback), so a reviewer reaches the intended design at either fidelity without excavating the issue thread. A plan whose exhibit was legitimately omitted has no design to link, and this section does not apply.
 - MUST name the chosen option in the pull request body (for example, `Implements Option B — <name> from #<issue>`) so the reviewer knows which direction to hold the diff against.
 - MUST update those links whenever a later design revision changes the chosen design after the pull request exists.

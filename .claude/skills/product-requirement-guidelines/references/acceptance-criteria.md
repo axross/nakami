@@ -33,12 +33,12 @@ Most defects live outside the primary flow, so a criteria set that only covers t
 
 ## Right-Sized Checklists
 
-A checklist that needs far more than a handful of criteria is usually a sign the underlying story should split; too few leaves testable gaps that surface as bugs later. Practitioner guidance converges on roughly three to seven or eight criteria as a starting rubric, not a hard ceiling. Verification gates belong in the same checklist as trailing items, since "done" includes passing the project's own format/lint/test/build commands, not only the feature behavior.
+A checklist that needs far more than a handful of criteria is usually a sign the underlying story should split; too few leaves testable gaps that surface as bugs later. Practitioner guidance converges on roughly three to seven or eight criteria as a starting rubric, not a hard ceiling. The project's format/lint/test/build gates may appear as trailing checklist items, but the *method* for running them — which checks exercise which surface — lives in the spec's separate Verification strategy section, so the checklist stays focused on observable behavior rather than doubling as a verification plan.
 
 **Guidelines:**
 
 - SHOULD right-size the checklist to roughly three to seven criteria; treat materially more as a signal to reconsider the change's scope rather than padding restatements of the same behavior.
-- MUST include the verification gates the change requires (format/lint, unit/e2e suites, build) as trailing checklist items, per [AGENTS.md › Verification](../../../../AGENTS.md#verification) (and the project's development guidelines (verification rules) for the e2e/manual side).
+- MAY include the change's verification gates (format/lint, unit/e2e suites, build) as trailing checklist items, but state *how* they are run — which checks exercise which surface — in the spec's separate **Verification strategy** section per [verification-strategy.md](./verification-strategy.md), not by expanding the acceptance-criteria list into a method plan.
 - MUST NOT restate the same observable behavior across multiple bullets.
 - MUST write each criterion as a plain bullet (`-`), not a GitHub task-list checkbox (`- [ ]`) — unless the project actually checks the boxes as part of its process, an unchecked box reads as perpetually incomplete.
 
