@@ -15,7 +15,7 @@ Shared components live under `src/common/components/`, one directory per compone
 
 | Component | Purpose |
 | --------- | ------- |
-| _(none yet)_ | |
+| `message-state` | Centered mark + title + subtitle surface with an optional action slot, shared by feature empty/error/placeholder screens |
 
 **Guidelines:**
 
