@@ -104,14 +104,15 @@ describe("<SettingsScreen>", () => {
 		}
 	});
 
-	it("hides the Account group when unauthenticated", () => {
+	it("shows a Sign in row in place of the Account group when unauthenticated", () => {
 		useAuthStore.setState({ status: "unauthenticated", session: null });
 
-		const { queryByTestId } = renderRouter(
+		const { getByTestId, queryByTestId } = renderRouter(
 			{ index: SettingsScreen },
 			{ initialUrl: "/" },
 		);
 
+		expect(getByTestId("settings-sign-in-button")).toBeTruthy();
 		expect(queryByTestId("settings-account-row")).toBeNull();
 		expect(queryByTestId("settings-sign-out-row")).toBeNull();
 	});
@@ -119,7 +120,7 @@ describe("<SettingsScreen>", () => {
 	it("shows the Account group with the user email and Sign out when authenticated", () => {
 		useAuthStore.setState({ status: "authenticated", session });
 
-		const { getByTestId, getByText } = renderRouter(
+		const { getByTestId, getByText, queryByTestId } = renderRouter(
 			{ index: SettingsScreen },
 			{ initialUrl: "/" },
 		);
@@ -129,5 +130,6 @@ describe("<SettingsScreen>", () => {
 		expect(getByText("https://cms.example.com")).toBeTruthy();
 		expect(getByTestId("settings-sign-out-row")).toBeTruthy();
 		expect(getByText("Sign out")).toBeTruthy();
+		expect(queryByTestId("settings-sign-in-button")).toBeNull();
 	});
 });

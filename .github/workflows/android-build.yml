@@ -7,11 +7,21 @@ name: Android Preview Build
 # dispatch it from the Actions tab, `gh workflow run android-build.yml --ref
 # <branch>`, or an agent, choosing the PR's branch as the ref.
 #
-# The build is split into a cached `prebuild` job (`expo prebuild`, keyed by a
-# checksum of app.json + package-lock.json) and a `build_android` job, so an
-# unchanged app config + lockfile reuses the generated native project across
-# runs. `actions/cache` handles cross-run reuse; the artifact handles the
-# cross-job handoff within a run (caches are only eventually-consistent).
+# The workflow is split into four jobs so a failed phase can be re-run on its
+# own via "Re-run failed jobs" (GitHub keeps the successful jobs' artifacts, so
+# a re-run reuses them instead of redoing that work):
+#   prebuild  cached `expo prebuild`, keyed by a checksum of app.json +
+#             package-lock.json, so an unchanged app config + lockfile reuses
+#             the generated native project across runs.
+#   build     assembles + signs the release APK and uploads it as an artifact.
+#   publish   downloads that APK and distributes it via Firebase App
+#             Distribution. A failed distribution re-runs HERE without
+#             rebuilding the APK.
+#   report    writes the run summary and (optionally) comments the install link.
+# `actions/cache` handles cross-run reuse of the native project; artifacts hand
+# the native project (prebuild -> build) and the APK (build -> publish) between
+# jobs within a run. Each job carries only the credentials its phase needs — the
+# keystore never reaches `publish`, the Firebase account never reaches `build`.
 #
 # Operator prerequisites — the build fails cleanly until these repo secrets
 # exist (Settings -> Secrets and variables -> Actions):
@@ -46,6 +56,13 @@ concurrency:
   group: android-build-${{ github.ref }}
   cancel-in-progress: true
 
+# Tester(s) invited to every preview build so they can install without waiting
+# on a manual Firebase invitation. A workflow constant (not a repo variable) so
+# it is always set; passed into the publish lane's firebase_app_distribution
+# `testers`. Comma-separate to invite more than one.
+env:
+  FIREBASE_TESTERS: yo@axross.dev
+
 jobs:
   prebuild:
     name: Prebuild (cached)
@@ -78,12 +95,10 @@ jobs:
           include-hidden-files: true
           retention-days: 1
 
-  build_android:
+  build:
     name: Build Android
     needs: [prebuild]
     runs-on: ubuntu-latest
-    outputs:
-      testing_uri: ${{ steps.fastlane.outputs.testing_uri }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -119,33 +134,68 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
-      - name: Write Firebase service account
-        env:
-          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-service-account.json"
-      - name: Build and distribute
+      - name: Build signed APK
         id: fastlane
         env:
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
-          FIREBASE_SERVICE_ACCOUNT_PATH: ${{ runner.temp }}/firebase-service-account.json
-          FIREBASE_GROUPS: ${{ vars.FIREBASE_GROUPS }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: bundle exec fastlane android preview
+        run: bundle exec fastlane android build
+      # Stage the Gradle output APK under a stable name so the publish job can
+      # reference a deterministic download path instead of guessing the filename.
+      - name: Stage APK for upload
+        run: cp "${{ steps.fastlane.outputs.apk_path }}" "$RUNNER_TEMP/preview.apk"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: ${{ runner.temp }}/preview.apk
+          retention-days: 1
+
+  publish:
+    name: Publish to Firebase
+    needs: [build]
+    runs-on: ubuntu-latest
+    outputs:
+      testing_uri: ${{ steps.fastlane.outputs.testing_uri }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - name: Write Firebase service account
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-service-account.json"
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: apk
+      - name: Distribute to Firebase
+        id: fastlane
+        env:
+          FIREBASE_ANDROID_APP_ID: ${{ vars.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_SERVICE_ACCOUNT_PATH: ${{ runner.temp }}/firebase-service-account.json
+          FIREBASE_GROUPS: ${{ vars.FIREBASE_GROUPS }}
+          ANDROID_APK_PATH: apk/preview.apk
+        run: bundle exec fastlane android publish
 
   report:
     name: Report install link
-    needs: [build_android]
+    needs: [publish]
     runs-on: ubuntu-latest
     steps:
       - name: Write run summary
         env:
-          TESTING_URI: ${{ needs.build_android.outputs.testing_uri }}
+          TESTING_URI: ${{ needs.publish.outputs.testing_uri }}
         run: |
           if [ -n "$TESTING_URI" ]; then
             echo "### Android preview build ready" >> "$GITHUB_STEP_SUMMARY"
@@ -157,11 +207,11 @@ jobs:
             echo "Check the build logs — the Firebase upload may not have returned a testing URI." >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Comment install link on PR
-        if: ${{ github.event.inputs.pr != '' && needs.build_android.outputs.testing_uri != '' }}
+        if: ${{ github.event.inputs.pr != '' && needs.publish.outputs.testing_uri != '' }}
         uses: actions/github-script@v7
         env:
           PR_NUMBER: ${{ github.event.inputs.pr }}
-          TESTING_URI: ${{ needs.build_android.outputs.testing_uri }}
+          TESTING_URI: ${{ needs.publish.outputs.testing_uri }}
         with:
           script: |
             await github.rest.issues.createComment({
