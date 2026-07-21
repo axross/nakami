@@ -8,10 +8,14 @@ import { request, serverBaseUrl } from "~/common/helpers/payload-client";
  * {@link import("~/common/helpers/payload-client").PayloadRequestError}.
  */
 export async function fetchAccess(serverUrl: string, token: string) {
-	const body = await request(`${serverBaseUrl(serverUrl)}/api/access`, {
-		method: "GET",
-		headers: { Authorization: `JWT ${token}` },
-	});
+	const body = await request(
+		"fetchAccess",
+		`${serverBaseUrl(serverUrl)}/api/access`,
+		{
+			method: "GET",
+			headers: { Authorization: `JWT ${token}` },
+		},
+	);
 
 	return accessResponseSchema.parse(body);
 }

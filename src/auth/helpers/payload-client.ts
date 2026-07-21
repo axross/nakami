@@ -32,7 +32,7 @@ export async function login(
 	server: PayloadServer,
 	credentials: { email: string; password: string },
 ) {
-	const body = await request(endpoint(server, "/login"), {
+	const body = await request("login", endpoint(server, "/login"), {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(credentials),
@@ -43,7 +43,7 @@ export async function login(
 
 /** Re-validates a token; `user` is null when the token is no longer valid. */
 export async function fetchMe(server: PayloadServer, token: string) {
-	const body = await request(endpoint(server, "/me"), {
+	const body = await request("fetchMe", endpoint(server, "/me"), {
 		method: "GET",
 		headers: { Authorization: `JWT ${token}` },
 	});
@@ -53,13 +53,17 @@ export async function fetchMe(server: PayloadServer, token: string) {
 
 /** Exchanges a still-valid token for a fresh one with a later expiry. */
 export async function refreshToken(server: PayloadServer, token: string) {
-	const body = await request(endpoint(server, "/refresh-token"), {
-		method: "POST",
-		headers: {
-			Authorization: `JWT ${token}`,
-			"Content-Type": "application/json",
+	const body = await request(
+		"refreshToken",
+		endpoint(server, "/refresh-token"),
+		{
+			method: "POST",
+			headers: {
+				Authorization: `JWT ${token}`,
+				"Content-Type": "application/json",
+			},
 		},
-	});
+	);
 
 	return refreshResponseSchema.parse(body);
 }
@@ -69,10 +73,10 @@ export async function logout(
 	server: PayloadServer,
 	token: string,
 ): Promise<void> {
-	await request(endpoint(server, "/logout"), {
+	await request("logout", endpoint(server, "/logout"), {
 		method: "POST",
 		headers: { Authorization: `JWT ${token}` },
 	});
 
-	logger.info("Signed out remotely");
+	logger.info("Signed out remotely.");
 }
