@@ -1,39 +1,44 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useRouter } from "expo-router";
-import { type JSX, useCallback } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Link } from "expo-router";
+import type { ComponentPropsWithoutRef, JSX } from "react";
+import {
+	Pressable,
+	type StyleProp,
+	Text,
+	View,
+	type ViewStyle,
+} from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Collection } from "~/collections/models/collection";
 
 /**
- * A single collection row: a monogram of the collection's initial, its name,
- * and a chevron. Pressing it opens the collection's (placeholder) detail
- * screen. Navigation goes through `router.push` on a plain `Pressable` rather
- * than a `Link asChild` wrapper: wrapping a Unistyles-styled `Pressable`
- * directly in `Link asChild` drops the row's computed style (the clone takes
- * the ref Unistyles applies styles through), collapsing the horizontal layout.
+ * The pressable row body: a monogram of the collection's initial, its name, and
+ * a chevron. Kept a separate component so `Link asChild` clones *this* wrapper
+ * and threads its injected press/href props onto the root `Pressable` via
+ * `...props`. Wrapping the Unistyles-styled `Pressable` in `Link asChild`
+ * directly drops the row's computed style — the clone takes over the ref
+ * Unistyles applies styles through — collapsing the horizontal layout.
  */
-export function CollectionListItem({
+function CollectionRow({
 	collection,
-}: Readonly<{ collection: Collection }>): JSX.Element {
+	style,
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithoutRef<typeof Pressable>, "style" | "children"> & {
+		collection: Collection;
+		style?: StyleProp<ViewStyle>;
+	}
+>): JSX.Element {
 	const { theme } = useUnistyles();
-	const router = useRouter();
 	const initial = collection.label.charAt(0).toUpperCase() || "#";
-
-	const onPress = useCallback(() => {
-		router.push({
-			pathname: "/collections/[slug]",
-			params: { slug: collection.slug },
-		});
-	}, [router, collection.slug]);
 
 	return (
 		<Pressable
 			accessibilityLabel={collection.label}
-			accessibilityRole="button"
-			onPress={onPress}
-			style={({ pressed }) => styles.row(pressed)}
+			accessibilityRole="link"
 			testID={`collection-list-item-${collection.slug}`}
+			{...props}
+			style={({ pressed }) => [styles.row(pressed), style]}
 		>
 			<View style={styles.monogram}>
 				<Text style={styles.monogramText}>{initial}</Text>
@@ -48,6 +53,28 @@ export function CollectionListItem({
 				size={22}
 			/>
 		</Pressable>
+	);
+}
+
+/**
+ * A single collection row that opens the collection's (placeholder) detail
+ * screen. Navigation is declarative via `Link`; the row body lives in
+ * {@link CollectionRow} so `Link asChild` targets a wrapper component rather
+ * than the Unistyles-styled `Pressable` directly (see that component's note).
+ */
+export function CollectionListItem({
+	collection,
+}: Readonly<{ collection: Collection }>): JSX.Element {
+	return (
+		<Link
+			asChild
+			href={{
+				pathname: "/collections/[slug]",
+				params: { slug: collection.slug },
+			}}
+		>
+			<CollectionRow collection={collection} />
+		</Link>
 	);
 }
 
