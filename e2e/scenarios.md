@@ -19,3 +19,4 @@ Remove rows only when the journey itself is removed from the product.
 | `auth-signed-out` | must | Signed out, Home shows the sign-in call to action and the Collections tab is hidden. |
 | `auth-sign-in-form` | must | The sign-in screen opens with its fields, the Collection value toggles to an editable input, and an unreachable server surfaces an inline error. |
 | `auth-session` | should | After signing in, the Collections tab and the Settings Account section appear and Sign out returns to the signed-out state. Requires a live Payload server, so it is covered by unit/component tests and manual/on-device verification rather than an automated flow. |
+| `collections-list` | should | Signed in, the Collections tab lists the server's readable, non-system collections, and tapping one opens the placeholder detail screen. Requires a live Payload server, so it is covered by unit/component tests and manual/on-device verification rather than an automated flow. |
