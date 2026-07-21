@@ -16,7 +16,7 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." &
 cd "$PROJECT_DIR"
 
 # provision Node 22 via mise — kept in step with the version specified in the CI
-# workflows (.github/workflows/*.yml) and eas.json; best-effort, since the base
+# workflows (.github/workflows/*.yml); best-effort, since the base
 # image usually ships a usable Node.
 if ! command -v mise >/dev/null 2>&1; then
   curl -fsSL https://mise.run | sh

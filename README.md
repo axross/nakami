@@ -18,19 +18,19 @@ A companion mobile app for Payload CMS, built for iOS and Android with Expo (Rea
 | E2E tests               | Maestro, with a scenario-coverage gate                       |
 | Error tracking          | Sentry (`@sentry/react-native`)                              |
 | Logging                 | react-native-logs                                            |
-| Hosting                 | EAS (Expo Application Services)                              |
+| Builds & distribution   | GitHub Actions + Fastlane → Firebase App Distribution (Android) |
 
 ## Getting started
 
-1. Use Node 22 (the version specified in the CI workflows and `eas.json`).
+1. Use Node 22 (the version specified in the CI workflows).
 2. Install dependencies: `npm install`
 3. Optional: copy `.env.example` to `.env.local` for machine-local overrides. The committed `.env` already carries the public Sentry DSN (`axross/payload-mobile` on sentry.io); dev builds never send events.
 4. Start developing: `npm run dev`, then connect a dev build — or compile and launch one with `npm run ios` / `npm run android`.
-5. Export release-shaped JS bundles: `npm run build`. Release binaries are built with EAS Build.
+5. Export release-shaped JS bundles: `npm run build`. Signed, installable Android builds come from the Fastlane preview workflow ([`android-build.yml`](./.github/workflows/android-build.yml)); no store or iOS release pipeline is configured yet.
 
 ## Service links and secrets
 
-The app is linked to Sentry (`axross/payload-mobile`, DSN committed in `.env`) and EAS (project `98f3d55e-93ca-4b3c-8564-adca02d5325c`, profiles in `eas.json`). Secrets configured as GitHub Actions secrets:
+The app is linked to Sentry (`axross/payload-mobile`, DSN committed in `.env`). Secrets configured as GitHub Actions secrets:
 
 | Secret                                                                     | Used for                                                                                     |
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -48,11 +48,9 @@ Repo **variables** (Settings → Secrets and variables → Actions → Variables
 | `FIREBASE_ANDROID_APP_ID` | Firebase Android app id (`1:…:android:…`) the preview APK is distributed to. A **variable, not a secret**, so the tester install link (which embeds the app id) is not redacted out of the run summary / PR comment. |
 | `FIREBASE_GROUPS` (optional) | Comma-separated Firebase tester group names to target the distribution at specific groups.                                                                                              |
 
-Builds started outside GitHub Actions (e.g. `eas build` locally or EAS's own CI) do not see Actions secrets — mirror `SENTRY_AUTH_TOKEN` as an EAS environment variable for those.
-
 ## Expo MCP
 
-The [Expo MCP server](https://docs.expo.dev/mcp/) gives AI-assisted tooling live access to Expo: on-demand documentation and SDK guidance, EAS build and workflow state, and TestFlight crash/feedback data. With a local dev server it also unlocks **local capabilities** — simulator automation, React Native DevTools, and project analysis. It complements the enabled `expo@claude-plugins-official` Claude Code plugin: the plugin teaches static known-good Expo patterns, while the MCP server provides live project and EAS access.
+The [Expo MCP server](https://docs.expo.dev/mcp/) gives AI-assisted tooling live access to Expo: on-demand documentation and SDK guidance. With a local dev server it also unlocks **local capabilities** — simulator automation, React Native DevTools, and project analysis. It complements the enabled `expo@claude-plugins-official` Claude Code plugin: the plugin teaches static known-good Expo patterns, while the MCP server provides live docs and project access.
 
 [`.mcp.json`](./.mcp.json) registers the remote server for **Claude Code** (project scope, checked in). Other clients (VS Code, Cursor, Codex) are not wired up here — connect them with the per-client commands in the [Expo MCP docs](https://docs.expo.dev/mcp/).
 
@@ -66,7 +64,7 @@ The server requires an **Expo account**. Instead of the interactive OAuth browse
    - **Desktop / terminal:** export it from your shell profile (`export EXPO_TOKEN=…`). Note: `.env` / `.env.local` files are **not** auto-loaded into the MCP header expansion, so a value placed only in a `.env` file will not be picked up — it must be an exported env var.
 3. In Claude Code, approve the project MCP server on first use; run `/mcp` to check the connection.
 
-> **Security.** Claude Code cloud environments have no dedicated secrets store — environment variables are visible to anyone who can edit the environment, and an Expo token grants account access. Use a dedicated token (not a shared/CI one), keep it in a **personal** environment, rotate it periodically, and revoke it from the EAS dashboard if it leaks.
+> **Security.** Claude Code cloud environments have no dedicated secrets store — environment variables are visible to anyone who can edit the environment, and an Expo token grants account access. Use a dedicated token (not a shared/CI one), keep it in a **personal** environment, rotate it periodically, and revoke it from the Expo dashboard if it leaks.
 
 ### Local capabilities
 
@@ -143,7 +141,7 @@ Per-PR Android preview builds are produced on demand by [`android-build.yml`](./
 - **Four jobs:** `prebuild` runs `expo prebuild` and caches the generated `android/` project keyed by a checksum of `app.json` + `package-lock.json` (skipped on a cache hit), handing it to `build` via an artifact; `build` signs the release APK and uploads it as an artifact; `publish` downloads that APK and distributes it via Firebase App Distribution — always adding the `yo@axross.dev` tester (a workflow-level `FIREBASE_TESTERS` constant) so it installs without waiting on a manual invite; and `report` writes the install link to the run summary and, when the `pr` input is given, comments it on that PR. Splitting `build` from `publish` lets a failed distribution be re-run on its own (via **Re-run failed jobs**) without rebuilding the APK, and keeps each phase's credentials scoped to its own job. Requires the `ANDROID_*`, `FIREBASE_*`, and `SENTRY_AUTH_TOKEN` secrets above.
 - **Not a merge blocker (by design):** merges are gated only by the checks in `merge-checks.yml`. On-device sign-off on a preview build is a manual, human-in-the-loop step before merging.
 
-Store/production builds and on-demand dev clients remain on EAS ([`release-internal.yml`](./.eas/workflows/release-internal.yml), [`dev-client.yml`](./.eas/workflows/dev-client.yml)).
+Store/production builds and on-demand dev clients are not wired into CI — the EAS pipelines that previously covered them have been removed. Local dev clients can still be compiled with `npm run ios` / `npm run android` (`expo run`); a non-EAS store/production release pipeline is future work.
 
 ## Related links
 
