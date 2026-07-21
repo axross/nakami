@@ -1,8 +1,9 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useMutation } from "@tanstack/react-query";
 import { type JSX, useCallback } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useSignOut } from "~/auth/mutations/use-sign-out";
+import { getSignOutMutationOptions } from "~/auth/mutations/sign-out-mutation";
 import { useAuthSession } from "~/auth/stores/auth-store";
 import { SettingMenuGroup } from "~/settings/components/setting-menu-group/setting-menu-group";
 import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/setting-menu-group-body";
@@ -18,7 +19,9 @@ import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-gr
 export function SettingsAccountGroup(): JSX.Element | null {
 	const { theme } = useUnistyles();
 	const session = useAuthSession();
-	const { mutate: signOut, isPending } = useSignOut();
+	const { mutate: signOut, isPending } = useMutation(
+		getSignOutMutationOptions(),
+	);
 
 	const onSignOutPress = useCallback(() => {
 		signOut();

@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -14,7 +15,7 @@ import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
 import { normalizeServerUrl } from "~/auth/helpers/server-url";
-import { useSignIn } from "~/auth/mutations/use-sign-in";
+import { getSignInMutationOptions } from "~/auth/mutations/sign-in-mutation";
 
 const DEFAULT_COLLECTION = "users";
 
@@ -41,7 +42,9 @@ function messageForError(error: unknown): string {
 export function SignInScreen(): JSX.Element {
 	const router = useRouter();
 	const { theme } = useUnistyles();
-	const { mutate, isPending, error, reset } = useSignIn();
+	const { mutate, isPending, error, reset } = useMutation(
+		getSignInMutationOptions(),
+	);
 
 	const [serverUrl, setServerUrl] = useState("");
 	const [collection, setCollection] = useState(DEFAULT_COLLECTION);
