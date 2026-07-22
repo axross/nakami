@@ -1,4 +1,4 @@
-# Fastlane lanes for payload-mobile.
+# Fastlane lanes for nakami.
 #
 # Only Android lanes exist today, driven by the manually-dispatched
 # .github/workflows/android-build.yml. The preview build is split into two

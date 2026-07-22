@@ -1,4 +1,4 @@
-appId: app.axross.payload
+appId: app.axross.nakami
 name: auth-sign-in-form — the sign-in form toggles Collection and reports an unreachable server
 tags:
   - scenario:auth-sign-in-form

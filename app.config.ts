@@ -39,8 +39,8 @@ function resolveCommitHash(): string | undefined {
 // app.json value. Empty is treated as unset via `||`.
 export default ({ config }: ConfigContext): ExpoConfig => ({
 	...config,
-	name: config.name ?? "payload-mobile",
-	slug: config.slug ?? "payload-mobile",
+	name: config.name ?? "Nakami",
+	slug: config.slug ?? "nakami",
 	version: process.env.PREVIEW_VERSION_NAME || config.version,
 	extra: {
 		...config.extra,

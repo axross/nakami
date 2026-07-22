@@ -16,7 +16,7 @@ Elements are targeted by stable test-id hooks (`testID` on the component, `id:` 
 **Example:**
 
 ```yaml
-appId: app.axross.payload
+appId: app.axross.nakami
 name: home — summary section renders
 tags:
   - scenario:app-launch

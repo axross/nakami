@@ -1,4 +1,4 @@
-appId: app.axross.payload
+appId: app.axross.nakami
 name: auth-signed-out — signed-out Home guides to sign in and hides Collections
 tags:
   - scenario:auth-signed-out

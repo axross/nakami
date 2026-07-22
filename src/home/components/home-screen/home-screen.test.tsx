@@ -30,7 +30,7 @@ describe("<HomeScreen>", () => {
 		);
 
 		expect(getByTestId("home-screen")).toBeTruthy();
-		expect(getByText("Payload Mobile")).toBeTruthy();
+		expect(getByText("Nakami")).toBeTruthy();
 		expect(getByText("A companion mobile app for Payload CMS.")).toBeTruthy();
 	});
 });

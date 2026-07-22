@@ -1,4 +1,4 @@
-appId: app.axross.payload
+appId: app.axross.nakami
 name: tab-navigation — switching tabs reaches the signed-out tab screens
 tags:
   - scenario:tab-navigation
