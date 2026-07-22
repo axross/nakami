@@ -5,7 +5,6 @@ import { Link } from "expo-router";
 import { type JSX, useCallback } from "react";
 import { Platform, ScrollView, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useAuthStatus } from "~/auth/stores/auth-store";
 import { SettingMenuGroup } from "~/settings/components/setting-menu-group/setting-menu-group";
 import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/setting-menu-group-body";
 import { SettingMenuGroupHeading } from "~/settings/components/setting-menu-group/setting-menu-group-heading";
@@ -14,7 +13,6 @@ import { SettingMenuGroupItemChevron } from "~/settings/components/setting-menu-
 import { SettingMenuGroupItemIcon } from "~/settings/components/setting-menu-group/setting-menu-group-item-icon";
 import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
 import { SettingsAccountGroup } from "~/settings/components/settings-account-group/settings-account-group";
-import { SettingsSignInGroup } from "~/settings/components/settings-sign-in-group/settings-sign-in-group";
 import { getCommitHash } from "~/settings/helpers/commit-hash";
 
 const technicalInfo = [
@@ -24,8 +22,6 @@ const technicalInfo = [
 ];
 
 export function SettingsScreen(): JSX.Element {
-	const status = useAuthStatus();
-
 	const onFeedbackPress = useCallback(() => {
 		showFeedbackWidget();
 	}, []);
@@ -40,11 +36,7 @@ export function SettingsScreen(): JSX.Element {
 			style={styles.root}
 			testID="settings-screen"
 		>
-			{status === "authenticated" ? (
-				<SettingsAccountGroup />
-			) : (
-				<SettingsSignInGroup />
-			)}
+			<SettingsAccountGroup />
 
 			<SettingMenuGroup>
 				<SettingMenuGroupHeading>About</SettingMenuGroupHeading>

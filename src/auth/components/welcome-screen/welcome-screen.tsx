@@ -5,10 +5,12 @@ import { StyleSheet } from "react-native-unistyles";
 import { MessageState } from "~/common/components/message-state/message-state";
 
 /**
- * The signed-out Home surface: guides the user to connect their Payload server
- * with a primary call to action that opens the sign-in screen.
+ * The signed-out landing screen: guides the user to connect their Payload
+ * server with a primary call to action that opens the sign-in screen. It is the
+ * single non-tab surface shown while unauthenticated — the tab UI mounts only
+ * after a successful sign-in.
  */
-export function HomeEmptyState(): JSX.Element {
+export function WelcomeScreen(): JSX.Element {
 	return (
 		<MessageState
 			action={
@@ -16,7 +18,7 @@ export function HomeEmptyState(): JSX.Element {
 					<Pressable
 						accessibilityRole="button"
 						style={({ pressed }) => styles.button(pressed)}
-						testID="home-sign-in-button"
+						testID="welcome-sign-in-button"
 					>
 						<Text style={styles.buttonLabel}>Sign in</Text>
 					</Pressable>
@@ -24,7 +26,7 @@ export function HomeEmptyState(): JSX.Element {
 			}
 			iconName="database-outline"
 			subtitle="Sign in to your Payload CMS to browse your collections."
-			testID="home-screen"
+			testID="welcome-screen"
 			title="Connect to Payload"
 		/>
 	);
@@ -37,7 +39,6 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.accent,
 		borderRadius: theme.radiusSizes.md,
 		justifyContent: "center",
-		marginTop: theme.gapSizes.x16,
 		minHeight: 50,
 		opacity: pressed ? 0.7 : 1,
 	}),

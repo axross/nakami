@@ -117,26 +117,15 @@ describe("<SettingsScreen>", () => {
 		}
 	});
 
-	it("shows a Sign in row in place of the Account group when unauthenticated", () => {
-		useAuthStore.setState({ status: "unauthenticated", session: null });
-
-		const { getByTestId, queryByTestId } = renderSettingsScreen();
-
-		expect(getByTestId("settings-sign-in-button")).toBeTruthy();
-		expect(queryByTestId("settings-account-row")).toBeNull();
-		expect(queryByTestId("settings-sign-out-row")).toBeNull();
-	});
-
-	it("shows the Account group with the user email and Sign out when authenticated", () => {
+	it("shows the Account group with the user email and Sign out", () => {
 		useAuthStore.setState({ status: "authenticated", session });
 
-		const { getByTestId, getByText, queryByTestId } = renderSettingsScreen();
+		const { getByTestId, getByText } = renderSettingsScreen();
 
 		expect(getByTestId("settings-account-row")).toBeTruthy();
 		expect(getByText("you@example.com")).toBeTruthy();
 		expect(getByText("https://cms.example.com")).toBeTruthy();
 		expect(getByTestId("settings-sign-out-row")).toBeTruthy();
 		expect(getByText("Sign out")).toBeTruthy();
-		expect(queryByTestId("settings-sign-in-button")).toBeNull();
 	});
 });
