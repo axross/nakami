@@ -1,10 +1,8 @@
+import type { LucideIcon } from "lucide-react-native";
 import type { JSX } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import {
-	MessageState,
-	type MessageStateIconName,
-} from "~/common/components/message-state/message-state";
+import { MessageState } from "~/common/components/message-state/message-state";
 
 interface MessageAction {
 	readonly label: string;
@@ -17,14 +15,14 @@ interface MessageAction {
  * {@link MessageState} with a primary retry button when an action is given.
  */
 export function CollectionsMessageState({
-	iconName,
+	icon,
 	iconColor,
 	title,
 	subtitle,
 	action,
 	testID,
 }: Readonly<{
-	iconName: MessageStateIconName;
+	icon: LucideIcon;
 	iconColor?: string;
 	title: string;
 	subtitle: string;
@@ -45,8 +43,8 @@ export function CollectionsMessageState({
 					</Pressable>
 				) : undefined
 			}
+			icon={icon}
 			iconColor={iconColor}
-			iconName={iconName}
 			subtitle={subtitle}
 			testID={testID}
 			title={title}

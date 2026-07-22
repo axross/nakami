@@ -1,4 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import {
+	CircleAlert,
+	FolderOpen,
+	Lock,
+	type LucideIcon,
+} from "lucide-react-native";
 import type { JSX } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -7,13 +13,12 @@ import { CollectionListItem } from "~/collections/components/collection-list-ite
 import { CollectionListSkeleton } from "~/collections/components/collection-list-skeleton/collection-list-skeleton";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
 import { getCollectionListQueryOptions } from "~/collections/queries/collection-list-query";
-import type { MessageStateIconName } from "~/common/components/message-state/message-state";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 
 interface ErrorCopy {
 	readonly title: string;
 	readonly subtitle: string;
-	readonly iconName: MessageStateIconName;
+	readonly icon: LucideIcon;
 	readonly tone: "danger" | "muted";
 	readonly retryable: boolean;
 }
@@ -30,7 +35,7 @@ function describeError(error: unknown): ErrorCopy {
 			title: "Can't access collections",
 			subtitle:
 				"Your account doesn't have permission to view this server's collections.",
-			iconName: "lock-outline",
+			icon: Lock,
 			tone: "muted",
 			retryable: false,
 		};
@@ -41,7 +46,7 @@ function describeError(error: unknown): ErrorCopy {
 			title: "Couldn't load",
 			subtitle:
 				"We couldn't reach the server. Check your connection and try again.",
-			iconName: "alert-circle-outline",
+			icon: CircleAlert,
 			tone: "danger",
 			retryable: true,
 		};
@@ -50,7 +55,7 @@ function describeError(error: unknown): ErrorCopy {
 	return {
 		title: "Couldn't load",
 		subtitle: "Something went wrong loading collections. Please try again.",
-		iconName: "alert-circle-outline",
+		icon: CircleAlert,
 		tone: "danger",
 		retryable: true,
 	};
@@ -95,12 +100,12 @@ export function CollectionsScreen(): JSX.Element {
 							}
 						: undefined
 				}
+				icon={copy.icon}
 				iconColor={
 					copy.tone === "danger"
 						? theme.colors.danger
 						: theme.colors.textSecondary
 				}
-				iconName={copy.iconName}
 				subtitle={copy.subtitle}
 				testID="collections-error"
 				title={copy.title}
@@ -120,7 +125,7 @@ export function CollectionsScreen(): JSX.Element {
 	} else {
 		content = (
 			<CollectionsMessageState
-				iconName="folder-open-outline"
+				icon={FolderOpen}
 				subtitle="There are no collections to show for this account."
 				testID="collections-empty"
 				title="No collections"

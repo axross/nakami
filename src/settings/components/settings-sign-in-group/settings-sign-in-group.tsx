@@ -1,4 +1,5 @@
 import { Link } from "expo-router";
+import { LogIn } from "lucide-react-native";
 import type { JSX } from "react";
 import { SettingMenuGroup } from "~/settings/components/setting-menu-group/setting-menu-group";
 import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/setting-menu-group-body";
@@ -27,7 +28,7 @@ export function SettingsSignInGroup(): JSX.Element {
 						last
 						testID="settings-sign-in-button"
 					>
-						<SettingMenuGroupItemIcon name="login" />
+						<SettingMenuGroupItemIcon icon={LogIn} />
 						<SettingMenuGroupItemLabel>Sign in</SettingMenuGroupItemLabel>
 						<SettingMenuGroupItemChevron />
 					</SettingMenuGroupItem>

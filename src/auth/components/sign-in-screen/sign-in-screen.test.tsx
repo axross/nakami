@@ -27,12 +27,6 @@ jest.mock("~/auth/stores/auth-store", () => ({
 jest.mock("~/auth/helpers/last-server-url", () => ({
 	readLastServerUrl: jest.fn(),
 }));
-// The collection field's icon loads its font asynchronously and setStates; stub
-// it so the async-`waitFor` tests below don't emit spurious act(...) warnings.
-jest.mock("@expo/vector-icons/MaterialCommunityIcons", () => ({
-	__esModule: true,
-	default: () => null,
-}));
 
 // Render the screen under a fresh, isolated QueryClient (retries off) so the
 // real `useMutation` runs; tests drive the actual mutation and assert its

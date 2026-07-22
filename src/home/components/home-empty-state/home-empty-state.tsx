@@ -1,4 +1,5 @@
 import { Link } from "expo-router";
+import { Database } from "lucide-react-native";
 import type { JSX } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -22,7 +23,7 @@ export function HomeEmptyState(): JSX.Element {
 					</Pressable>
 				</Link>
 			}
-			iconName="database-outline"
+			icon={Database}
 			subtitle="Sign in to your Payload CMS to browse your collections."
 			testID="home-screen"
 			title="Connect to Payload"

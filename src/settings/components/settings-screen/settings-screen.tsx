@@ -2,6 +2,7 @@ import { showFeedbackWidget } from "@sentry/react-native";
 import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { openMenu as openDevMenu } from "expo-dev-client";
 import { Link } from "expo-router";
+import { FileText, MessageSquare, SquareTerminal } from "lucide-react-native";
 import { type JSX, useCallback } from "react";
 import { Platform, ScrollView, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -56,7 +57,7 @@ export function SettingsScreen(): JSX.Element {
 						onPress={onFeedbackPress}
 						testID="settings-feedback-row"
 					>
-						<SettingMenuGroupItemIcon name="message-outline" />
+						<SettingMenuGroupItemIcon icon={MessageSquare} />
 						<SettingMenuGroupItemLabel>Feedback</SettingMenuGroupItemLabel>
 						<SettingMenuGroupItemChevron />
 					</SettingMenuGroupItem>
@@ -67,7 +68,7 @@ export function SettingsScreen(): JSX.Element {
 							last
 							testID="settings-license-row"
 						>
-							<SettingMenuGroupItemIcon name="file-document-outline" />
+							<SettingMenuGroupItemIcon icon={FileText} />
 							<SettingMenuGroupItemLabel>License</SettingMenuGroupItemLabel>
 							<SettingMenuGroupItemChevron />
 						</SettingMenuGroupItem>
@@ -87,7 +88,7 @@ export function SettingsScreen(): JSX.Element {
 							onPress={onOpenDevMenuPress}
 							testID="settings-open-dev-menu-row"
 						>
-							<SettingMenuGroupItemIcon name="console" />
+							<SettingMenuGroupItemIcon icon={SquareTerminal} />
 							<SettingMenuGroupItemLabel>
 								Open Dev Menu
 							</SettingMenuGroupItemLabel>
