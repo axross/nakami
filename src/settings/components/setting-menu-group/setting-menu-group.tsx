@@ -11,6 +11,6 @@ export function SettingMenuGroup({
 
 const styles = StyleSheet.create((theme) => ({
 	group: {
-		rowGap: theme.gapSizes.x12,
+		rowGap: theme.gap.sm,
 	},
 }));

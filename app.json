@@ -39,6 +39,16 @@
 			"expo-sqlite",
 			"react-native-edge-to-edge",
 			[
+				"expo-font",
+				{
+					"fonts": [
+						"./assets/fonts/InnovatorGrotesk-Regular.otf",
+						"./assets/fonts/InnovatorGrotesk-SemiBold.otf",
+						"./assets/fonts/JetBrainsMono-Regular.ttf"
+					]
+				}
+			],
+			[
 				"@sentry/react-native/expo",
 				{
 					"organization": "axross",

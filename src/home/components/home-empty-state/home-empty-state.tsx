@@ -34,16 +34,16 @@ const styles = StyleSheet.create((theme) => ({
 	button: (pressed: boolean) => ({
 		alignItems: "center",
 		alignSelf: "stretch",
-		backgroundColor: theme.colors.accent,
-		borderRadius: theme.radiusSizes.md,
+		backgroundColor: theme.colors.solid.accent.base,
+		borderRadius: theme.gap.sm,
 		justifyContent: "center",
-		marginTop: theme.gapSizes.x16,
+		marginTop: theme.gap.md,
 		minHeight: 50,
 		opacity: pressed ? 0.7 : 1,
 	}),
 	buttonLabel: {
-		color: theme.colors.accentContrast,
-		fontSize: theme.fontSizes.md,
-		fontWeight: "600",
+		color: theme.colors.text.onAccent,
+		fontFamily: theme.fonts.heading,
+		fontSize: 16,
 	},
 }));

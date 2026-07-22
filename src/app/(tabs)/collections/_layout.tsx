@@ -10,10 +10,10 @@ export default function CollectionsLayout(): JSX.Element {
 			screenOptions={{
 				headerShown: true,
 				headerStyle: {
-					backgroundColor: theme.colors.backgroundElevated,
+					backgroundColor: theme.colors.foundation.neutral.subtle,
 				},
 				headerTitleStyle: {
-					color: theme.colors.textPrimary,
+					color: theme.colors.text.neutral.intense,
 				},
 			}}
 		>

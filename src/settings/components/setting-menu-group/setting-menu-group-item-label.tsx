@@ -11,9 +11,10 @@ export function SettingMenuGroupItemLabel({
 
 const styles = StyleSheet.create((theme) => ({
 	label: {
-		color: theme.colors.textPrimary,
+		color: theme.colors.text.neutral.intense,
 		flexGrow: 1,
 		flexShrink: 1,
-		fontSize: theme.fontSizes.md,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 	},
 }));

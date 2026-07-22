@@ -10,11 +10,11 @@ export default function SettingsLayout(): JSX.Element {
 			screenOptions={{
 				headerShown: true,
 				headerStyle: {
-					backgroundColor: theme.colors.backgroundElevated,
+					backgroundColor: theme.colors.foundation.neutral.subtle,
 				},
-				headerTintColor: theme.colors.accent,
+				headerTintColor: theme.colors.text.accent.base,
 				headerTitleStyle: {
-					color: theme.colors.textPrimary,
+					color: theme.colors.text.neutral.intense,
 				},
 			}}
 		>

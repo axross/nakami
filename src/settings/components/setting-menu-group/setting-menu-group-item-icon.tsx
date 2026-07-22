@@ -14,7 +14,7 @@ export function SettingMenuGroupItemIcon({
 
 	return (
 		<MaterialCommunityIcons
-			color={theme.colors.textSecondary}
+			color={theme.colors.text.neutral.base}
 			size={24}
 			{...props}
 		/>

@@ -11,9 +11,9 @@ export function SettingMenuGroupHeading({
 
 const styles = StyleSheet.create((theme) => ({
 	heading: {
-		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.md,
-		fontWeight: "700",
-		paddingHorizontal: theme.gapSizes.x16,
+		color: theme.colors.text.neutral.intense,
+		fontFamily: theme.fonts.heading,
+		fontSize: 16,
+		paddingHorizontal: theme.gap.md,
 	},
 }));

@@ -35,9 +35,11 @@ function RootLayout(): JSX.Element {
 					options={{
 						headerShown: true,
 						title: "Sign in",
-						headerStyle: { backgroundColor: theme.colors.backgroundElevated },
-						headerTintColor: theme.colors.accent,
-						headerTitleStyle: { color: theme.colors.textPrimary },
+						headerStyle: {
+							backgroundColor: theme.colors.foundation.neutral.subtle,
+						},
+						headerTintColor: theme.colors.text.accent.base,
+						headerTitleStyle: { color: theme.colors.text.neutral.intense },
 					}}
 				/>
 			</Stack>

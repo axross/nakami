@@ -8,7 +8,7 @@ export default function TabsLayout(): JSX.Element {
 	const status = useAuthStatus();
 
 	return (
-		<NativeTabs tintColor={theme.colors.accent}>
+		<NativeTabs tintColor={theme.colors.text.accent.base}>
 			<NativeTabs.Trigger name="index" testID="tab-home">
 				<NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
 				<NativeTabs.Trigger.Icon md="home" sf="house" />
