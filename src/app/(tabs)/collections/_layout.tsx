@@ -18,6 +18,7 @@ export default function CollectionsLayout(): JSX.Element {
 			}}
 		>
 			<Stack.Screen name="index" options={{ title: "Collections" }} />
+			<Stack.Screen name="[slug]" />
 		</Stack>
 	);
 }

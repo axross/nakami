@@ -4,6 +4,16 @@ module.exports = {
 	moduleNameMapper: {
 		"^~/assets/(.*)$": "<rootDir>/assets/$1",
 		"^~/(.*)$": "<rootDir>/src/$1",
+		// react-native-reanimated v4's own jest mock (`react-native-reanimated/
+		// mock`) is broken — it requires an absent `./src/mock` — so expo-router's
+		// testing-library `jest.mock` catches the throw and falls back to an empty
+		// module, dropping hooks like useReducedMotion. Redirect that `/mock`
+		// subpath to a complete manual mock; expo-router's factory then loads it
+		// and re-exports it as the reanimated module. Map ONLY `/mock`, not the
+		// bare specifier: a bare mapper conflicts with expo-router's own
+		// `jest.mock` of react-native-reanimated and recurses through the `/mock`
+		// require, overflowing the stack.
+		"^react-native-reanimated/mock$": "<rootDir>/jest/reanimated-mock.js",
 	},
 	// jest-expo's default transformIgnorePatterns already allows every
 	// react-native-* / expo-* / @expo/* package through Babel — do not override

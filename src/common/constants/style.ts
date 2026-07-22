@@ -28,6 +28,7 @@ const lightColors = {
 	border: "#d9d9e0",
 	accent: "#0588f0",
 	accentContrast: "#ffffff",
+	accentMuted: "#e6f2fe",
 	danger: "#dc3e42",
 	dangerContrast: "#ffffff",
 } as const;
@@ -40,6 +41,7 @@ const darkColors = {
 	border: "#3a3a44",
 	accent: "#3b9eff",
 	accentContrast: "#ffffff",
+	accentMuted: "#14283e",
 	danger: "#ec5d5e",
 	dangerContrast: "#ffffff",
 } as const;
