@@ -44,12 +44,13 @@ src/common/components/button/
 
 ## Styling and Theming
 
-All styling goes through Unistyles; the theme is the only source of colors, spacing, radii, and font sizes.
+All styling goes through Unistyles; the theme (`src/common/constants/style.ts`) is the source of colors, spacing, radii, and fonts. Font **sizes** are the one deliberate exception — the theme carries no size scale, so each text style inlines its numeric `fontSize` paired with a `theme.fonts.*` family (mirroring the reference `axross/cunnpe` theme).
 
 **Guidelines:**
 
-- MUST style with `StyleSheet.create((theme) => ({ … }))` from `react-native-unistyles` and consume tokens (`theme.colors.*`, `theme.gapSizes.*`, `theme.radiusSizes.*`, `theme.fontSizes.*`) — no hard-coded colors, sizes, or radii in component files.
-- MUST add new design tokens to `src/common/constants/style.ts` (both themes) rather than inlining a one-off value; light and dark themes MUST keep identical token shapes.
+- MUST style with `StyleSheet.create((theme) => ({ … }))` from `react-native-unistyles` and consume tokens: `theme.colors.*` (semantic role tokens — `foundation` / `surface` / `border` / `solid` / `text`, each × `neutral` / `accent` / `destructive`), `theme.gap.*` (spacing **and** border radii — there is no separate radius token), and `theme.fonts.*` (`heading` / `paragraph` / `label` / `monospace`). MUST NOT hard-code colors, spacing, or radii. A text style's numeric `fontSize` is the sole allowed inlined value, and it MUST be paired with a `theme.fonts.*` family.
+- MUST pick the color token by its semantic role, not its resemblance: an icon or text glyph uses a `text.*` (or `solid.*`) token, never a `border.*` token; an inset element uses a `surface.*` token, not a `foundation.*` background.
+- MUST add new design tokens to `src/common/constants/style.ts` (both themes) rather than inlining a one-off color, spacing, or radius; light and dark themes MUST keep identical token shapes.
 - MUST accept a `style` prop on the root element and merge it after the component's own styles, so consumers extend rather than fork.
 - MUST NOT branch on the color scheme manually (`useColorScheme()`); adaptive theming is Unistyles' job.
 
