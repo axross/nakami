@@ -39,6 +39,7 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.accent,
 		borderRadius: theme.radiusSizes.md,
 		justifyContent: "center",
+		marginTop: theme.gapSizes.x16,
 		minHeight: 50,
 		opacity: pressed ? 0.7 : 1,
 	}),
