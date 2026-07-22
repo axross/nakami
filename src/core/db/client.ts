@@ -3,7 +3,7 @@ import { openDatabaseSync } from "expo-sqlite";
 import { createModuleLogger } from "~/core/helpers/logging";
 import * as schema from "./schema";
 
-const DATABASE_NAME = "payload-mobile.db";
+const DATABASE_NAME = "nakami.db";
 
 const logger = createModuleLogger("core/db");
 

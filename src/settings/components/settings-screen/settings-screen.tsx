@@ -99,6 +99,12 @@ export function SettingsScreen(): JSX.Element {
 			<Text style={styles.technicalDetails} testID="settings-technical-details">
 				{technicalInfo.join("\n")}
 			</Text>
+
+			<Text style={styles.disclaimer} testID="settings-disclaimer">
+				Nakami is an independent, third-party client and is not affiliated with,
+				endorsed by, or sponsored by Payload CMS, Inc. or Figma. Payload and
+				related marks are trademarks of Payload CMS, Inc.
+			</Text>
 		</ScrollView>
 	);
 }
@@ -115,6 +121,11 @@ const styles = StyleSheet.create((theme) => ({
 	technicalDetails: {
 		color: theme.colors.textPrimary,
 		fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
+		fontSize: theme.fontSizes.sm,
+		paddingHorizontal: theme.gapSizes.x16,
+	},
+	disclaimer: {
+		color: theme.colors.textSecondary,
 		fontSize: theme.fontSizes.sm,
 		paddingHorizontal: theme.gapSizes.x16,
 	},

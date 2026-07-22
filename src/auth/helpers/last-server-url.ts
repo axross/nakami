@@ -5,7 +5,7 @@ import { reportError } from "~/core/helpers/error-reporting";
 // keychain entry separate from the session so the two persist independently:
 // sign-out clears the session but deliberately leaves this behind, so the next
 // sign-in can pre-fill the endpoint.
-const LAST_SERVER_URL_KEY = "payload-mobile.last-server-url";
+const LAST_SERVER_URL_KEY = "nakami.last-server-url";
 
 /**
  * Reads the server URL of the last successful sign-in, or `null` when none has

@@ -1,6 +1,10 @@
-# Payload Mobile
+# Nakami
 
 A companion mobile app for Payload CMS, built for iOS and Android with Expo (React Native). The repository is newly initialized: the toolchain, testing setup, and agent working agreement are in place, and product features land as feature directories under `src/`.
+
+## Trademarks
+
+Nakami is an independent, third-party client and is not affiliated with, endorsed by, or sponsored by Payload CMS, Inc. or Figma. Payload, the Payload design, and related marks are trademarks or registered trademarks of Payload CMS, Inc. in the U.S. and other countries. References to "Payload CMS" in this project are nominative — they describe the platform Nakami connects to.
 
 ## Tech stack
 
