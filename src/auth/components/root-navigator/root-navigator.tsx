@@ -8,11 +8,9 @@ import { useAuthStatus } from "~/auth/stores/auth-store";
  * out (or still resolving behind the splash), it mounts the single non-tab
  * welcome screen and the sign-in screen that welcome pushes.
  *
- * Gating the whole tab group behind auth — rather than toggling one tab's
- * visibility — keeps the native tab bar mounted only ever with its full, static
- * set, never reconfigured in place. That is what avoids the on-device
- * post-authentication crash: Expo's native tabs remount the navigator when
- * their visible set changes while mounted (which crashes on Android).
+ * Gating the whole tab group behind auth keeps the tab UI authenticated-only —
+ * the signed-out experience is a dedicated welcome screen rather than a tab bar
+ * with gated screens. Exported for the auth-gate test.
  */
 export function RootNavigator(): JSX.Element {
 	const { theme } = useUnistyles();

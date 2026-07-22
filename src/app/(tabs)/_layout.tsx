@@ -1,31 +1,70 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Tabs } from "expo-router";
 import type { JSX } from "react";
 import { useUnistyles } from "react-native-unistyles";
 
 export default function TabsLayout(): JSX.Element {
 	const { theme } = useUnistyles();
 
-	// The tab group is only mounted while authenticated (the root navigator gates
-	// it), so the tab set is fixed here — all three triggers, unconditionally.
-	// Never toggle a trigger on auth state: Expo's native tabs remount the
-	// navigator when their visible set changes while mounted, which crashes
-	// on-device on Android.
+	// Standard JS tabs (React Navigation bottom tabs via expo-router's `Tabs`),
+	// NOT expo-router's `unstable-native-tabs`: the experimental native
+	// Fragment-backed tab host crashes on Android's New Architecture
+	// (react-native-screens). The tab group is only mounted while authenticated
+	// (the root navigator gates it), so the three-tab set is fixed.
 	return (
-		<NativeTabs tintColor={theme.colors.accent}>
-			<NativeTabs.Trigger name="index" testID="tab-home">
-				<NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon md="home" sf="house" />
-			</NativeTabs.Trigger>
-
-			<NativeTabs.Trigger name="collections" testID="tab-collections">
-				<NativeTabs.Trigger.Label>Collections</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon md="collections_bookmark" sf="square.stack" />
-			</NativeTabs.Trigger>
-
-			<NativeTabs.Trigger name="settings" testID="tab-settings">
-				<NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
-				<NativeTabs.Trigger.Icon md="settings" sf="gearshape" />
-			</NativeTabs.Trigger>
-		</NativeTabs>
+		<Tabs
+			screenOptions={{
+				headerShown: false,
+				tabBarActiveTintColor: theme.colors.accent,
+				tabBarInactiveTintColor: theme.colors.textSecondary,
+				tabBarStyle: {
+					backgroundColor: theme.colors.backgroundElevated,
+					borderTopColor: theme.colors.border,
+				},
+			}}
+		>
+			<Tabs.Screen
+				name="index"
+				options={{
+					title: "Home",
+					tabBarButtonTestID: "tab-home",
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							color={color}
+							name="home-outline"
+							size={size}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="collections"
+				options={{
+					title: "Collections",
+					tabBarButtonTestID: "tab-collections",
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							color={color}
+							name="folder-multiple-outline"
+							size={size}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="settings"
+				options={{
+					title: "Settings",
+					tabBarButtonTestID: "tab-settings",
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							color={color}
+							name="cog-outline"
+							size={size}
+						/>
+					),
+				}}
+			/>
+		</Tabs>
 	);
 }
