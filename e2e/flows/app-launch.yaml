@@ -1,4 +1,4 @@
-appId: app.axross.payload
+appId: app.axross.nakami
 name: app-launch — cold start reaches the home screen
 tags:
   - scenario:app-launch

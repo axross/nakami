@@ -5,7 +5,7 @@ import { reportError } from "~/core/helpers/error-reporting";
 // The single keychain entry that holds the session. Session material is a
 // bearer credential, so it lives only in the platform keychain — never the
 // Drizzle database or plain key-value storage.
-const SESSION_KEY = "payload-mobile.session";
+const SESSION_KEY = "nakami.session";
 
 /**
  * Reads the persisted session from the keychain, returning `null` when none is

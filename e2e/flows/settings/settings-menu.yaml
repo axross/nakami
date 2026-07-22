@@ -1,4 +1,4 @@
-appId: app.axross.payload
+appId: app.axross.nakami
 name: settings-menu — settings groups render and License pushes the Licenses screen
 tags:
   - scenario:settings-menu

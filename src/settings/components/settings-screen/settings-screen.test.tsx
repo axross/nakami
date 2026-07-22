@@ -70,6 +70,15 @@ describe("<SettingsScreen>", () => {
 		expect(technicalDetails.props.children).toContain("SHA: 9b05d81");
 	});
 
+	it("renders the non-affiliation trademark disclaimer", () => {
+		const { getByTestId } = renderSettingsScreen();
+
+		const disclaimer = getByTestId("settings-disclaimer");
+
+		expect(disclaimer.props.children).toContain("Nakami is an independent");
+		expect(disclaimer.props.children).toContain("not affiliated with");
+	});
+
 	it("opens the Sentry feedback widget when the Feedback row is pressed", () => {
 		const { showFeedbackWidget } = jest.requireMock<
 			typeof import("@sentry/react-native")

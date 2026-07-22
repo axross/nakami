@@ -15,7 +15,7 @@ export function HomeScreen(): JSX.Element {
 
 	return (
 		<View style={styles.root} testID="home-screen">
-			<Text style={styles.title}>Payload Mobile</Text>
+			<Text style={styles.title}>Nakami</Text>
 			<Text style={styles.subtitle}>
 				A companion mobile app for Payload CMS.
 			</Text>

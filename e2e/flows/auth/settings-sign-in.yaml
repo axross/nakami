@@ -1,4 +1,4 @@
-appId: app.axross.payload
+appId: app.axross.nakami
 name: auth-settings-sign-in — signed-out Settings offers a Sign in row that opens the sign-in screen
 tags:
   - scenario:auth-settings-sign-in

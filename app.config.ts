@@ -33,8 +33,8 @@ function resolveCommitHash(): string | undefined {
 // ExpoConfig fields the context types as optional.
 export default ({ config }: ConfigContext): ExpoConfig => ({
 	...config,
-	name: config.name ?? "Payload",
-	slug: config.slug ?? "payload-mobile",
+	name: config.name ?? "Nakami",
+	slug: config.slug ?? "nakami",
 	extra: {
 		...config.extra,
 		commitHash: resolveCommitHash(),

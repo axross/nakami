@@ -12,7 +12,7 @@ jest.mock("~/core/helpers/error-reporting", () => ({
 	reportError: jest.fn(),
 }));
 
-const KEY = "payload-mobile.last-server-url";
+const KEY = "nakami.last-server-url";
 
 beforeEach(() => {
 	jest.clearAllMocks();
