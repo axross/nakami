@@ -90,7 +90,7 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	accountText: {
 		flexShrink: 1,
-		rowGap: 4,
+		rowGap: theme.gap.xs,
 	},
 	avatar: {
 		alignItems: "center",
