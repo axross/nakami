@@ -14,8 +14,10 @@ import { MessageState } from "~/common/components/message-state/message-state";
  * cloning a Unistyles-styled `Pressable` through `Link asChild` drops its
  * computed style on the release build (the clone takes over the ref Unistyles
  * applies styles through — see `CollectionListItem`'s note), which left this
- * button rendering invisibly (its accent background never painted). The style
- * is kept static, with an Android ripple for press feedback.
+ * button rendering invisibly (its accent background never painted). Press
+ * feedback is the codebase's standard pressed-opacity dip, applied through the
+ * `Pressable`'s own render-prop `style` (the same pattern as `CollectionRow`,
+ * which proves it paints on release) — no `Link asChild` cloning involved.
  */
 export function WelcomeScreen(): JSX.Element {
 	const router = useRouter();
@@ -25,11 +27,13 @@ export function WelcomeScreen(): JSX.Element {
 			action={
 				<Pressable
 					accessibilityRole="button"
-					android_ripple={{ color: "rgba(255, 255, 255, 0.24)" }}
 					onPress={() => {
 						router.push("/sign-in");
 					}}
-					style={styles.button}
+					style={({ pressed }) => [
+						styles.button,
+						pressed && styles.buttonPressed,
+					]}
 					testID="welcome-sign-in-button"
 				>
 					<Text style={styles.buttonLabel}>Sign in</Text>
@@ -52,11 +56,13 @@ const styles = StyleSheet.create((theme) => ({
 		justifyContent: "center",
 		marginTop: theme.gapSizes.x16,
 		minHeight: 50,
-		overflow: "hidden",
 	},
 	buttonLabel: {
 		color: theme.colors.accentContrast,
 		fontSize: theme.fontSizes.md,
 		fontWeight: "600",
+	},
+	buttonPressed: {
+		opacity: 0.6,
 	},
 }));
