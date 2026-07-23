@@ -202,9 +202,10 @@ export function SignInScreen(): JSX.Element {
 				<Pressable
 					accessibilityRole="button"
 					accessibilityState={{ disabled: !canSubmit }}
+					android_ripple={{ color: "rgba(255, 255, 255, 0.24)" }}
 					disabled={!canSubmit}
 					onPress={onSubmit}
-					style={({ pressed }) => styles.submit(pressed, canSubmit)}
+					style={[styles.submit, !canSubmit && styles.submitDisabled]}
 					testID="sign-in-submit"
 				>
 					<Text style={styles.submitLabel}>
@@ -246,14 +247,22 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.background,
 		flex: 1,
 	},
-	submit: (pressed: boolean, enabled: boolean) => ({
+	// The primary action is kept on the simplest style path known to paint on the
+	// release build — static styles (disabled variant applied via an array) plus
+	// an Android ripple, rather than a `(pressed, enabled) => …` dynamic function
+	// — as a precaution after the welcome screen's Sign in button rendered
+	// invisibly there (see its note on the `Link asChild` + Unistyles issue).
+	submit: {
 		alignItems: "center",
 		backgroundColor: theme.colors.accent,
 		borderRadius: theme.radiusSizes.md,
 		justifyContent: "center",
 		minHeight: 50,
-		opacity: !enabled ? 0.5 : pressed ? 0.7 : 1,
-	}),
+		overflow: "hidden",
+	},
+	submitDisabled: {
+		opacity: 0.5,
+	},
 	submitLabel: {
 		color: theme.colors.accentContrast,
 		fontSize: theme.fontSizes.md,
