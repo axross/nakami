@@ -60,13 +60,18 @@ const styles = StyleSheet.create((theme) => ({
 		paddingVertical: theme.gap.sm,
 	},
 	chip: {
+		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		borderColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.gap.md,
 		borderWidth: 1,
+		// Fixed pill height (a fixed element dimension, not scale spacing) keeps
+		// the chip compact around its 12px id text; the theme's smallest gap step
+		// (xs: 8) as vertical padding would make the pill far too tall.
+		height: 22,
+		justifyContent: "center",
 		maxWidth: 140,
 		paddingHorizontal: theme.gap.xs,
-		paddingVertical: 2,
 	},
 	chipText: {
 		color: theme.colors.text.neutral.base,
