@@ -34,7 +34,7 @@ payload-mobile is a companion mobile app for Payload CMS, built with Expo (React
 | `src/unistyles.ts`   | Unistyles theme/breakpoint registration (imported first by the root layout)                                                    |
 | `e2e/`               | Maestro flows (`flows/`), shared subflows (`helpers/`), scenario catalog (`scenarios.md`), coverage gate script                |
 | `assets/`            | App icons, splash, and other bundled binary assets                                                                             |
-| `.claude/`           | Agent skills, hooks, and harness settings                                                                                      |
+| `.claude/`           | Agent skills, hooks, harness settings, and the `workflows/` Workflow-tool scripts the Address skill launches for its Phase 2 checks |
 | `.github/workflows/` | Merge checks CI and the independent Claude reviewer                                                                            |
 
 ## File Placement
@@ -46,3 +46,4 @@ payload-mobile is a companion mobile app for Payload CMS, built with Expo (React
 - MUST add new tables to `src/core/db/schema.ts` and commit the generated migration from `npm run db-migrate:generate` alongside; feature-level data access (queries/mutations wrapping the shared `db` client) stays in the owning feature.
 - MUST use the `~/` alias for cross-directory imports; relative paths only within the same directory subtree (max two levels).
 - SHOULD name files kebab-case, matching the porousel convention (`button-icon.tsx`, `feed-create-form.tsx`).
+- MUST consult the Address skill before changing scripts under `.claude/workflows/` — they implement its Phase 2 self-check and acceptance-criteria delegation contract — and Agent Skills Best Practices (both via the `AGENTS.md` skill index) for the delegation pattern's rules.

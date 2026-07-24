@@ -3,6 +3,9 @@
 	"enabledPlugins": {
 		"expo@claude-plugins-official": true
 	},
+	"permissions": {
+		"allow": ["Workflow(address-selfcheck)", "Workflow(address-criteria)"]
+	},
 	"hooks": {
 		"SessionStart": [
 			{
