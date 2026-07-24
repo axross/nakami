@@ -34,7 +34,7 @@ export function deriveRecordTitle(
 	for (const field of TITLE_FIELDS) {
 		const value = record[field];
 		if (typeof value === "string" && value.trim().length > 0) {
-			return { title: value, hasTitle: true };
+			return { title: value.trim(), hasTitle: true };
 		}
 	}
 

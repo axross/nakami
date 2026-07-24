@@ -19,6 +19,13 @@ describe("deriveRecordTitle", () => {
 		});
 	});
 
+	it("trims surrounding whitespace from the chosen title", () => {
+		expect(deriveRecordTitle({ id: "1", title: "  Hello  " })).toEqual({
+			title: "Hello",
+			hasTitle: true,
+		});
+	});
+
 	it("falls back to the id when no title-ish field exists", () => {
 		expect(deriveRecordTitle({ id: "abc123", body: "no title here" })).toEqual({
 			title: "abc123",
