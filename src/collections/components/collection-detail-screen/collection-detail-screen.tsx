@@ -1,3 +1,4 @@
+import { List } from "lucide-react-native";
 import type { JSX } from "react";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
 
@@ -11,7 +12,7 @@ export function CollectionDetailScreen({
 }: Readonly<{ label: string }>): JSX.Element {
 	return (
 		<CollectionsMessageState
-			iconName="format-list-bulleted"
+			icon={List}
 			subtitle={`Browsing the records in ${label} lands in a follow-up update.`}
 			testID="collection-detail-screen"
 			title="Records coming soon"

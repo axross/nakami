@@ -1,22 +1,11 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { LucideIcon } from "lucide-react-native";
+import type { JSX } from "react";
 import { useUnistyles } from "react-native-unistyles";
 
 export function SettingMenuGroupItemIcon({
-	...props
-}: Readonly<
-	Omit<
-		ComponentPropsWithoutRef<typeof MaterialCommunityIcons>,
-		"color" | "size"
-	>
->): JSX.Element {
+	icon: Icon,
+}: Readonly<{ icon: LucideIcon }>): JSX.Element {
 	const { theme } = useUnistyles();
 
-	return (
-		<MaterialCommunityIcons
-			color={theme.colors.text.neutral.base}
-			size={24}
-			{...props}
-		/>
-	);
+	return <Icon color={theme.colors.text.neutral.base} size={24} />;
 }

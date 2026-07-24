@@ -1,5 +1,5 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link } from "expo-router";
+import { ChevronRight } from "lucide-react-native";
 import type { ComponentPropsWithoutRef, JSX } from "react";
 import {
 	Pressable,
@@ -47,11 +47,7 @@ function CollectionRow({
 				{collection.label}
 			</Text>
 			<View style={styles.spring} />
-			<MaterialCommunityIcons
-				color={theme.colors.text.neutral.base}
-				name="chevron-right"
-				size={22}
-			/>
+			<ChevronRight color={theme.colors.text.neutral.base} size={22} />
 		</Pressable>
 	);
 }

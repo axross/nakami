@@ -23,12 +23,6 @@ import { CollectionsScreen } from "./collections-screen";
 jest.mock("~/collections/helpers/fetch-access", () => ({
 	fetchAccess: jest.fn(),
 }));
-// The row chevron and message-state marks load their font asynchronously and
-// setState; stub the icon so the async `waitFor` tests don't emit act(...) noise.
-jest.mock("@expo/vector-icons/MaterialCommunityIcons", () => ({
-	__esModule: true,
-	default: () => null,
-}));
 
 const SESSION: Session = {
 	serverUrl: "https://cms.example.com",

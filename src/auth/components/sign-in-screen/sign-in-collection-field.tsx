@@ -1,4 +1,4 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Pencil } from "lucide-react-native";
 import type { JSX } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -59,11 +59,7 @@ export function SignInCollectionField({
 						style={styles.editButton}
 						testID="sign-in-collection-edit"
 					>
-						<MaterialCommunityIcons
-							color={theme.colors.text.accent.base}
-							name="pencil-outline"
-							size={20}
-						/>
+						<Pencil color={theme.colors.text.accent.base} size={20} />
 					</Pressable>
 				</View>
 			)}

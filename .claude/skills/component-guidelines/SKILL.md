@@ -7,7 +7,7 @@ user-invocable: false
 
 # Component Guidelines
 
-This skill owns *how UI surfaces are built*. Where component files live belongs to Project Structure; route files belong to Routing Guidelines (both resolved via the `AGENTS.md` skill index). Components are hand-rolled on React Native primitives — no component library — following the composition and theming pattern of [axross/porousel](https://github.com/axross/porousel).
+This skill owns *how UI surfaces are built*. Where component files live belongs to Project Structure; route files belong to Routing Guidelines (both resolved via the `AGENTS.md` skill index). Components are hand-rolled on React Native primitives — no UI component library (icons are the exception; see [Icons](#icons)) — following the composition and theming pattern of [axross/porousel](https://github.com/axross/porousel).
 
 ## Component Catalog
 
@@ -53,6 +53,17 @@ All styling goes through Unistyles; the theme (`src/common/constants/style.ts`) 
 - MUST add new design tokens to `src/common/constants/style.ts` (both themes) rather than inlining a one-off color, spacing, or radius; light and dark themes MUST keep identical token shapes.
 - MUST accept a `style` prop on the root element and merge it after the component's own styles, so consumers extend rather than fork.
 - MUST NOT branch on the color scheme manually (`useColorScheme()`); adaptive theming is Unistyles' job.
+
+## Icons
+
+Icons come from [Lucide](https://lucide.dev) via `lucide-react-native` (rendered as SVG through `react-native-svg`) — the app's single icon set. This is the one exception to "no UI component library": Lucide supplies icon glyphs, not UI controls, which stay hand-rolled.
+
+**Guidelines:**
+
+- MUST source in-app icons from `lucide-react-native`; do not add another icon set (e.g. `@expo/vector-icons`) or hand-draw a glyph Lucide already provides.
+- MUST, when a component renders an icon it chooses itself, import the Lucide component directly and size/color it from the theme — `<ChevronRight color={theme.colors.textSecondary} size={22} />` — never a hard-coded color (see [Styling and Theming](#styling-and-theming)).
+- MUST, when a component lets its caller choose the icon, accept it as a `LucideIcon` component prop (`icon: LucideIcon`) — not a glyph-name string — and render it as `<Icon color={…} size={…} />`. `MessageState` (`icon`) and `SettingMenuGroupItemIcon` (`icon`) are the reference examples; the JS tab bar's `tabBarIcon` renders Lucide components the same way.
+- MAY import a bespoke `.svg` file as a React component (via `react-native-svg-transformer`, configured in `metro.config.js` and typed by the root `declarations.d.ts`) when a design needs a vector asset Lucide does not cover; prefer a Lucide glyph when one fits.
 
 ## Logic Extraction
 

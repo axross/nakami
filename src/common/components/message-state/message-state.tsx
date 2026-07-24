@@ -1,10 +1,7 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import type { LucideIcon } from "lucide-react-native";
 import type { JSX, ReactNode } from "react";
 import { type StyleProp, Text, View, type ViewStyle } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-
-/** The icon glyph names {@link MessageState} accepts, from the MaterialCommunityIcons set. */
-export type MessageStateIconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 /**
  * A centered "mark + title + subtitle" surface with an optional action slot —
@@ -14,7 +11,7 @@ export type MessageStateIconName = keyof typeof MaterialCommunityIcons.glyphMap;
  * link, a retry button).
  */
 export function MessageState({
-	iconName,
+	icon: Icon,
 	iconColor,
 	title,
 	subtitle,
@@ -22,7 +19,7 @@ export function MessageState({
 	testID,
 	style,
 }: Readonly<{
-	iconName: MessageStateIconName;
+	icon: LucideIcon;
 	iconColor?: string;
 	title: string;
 	subtitle: string;
@@ -35,11 +32,7 @@ export function MessageState({
 	return (
 		<View style={[styles.root, style]} testID={testID}>
 			<View style={styles.mark}>
-				<MaterialCommunityIcons
-					color={iconColor ?? theme.colors.text.accent.base}
-					name={iconName}
-					size={34}
-				/>
+				<Icon color={iconColor ?? theme.colors.text.accent.base} size={34} />
 			</View>
 
 			<Text style={styles.title}>{title}</Text>

@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { Database } from "lucide-react-native";
 import type { JSX } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -39,7 +40,7 @@ export function WelcomeScreen(): JSX.Element {
 					<Text style={styles.buttonLabel}>Sign in</Text>
 				</Pressable>
 			}
-			iconName="database-outline"
+			icon={Database}
 			subtitle="Sign in to your Payload CMS to browse your collections."
 			testID="welcome-screen"
 			title="Connect to Payload"

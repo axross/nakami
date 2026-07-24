@@ -1,5 +1,5 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useMutation } from "@tanstack/react-query";
+import { LogOut, UserRound } from "lucide-react-native";
 import { type JSX, useCallback } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -38,11 +38,7 @@ export function SettingsAccountGroup(): JSX.Element | null {
 			<SettingMenuGroupBody>
 				<View style={styles.accountRow} testID="settings-account-row">
 					<View style={styles.avatar}>
-						<MaterialCommunityIcons
-							color={theme.colors.text.accent.base}
-							name="account-outline"
-							size={22}
-						/>
+						<UserRound color={theme.colors.text.accent.base} size={22} />
 					</View>
 					<View style={styles.accountText}>
 						<Text numberOfLines={1} style={styles.email}>
@@ -62,11 +58,7 @@ export function SettingsAccountGroup(): JSX.Element | null {
 					onPress={onSignOutPress}
 					testID="settings-sign-out-row"
 				>
-					<MaterialCommunityIcons
-						color={theme.colors.text.destructive.base}
-						name="logout"
-						size={24}
-					/>
+					<LogOut color={theme.colors.text.destructive.base} size={24} />
 					<SettingMenuGroupItemLabel style={styles.signOutLabel}>
 						Sign out
 					</SettingMenuGroupItemLabel>

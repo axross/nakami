@@ -1,5 +1,5 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Tabs } from "expo-router";
+import { Folders, House, Settings } from "lucide-react-native";
 import type { JSX } from "react";
 import { useUnistyles } from "react-native-unistyles";
 
@@ -28,13 +28,7 @@ export default function TabsLayout(): JSX.Element {
 				options={{
 					title: "Home",
 					tabBarButtonTestID: "tab-home",
-					tabBarIcon: ({ color, size }) => (
-						<MaterialCommunityIcons
-							color={color}
-							name="home-outline"
-							size={size}
-						/>
-					),
+					tabBarIcon: ({ color, size }) => <House color={color} size={size} />,
 				}}
 			/>
 			<Tabs.Screen
@@ -43,11 +37,7 @@ export default function TabsLayout(): JSX.Element {
 					title: "Collections",
 					tabBarButtonTestID: "tab-collections",
 					tabBarIcon: ({ color, size }) => (
-						<MaterialCommunityIcons
-							color={color}
-							name="folder-multiple-outline"
-							size={size}
-						/>
+						<Folders color={color} size={size} />
 					),
 				}}
 			/>
@@ -57,11 +47,7 @@ export default function TabsLayout(): JSX.Element {
 					title: "Settings",
 					tabBarButtonTestID: "tab-settings",
 					tabBarIcon: ({ color, size }) => (
-						<MaterialCommunityIcons
-							color={color}
-							name="cog-outline"
-							size={size}
-						/>
+						<Settings color={color} size={size} />
 					),
 				}}
 			/>

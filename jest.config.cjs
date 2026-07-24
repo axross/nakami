@@ -14,6 +14,12 @@ module.exports = {
 		// `jest.mock` of react-native-reanimated and recurses through the `/mock`
 		// require, overflowing the stack.
 		"^react-native-reanimated/mock$": "<rootDir>/jest/reanimated-mock.js",
+		// lucide-react-native's `react-native` entry is ESM (`dist/esm/*.mjs`) that
+		// jest-expo's transform does not process, so importing an icon throws
+		// `SyntaxError: Unexpected token 'export'`. Map the module to a stub that
+		// renders every icon as a no-op component (see that file) rather than
+		// widening the transformIgnorePatterns the note below keeps untouched.
+		"^lucide-react-native$": "<rootDir>/jest/lucide-react-native-mock.js",
 	},
 	// jest-expo's default transformIgnorePatterns already allows every
 	// react-native-* / expo-* / @expo/* package through Babel — do not override

@@ -1,15 +1,9 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { ChevronRight } from "lucide-react-native";
 import type { JSX } from "react";
 import { useUnistyles } from "react-native-unistyles";
 
 export function SettingMenuGroupItemChevron(): JSX.Element {
 	const { theme } = useUnistyles();
 
-	return (
-		<MaterialCommunityIcons
-			color={theme.colors.text.neutral.base}
-			name="chevron-right"
-			size={24}
-		/>
-	);
+	return <ChevronRight color={theme.colors.text.neutral.base} size={24} />;
 }
