@@ -53,8 +53,8 @@ function CollectionRow({
 }
 
 /**
- * A single collection row that opens the collection's (placeholder) detail
- * screen. Navigation is declarative via `Link`; the row body lives in
+ * A single collection row that opens the collection's record list. Navigation
+ * is declarative via `Link`; the row body lives in
  * {@link CollectionRow} so `Link asChild` targets a wrapper component rather
  * than the Unistyles-styled `Pressable` directly (see that component's note).
  */
