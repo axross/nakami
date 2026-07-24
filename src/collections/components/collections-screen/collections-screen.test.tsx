@@ -9,19 +9,25 @@ import {
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
-import CollectionDetailRoute from "~/app/(tabs)/collections/[slug]";
+import CollectionRecordsRoute from "~/app/(tabs)/collections/[slug]";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchAccess } from "~/collections/helpers/fetch-access";
+import { fetchRecords } from "~/collections/helpers/fetch-records";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { CollectionsScreen } from "./collections-screen";
 
 // Mock only the data layer the real query calls; the query, its factory, and
 // the access→list mapping all run for real. `PayloadRequestError` stays real so
-// the error-mapping path is exercised end to end.
+// the error-mapping path is exercised end to end. `fetch-records` is mocked too
+// so that pressing a row (which navigates to the records screen) does not make a
+// real request.
 jest.mock("~/collections/helpers/fetch-access", () => ({
 	fetchAccess: jest.fn(),
+}));
+jest.mock("~/collections/helpers/fetch-records", () => ({
+	fetchRecords: jest.fn(),
 }));
 
 const SESSION: Session = {
@@ -42,7 +48,11 @@ function renderScreen() {
 					<CollectionsScreen />
 				</QueryClientProvider>
 			),
-			"collections/[slug]": CollectionDetailRoute,
+			"collections/[slug]": () => (
+				<QueryClientProvider client={client}>
+					<CollectionRecordsRoute />
+				</QueryClientProvider>
+			),
 		},
 		{ initialUrl: "/collections" },
 	);
@@ -132,10 +142,16 @@ describe("<CollectionsScreen>", () => {
 		expect(getByText("Media")).toBeTruthy();
 	});
 
-	it("opens the placeholder detail screen when a row is pressed", async () => {
+	it("opens the collection's records screen when a row is pressed", async () => {
 		jest
 			.mocked(fetchAccess)
 			.mockResolvedValue({ collections: { "blog-posts": { read: true } } });
+		jest.mocked(fetchRecords).mockResolvedValue({
+			docs: [],
+			totalDocs: 0,
+			hasNextPage: false,
+			nextPage: null,
+		});
 
 		const { getByTestId, getByText } = renderScreen();
 
@@ -145,12 +161,10 @@ describe("<CollectionsScreen>", () => {
 
 		fireEvent.press(getByTestId("collection-list-item-blog-posts"));
 
-		expect(getByTestId("collection-detail-screen")).toBeTruthy();
-		expect(getByText("Records coming soon")).toBeTruthy();
-		expect(
-			getByText(
-				"Browsing the records in Blog Posts lands in a follow-up update.",
-			),
-		).toBeTruthy();
+		expect(getByTestId("collection-records-screen")).toBeTruthy();
+		await waitFor(() => {
+			expect(getByTestId("collection-records-empty")).toBeTruthy();
+		});
+		expect(getByText("No records")).toBeTruthy();
 	});
 });

@@ -1,10 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-	CircleAlert,
-	FolderOpen,
-	Lock,
-	type LucideIcon,
-} from "lucide-react-native";
+import { FolderOpen } from "lucide-react-native";
 import type { JSX } from "react";
 import { FlatList, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -12,54 +7,18 @@ import { useAuthSession } from "~/auth/stores/auth-store";
 import { CollectionListItem } from "~/collections/components/collection-list-item/collection-list-item";
 import { CollectionListSkeleton } from "~/collections/components/collection-list-skeleton/collection-list-skeleton";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
+import { describeLoadError } from "~/collections/helpers/describe-collections-error";
 import { getCollectionListQueryOptions } from "~/collections/queries/collection-list-query";
-import { PayloadRequestError } from "~/common/helpers/payload-client";
 
-interface ErrorCopy {
-	readonly title: string;
-	readonly subtitle: string;
-	readonly icon: LucideIcon;
-	readonly tone: "danger" | "muted";
-	readonly retryable: boolean;
-}
-
-/**
- * Maps a load failure to user-facing copy. A permission failure is an expected
- * account/config state, so it gets a distinct, non-alarming message and no
- * retry (retrying can't grant access); connectivity and unexpected failures
- * offer a retry.
- */
-function describeError(error: unknown): ErrorCopy {
-	if (error instanceof PayloadRequestError && error.kind === "auth") {
-		return {
-			title: "Can't access collections",
-			subtitle:
-				"Your account doesn't have permission to view this server's collections.",
-			icon: Lock,
-			tone: "muted",
-			retryable: false,
-		};
-	}
-
-	if (error instanceof PayloadRequestError && error.kind === "network") {
-		return {
-			title: "Couldn't load",
-			subtitle:
-				"We couldn't reach the server. Check your connection and try again.",
-			icon: CircleAlert,
-			tone: "danger",
-			retryable: true,
-		};
-	}
-
-	return {
-		title: "Couldn't load",
-		subtitle: "Something went wrong loading collections. Please try again.",
-		icon: CircleAlert,
-		tone: "danger",
-		retryable: true,
-	};
-}
+// Subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
+// retryability — is shared with the records list).
+const COLLECTIONS_LOAD_ERROR = {
+	accessTitle: "Can't access collections",
+	accessSubtitle:
+		"Your account doesn't have permission to view this server's collections.",
+	genericSubtitle:
+		"Something went wrong loading collections. Please try again.",
+} as const;
 
 function CollectionListDivider(): JSX.Element {
 	return <View style={styles.divider} />;
@@ -67,7 +26,7 @@ function CollectionListDivider(): JSX.Element {
 
 /**
  * The Collections tab: lists the signed-in server's readable, non-system
- * collections, each row opening its (placeholder) detail screen. Renders a
+ * collections, each row opening that collection's record list. Renders a
  * loading skeleton, an error state (with a message tailored to the failure),
  * an empty state, or the list.
  */
@@ -86,7 +45,7 @@ export function CollectionsScreen(): JSX.Element {
 	if (isPending) {
 		content = <CollectionListSkeleton />;
 	} else if (isError) {
-		const copy = describeError(error);
+		const copy = describeLoadError(error, COLLECTIONS_LOAD_ERROR);
 		content = (
 			<CollectionsMessageState
 				action={
