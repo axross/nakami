@@ -1,18 +1,13 @@
 import type { JSX } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useAuthStatus } from "~/auth/stores/auth-store";
-import { HomeEmptyState } from "~/home/components/home-empty-state/home-empty-state";
 
+/**
+ * The Home tab surface. Home renders only while authenticated — the root
+ * navigator gates the whole tab UI behind sign-in — so there is no signed-out
+ * branch here; the signed-out landing lives in the welcome screen.
+ */
 export function HomeScreen(): JSX.Element {
-	const status = useAuthStatus();
-
-	// Signed out (or still resolving behind the splash): guide the user to sign
-	// in. Authenticated: the unchanged placeholder Home.
-	if (status !== "authenticated") {
-		return <HomeEmptyState />;
-	}
-
 	return (
 		<View style={styles.root} testID="home-screen">
 			<Text style={styles.title}>Nakami</Text>

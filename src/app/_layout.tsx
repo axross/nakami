@@ -1,11 +1,10 @@
 import "~/unistyles";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import type { JSX } from "react";
-import { useUnistyles } from "react-native-unistyles";
+import { RootNavigator } from "~/auth/components/root-navigator/root-navigator";
 import { useSessionBootstrap } from "~/auth/hooks/use-session-bootstrap";
 import { useSessionRefresh } from "~/auth/hooks/use-session-refresh";
 import {
@@ -21,26 +20,12 @@ initializeErrorReporter();
 void SplashScreen.preventAutoHideAsync();
 
 function RootLayout(): JSX.Element {
-	const { theme } = useUnistyles();
-
 	useSessionBootstrap();
 	useSessionRefresh();
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Stack screenOptions={{ headerShown: false }}>
-				<Stack.Screen name="(tabs)" />
-				<Stack.Screen
-					name="sign-in"
-					options={{
-						headerShown: true,
-						title: "Sign in",
-						headerStyle: { backgroundColor: theme.colors.backgroundElevated },
-						headerTintColor: theme.colors.accent,
-						headerTitleStyle: { color: theme.colors.textPrimary },
-					}}
-				/>
-			</Stack>
+			<RootNavigator />
 			<StatusBar style="auto" />
 		</QueryClientProvider>
 	);
