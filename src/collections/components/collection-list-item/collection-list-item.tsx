@@ -48,7 +48,7 @@ function CollectionRow({
 			</Text>
 			<View style={styles.spring} />
 			<MaterialCommunityIcons
-				color={theme.colors.textSecondary}
+				color={theme.colors.text.neutral.base}
 				name="chevron-right"
 				size={22}
 			/>
@@ -80,32 +80,33 @@ export function CollectionListItem({
 
 const styles = StyleSheet.create((theme) => ({
 	label: {
-		color: theme.colors.textPrimary,
+		color: theme.colors.text.neutral.intense,
 		flexShrink: 1,
-		fontSize: theme.fontSizes.md,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 	},
 	monogram: {
 		alignItems: "center",
 		aspectRatio: 1,
-		backgroundColor: theme.colors.accentMuted,
-		borderRadius: theme.radiusSizes.sm,
+		backgroundColor: theme.colors.surface.accent.base,
+		borderRadius: theme.gap.xs,
 		justifyContent: "center",
 		width: 34,
 	},
 	monogramText: {
-		color: theme.colors.accent,
-		fontSize: theme.fontSizes.md,
-		fontWeight: "600",
+		color: theme.colors.text.accent.base,
+		fontFamily: theme.fonts.heading,
+		fontSize: 16,
 	},
 	row: (pressed: boolean) => ({
 		alignItems: "center",
-		backgroundColor: theme.colors.backgroundElevated,
-		columnGap: theme.gapSizes.x12,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		columnGap: theme.gap.sm,
 		flexDirection: "row",
 		minHeight: 56,
 		opacity: pressed ? 0.6 : 1,
-		paddingHorizontal: theme.gapSizes.x16,
-		paddingVertical: theme.gapSizes.x8,
+		paddingHorizontal: theme.gap.md,
+		paddingVertical: theme.gap.xs,
 	}),
 	spring: {
 		flex: 1,

@@ -11,7 +11,7 @@ export function SettingMenuGroupBody({
 
 const styles = StyleSheet.create((theme) => ({
 	body: {
-		paddingHorizontal: theme.gapSizes.x16,
+		paddingHorizontal: theme.gap.md,
 		rowGap: 1,
 	},
 }));

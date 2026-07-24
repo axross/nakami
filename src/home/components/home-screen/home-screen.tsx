@@ -21,20 +21,21 @@ export function HomeScreen(): JSX.Element {
 const styles = StyleSheet.create((theme) => ({
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 		justifyContent: "center",
-		padding: theme.gapSizes.x24,
-		rowGap: theme.gapSizes.x8,
+		padding: theme.gap.lg,
+		rowGap: theme.gap.xs,
 	},
 	subtitle: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.md,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 		textAlign: "center",
 	},
 	title: {
-		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.xl,
-		fontWeight: "600",
+		color: theme.colors.text.neutral.intense,
+		fontFamily: theme.fonts.heading,
+		fontSize: 28,
 	},
 }));

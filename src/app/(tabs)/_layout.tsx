@@ -15,11 +15,11 @@ export default function TabsLayout(): JSX.Element {
 		<Tabs
 			screenOptions={{
 				headerShown: false,
-				tabBarActiveTintColor: theme.colors.accent,
-				tabBarInactiveTintColor: theme.colors.textSecondary,
+				tabBarActiveTintColor: theme.colors.text.accent.base,
+				tabBarInactiveTintColor: theme.colors.text.neutral.base,
 				tabBarStyle: {
-					backgroundColor: theme.colors.backgroundElevated,
-					borderTopColor: theme.colors.border,
+					backgroundColor: theme.colors.foundation.neutral.subtle,
+					borderTopColor: theme.colors.border.neutral.subtle,
 				},
 			}}
 		>

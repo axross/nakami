@@ -41,11 +41,13 @@ The kit renders in two forms, both in light **and** dark: an **element palette**
 
 A static HTML file cannot import the TypeScript token module, so the kit mirrors `src/common/constants/style.ts` as CSS custom properties on a shared `.device, .el-surface` block. That mirror can drift as the app's tokens change, so the kit treats `style.ts` as the source of truth and the CSS as a copy to reconcile per run.
 
-The mirrored tokens (as of the kit's authoring):
+The token shape to mirror (see `src/common/constants/style.ts` for current values):
 
-- Colors — `lightColors` / `darkColors`: `background`, `backgroundElevated`, `textPrimary`, `textSecondary`, `border`, `accent`, `accentContrast`, `danger`, `dangerContrast`.
-- Radii — `radiusSizes`: `sm 8` / `md 12` / `lg 16` (`--r-sm` / `--r-md` / `--r-lg`).
-- Type scale — `fontSizes`: `sm 13` / `md 16` / `lg 20` / `xl 28`.
+- Colors — semantic role tokens under `theme.colors`: `foundation` / `surface` / `border` / `solid` / `text`, each × `neutral` / `accent` / `destructive` (plus `text.onAccent`). Neutrals are Radix Slate, destructive is Radix Ruby, accent is Radix Teal, in light and dark.
+- Spacing **and** radii — `gap`: `xs 8` / `sm 12` / `md 16` / `lg 24` / `xl 32` (there is no separate radius token; radii reuse `gap`).
+- Fonts — `fonts`: `heading` / `paragraph` / `label` (InnovatorGrotesk) and `monospace` (JetBrains Mono). There is no font-size scale; each text style inlines its `fontSize` paired with a `fonts.*` family.
+
+The kit's own `hifi-design-kit.html` has been reconciled to this shape as of this change; re-check it against `style.ts` before each high-fidelity round, since the mirror can drift again as tokens evolve.
 
 **Guidelines:**
 

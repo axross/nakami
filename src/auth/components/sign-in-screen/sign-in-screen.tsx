@@ -139,7 +139,7 @@ export function SignInScreen(): JSX.Element {
 							clearErrors();
 						}}
 						placeholder="https://cms.example.com"
-						placeholderTextColor={theme.colors.textSecondary}
+						placeholderTextColor={theme.colors.text.neutral.base}
 						style={styles.input}
 						testID="sign-in-server-url"
 						value={serverUrl}
@@ -168,7 +168,7 @@ export function SignInScreen(): JSX.Element {
 							clearErrors();
 						}}
 						placeholder="you@example.com"
-						placeholderTextColor={theme.colors.textSecondary}
+						placeholderTextColor={theme.colors.text.neutral.base}
 						style={styles.input}
 						testID="sign-in-email"
 						value={email}
@@ -185,7 +185,7 @@ export function SignInScreen(): JSX.Element {
 							setPassword(next);
 							clearErrors();
 						}}
-						placeholderTextColor={theme.colors.textSecondary}
+						placeholderTextColor={theme.colors.text.neutral.base}
 						secureTextEntry
 						style={styles.input}
 						testID="sign-in-password"
@@ -222,38 +222,41 @@ export function SignInScreen(): JSX.Element {
 
 const styles = StyleSheet.create((theme) => ({
 	content: {
-		padding: theme.gapSizes.x16,
-		rowGap: theme.gapSizes.x16,
+		padding: theme.gap.md,
+		rowGap: theme.gap.md,
 	},
 	error: {
-		color: theme.colors.danger,
-		fontSize: theme.fontSizes.sm,
+		color: theme.colors.text.destructive.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 13,
 	},
 	field: {
-		rowGap: theme.gapSizes.x8,
+		rowGap: theme.gap.xs,
 	},
 	input: {
-		backgroundColor: theme.colors.backgroundElevated,
-		borderColor: theme.colors.border,
-		borderRadius: theme.radiusSizes.md,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderRadius: theme.gap.sm,
 		borderWidth: 1,
-		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.md,
+		color: theme.colors.text.neutral.intense,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 		minHeight: 48,
-		paddingHorizontal: theme.gapSizes.x12,
+		paddingHorizontal: theme.gap.sm,
 	},
 	label: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.sm,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.label,
+		fontSize: 13,
 	},
 	root: {
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
 	submit: {
 		alignItems: "center",
-		backgroundColor: theme.colors.accent,
-		borderRadius: theme.radiusSizes.md,
+		backgroundColor: theme.colors.solid.accent.base,
+		borderRadius: theme.gap.sm,
 		justifyContent: "center",
 		minHeight: 50,
 	},
@@ -261,9 +264,9 @@ const styles = StyleSheet.create((theme) => ({
 		opacity: 0.5,
 	},
 	submitLabel: {
-		color: theme.colors.accentContrast,
-		fontSize: theme.fontSizes.md,
-		fontWeight: "600",
+		color: theme.colors.text.onAccent,
+		fontFamily: theme.fonts.heading,
+		fontSize: 16,
 	},
 	submitPressed: {
 		opacity: 0.6,

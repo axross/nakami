@@ -7,7 +7,7 @@ export function SettingMenuGroupItemChevron(): JSX.Element {
 
 	return (
 		<MaterialCommunityIcons
-			color={theme.colors.border}
+			color={theme.colors.text.neutral.base}
 			name="chevron-right"
 			size={24}
 		/>

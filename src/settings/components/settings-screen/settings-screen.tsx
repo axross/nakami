@@ -3,7 +3,7 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { openMenu as openDevMenu } from "expo-dev-client";
 import { Link } from "expo-router";
 import { type JSX, useCallback } from "react";
-import { Platform, ScrollView, Text } from "react-native";
+import { ScrollView, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { SettingMenuGroup } from "~/settings/components/setting-menu-group/setting-menu-group";
 import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/setting-menu-group-body";
@@ -103,22 +103,23 @@ export function SettingsScreen(): JSX.Element {
 
 const styles = StyleSheet.create((theme) => ({
 	content: {
-		paddingTop: theme.gapSizes.x24,
-		rowGap: theme.gapSizes.x24,
+		paddingTop: theme.gap.lg,
+		rowGap: theme.gap.lg,
 	},
 	root: {
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
 	technicalDetails: {
-		color: theme.colors.textPrimary,
-		fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
-		fontSize: theme.fontSizes.sm,
-		paddingHorizontal: theme.gapSizes.x16,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.monospace,
+		fontSize: 13,
+		paddingHorizontal: theme.gap.md,
 	},
 	disclaimer: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.sm,
-		paddingHorizontal: theme.gapSizes.x16,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 13,
+		paddingHorizontal: theme.gap.md,
 	},
 }));
