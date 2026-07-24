@@ -14,15 +14,16 @@ export function LicensesScreen(): JSX.Element {
 
 const styles = StyleSheet.create((theme) => ({
 	placeholder: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.md,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 		textAlign: "center",
 	},
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 		justifyContent: "center",
-		padding: theme.gapSizes.x24,
+		padding: theme.gap.lg,
 	},
 }));

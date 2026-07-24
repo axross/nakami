@@ -5,5 +5,5 @@ import { useUnistyles } from "react-native-unistyles";
 export function SettingMenuGroupItemChevron(): JSX.Element {
 	const { theme } = useUnistyles();
 
-	return <ChevronRight color={theme.colors.border} size={24} />;
+	return <ChevronRight color={theme.colors.text.neutral.base} size={24} />;
 }

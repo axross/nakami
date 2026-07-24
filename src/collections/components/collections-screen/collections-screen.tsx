@@ -103,8 +103,8 @@ export function CollectionsScreen(): JSX.Element {
 				icon={copy.icon}
 				iconColor={
 					copy.tone === "danger"
-						? theme.colors.danger
-						: theme.colors.textSecondary
+						? theme.colors.text.destructive.base
+						: theme.colors.text.neutral.base
 				}
 				subtitle={copy.subtitle}
 				testID="collections-error"
@@ -142,23 +142,23 @@ export function CollectionsScreen(): JSX.Element {
 
 const styles = StyleSheet.create((theme) => ({
 	card: {
-		backgroundColor: theme.colors.backgroundElevated,
-		borderColor: theme.colors.border,
-		borderRadius: theme.radiusSizes.md,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderRadius: theme.gap.sm,
 		borderWidth: 1,
-		margin: theme.gapSizes.x16,
+		margin: theme.gap.md,
 		overflow: "hidden",
 	},
 	divider: {
-		backgroundColor: theme.colors.border,
+		backgroundColor: theme.colors.border.neutral.subtle,
 		height: 1,
 	},
 	list: {
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
 	root: {
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
 }));

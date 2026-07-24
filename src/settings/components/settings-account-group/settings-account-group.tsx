@@ -38,7 +38,7 @@ export function SettingsAccountGroup(): JSX.Element | null {
 			<SettingMenuGroupBody>
 				<View style={styles.accountRow} testID="settings-account-row">
 					<View style={styles.avatar}>
-						<UserRound color={theme.colors.accent} size={22} />
+						<UserRound color={theme.colors.text.accent.base} size={22} />
 					</View>
 					<View style={styles.accountText}>
 						<Text numberOfLines={1} style={styles.email}>
@@ -58,7 +58,7 @@ export function SettingsAccountGroup(): JSX.Element | null {
 					onPress={onSignOutPress}
 					testID="settings-sign-out-row"
 				>
-					<LogOut color={theme.colors.danger} size={24} />
+					<LogOut color={theme.colors.text.destructive.base} size={24} />
 					<SettingMenuGroupItemLabel style={styles.signOutLabel}>
 						Sign out
 					</SettingMenuGroupItemLabel>
@@ -71,36 +71,38 @@ export function SettingsAccountGroup(): JSX.Element | null {
 const styles = StyleSheet.create((theme) => ({
 	accountRow: {
 		alignItems: "center",
-		backgroundColor: theme.colors.backgroundElevated,
-		borderTopLeftRadius: theme.radiusSizes.md,
-		borderTopRightRadius: theme.radiusSizes.md,
-		columnGap: theme.gapSizes.x16,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderTopLeftRadius: theme.gap.sm,
+		borderTopRightRadius: theme.gap.sm,
+		columnGap: theme.gap.md,
 		flexDirection: "row",
 		minHeight: 48,
-		paddingHorizontal: theme.gapSizes.x16,
-		paddingVertical: theme.gapSizes.x8,
+		paddingHorizontal: theme.gap.md,
+		paddingVertical: theme.gap.xs,
 	},
 	accountText: {
 		flexShrink: 1,
-		rowGap: theme.gapSizes.x4,
+		rowGap: theme.gap.xs,
 	},
 	avatar: {
 		alignItems: "center",
 		aspectRatio: 1,
-		backgroundColor: theme.colors.background,
-		borderRadius: theme.radiusSizes.lg,
+		backgroundColor: theme.colors.surface.neutral.base,
+		borderRadius: theme.gap.md,
 		justifyContent: "center",
 		width: 36,
 	},
 	email: {
-		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.md,
+		color: theme.colors.text.neutral.intense,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 	},
 	server: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.sm,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 13,
 	},
 	signOutLabel: {
-		color: theme.colors.danger,
+		color: theme.colors.text.destructive.base,
 	},
 }));

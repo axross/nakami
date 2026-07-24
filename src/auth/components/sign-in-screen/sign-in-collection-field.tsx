@@ -37,7 +37,7 @@ export function SignInCollectionField({
 						autoFocus
 						onChangeText={onChangeText}
 						placeholder="users"
-						placeholderTextColor={theme.colors.textSecondary}
+						placeholderTextColor={theme.colors.text.neutral.base}
 						style={styles.input}
 						testID="sign-in-collection-input"
 						value={value}
@@ -59,7 +59,7 @@ export function SignInCollectionField({
 						style={styles.editButton}
 						testID="sign-in-collection-edit"
 					>
-						<Pencil color={theme.colors.accent} size={20} />
+						<Pencil color={theme.colors.text.accent.base} size={20} />
 					</Pressable>
 				</View>
 			)}
@@ -75,34 +75,38 @@ const styles = StyleSheet.create((theme) => ({
 		width: 40,
 	},
 	field: {
-		rowGap: theme.gapSizes.x8,
+		rowGap: theme.gap.xs,
 	},
 	hint: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.sm,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 13,
 	},
 	input: {
-		backgroundColor: theme.colors.backgroundElevated,
-		borderColor: theme.colors.border,
-		borderRadius: theme.radiusSizes.md,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderRadius: theme.gap.sm,
 		borderWidth: 1,
-		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.md,
+		color: theme.colors.text.neutral.intense,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 		minHeight: 48,
-		paddingHorizontal: theme.gapSizes.x12,
+		paddingHorizontal: theme.gap.sm,
 	},
 	label: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.sm,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.label,
+		fontSize: 13,
 	},
 	value: {
-		color: theme.colors.textPrimary,
+		color: theme.colors.text.neutral.intense,
 		flexGrow: 1,
-		fontSize: theme.fontSizes.md,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 	},
 	valueRow: {
 		alignItems: "center",
-		columnGap: theme.gapSizes.x8,
+		columnGap: theme.gap.xs,
 		flexDirection: "row",
 		minHeight: 40,
 	},

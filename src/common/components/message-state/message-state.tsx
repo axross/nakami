@@ -32,7 +32,7 @@ export function MessageState({
 	return (
 		<View style={[styles.root, style]} testID={testID}>
 			<View style={styles.mark}>
-				<Icon color={iconColor ?? theme.colors.accent} size={34} />
+				<Icon color={iconColor ?? theme.colors.text.accent.base} size={34} />
 			</View>
 
 			<Text style={styles.title}>{title}</Text>
@@ -47,29 +47,30 @@ const styles = StyleSheet.create((theme) => ({
 	mark: {
 		alignItems: "center",
 		aspectRatio: 1,
-		backgroundColor: theme.colors.backgroundElevated,
-		borderRadius: theme.radiusSizes.lg,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderRadius: theme.gap.md,
 		justifyContent: "center",
-		marginBottom: theme.gapSizes.x8,
+		marginBottom: theme.gap.xs,
 		width: 66,
 	},
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.background,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 		justifyContent: "center",
-		padding: theme.gapSizes.x24,
-		rowGap: theme.gapSizes.x8,
+		padding: theme.gap.lg,
+		rowGap: theme.gap.xs,
 	},
 	subtitle: {
-		color: theme.colors.textSecondary,
-		fontSize: theme.fontSizes.md,
+		color: theme.colors.text.neutral.base,
+		fontFamily: theme.fonts.paragraph,
+		fontSize: 16,
 		maxWidth: 280,
 		textAlign: "center",
 	},
 	title: {
-		color: theme.colors.textPrimary,
-		fontSize: theme.fontSizes.lg,
-		fontWeight: "600",
+		color: theme.colors.text.neutral.intense,
+		fontFamily: theme.fonts.heading,
+		fontSize: 20,
 	},
 }));

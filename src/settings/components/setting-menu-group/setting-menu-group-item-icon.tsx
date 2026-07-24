@@ -7,5 +7,5 @@ export function SettingMenuGroupItemIcon({
 }: Readonly<{ icon: LucideIcon }>): JSX.Element {
 	const { theme } = useUnistyles();
 
-	return <Icon color={theme.colors.textSecondary} size={24} />;
+	return <Icon color={theme.colors.text.neutral.base} size={24} />;
 }
