@@ -47,7 +47,7 @@ The token shape to mirror (see `src/common/constants/style.ts` for current value
 - Spacing **and** radii — `gap`: `xs 8` / `sm 12` / `md 16` / `lg 24` / `xl 32` (there is no separate radius token; radii reuse `gap`).
 - Fonts — `fonts`: `heading` / `paragraph` / `label` (InnovatorGrotesk) and `monospace` (JetBrains Mono). There is no font-size scale; each text style inlines its `fontSize` paired with a `fonts.*` family.
 
-The kit's own `hifi-design-kit.html` still renders from an earlier flat-token mirror; treat `style.ts` as the source of truth and reconcile the kit's CSS custom properties to the shape above when you build a mockup.
+The kit's own `hifi-design-kit.html` has been reconciled to this shape as of this change; re-check it against `style.ts` before each high-fidelity round, since the mirror can drift again as tokens evolve.
 
 **Guidelines:**
 
