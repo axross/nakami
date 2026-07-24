@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import {
 	KeyboardAvoidingView,
@@ -36,11 +35,12 @@ function messageForError(error: unknown): string {
  * The Payload sign-in form: server URL, auth collection (defaulted), email, and
  * password. The Server URL field pre-fills on mount with the last successful
  * sign-in's endpoint (kept in the keychain) so a returning user need not retype
- * it. On success it persists the session (via the sign-in mutation) and
- * dismisses back to Home; failures surface inline without leaving the screen.
+ * it. On success it persists the session (via the sign-in mutation), which
+ * flips the app to authenticated — the root navigator then swaps this
+ * signed-out stack for the tab UI. Failures surface inline without leaving the
+ * screen.
  */
 export function SignInScreen(): JSX.Element {
-	const router = useRouter();
 	const { theme } = useUnistyles();
 	const { mutate, isPending, error, reset } = useMutation(
 		getSignInMutationOptions(),
@@ -101,16 +101,13 @@ export function SignInScreen(): JSX.Element {
 		}
 
 		setValidationError(null);
-		mutate(
-			{
-				serverUrl: normalizedUrl,
-				collectionSlug,
-				email: trimmedEmail,
-				password,
-			},
-			{ onSuccess: () => router.back() },
-		);
-	}, [serverUrl, collection, email, password, mutate, router]);
+		mutate({
+			serverUrl: normalizedUrl,
+			collectionSlug,
+			email: trimmedEmail,
+			password,
+		});
+	}, [serverUrl, collection, email, password, mutate]);
 
 	const message = validationError ?? (error ? messageForError(error) : null);
 	const canSubmit =
@@ -207,7 +204,11 @@ export function SignInScreen(): JSX.Element {
 					accessibilityState={{ disabled: !canSubmit }}
 					disabled={!canSubmit}
 					onPress={onSubmit}
-					style={({ pressed }) => styles.submit(pressed, canSubmit)}
+					style={({ pressed }) => [
+						styles.submit,
+						!canSubmit && styles.submitDisabled,
+						pressed && styles.submitPressed,
+					]}
 					testID="sign-in-submit"
 				>
 					<Text style={styles.submitLabel}>
@@ -252,17 +253,22 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
-	submit: (pressed: boolean, enabled: boolean) => ({
+	submit: {
 		alignItems: "center",
 		backgroundColor: theme.colors.solid.accent.base,
 		borderRadius: theme.gap.sm,
 		justifyContent: "center",
 		minHeight: 50,
-		opacity: !enabled ? 0.5 : pressed ? 0.7 : 1,
-	}),
+	},
+	submitDisabled: {
+		opacity: 0.5,
+	},
 	submitLabel: {
 		color: theme.colors.text.onAccent,
 		fontFamily: theme.fonts.heading,
 		fontSize: 16,
+	},
+	submitPressed: {
+		opacity: 0.6,
 	},
 }));

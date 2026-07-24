@@ -6,7 +6,7 @@ tags:
 - launchApp:
     clearState: true
 - tapOn:
-    id: "home-sign-in-button"
+    id: "welcome-sign-in-button"
 - assertVisible:
     id: "sign-in-screen"
 # Collection starts as plain text with an edit affordance, then becomes an input.

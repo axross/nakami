@@ -1,10 +1,10 @@
 appId: app.axross.nakami
-name: app-launch — cold start reaches the home screen
+name: app-launch — cold start reaches the welcome screen
 tags:
   - scenario:app-launch
 ---
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "home-screen"
+    id: "welcome-screen"
 - assertVisible: "Connect to Payload"

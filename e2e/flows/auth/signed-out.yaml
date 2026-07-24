@@ -1,12 +1,14 @@
 appId: app.axross.nakami
-name: auth-signed-out — signed-out Home guides to sign in and hides Collections
+name: auth-signed-out — signed out shows the welcome screen with no tab bar
 tags:
   - scenario:auth-signed-out
 ---
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "home-screen"
+    id: "welcome-screen"
 - assertVisible:
-    id: "home-sign-in-button"
+    id: "welcome-sign-in-button"
+# The tab UI mounts only after authentication, so no tab bar is shown here.
 - assertNotVisible: "Collections"
+- assertNotVisible: "Settings"
