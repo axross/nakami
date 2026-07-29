@@ -82,41 +82,48 @@ Reconnect the MCP server after starting or stopping the dev server so the local 
 
 ## Development workflow
 
-Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`AGENTS.md`](./AGENTS.md) (loaded through `CLAUDE.md`) and routes to the detailed skills under [`.claude/skills/`](./.claude/skills). Human and agent contributors follow the same loop: plan → implement → self-review → verify → report.
+Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`AGENTS.md`](./AGENTS.md) (loaded through `CLAUDE.md`), which carries this repository's own conventions and routes to the skills under [`.claude/skills/`](./.claude/skills). Human and agent contributors follow the same loop: plan → implement → self-review → verify → report.
 
-### `/address` — deliver a unit of work end-to-end
+### Agent skills
 
-[`/address`](./.claude/skills/address/SKILL.md) is the main delivery entry point. It takes one unit of work — a GitHub issue, a pull request, or a free-form prompt — from intake to a merge-ready pull request in a single continuing session:
+Every skill under [`.claude/skills/`](./.claude/skills) is an **installed copy** from [`axross/skills`](https://github.com/axross/skills), pinned by [`skills-lock.json`](./skills-lock.json). Nothing there is hand-written, and a hand-edit is discarded by the next reinstall — repository-specific rules live in [`AGENTS.md`](./AGENTS.md) instead.
 
-1. **Plan** — reads the issue and its thread, asks you the product and scope questions the spec leaves open, and rewrites the issue body into a reviewable plan with acceptance criteria. It then **always pauses for your approval**: it verifies nothing gets built until you review the plan and send `/address continue`.
-2. **Code + verify** — implements the approved plan (on a separate worktree unless it is running in a Claude Code cloud environment, so it never blocks your working copy) on an agent-namespaced branch, runs the checks the changed surface requires, and self-reviews the diff.
+Refresh them with the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, then commit the regenerated directories together with `skills-lock.json`:
+
+```sh
+npx skills add axross/skills --agent claude-code --yes --copy \
+  --skill agent-skill-authoring --skill agent-skill-management \
+  --skill application-security --skill code-maintainability \
+  --skill code-review --skill conventional-commits \
+  --skill end-to-end-testing --skill expo-app-development \
+  --skill github-operation --skill high-fidelity-ui-design \
+  --skill loop-engineering --skill product-requirement-document-authoring \
+  --skill professional-behavior --skill quality-assurance \
+  --skill react-component-development --skill react-component-styling \
+  --skill software-development --skill software-instrumentation \
+  --skill tanstack-query-development --skill unit-testing \
+  --skill wireframe-design
+```
+
+Each skill is named deliberately rather than passing `--skill '*'`: the library also ships `next-app-development`, which has no call site in an Expo app, and a wildcard refresh would keep reinstalling it. Add a skill to the list when the library gains one worth taking.
+
+If npx cannot resolve the CLI (`npm error could not determine executable to run`), pin the version: `npx --yes skills@latest add …`.
+
+### Delivering a unit of work end-to-end
+
+[Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) is the repository's change loop. It runs **model-invoked** — there is no slash command; describe the work (a GitHub issue, a pull request, or a free-form request) and the loop drives it from intake to a merge-ready pull request in a single continuing session:
+
+1. **Plan** — reads the issue and its thread, asks you the product and scope questions the spec leaves open, and rewrites the issue body into a reviewable plan with acceptance criteria. It then **always pauses for your approval**: nothing gets built until you review the plan and tell it to continue.
+2. **Code + verify** — implements the approved plan on an agent-namespaced `claude/` branch, runs the checks the changed surface requires, and self-reviews the diff.
 3. **Independent review** — opens a draft pull request and requests the CI reviewer, a separate bot session, so the code's author never certifies its own work.
 4. **Address** — fixes review findings and CI failures, tying each resolved thread to the resolving commit, for up to eight rounds.
 5. **Ready** — flips the pull request to ready once CI is green and the review is clean. Merging always stays a human decision.
 
-Practical examples:
-
-```text
-/address https://github.com/axross/payload-mobile/issues/42   # deliver issue #42 end-to-end
-/address 57                                        # resume delivery of open PR #57
-/address The 404 page should link back home        # no issue yet: files a tracking
-                                                   #   issue, then delivers it
-/address continue                                  # approve a paused plan, or resume
-                                                   #   after you answer a question,
-                                                   #   leave PR comments, or start a
-                                                   #   fresh session from a /handoff
-                                                   #   package
-```
-
-Every run pauses after the plan for your approval, and pauses again whenever it genuinely needs a human — an ambiguous requirement, a judgment call on conflicting changes — and `/address continue` picks it back up where it stopped.
+Kick it off by naming the work — "deliver issue #42", "pick up PR 57", or a free-form request (with no issue yet, it files a tracking issue first, then delivers it). To approve a paused plan or resume after a question, continue the session and tell it to continue.
 
 ### `@claude review` — get findings on any PR
 
-Comment **`@claude review`** on a pull request to run this repository's review policy ([`REVIEW.md`](./REVIEW.md)) — severity-tagged findings with `file:line` evidence and concrete fixes, posted as inline comments by the CI reviewer ([`claude-review.yml`](./.github/workflows/claude-review.yml)). Use it for a pre-merge check on a hand-written change or a second opinion before merging; the same review runs automatically against `/address` pull requests.
-
-### `/handoff` — suspend work for another session
-
-[`/handoff`](./.claude/skills/handoff/SKILL.md) packages in-progress work — goal, current state, remaining to-dos, uncommitted changes — into a downloadable `handoff-<epoch>.md` (plus an optional zip of supporting files). Use it when a session is running low on context, or to park work for later; a fresh session (yours or a teammate's) takes the package over with `/address continue`.
+Comment **`@claude review`** on a pull request to run this repository's review policy ([`REVIEW.md`](./REVIEW.md)) — severity-tagged findings with `file:line` evidence and concrete fixes, posted as inline comments by the CI reviewer ([`claude-review.yml`](./.github/workflows/claude-review.yml)). Use it for a pre-merge check on a hand-written change or a second opinion before merging; the same review runs automatically against pull requests the loop opens.
 
 Changes made without an agent follow the same bar: branch, implement, run the checks below, open a pull request, and get it reviewed before merge.
 
@@ -126,16 +133,28 @@ Unit tests (Jest via jest-expo, colocated with their subject) cover helpers, sch
 
 > Branch protection: the `Lint` and `Unit Tests` check names are unchanged, but `Typecheck` and `E2E Scenario Coverage` are now **separate** checks (they used to be bundled into `Lint` and `Unit Tests` respectively). To keep gating merges on them, add both to the required status checks under Settings → Branches → branch protection for `main`.
 
-| Check                      | Command                     |
-| -------------------------- | --------------------------- |
-| Format                     | `npm run format`            |
-| Lint                       | `npm run lint`              |
-| Type-check                 | `npm run typecheck`         |
-| Unit tests                 | `npm run test:unit`         |
-| E2E tests                  | `npm run test:e2e`          |
-| E2E scenario coverage only | `npm run test:e2e:coverage` |
+## Commands
 
-Run format + lint after every change, and the suites relevant to the changed surface before opening a pull request — see the Verification section of [`AGENTS.md`](./AGENTS.md).
+This table is the authoritative list of the repository's commands, for human contributors and agents alike. Run format + lint after every change, and the suites relevant to the changed surface before opening a pull request — see the Verification section of [`AGENTS.md`](./AGENTS.md).
+
+| Command                     | What it does                                                                                                                              | When to run it                                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `npm install`               | Installs dependencies pinned in `package.json`.                                                                                           | Once per checkout, and after `package.json` changes.                                                    |
+| `npm run dev`               | Starts the Expo dev server; connect a dev build or simulator.                                                                             | Manual verification of UI, routing, and data-driven output.                                             |
+| `npm run dev:mcp`           | Starts the dev server with the local Expo MCP capabilities enabled.                                                                       | When an agent needs simulator automation or project analysis.                                            |
+| `npm run ios` / `android`   | Compiles and runs the native dev build on a simulator, emulator, or device.                                                               | When a change touches native modules or config plugins, which `expo export` does not exercise.          |
+| `npm run build`             | Exports the production JS bundles for iOS and Android (`expo export`).                                                                    | After changes to routes, `app.json`, Babel/Metro config, dependencies, or public type signatures.       |
+| `npm run format`            | Formats code and configuration with Biome.                                                                                                | After every set of edits, before committing.                                                             |
+| `npm run lint`              | Runs Biome, including formatting and lint rules.                                                                                          | After formatting; fix every reported error before finishing.                                             |
+| `npm run typecheck`         | Type-checks the project with the TypeScript compiler.                                                                                     | After any change to a TypeScript surface.                                                                |
+| `npm run test:unit`         | Runs the Jest (jest-expo) unit suite.                                                                                                     | After a change affects code it covers.                                                                   |
+| `npm run test:e2e`          | Checks scenario coverage, then runs the Maestro suite (needs a running simulator/emulator with the app installed).                        | After a change affects a user-facing output surface or e2e coverage.                                     |
+| `npm run test:e2e:coverage` | Runs only the scenario-coverage gate — no device needed.                                                                                  | When no simulator is available; report the skipped on-device run.                                        |
+| `npm run db-migrate:generate` | Generates a SQL migration under `src/core/db/migrations/` from changes to `src/core/db/schema.ts`.                                       | Immediately after changing the data-layer schema; commit the migration with the schema change.           |
+
+Files under `src/core/db/migrations/` are generated — never hand-edit or amend a committed migration; change the schema and generate a new one. The generated migrations are meant to be applied on-device at startup via Drizzle's expo-sqlite migrator (`useMigrations`), which is **not wired yet**: the change that lands the first migration must also wire it into `src/app/_layout.tsx`.
+
+If a required command cannot be run, say so — naming the command, the reason, and the residual risk — rather than presenting the change as fully verified.
 
 ## Preview builds
 
@@ -146,6 +165,24 @@ Per-PR Android preview builds are produced on demand by [`android-build.yml`](./
 - **Not a merge blocker (by design):** merges are gated only by the checks in `merge-checks.yml`. On-device sign-off on a preview build is a manual, human-in-the-loop step before merging.
 
 Store/production builds and on-demand dev clients are not wired into CI — the EAS pipelines that previously covered them have been removed. Local dev clients can still be compiled with `npm run ios` / `npm run android` (`expo run`); a non-EAS store/production release pipeline is future work.
+
+## Repository gotchas
+
+**Some dependencies move fast enough that memory is unreliable.** Consult the current official docs — as the primary source, not a blog post — before changing behavior these govern, and say which docs you consulted when the implementation depends on them.
+
+| Dependency                                                                                                | Refresh docs before changing                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Expo (React Native)                                                                                       | Routing (Expo Router), app config and config plugins, native module APIs, asset/image behavior. Expo breaks between SDKs — use the versioned docs for the installed SDK (currently <https://docs.expo.dev/versions/v57.0.0/>).                                                                                                                                          |
+| React Native native modules (reanimated, worklets, screens, gesture-handler, unistyles, nitro-modules, svg) | Each module's own compatibility table and peer-dependency ranges against the **exact** installed React Native version. The Expo SDK pin can lag or mismatch a module's real RN support — check when a native crash (hard crash, no JS error, no Sentry event) implicates one, or before bumping their versions.                                                            |
+| Drizzle ORM over expo-sqlite                                                                              | Schema/table definitions, column types, query APIs, relation helpers, drizzle-kit migration generation, the expo-sqlite driver and runtime migrator.                                                                                                                                                                                                                    |
+| Sentry                                                                                                    | SDK setup (`@sentry/react-native` and its Expo config plugin), instrumentation, source maps, event capture, PII behavior.                                                                                                                                                                                                                                              |
+| TanStack Query                                                                                            | Option-helper and hook APIs, cache-lifetime defaults, and mutation callback signatures — behavior has moved inside v5.                                                                                                                                                                                                                                                 |
+| Maestro                                                                                                   | Test runner configuration, snapshot behavior, locator/assertion APIs.                                                                                                                                                                                                                                                                                                  |
+| Biome                                                                                                     | Formatter/linter configuration, suppression syntax, rule names.                                                                                                                                                                                                                                                                                                        |
+
+**Some files fail globally rather than locally.** A small mismatch in one of these breaks the app at launch or the gate outright, not just one screen — refresh the owning tool's docs before editing: `app.json` and config plugins, `babel.config.js`, `metro.config.js`, `drizzle.config.ts` and `src/core/db/`, and the Sentry/Unistyles initialization in `src/core/helpers/` and `src/unistyles.ts`.
+
+**The installed agent skills are generated, not source.** `.claude/skills/` is produced by `npx skills` from [`axross/skills`](https://github.com/axross/skills); a hand-edit there is discarded by the next reinstall. Biome deliberately excludes `.claude/skills` and `.claude/assets` (see `biome.json`) so formatting never rewrites an upstream artifact and breaks its lockfile hash.
 
 ## Related links
 

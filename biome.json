@@ -10,7 +10,9 @@
 			"**",
 			"!src/core/db/migrations",
 			"!assets",
-			"!package-lock.json"
+			"!package-lock.json",
+			"!.claude/skills",
+			"!.claude/assets"
 		]
 	},
 	"formatter": {

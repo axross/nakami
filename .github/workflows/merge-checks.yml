@@ -4,9 +4,9 @@ name: Merge Checks
 # scenario-coverage gate that gate merges to the default branch. Each check is
 # its OWN parallel job (never folded together) so a red check names exactly one
 # failing tool and branch protection can require each independently. This is the
-# CI the /address skill's tail polls after a push (see
-# .claude/skills/address/SKILL.md). Keep REVIEW.md's do-not-report list in sync
-# with exactly what these jobs enforce.
+# CI the change loop's tail polls after a push (see
+# .claude/skills/loop-engineering/SKILL.md). Keep REVIEW.md's do-not-report list
+# in sync with exactly what these jobs enforce.
 #
 # The per-PR Android build is intentionally NOT here — it is a separate,
 # manually-dispatched workflow (android-build.yml) and is not a merge gate.

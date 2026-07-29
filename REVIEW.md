@@ -7,9 +7,9 @@ reviewer ([`claude-review.yml`](.github/workflows/claude-review.yml)) via a
 system-prompt bootstrap. This file overrides reviewer defaults and complements
 the review
 **methodology** in
-[Code Review Guideline](.claude/skills/code-review-guideline/SKILL.md); where
+[Code Review](.claude/skills/code-review/SKILL.md); where
 the two differ about what a posted review reports, this file wins (see that
-skill's [Repository Review Policy Overlay](.claude/skills/code-review-guideline/SKILL.md#repository-review-policy-overlay)).
+skill's [posted-review policy](.claude/skills/code-review/references/posted-review-policy.md)).
 
 This is a **strict** review: run every mandatory check below, verify the linked
 issue's acceptance criteria, and report every finding — do not wave anything
@@ -60,7 +60,7 @@ skill in the finding.
   miss.
 - MUST give each finding a severity label, `file:line` evidence, and a concrete
   fix, per
-  [Code Review Guideline](.claude/skills/code-review-guideline/SKILL.md).
+  [Code Review](.claude/skills/code-review/SKILL.md).
 
 ## Do Not Report
 
@@ -95,5 +95,5 @@ and nothing is summarized away — the tally counts every finding.
   separate top-level conversation comments.
 - MUST post any pull-request review as a **COMMENT**-type review — never
   APPROVE or REQUEST_CHANGES — per
-  [GitHub Operation Guidelines](.claude/skills/github-operation-guidelines/SKILL.md); this reviewer
+  [GitHub Operation](.claude/skills/github-operation/SKILL.md); this reviewer
   is advisory and does not gate merges.
