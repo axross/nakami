@@ -44,7 +44,7 @@ The skills under [`.claude/skills/`](./.claude/skills) are **installed copies** 
 | [Unit Testing](.claude/skills/unit-testing/SKILL.md)                                                     | Writing, refactoring, reviewing, or running unit tests                                                                                                 |
 | [End-to-End Testing](.claude/skills/end-to-end-testing/SKILL.md)                                          | Writing, running, reviewing, or maintaining end-to-end tests and scenario coverage                                                                     |
 | [Wireframe Design](.claude/skills/wireframe-design/SKILL.md)                                             | Producing a low-fidelity wireframe, breadboard, or wireflow                                                                                            |
-| [High-Fidelity UI Design](.claude/skills/high-fidelity-ui-design/SKILL.md)                               | Designing or reviewing a high-fidelity surface with real color, type, spacing, and interaction states                                                   |
+| [High-Fidelity UI Design](.claude/skills/high-fidelity-ui-design/SKILL.md)                               | Designing or reviewing a high-fidelity surface with real color, type, spacing, and interaction states — pair it with [the design kit](#the-high-fidelity-design-kit) |
 | [Agent Skill Authoring](.claude/skills/agent-skill-authoring/SKILL.md)                                   | Writing or auditing a `SKILL.md` — framing, frontmatter, discovery text, the structure validator                                                        |
 | [Agent Skill Management](.claude/skills/agent-skill-management/SKILL.md)                                 | Installing, refreshing, or proposing a change to a skill, and deciding where a skill's source belongs                                                   |
 
@@ -63,7 +63,7 @@ Rules specific to this repository. The installed skills own the general practice
 | `src/unistyles.ts`   | Unistyles theme/breakpoint registration (imported first by the root layout)                                                    |
 | `e2e/`               | Maestro flows (`flows/`), the scenario catalog (`scenarios.md`), and the coverage gate (`check-scenario-coverage.mjs`)         |
 | `assets/`            | App icons, splash, and other bundled binary assets                                                                             |
-| `.claude/`           | Installed agent skills, the preserved design kit under `assets/`, hooks, and harness settings                                  |
+| `.claude/`           | Installed agent skills (`skills/`), the high-fidelity design kit (`assets/hifi-design-kit.html`), hooks, and harness settings  |
 | `.github/workflows/` | Merge checks CI, the independent Claude reviewer, and the Android preview build                                                |
 
 **Guidelines:**
@@ -102,6 +102,15 @@ Shared components live under `src/common/components/`, one directory per compone
 - MUST give interactive components an `accessibilityRole` and an accessible name, keep touch targets at least 44×44 points, and never encode meaning in color alone.
 - MUST put a kebab-case `testID` on each screen's root element and on every element an e2e flow asserts; Maestro locates by `id:`.
 - MAY import a bespoke `.svg` as a React component (via `react-native-svg-transformer`, configured in `metro.config.js` and typed by `declarations.d.ts`) when a design needs a vector Lucide does not cover.
+
+### The High-Fidelity Design Kit
+
+`.claude/assets/hifi-design-kit.html` is a self-contained, theme-aware HTML template that renders this app's components and screens with the **real** tokens above, in light and dark. Use it for the high-fidelity round of a design exhibit — the round where concrete color, type, and spacing are the subject — after the layout has been settled with the wireframe kit that ships inside [Wireframe Design](.claude/skills/wireframe-design/SKILL.md) (`assets/wireframe-kit.html`). [High-Fidelity UI Design](.claude/skills/high-fidelity-ui-design/SKILL.md) owns the design rationale; this kit only supplies the tokens.
+
+**Guidelines:**
+
+- MUST re-read `src/common/constants/style.ts` before each high-fidelity round and reconcile any drift into the kit — a static HTML file cannot import the TypeScript, so its token block is a hand-maintained mirror.
+- MUST keep the kit self-contained: no external fetches, system fonts and inline SVG only.
 
 ### Routing
 
@@ -161,9 +170,9 @@ TanStack Query Development owns the pattern in full, and this codebase already f
 
 ### Known Deviations from the Installed Skills
 
-Two installed rules disagree with this codebase. Both are recorded rather than silently violated; upstream's own boundary clause ("the host project's existing convention wins") sanctions the first.
+Two installed rules disagree with this codebase. Both are deliberate, accepted deviations, recorded here rather than silently violated — neither is sanctioned by an upstream escape hatch.
 
-- **Screen bodies live in `components/`, not `screens/`.** Expo App Development's route-modules reference requires a screen body in the owning domain's `screens/` directory. This repository has no `screens/` — routes compose from `src/<feature>/components/`. Follow this repository.
+- **Screen bodies live in `components/`, not `screens/`.** Expo App Development's route-modules reference states a MUST: the screen body belongs in the owning domain's `screens/` directory. This repository has no `screens/` — routes compose from `src/<feature>/components/`. Follow this repository. Note that `expo-app-development` carries **no** general "existing convention wins" carve-out (unlike `tanstack-query-development` and `react-component-development`, which do); its only established-convention allowances are narrow ones for the source-root name and the path alias. This deviation is therefore a standing, accepted violation of that MUST, not a permitted variation — revisit it if the cost of diverging grows.
 - **Two existing query keys use the trailing-filter tenancy shape** the TanStack Query skill forbids. See [Server State](#server-state); new code follows the skill.
 
 ## Response Approach
