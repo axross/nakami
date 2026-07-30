@@ -7,6 +7,8 @@ import {
 	writeSession,
 } from "~/auth/helpers/session-storage";
 import type { Session } from "~/auth/models/session";
+import { getSessionQueryKeyRoot } from "~/common/helpers/session-query-key";
+import { queryClient } from "~/core/helpers/query-client";
 import { useAuthStore } from "./auth-store";
 
 jest.mock("~/auth/helpers/session-storage", () => ({
@@ -36,6 +38,7 @@ const session: Session = {
 
 beforeEach(() => {
 	jest.clearAllMocks();
+	queryClient.clear();
 	useAuthStore.setState({ status: "loading", session: null });
 });
 
@@ -119,6 +122,33 @@ describe("authenticate / deauthenticate / applyRefresh", () => {
 		expect(clearSession).toHaveBeenCalled();
 		// The last-used URL survives sign-out, so nothing clears it here.
 		expect(writeLastServerUrl).not.toHaveBeenCalled();
+	});
+
+	it("evicts the ending session's cached server state, and only that session's", async () => {
+		useAuthStore.setState({ status: "authenticated", session });
+		queryClient.setQueryData(
+			[...getSessionQueryKeyRoot(session.user.id), "collections"],
+			[{ slug: "posts", label: "Posts" }],
+		);
+		queryClient.setQueryData(
+			[...getSessionQueryKeyRoot("someone-else"), "collections"],
+			[{ slug: "media", label: "Media" }],
+		);
+
+		await useAuthStore.getState().deauthenticate();
+
+		expect(
+			queryClient.getQueryData([
+				...getSessionQueryKeyRoot(session.user.id),
+				"collections",
+			]),
+		).toBeUndefined();
+		expect(
+			queryClient.getQueryData([
+				...getSessionQueryKeyRoot("someone-else"),
+				"collections",
+			]),
+		).toEqual([{ slug: "media", label: "Media" }]);
 	});
 
 	it("replaces the token and expiry on applyRefresh", async () => {

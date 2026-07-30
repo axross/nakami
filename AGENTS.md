@@ -143,7 +143,8 @@ TanStack Query Development owns the pattern in full, and this codebase already f
 
 - MUST use the shared `queryClient` from `src/core/helpers/query-client.ts`; there is exactly one.
 - MUST read the Zustand store through `useAuthStore.getState()` **inside** the `queryFn`/`mutationFn`, never in the factory body.
-- Existing query keys (`src/collections/queries/collection-list-query.ts`, `collection-records-query.ts`) put tenancy in a trailing filter object — `["collections", scope]` — which the installed skill marks as a Major finding. New queries MUST use the tenancy-rooted form (`["users", userId, "collections", …]`); migrating the existing two is tracked separately.
+- MUST root every session-scoped query key at `getSessionQueryKeyRoot(userId)` from `src/common/helpers/session-query-key.ts` — `[...getSessionQueryKeyRoot(userId), "collections", …]` — never at a bare `["users", userId]` literal. The auth store's `deauthenticate()` evicts that same root with `removeQueries`, so a hand-typed prefix that drifts would silently stop matching and leave the ended session's data resident.
+- MUST keep the server URL out of a query key. Server and user are one authentication-session pair, so the user id identifies the tenant on its own; a `queryFn` reads the URL from the session alongside the token, exactly as it reads the token.
 
 ### Observability
 
@@ -172,10 +173,9 @@ TanStack Query Development owns the pattern in full, and this codebase already f
 
 ### Known Deviations from the Installed Skills
 
-Two installed rules disagree with this codebase. Both are deliberate, accepted deviations, recorded here rather than silently violated — neither is sanctioned by an upstream escape hatch.
+One installed rule disagrees with this codebase. It is a deliberate, accepted deviation, recorded here rather than silently violated — and it is not sanctioned by an upstream escape hatch.
 
 - **Screen bodies live in `components/`, not `screens/`.** Expo App Development's route-modules reference states a MUST: the screen body belongs in the owning domain's `screens/` directory. This repository has no `screens/` — routes compose from `src/<feature>/components/`. Follow this repository. Note that `expo-app-development` carries **no** general "existing convention wins" carve-out (unlike `tanstack-query-development` and `react-component-development`, which do); its established-convention allowances are each scoped to one subject — the source-root name, the path alias, and the safe-area inset mechanism — and none reaches the screen-body rule. This deviation is therefore a standing, accepted violation of that MUST, not a permitted variation — revisit it if the cost of diverging grows.
-- **Two existing query keys use the trailing-filter tenancy shape** the TanStack Query skill forbids. See [Server State](#server-state); new code follows the skill.
 
 ## Response Approach
 
