@@ -45,7 +45,6 @@ export function SettingsScreen(): JSX.Element {
 				<SettingMenuGroupBody>
 					<SettingMenuGroupItem
 						accessibilityRole="button"
-						first
 						onPress={onFeedbackPress}
 						testID="settings-feedback-row"
 					>
@@ -57,7 +56,6 @@ export function SettingsScreen(): JSX.Element {
 					<Link asChild href="/(tabs)/settings/licenses">
 						<SettingMenuGroupItem
 							accessibilityRole="link"
-							last
 							testID="settings-license-row"
 						>
 							<SettingMenuGroupItemIcon icon={FileText} />
@@ -75,8 +73,6 @@ export function SettingsScreen(): JSX.Element {
 					<SettingMenuGroupBody>
 						<SettingMenuGroupItem
 							accessibilityRole="button"
-							first
-							last
 							onPress={onOpenDevMenuPress}
 							testID="settings-open-dev-menu-row"
 						>
