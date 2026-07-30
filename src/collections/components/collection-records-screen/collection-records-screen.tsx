@@ -51,7 +51,6 @@ export function CollectionRecordsScreen({
 		isFetchingNextPage,
 	} = useInfiniteQuery({
 		...getCollectionRecordsInfiniteQueryOptions({
-			serverUrl: session?.serverUrl ?? "",
 			userId: session?.user.id ?? "",
 			slug,
 		}),
