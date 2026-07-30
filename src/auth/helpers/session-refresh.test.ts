@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
+import { addBreadcrumb } from "~/core/helpers/error-reporting";
 import { PayloadRequestError, refreshToken } from "./payload-client";
 import {
 	isWithinRefreshWindow,
 	REFRESH_LEAD_SECONDS,
 	refreshSessionIfDue,
 } from "./session-refresh";
+
+// Assert the logging through the breadcrumb transport rather than the logger:
+// reaching the error tracker's trail is the point of these lines, and it is the
+// same seam `core/helpers/logging.test.ts` asserts against.
+jest.mock("~/core/helpers/error-reporting");
 
 jest.mock("~/auth/helpers/session-storage", () => ({
 	readSession: jest.fn(async () => null),
@@ -118,5 +124,55 @@ describe("refreshSessionIfDue", () => {
 
 		expect(useAuthStore.getState().status).toBe("authenticated");
 		expect(useAuthStore.getState().session?.token).toBe("current-token");
+	});
+
+	it("brackets the refresh and attributes the sign-out when the token is rejected", async () => {
+		useAuthStore.setState({
+			status: "authenticated",
+			session: sessionExpiringIn(60),
+		});
+		jest
+			.mocked(refreshToken)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		await refreshSessionIfDue();
+
+		expect(addBreadcrumb).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: "Started refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "debug",
+			}),
+		);
+		// The line that makes an involuntary sign-out attributable from the
+		// breadcrumb trail alone — without it the app just drops to the welcome
+		// screen with nothing saying why.
+		expect(addBreadcrumb).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: "Completed refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "info",
+				data: expect.objectContaining({
+					outcome: "signed-out",
+					reason: "token-rejected",
+				}),
+			}),
+		);
+	});
+
+	it("keeps credentials out of the breadcrumbs it emits", async () => {
+		useAuthStore.setState({
+			status: "authenticated",
+			session: sessionExpiringIn(60),
+		});
+		jest
+			.mocked(refreshToken)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		await refreshSessionIfDue();
+
+		const emitted = JSON.stringify(jest.mocked(addBreadcrumb).mock.calls);
+		expect(emitted).not.toContain("current-token");
+		expect(emitted).not.toContain("you@example.com");
 	});
 });

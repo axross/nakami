@@ -25,10 +25,12 @@ describe("createModuleLogger breadcrumb transport", () => {
 	it("maps `warn` to the error tracker's `warning` level", () => {
 		const logger = createModuleLogger("test/warn-module");
 
-		logger.warn("Token refresh deferred.", { reason: "network" });
+		logger.warn("Completed refreshing the session token.", {
+			reason: "network",
+		});
 
 		expect(addBreadcrumb).toHaveBeenCalledWith({
-			message: "Token refresh deferred.",
+			message: "Completed refreshing the session token.",
 			category: "test/warn-module",
 			level: "warning",
 			data: { reason: "network" },
