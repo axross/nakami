@@ -18,7 +18,6 @@ This repository satisfies that MUST. `src/app/welcome.tsx` is a default export t
 
 - MUST place a screen body in `src/<feature>/components/`, not in the route file.
 - MUST NOT raise the absence of a `screens/` directory as a skill violation; the installed rule does not require that name.
-- SHOULD keep the route file to its default export, its own screen options, and the literals only that route needs, exactly as the installed capability requires.
 
 ## Two Existing Query Keys Use the Trailing-Filter Shape
 
