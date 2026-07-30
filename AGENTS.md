@@ -14,46 +14,168 @@ Apply these keywords consistently in this document and the documents linked from
 
 ## Project Overview
 
-- **payload-mobile** is a companion mobile app for Payload CMS, built for iOS and Android.
-- Primary language: TypeScript. App framework: Expo (React Native) with Expo Router file-based routing. Expo has breaking changes between SDKs — consult the versioned docs for the installed SDK before writing framework-touching code (see [Development Guidelines](.claude/skills/development-guidelines/SKILL.md), current-docs rules).
-- Tooling: npm for packages, Biome for linting and formatting.
+- **Nakami** is a companion mobile app for Payload CMS, built for iOS and Android.
+- Primary language: TypeScript. App framework: Expo (React Native) with Expo Router file-based routing.
 - Core stack: Zustand + TanStack Query for state, Drizzle ORM over expo-sqlite for on-device data, Zod for validation, react-native-unistyles for styling/theming, hand-rolled compound components.
-- For run-scripts, current-docs lookup rules, and verification commands, consult [Development Guidelines](.claude/skills/development-guidelines/SKILL.md).
-- For repository layout, stack, and file placement, consult [Project Structure](.claude/skills/project-structure/SKILL.md).
+- [`README.md`](./README.md) is the contributor documentation: the command table, the tech stack with versions, the fast-moving dependencies that need a docs refresh, the preview-build mechanism, and the skill install command. Consult it before running any project operation.
+- [Project Conventions](#project-conventions) below carries the rules specific to this repository — everything the installed skills cannot know.
 
 ## Skill Index
 
-`AGENTS.md` is the master routing index for project skills. Consult the relevant skill before acting on matching work. When a new project-specific skill is added, list it here.
+The skills under [`.claude/skills/`](./.claude/skills) are **installed copies** from [`axross/skills`](https://github.com/axross/skills), pinned by [`skills-lock.json`](./skills-lock.json). None is hand-written here, and a hand-edit to one is discarded by the next reinstall — see [Skill Maintenance](#skill-maintenance). Consult the relevant skill before acting on matching work.
 
-| Skill                                                                                                        | When to apply                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Agent Skills Best Practices](.claude/skills/agent-skills-best-practices/SKILL.md)                           | Creating, refining, splitting, renaming, deleting, or auditing project skills or this skill index                                                                                                                                                                                                                                                                      |
-| [Application Security Requirements](.claude/skills/application-security-requirements/SKILL.md)               | Reviewing secrets, environment variables, input validation, access control, injection in rendered content, SSRF/outbound fetching, auth/session behavior, privacy exposure, error-reporting data, or dependency/supply-chain risk                                                                                                                                      |
-| [Code Review Guideline](.claude/skills/code-review-guideline/SKILL.md)                                       | Reviewing a diff, pull request, local change, or post-implementation self-review                                                                                                                                                                                                                                                                                       |
-| [Development Guidelines](.claude/skills/development-guidelines/SKILL.md)                                     | Implementing, refactoring, running commands, preparing commits, writing pull request descriptions, adding dependencies, writing source comments or doc-comments, checking current docs, dispatching or surfacing a preview build, or changing the data layer                                                                                                            |
-| [E2E Testing Guidelines](.claude/skills/e2e-testing-guidelines/SKILL.md)                                     | Writing, running, reviewing, or maintaining end-to-end tests, snapshots, scenario coverage, or flow assertions                                                                                                                                                                                                                                                         |
-| [GitHub Operation Guidelines](.claude/skills/github-operation-guidelines/SKILL.md)                           | Reading from or writing to GitHub — issues, pull requests, comments, labels, reviews, or branches — through a proxied single-operator identity: agent-comment markers, issue-vs-PR targets, commit messages and pull request titles under squash merge, pull request template and description authoring, history preservation (no amend/force-push), untrusted content |
-| [Maintainable Code Guidelines](.claude/skills/maintainable-code-guidelines/SKILL.md)                         | Reviewing readability, naming, abstraction boundaries, complexity, dead code, or scope discipline                                                                                                                                                                                                                                                                      |
-| [Observability Guidelines](.claude/skills/observability-guidelines/SKILL.md)                                 | Throwing, catching, reporting, or logging errors with the project's error tracker and structured logger                                                                                                                                                                                                                                                                |
-| [Performance and Reliability Requirements](.claude/skills/performance-and-reliability-requirements/SKILL.md) | Reviewing data-access cost, async loading, caching, asset/image optimization, bundle weight, or runtime failure behavior                                                                                                                                                                                                                                               |
-| [Product Requirement Guidelines](.claude/skills/product-requirement-guidelines/SKILL.md)                     | Writing, refining, or reviewing a product requirement, feature spec, or issue description, or deciding which plan sections a change needs; the canonical plan-document structure and its per-section omit-rules, scope/non-goals framing, testable acceptance criteria, and verification strategy                                                                          |
-| [Quality Assurance Guidelines](.claude/skills/quality-assurance-guidelines/SKILL.md)                         | Reviewing verification evidence, e2e coverage, snapshots, flakiness, lint/format evidence, or manual checks                                                                                                                                                                                                                                                            |
-| [Unit Test Guidelines](.claude/skills/unit-test-guidelines/SKILL.md)                                         | Writing, refactoring, reviewing, or running unit tests, including mocks/fakes, fixtures, schema tests, and behavior-focused assertions                                                                                                                                                                                                                                 |
-| [Project Structure](.claude/skills/project-structure/SKILL.md)                                               | Navigating the repository, deciding where a new module, route, component, or test belongs, or checking stack, tooling, and directory conventions                                                                                                                                                                                                                       |
-| [Component Guidelines](.claude/skills/component-guidelines/SKILL.md)                                         | Writing, placing, reviewing, or refactoring a component or hook — compound-component composition, theming with Unistyles, tier placement, promoting repeated UI, test hooks                                                                                                                                                                                            |
-| [Routing Guidelines](.claude/skills/routing-guidelines/SKILL.md)                                             | Creating, moving, renaming, or reviewing routes — Expo Router file conventions, layouts, navigation, deep links, or route-level loading and error surfaces                                                                                                                                                                                                             |
-| [TanStack Query Guidelines](.claude/skills/tanstack-query-guidelines/SKILL.md)                               | Adding, moving, reviewing, or refactoring TanStack Query code — `queryOptions()`/`mutationOptions()` factories under `queries/` & `mutations/`, `useQuery()`/`useMutation()` call sites, query keys, cache invalidation, or query/mutation error handling; deciding whether server-state logic is an option factory or a plain lifecycle hook                            |
-| [Wireframe Design Guidelines](.claude/skills/wireframe-design-guidelines/SKILL.md)                           | Producing a low-fidelity wireframe or breadboard mockup of any client-app UI (mobile or web/desktop) — sketching screens, comparing layout options, or a design exhibit's wireframe round                                                                                                                                                                              |
-| [High-Fidelity UI Design Guidelines](.claude/skills/high-fidelity-ui-design-guidelines/SKILL.md)             | Producing a high-fidelity real-token UI mockup — rendering a chosen design with the project's real design-system tokens in light and dark, e.g. a design exhibit's high-fidelity round                                                                                                                                                                                 |
+| Skill                                                                                                    | When to apply                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Professional Behavior](.claude/skills/professional-behavior/SKILL.md)                                   | Every session — resolving uncertainty at its right source, researching current sources, accuracy discipline, and reporting back                        |
+| [Software Development](.claude/skills/software-development/SKILL.md)                                     | Every task that touches the project — the format/lint loop, scoped changes, project docs, verification, current docs, pull request descriptions        |
+| [Loop Engineering](.claude/skills/loop-engineering/SKILL.md)                                             | Driving a change end-to-end through plan → code → review, including the plan-approval gate and the independent review                                  |
+| [Product Requirement Document Authoring](.claude/skills/product-requirement-document-authoring/SKILL.md) | Writing or refining a requirement, spec, plan document, or issue description, and deciding which sections it needs                                     |
+| [Technical Document Authoring](.claude/skills/technical-document-authoring/SKILL.md)                     | Drafting, structuring, or editing a technical document — a design doc, ADR, runbook, README, or this file's prose                                       |
+| [Conventional Commits](.claude/skills/conventional-commits/SKILL.md)                                     | Authoring a commit message or a pull request title                                                                                                     |
+| [GitHub Operation](.claude/skills/github-operation/SKILL.md)                                             | Any GitHub read or write — issues, pull requests, comments, labels, reviews, branches — through the harness's tool channel                             |
+| [Code Review](.claude/skills/code-review/SKILL.md)                                                       | Reviewing a diff, pull request, or your own change before calling it done                                                                              |
+| [Quality Assurance](.claude/skills/quality-assurance/SKILL.md)                                           | Judging whether a change carries adequate verification evidence                                                                                        |
+| [Code Maintainability](.claude/skills/code-maintainability/SKILL.md)                                     | Naming, file organization, abstraction boundaries, complexity, dead code, scope discipline                                                              |
+| [Application Security](.claude/skills/application-security/SKILL.md)                                     | Untrusted input, secrets, outbound requests, rendered content, access control, dependency risk                                                          |
+| [Software Instrumentation](.claude/skills/software-instrumentation/SKILL.md)                             | Logging, throwing, catching, reporting an error, tracking an event, or configuring a logger or error tracker                                            |
+| [Sentry Instrumentation](.claude/skills/sentry-instrumentation/SKILL.md)                                 | The Sentry vendor layer beneath the above — `Sentry.init`, the DSN, data-collection options, source maps, capture and scopes, the Expo/React Native wiring |
+| [Expo App Development](.claude/skills/expo-app-development/SKILL.md)                                     | The framework layer — project layout, routes and navigators, app config and config plugins, permissions, safe areas, assets, startup, SDK upgrades      |
+| [React Component Development](.claude/skills/react-component-development/SKILL.md)                       | A component's composition, props contract, extracted logic, state, memoization, loading and error surfaces, test hooks, virtualization                  |
+| [React Component Styling](.claude/skills/react-component-styling/SKILL.md)                               | A component's styles — Unistyles stylesheets, tokens, theming, adaptive and responsive behavior                                                         |
+| [TanStack Query Development](.claude/skills/tanstack-query-development/SKILL.md)                          | Server state — option factories, query keys, cache lifetime, invalidation, mutations, optimistic updates, and their tests                               |
+| [Unit Testing](.claude/skills/unit-testing/SKILL.md)                                                     | Writing, refactoring, reviewing, or running unit tests                                                                                                 |
+| [End-to-End Testing](.claude/skills/end-to-end-testing/SKILL.md)                                          | Writing, running, reviewing, or maintaining end-to-end tests and scenario coverage                                                                     |
+| [Wireframe Design](.claude/skills/wireframe-design/SKILL.md)                                             | Producing a low-fidelity wireframe, breadboard, or wireflow                                                                                            |
+| [High-Fidelity UI Design](.claude/skills/high-fidelity-ui-design/SKILL.md)                               | Designing or reviewing a high-fidelity surface with real color, type, spacing, and interaction states — pair it with [the design kit](#the-high-fidelity-design-kit) |
+| [Agent Skill Authoring](.claude/skills/agent-skill-authoring/SKILL.md)                                   | Writing or auditing a `SKILL.md` — framing, frontmatter, discovery text, the structure validator                                                        |
+| [Agent Skill Management](.claude/skills/agent-skill-management/SKILL.md)                                 | Installing, refreshing, or proposing a change to a skill, and deciding where a skill's source belongs                                                   |
 
-### Workflow Entry Points
+## Project Conventions
 
-Unlike the guideline skills above, these skills are runnable workflows: a human launches one as `/<name>` (or the agent invokes it when its `when_to_use` matches), so they carry `user-invocable: true` and an `argument-hint` per [Agent Skills Best Practices](.claude/skills/agent-skills-best-practices/SKILL.md).
+Rules specific to this repository. The installed skills own the general practice; this section owns what only this codebase can say. Consult it alongside whichever skill matches the surface being changed.
 
-| Skill                                      | What it drives                                                                                                                                                                                                                |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Address](.claude/skills/address/SKILL.md) | Delivering one unit of work — an issue, a pull request, or a free-form prompt — end-to-end: plan, human approval, code, independent review, address findings; `continue` resumes a paused run or takes over a handoff package |
-| [Handoff](.claude/skills/handoff/SKILL.md) | Suspending in-progress work into a downloadable package that a fresh-context session takes over with `/address continue`                                                                                                      |
+### Repository Map
+
+| Path                 | Owns                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `src/app/`           | Expo Router routes — thin entry points only                                                                                    |
+| `src/<feature>/`     | One domain feature: `components/`, `queries/`, `mutations/`, `models/`, `helpers/`, `hooks/`, `stores/` as needed              |
+| `src/common/`        | Code shared by ≥ 2 features: `components/`, `constants/`, `helpers/`                                                           |
+| `src/core/`          | App bootstrap and infrastructure: `db/` (`schema.ts`, `client.ts`, and `migrations/` once one is generated), `helpers/` (env, logging, error-reporting, query-client) |
+| `src/unistyles.ts`   | Unistyles theme/breakpoint registration (imported first by the root layout)                                                    |
+| `e2e/`               | Maestro flows (`flows/`), the scenario catalog (`scenarios.md`), and the coverage gate (`check-scenario-coverage.mjs`)         |
+| `assets/`            | App icons, splash, and other bundled binary assets                                                                             |
+| `.claude/`           | Installed agent skills (`skills/`), the high-fidelity design kit (`assets/hifi-design-kit.html`), hooks, and harness settings  |
+| `.github/workflows/` | Merge checks CI, the independent Claude reviewer, and the Android preview build                                                |
+
+**Guidelines:**
+
+- MUST place feature code in `src/<feature>/…`; create the feature directory when the first file of a new domain lands.
+- MUST place a module used by two or more features in `src/common/`, and keep single-consumer modules feature-local.
+- MUST keep `src/core/` free of feature logic — only cross-cutting infrastructure lives there.
+- MUST colocate unit tests with their subject as `<name>.test.ts(x)`.
+- MUST use the `~/*` alias (→ `src/*`) for cross-directory imports, and `~/assets/*` (→ `assets/*`) for bundled assets; both are declared in `tsconfig.json` and mirrored in `jest.config.cjs`. Relative paths only within the same directory subtree.
+- MUST name files kebab-case, matching the porousel convention (`button-icon.tsx`, `feed-create-form.tsx`).
+
+### Components and Theming
+
+Components are hand-rolled on React Native primitives — no UI component library, icons excepted — following the composition and theming pattern of [axross/porousel](https://github.com/axross/porousel).
+
+Shared components live under `src/common/components/`, one directory per component. Keep this catalog current as components land:
+
+| Component       | Purpose                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| `message-state` | Centered mark + title + subtitle surface with an optional action slot, shared by empty/error/placeholder screens |
+
+**Guidelines:**
+
+- MUST compose an existing catalog component instead of re-creating its look, and MUST add a catalog row when a new shared component lands.
+- MUST give each component its own kebab-case directory with one file per part; the main file bears the component's name, and child parts (`button-text.tsx`, `button-icon.tsx`) read variant state from a private `<name>-context.tsx` rather than re-declaring props.
+- MUST throw from the context hook when a child part renders outside its parent (`<ButtonText> must be used within a <Button> component.`).
+- MUST style with `StyleSheet.create((theme) => ({ … }))` from `react-native-unistyles` and consume tokens from `src/common/constants/style.ts`:
+  - `theme.colors.<role>.<tone>.<step>` — roles `foundation` / `surface` / `border` / `solid` / `text`, each × tones `neutral` / `accent` / `destructive`. Step names differ per role (`bare`/`subtle` for foundation, `base`/`highlight` for surface, `subtle`/`base`/`intense` for border, `base`/`intense` plus accent-only `baseAlpha`/`intenseAlpha` for solid, `base`/`intense` for text). `theme.colors.text.onAccent` is the one flat token — text drawn on a solid accent fill. The scales mirror [axross/cunnpe](https://github.com/axross/cunnpe): Radix Slate for neutral, Teal for accent, Ruby for destructive.
+  - `theme.gap.*` (`xs` 8 / `sm` 12 / `md` 16 / `lg` 24 / `xl` 32) for scale spacing **and** border radii — there is no separate radius token.
+  - `theme.fonts.*` (`heading` / `paragraph` / `label` / `monospace`).
+- MUST NOT hard-code a color, or an on-scale spacing or radius value. Inlined numeric literals are limited to a text style's `fontSize` (paired with a `theme.fonts.*` family, since the theme carries no size scale), fixed element dimensions, and 1px hairlines.
+- MUST pick a color token by its semantic role, not its resemblance: a glyph uses a `text.*` or `solid.*` token, never `border.*`; an inset element uses `surface.*`, not `foundation.*`.
+- MUST add a new token to `src/common/constants/style.ts` in **both** themes rather than inlining a one-off value; light and dark MUST keep identical token shapes.
+- MUST source in-app icons from `lucide-react-native` — the app's single icon set, and the one exception to "no UI component library". A component that chooses its own icon imports the Lucide component directly and sizes/colors it from the theme; a component that lets its caller choose accepts a `LucideIcon` component prop, never a glyph-name string.
+- MUST promote a repeated UI pattern to `src/common/components/` once a third feature needs it (or a second needs it identically); until then it stays in the owning feature's `components/`.
+- MUST give interactive components an `accessibilityRole` and an accessible name, keep touch targets at least 44×44 points, and never encode meaning in color alone.
+- MUST put a kebab-case `testID` on each screen's root element and on every element an e2e flow asserts; Maestro locates by `id:`.
+- MAY import a bespoke `.svg` as a React component (via `react-native-svg-transformer`, configured in `metro.config.js` and typed by `declarations.d.ts`) when a design needs a vector Lucide does not cover.
+
+### The High-Fidelity Design Kit
+
+`.claude/assets/hifi-design-kit.html` is a self-contained, theme-aware HTML template that renders this app's components and screens with the **real** tokens above, in light and dark. Use it for the high-fidelity round of a design exhibit — the round where concrete color, type, and spacing are the subject — after the layout has been settled with the wireframe kit that ships inside [Wireframe Design](.claude/skills/wireframe-design/SKILL.md) (`assets/wireframe-kit.html`). [High-Fidelity UI Design](.claude/skills/high-fidelity-ui-design/SKILL.md) owns the design rationale; this kit only supplies the tokens.
+
+**Guidelines:**
+
+- MUST re-read `src/common/constants/style.ts` before each high-fidelity round and reconcile any drift into the kit — a static HTML file cannot import the TypeScript, so its token block is a hand-maintained mirror.
+- MUST keep the kit self-contained: no external fetches, system fonts and inline SVG only.
+
+### Routing
+
+Expo App Development owns the routing layer. These three rules have no owner there and are stated here instead.
+
+**Guidelines:**
+
+- MUST give each data-backed screen a loading state that renders without the loaded data, propagating the screen's `testID` convention to the fallback so e2e flows can assert it.
+- MUST keep the root error boundary (the error-reporter wrap in `src/app/_layout.tsx`) intact; a route needing custom error UI adds its own boundary beneath it.
+- SHOULD give unmatched routes a friendly `+not-found.tsx` screen once the app has more than one route (tracked as issue #8).
+- Every route is reachable via the `nakami://` deep-link scheme (`app.json` → `scheme`); parameters arriving through it are untrusted input.
+
+### Data Layer
+
+**Guidelines:**
+
+- MUST define tables in `src/core/db/schema.ts` and commit the migration generated by `npm run db-migrate:generate` alongside the schema change.
+- MUST NOT hand-edit or amend a file under `src/core/db/migrations/` — they are generated. Change the schema and generate a new migration instead.
+- MUST reach the database only through the shared client in `src/core/db/client.ts`; feature-level access (queries/mutations wrapping that client) stays in the owning feature.
+- MUST wire Drizzle's expo-sqlite migrator (`useMigrations`) into `src/app/_layout.tsx` as part of the change that lands the first migration — it is **not** wired yet, so until then a migration would never run.
+- MUST give every data-layer read an explicit projection, filter, and result limit where the dataset can grow, and MUST NOT iterate a list re-fetching each related record.
+
+### Server State
+
+TanStack Query Development owns the pattern in full, and this codebase already follows it: `get<Name>QueryOptions` / `get<Name>MutationOptions` factories under each feature's `queries/` and `mutations/`, consumed directly with `useQuery()` / `useMutation()`.
+
+**Guidelines:**
+
+- MUST use the shared `queryClient` from `src/core/helpers/query-client.ts`; there is exactly one.
+- MUST read the Zustand store through `useAuthStore.getState()` **inside** the `queryFn`/`mutationFn`, never in the factory body.
+- Existing query keys (`src/collections/queries/collection-list-query.ts`, `collection-records-query.ts`) put tenancy in a trailing filter object — `["collections", scope]` — which the installed skill marks as a Major finding. New queries MUST use the tenancy-rooted form (`["users", userId, "collections", …]`); migrating the existing two is tracked separately.
+
+### Observability
+
+**Guidelines:**
+
+- MUST log through the root logger in `src/core/helpers/logging.ts`, which runs at `debug` severity with two transports: a console transport (`debug` in development only; `info`/`warn`/`error` always) and a breadcrumb transport mirroring every line to the error tracker.
+- MUST reach error reporting through the wrappers in `src/core/helpers/error-reporting.ts` — `reportError`, `wrapRootComponent`, `addBreadcrumb` — and MUST NOT import `@sentry/react-native` for capture, breadcrumbs, or initialization anywhere else. (A Sentry **UI** component is a separate matter: `settings-screen.tsx` imports `showFeedbackWidget` directly, which is not error capture.)
+- MUST write log messages as a message string first and a single trailing context object, ending the message with a period, and MUST bracket a failable operation with "Started …" / "Completed …" lines.
+- MUST NOT put credentials, tokens, raw request bodies, or PII in a log context — every line becomes a breadcrumb.
+
+### Security and Privacy
+
+**Guidelines:**
+
+- MUST validate all external input with Zod: environment variables, deep-link route and search params, API payloads, and database-row parsing.
+- MUST NOT place a secret behind an `EXPO_PUBLIC_` variable — those are inlined into the client bundle. The committed `.env` carries only the public Sentry DSN.
+- MUST keep Sentry's content collection off. This project is on `@sentry/react-native` 7.x, where that is the `sendDefaultPii: false` currently set in `src/core/helpers/error-reporting.ts`. Newer SDK lines replace that boolean with a structured `dataCollection` option, so MUST check which one the installed SDK accepts before changing it — Sentry Instrumentation owns that question, and its rules are verified against the 8.x line.
+- MUST NOT perform a state-changing action directly from deep-link parameters without user confirmation.
+
+### Performance
+
+**Guidelines:**
+
+- MUST render remote images through `expo-image` with explicit dimensions, a cache policy, and a priority hint, and MUST give an image inside a virtualized list a `recyclingKey`.
+- SHOULD size a bundled asset for its largest rendered use, not the design-tool original.
+
+### Known Deviations from the Installed Skills
+
+Two installed rules disagree with this codebase. Both are deliberate, accepted deviations, recorded here rather than silently violated — neither is sanctioned by an upstream escape hatch.
+
+- **Screen bodies live in `components/`, not `screens/`.** Expo App Development's route-modules reference states a MUST: the screen body belongs in the owning domain's `screens/` directory. This repository has no `screens/` — routes compose from `src/<feature>/components/`. Follow this repository. Note that `expo-app-development` carries **no** general "existing convention wins" carve-out (unlike `tanstack-query-development` and `react-component-development`, which do); its established-convention allowances are each scoped to one subject — the source-root name, the path alias, and the safe-area inset mechanism — and none reaches the screen-body rule. This deviation is therefore a standing, accepted violation of that MUST, not a permitted variation — revisit it if the cost of diverging grows.
+- **Two existing query keys use the trailing-filter tenancy shape** the TanStack Query skill forbids. See [Server State](#server-state); new code follows the skill.
 
 ## Response Approach
 
@@ -70,14 +192,14 @@ Non-trivial work should move through the same decision sequence even when some s
 5. Implement, investigate, or review within the narrowest scope that satisfies the request.
 6. Self-review the result as a separate phase.
 7. Run or report the relevant verification.
-8. Update or propose skill guidance when the work exposes reusable project learning.
+8. Update the project conventions above when the work exposes reusable project learning.
 9. Summarize outcome, verification status, trade-offs, and open follow-ups.
 
 **Guidelines:**
 
-- MUST consult [Development Guidelines](.claude/skills/development-guidelines/SKILL.md) at the start of every task.
+- MUST consult [Software Development](.claude/skills/software-development/SKILL.md) at the start of every task, and [Professional Behavior](.claude/skills/professional-behavior/SKILL.md) in every session.
 - MUST classify non-trivial work as user-facing, implementation-only, review-only, skill-maintenance, exploratory, or mixed workflow before editing files.
-- MUST consult every skill whose routing condition matches the changed surface or requested review lens.
+- MUST consult every skill whose routing condition matches the changed surface or requested review lens, and the matching [Project Conventions](#project-conventions) subsection.
 - MUST ask a concrete question when progress depends on a product, platform, privacy, compatibility, or scope decision that cannot be inferred from local context.
 - SHOULD compress the sequence for small answer-only requests without skipping relevant safety checks.
 
@@ -100,10 +222,9 @@ User-facing changes need design intent before implementation mechanics. The sing
 **Guidelines:**
 
 - MUST establish design intent before implementing user-facing changes: hierarchy, interaction states, accessibility intent, responsive behavior, and copy constraints.
-- MUST consult [Component Guidelines](.claude/skills/component-guidelines/SKILL.md) (and the routing/structure skills where relevant) for design decisions and implementation mechanics.
+- MUST consult [React Component Development](.claude/skills/react-component-development/SKILL.md) and [React Component Styling](.claude/skills/react-component-styling/SKILL.md) for implementation mechanics, [Expo App Development](.claude/skills/expo-app-development/SKILL.md) where routes or navigators are involved, and [Components and Theming](#components-and-theming) for this repository's patterns and tokens.
 - MUST express design intent in user-facing terms before translating it into components, styles, or tests.
 - MUST verify that text, layout, focus behavior, loading states, and responsive behavior remain coherent across relevant viewports or surfaces.
-- SHOULD keep design-system rules in design vocabulary and link to implementation-mechanics skills instead of duplicating them.
 
 ### Review Independence Gates
 
@@ -112,41 +233,40 @@ A single agent cannot provide true independent review. This project compensates 
 **Guidelines:**
 
 - MUST perform a reviewer-mode reset after non-trivial implementation: stop editing, reread the request, inspect `git status` and `git diff`, and review only the produced diff.
-- MUST apply [Code Review Guideline](.claude/skills/code-review-guideline/SKILL.md) during self-review, including severity labels, file-line evidence, concrete fixes, and an explicit verdict when findings exist.
-- MUST load topic-specific review lenses when relevant: maintainability, quality assurance, security, performance/reliability, observability, e2e testing, and the project-specific lenses (structure, components, routing).
+- MUST apply [Code Review](.claude/skills/code-review/SKILL.md) during self-review, including severity labels, file-line evidence, concrete fixes, and an explicit verdict when findings exist.
+- MUST load topic-specific review lenses when relevant: maintainability, quality assurance, security, instrumentation, component, styling, server-state, Expo-framework, and testing.
 - MUST judge the actual diff and observed behavior, not the implementation intent.
-- MUST fix Critical or Major self-review findings before claiming completion.
-- MUST perform a second-pass re-review after fixing any blocking self-review finding.
+- MUST fix Critical or Major self-review findings before claiming completion, and re-review after fixing any blocking finding.
 - MUST report verification evidence before completion: commands run, manual checks, failures, skipped checks, and residual risk.
-- MUST escalate high-risk changes to user review, CI/PR review, or an explicitly requested secondary review before calling them merge-ready.
-- SHOULD route that escalation through the project's independent-review channel — the posted-review policy in [REVIEW.md](./REVIEW.md).
-- SHOULD treat auth, access control, injection/output-encoding, SSRF/outbound fetching, data-layer migrations, public route/API contracts, production config, data-loss risk, and large refactors as high-risk.
+- MUST escalate high-risk changes to user review or the independent review before calling them merge-ready, routed through the posted-review policy in [REVIEW.md](./REVIEW.md).
+- SHOULD treat auth, access control, injection/output-encoding, SSRF/outbound fetching, data-layer migrations, public route contracts, production config, data-loss risk, and large refactors as high-risk.
 
 ### Verification
 
-Verification should match the changed surface. Documentation-only changes need link and format checks; routes, user-facing output, data-layer, and runtime changes need stronger evidence.
+Verification should match the changed surface. Documentation-only changes need link and format checks; routes, user-facing output, data-layer, and runtime changes need stronger evidence. [`README.md`](./README.md) carries the full command table.
 
 **Guidelines:**
 
 - MUST run the relevant verification commands after non-trivial changes, or report why they could not run.
 - MUST run `npm run format` and `npm run lint` after code or documentation edits.
+- MUST run `npm run typecheck` after a change to any TypeScript surface.
 - MUST run `npm run test:unit` after a change affects code it covers.
 - MUST run `npm run test:e2e` after a change affects a user-facing output surface or e2e coverage (at minimum `npm run test:e2e:coverage` when no simulator is available, reporting the skipped on-device run).
 - MUST run `npm run build` after a change affects routes, app config, data-layer config, runtime config, dependencies, or public type signatures.
-- SHOULD perform focused manual checks when platform-specific native behavior, deep-link handling, responsive layout across device sizes, or content-preview behavior changes.
+- SHOULD perform focused manual checks when platform-specific native behavior, deep-link handling, or responsive layout across device sizes changes.
 - MUST report unverified acceptance criteria and residual risk in the final summary.
 
 ### Skill Maintenance
 
-Skill maintenance keeps reusable workflow learning close to the project rules. It should happen when a change reveals durable guidance, not after every narrow fix.
+The skills are installed from [`axross/skills`](https://github.com/axross/skills), not authored here. That changes where a rule change goes.
 
 **Guidelines:**
 
-- MUST consult [Agent Skills Best Practices](.claude/skills/agent-skills-best-practices/SKILL.md) when adding, renaming, moving, deleting, splitting, or cross-linking skills, changing reference files, or updating this index.
-- MUST keep this skill index synchronized when skills are added, renamed, moved, or removed.
-- MUST make one skill the source of truth for a rule instead of copying detailed guidance across multiple skills.
-- SHOULD propose or implement skill updates when the workflow exposes a reusable convention, outdated guidance, recurring review issue, or missing project rule.
-- SHOULD skip skill maintenance when the workflow produced no generalizable learning, and state that it was skipped.
+- MUST NOT hand-edit a file under `.claude/skills/` — the next reinstall discards it. Consult [Agent Skill Management](.claude/skills/agent-skill-management/SKILL.md) for the correct route.
+- MUST record a rule that is specific to this repository in [Project Conventions](#project-conventions) above, not in an installed skill.
+- MUST open a feature request against `axross/skills` for a rule that belongs upstream — a gap in general practice rather than a nakami fact.
+- MUST refresh the installed copies with the command documented in [`README.md`](./README.md), and commit the regenerated directories together with `skills-lock.json`.
+- SHOULD state whether skill maintenance was performed, skipped, or blocked when skill guidance governed the work.
 
 ### Communication
 
@@ -156,6 +276,5 @@ User-facing communication should expose decisions, blockers, verification, and o
 
 - MUST keep progress updates concise and focused on decisions, blockers, and outcomes.
 - MUST summarize changed files, verification status, trade-offs, unresolved risks, and deferred follow-ups at completion.
-- MUST state whether skill maintenance was performed, skipped, or blocked when skill guidance governed the work.
 - SHOULD include detailed plans, command logs, or iteration logs only when the user asks for auditability or when the outcome depends on them.
 - MUST ask a concrete question when progress depends on a product, platform, privacy, or scope decision.
