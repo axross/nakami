@@ -4,9 +4,16 @@ import { StyleSheet } from "react-native-unistyles";
 import type { CollectionRecord } from "~/collections/models/record";
 
 /**
- * The fixed line-box height shared by a record card's title, its metadata row,
- * and the id chip — the single value that makes a card's height deterministic.
- * Exported so the loading skeleton mirrors the exact same geometry.
+ * The fixed line-box height shared by a record card's title row, its metadata
+ * row, and the id chip — the single value that makes a card's height
+ * deterministic. Exported so the loading skeleton mirrors the exact same
+ * geometry.
+ *
+ * A deliberate geometry constant, not a typography value: it sizes elements,
+ * and no text style sets it. It matches the 22pt line box that `text.heading`
+ * and `text.code` already carry, so a title row is exactly this tall on its
+ * own; only the metadata row — whose `text.caption` line box is shorter, and
+ * whose chip may be absent — has to be held open to it explicitly.
  */
 export const RECORD_CARD_LINE = 22;
 
@@ -73,8 +80,8 @@ const styles = StyleSheet.create((theme) => ({
 		borderRadius: theme.gap.md,
 		borderWidth: 1,
 		// Fixed pill height (a fixed element dimension, not scale spacing) keeps
-		// the chip compact around its 12px id text and equal to the row line box;
-		// the theme's smallest gap step (xs: 8) as vertical padding would make the
+		// the chip compact around its id text and equal to the row line box; the
+		// theme's smallest gap step (xs: 8) as vertical padding would make the
 		// pill far too tall.
 		height: RECORD_CARD_LINE,
 		justifyContent: "center",
@@ -82,37 +89,34 @@ const styles = StyleSheet.create((theme) => ({
 		paddingHorizontal: theme.gap.xs,
 	},
 	chipText: {
+		...theme.text.codeCaption,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.monospace,
-		fontSize: 12,
 	},
+	// The title row and the metadata row are each one fixed line box, so a card's
+	// height is deterministic — every card is paddingV + LINE + gap + LINE +
+	// paddingV tall regardless of title length or whether a chip shows. The title
+	// row gets there from its own text role's 22pt line box; this row is held
+	// open explicitly, because its caption text is shorter than that and the chip
+	// that would otherwise set the height is absent on a title-less record. The
+	// loading skeleton mirrors these exact metrics so the list doesn't reflow
+	// when records arrive.
 	meta: {
 		alignItems: "center",
 		columnGap: theme.gap.xs,
 		flexDirection: "row",
+		height: RECORD_CARD_LINE,
 	},
-	// The title line and the metadata row share one fixed line box (matching the
-	// chip's height), so a card's height is deterministic — every card is
-	// paddingV + LINE + gap + LINE + paddingV tall regardless of title length or
-	// whether a chip shows. The loading skeleton mirrors these exact metrics so
-	// the list doesn't reflow when records arrive.
 	metaText: {
+		...theme.text.caption,
 		color: theme.colors.text.neutral.base,
 		flexShrink: 1,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 13,
-		lineHeight: RECORD_CARD_LINE,
 	},
 	title: {
+		...theme.text.heading,
 		color: theme.colors.text.neutral.intense,
-		fontFamily: theme.fonts.heading,
-		fontSize: 16,
-		lineHeight: RECORD_CARD_LINE,
 	},
 	titleFallback: {
+		...theme.text.code,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.monospace,
-		fontSize: 14,
-		lineHeight: RECORD_CARD_LINE,
 	},
 }));

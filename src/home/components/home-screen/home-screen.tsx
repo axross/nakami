@@ -28,14 +28,12 @@ const styles = StyleSheet.create((theme) => ({
 		rowGap: theme.gap.xs,
 	},
 	subtitle: {
+		...theme.text.body,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 16,
 		textAlign: "center",
 	},
 	title: {
+		...theme.text.display,
 		color: theme.colors.text.neutral.intense,
-		fontFamily: theme.fonts.heading,
-		fontSize: 28,
 	},
 }));

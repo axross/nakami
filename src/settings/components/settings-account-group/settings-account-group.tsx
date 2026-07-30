@@ -93,14 +93,12 @@ const styles = StyleSheet.create((theme) => ({
 		width: 36,
 	},
 	email: {
+		...theme.text.body,
 		color: theme.colors.text.neutral.intense,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 16,
 	},
 	server: {
+		...theme.text.caption,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 13,
 	},
 	signOutLabel: {
 		color: theme.colors.text.destructive.base,

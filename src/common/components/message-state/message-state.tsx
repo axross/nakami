@@ -62,15 +62,13 @@ const styles = StyleSheet.create((theme) => ({
 		rowGap: theme.gap.xs,
 	},
 	subtitle: {
+		...theme.text.body,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 16,
 		maxWidth: 280,
 		textAlign: "center",
 	},
 	title: {
+		...theme.text.title,
 		color: theme.colors.text.neutral.intense,
-		fontFamily: theme.fonts.heading,
-		fontSize: 20,
 	},
 }));

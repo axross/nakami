@@ -64,8 +64,7 @@ const styles = StyleSheet.create((theme) => ({
 		paddingHorizontal: theme.gap.lg,
 	}),
 	buttonLabel: {
+		...theme.text.heading,
 		color: theme.colors.text.onAccent,
-		fontFamily: theme.fonts.heading,
-		fontSize: 16,
 	},
 }));
