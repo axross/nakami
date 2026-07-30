@@ -84,10 +84,11 @@
      -------------------------------------------------------------------------
      SYNC SOURCE OF TRUTH: src/common/constants/style.ts
      The values below MIRROR that module (a static HTML file cannot import the
-     TypeScript). style.ts is now a semantic-role theme (foundation / surface /
+     TypeScript). style.ts is a semantic-role theme (foundation / surface /
      border / solid / text, each x neutral / accent / destructive; accent = Radix
-     Teal), with radii from `gap` (8/12/16 = gap.xs/sm/md) and font sizes inlined
-     per component (no size scale) paired with InnovatorGrotesk / JetBrains Mono.
+     Teal) over five non-colour families — `gap` (spacing only), `radius`,
+     `borderWidth`, `duration`, and `easing` — with font sizes still inlined per
+     component (no size scale) paired with InnovatorGrotesk / JetBrains Mono.
      The kit flattens those roles into the internal vars below; before a
      high-fidelity round, RE-READ style.ts and reconcile any drift.
      Do NOT treat this block as the source of truth; style.ts is.
@@ -110,7 +111,15 @@
     --bg: #fcfcfd; --elev: #f9f9fb; --surface: #f0f0f3; --txt: #1c2024; --txt2: #60646c;
     --line-d: #d9d9e0; --accent-d: #008573; --accent-solid: #12a594; --accent-surface: #e0f8f3;
     --accentC: #ffffff; --danger-d: #ca244d;
-    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --tabInactive: #8b8d98;
+    --tabInactive: #8b8d98;
+    /* Non-colour families — identical in both themes in style.ts, so declared
+       once here and inherited by .dark. Radius is its OWN family (never `gap`);
+       --bw-hairline stands in for StyleSheet.hairlineWidth, which is a third of
+       a point on a 3x device — 0.5px is the closest a browser gets. */
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-pill: 999px;
+    --bw-hairline: 0.5px; --bw-thin: 1px;
+    --dur-fast: 150ms; --dur-base: 250ms; --dur-slow: 700ms;
+    --ease-standard: cubic-bezier(0.45, 0, 0.55, 1);
   }
   .device.dark, .el-surface.dark {
     /* dark — mirror style.ts dark theme */
@@ -130,7 +139,7 @@
   .scr { position: relative; border-radius: 30px; overflow: hidden; background: var(--bg); height: 560px; display: flex; flex-direction: column; }
   .statusbar { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 12px; font-weight: 600; color: var(--txt); }
   .statusbar .dots i { width: 15px; height: 9px; border: 1.4px solid var(--txt); border-radius: 2px; display: inline-block; opacity: 0.85; }
-  .nav { height: 44px; display: flex; align-items: center; padding: 0 8px; background: var(--elev); border-bottom: 1px solid var(--line-d); }
+  .nav { height: 44px; display: flex; align-items: center; padding: 0 8px; background: var(--elev); border-bottom: var(--bw-hairline) solid var(--line-d); }
   .nav .back { color: var(--accent-d); font-size: 17px; display: flex; align-items: center; width: 64px; }
   .nav .back::before { content: "\2039"; font-size: 26px; line-height: 1; margin-top: -2px; }
   .nav .navtitle { flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: var(--txt); }  /* 16 · heading (fonts.heading) */
@@ -151,7 +160,7 @@
   .form { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
   .form .field { gap: 0; }
   .form label { display: block; font-size: 13px; font-weight: 500; color: var(--txt2); margin: 0 0 6px 2px; }  /* 13 · label (fonts.label) */
-  .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font-size: 16px; color: var(--txt); }
+  .input { height: 46px; border: var(--bw-hairline) solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font-size: 16px; color: var(--txt); }
   .input.ph { color: var(--txt2); }
   .input .dotpw { letter-spacing: 3px; }
   .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font-size: 14px; margin-top: -4px; border: 0; }
@@ -165,7 +174,7 @@
   .grp .gh { font-size: 16px; font-weight: 700; color: var(--txt); padding: 0 16px; }
   .grp .rows { margin: 0 16px; border: 0; background: transparent; }
   .item { min-height: 48px; background: var(--elev); display: flex; align-items: center; gap: 14px; padding: 9px 14px; border: 0; }
-  .item + .item { border-top: 1px solid var(--line-d); }
+  .item + .item { border-top: var(--bw-hairline) solid var(--line-d); }
   .grp .rows .item:first-child { border-top-left-radius: var(--r-md); border-top-right-radius: var(--r-md); }
   .grp .rows .item:last-child { border-bottom-left-radius: var(--r-md); border-bottom-right-radius: var(--r-md); }
   .item .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex: none; }
@@ -178,7 +187,7 @@
   .item.signout .ico, .item.signout .lbl { color: var(--danger-d); }
   .item .chev::after { content: "\203A"; color: var(--txt2); font-size: 20px; }
 
-  .tabs { height: 52px; background: var(--elev); border-top: 1px solid var(--line-d); display: flex; padding-bottom: 2px; }
+  .tabs { height: 52px; background: var(--elev); border-top: var(--bw-hairline) solid var(--line-d); display: flex; padding-bottom: 2px; }
   .tabs .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--tabInactive); font-size: 10px; font-weight: 500; }
   .tabs .tab.on { color: var(--accent-d); }
   .tabs .tab svg { width: 24px; height: 24px; }
@@ -192,7 +201,7 @@
 
   .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font-size: 16px; font-weight: 600; }
   .el-btn.primary { background: var(--accent-solid); color: var(--accentC); }
-  .el-btn.secondary { background: transparent; color: var(--accent-d); border: 1px solid var(--line-d); }
+  .el-btn.secondary { background: transparent; color: var(--accent-d); border: var(--bw-hairline) solid var(--line-d); }
   .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.75; }
   .input.focus { border-color: var(--accent-solid); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-solid) 30%, transparent); }
   .input.error { border-color: var(--danger-d); }
@@ -347,7 +356,7 @@
       </div></div>
     </div>
     <div class="el-spec"><span class="el-lbl">Tab bar — active / inactive</span>
-      <div class="tabs" style="border-radius:var(--r-md);border:1px solid var(--line-d)">
+      <div class="tabs" style="border-radius:var(--r-md);border:var(--bw-hairline) solid var(--line-d)">
         <div class="tab on"><svg><use href="#i-home"/></svg><span>Home</span></div>
         <div class="tab"><svg><use href="#i-gear"/></svg><span>Settings</span></div>
       </div>

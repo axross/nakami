@@ -1,9 +1,58 @@
+import { StyleSheet } from "react-native";
+
 const gap = {
 	xs: 8,
 	sm: 12,
 	md: 16,
 	lg: 24,
 	xl: 32,
+} as const;
+
+// Radius is its own family rather than a borrowed spacing step: each tier names
+// a design role, so retuning the spacing scale can never reshape a corner. The
+// values match what the app already draws — adopting them changes nothing
+// visually.
+const radius = {
+	// inset marks and placeholder bars — a collection monogram, a skeleton bar
+	sm: 8,
+	// the default surface corner — cards, inputs, buttons, menu-group ends
+	md: 12,
+	// large marks — the message-state icon plate, the account avatar
+	lg: 16,
+	// fully rounded; React Native clamps this to half the shorter side
+	pill: 999,
+} as const;
+
+// Border widths are their own family too. `hairline` is the platform's thinnest
+// renderable line — a third of a point on a 3x display — which is what every
+// outline and separator in the app means by a "1px" border.
+const borderWidth = {
+	hairline: StyleSheet.hairlineWidth,
+	thin: 1,
+} as const;
+
+// Motion, named by magnitude rather than by milliseconds so a retune does not
+// rename the token.
+const duration = {
+	fast: 150,
+	base: 250,
+	slow: 700,
+} as const;
+
+const easing = {
+	/**
+	 * The app's one curve — an ease-in-out quad, written out rather than taken
+	 * from reanimated's `Easing`, because this module is the first thing the root
+	 * layout imports (via `src/unistyles.ts`) and importing reanimated here would
+	 * pull its native initialization into that first tick. Role-named, not
+	 * curve-named: `standard` survives a retune where `inOutQuad` would become a
+	 * lie. Marked as a worklet so `withTiming` can run it on the UI thread.
+	 */
+	standard: (t: number): number => {
+		"worklet";
+
+		return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+	},
 } as const;
 
 const fonts = {
@@ -134,8 +183,12 @@ const defaultTheme = {
 			onAccent: "#ffffff",
 		},
 	},
+	borderWidth,
+	duration,
+	easing,
 	fonts,
 	gap,
+	radius,
 };
 
 type ThemeName = "light" | "dark";

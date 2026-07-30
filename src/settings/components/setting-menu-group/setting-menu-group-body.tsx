@@ -12,6 +12,8 @@ export function SettingMenuGroupBody({
 const styles = StyleSheet.create((theme) => ({
 	body: {
 		paddingHorizontal: theme.gap.md,
-		rowGap: 1,
+		// The group's rows sit flush against each other; the gap between them is
+		// the separator, so it is a border width rather than scale spacing.
+		rowGap: theme.borderWidth.hairline,
 	},
 }));

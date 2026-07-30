@@ -85,8 +85,8 @@ const styles = StyleSheet.create((theme) => ({
 	input: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.gap.sm,
-		borderWidth: 1,
+		borderRadius: theme.radius.md,
+		borderWidth: theme.borderWidth.hairline,
 		color: theme.colors.text.neutral.intense,
 		fontFamily: theme.fonts.paragraph,
 		fontSize: 16,
