@@ -102,8 +102,17 @@ export function SettingsScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// The stack header and the tab bar clear this screen's vertical edges, so
+	// only the horizontal inset is its own. The rows carry the design's own
+	// horizontal gutter (`SettingMenuGroupBody`, `SettingMenuGroupHeading`, and
+	// the two paragraphs below), so the scrolled content adds the bare inset on
+	// top of it rather than a maximum of the two. The bottom padding is a gutter,
+	// not an inset — without it the last row scrolls flush against the tab bar.
 	content: {
+		paddingBottom: theme.gap.lg,
+		paddingEnd: rt.insets.right,
+		paddingStart: rt.insets.left,
 		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.lg,
 	},

@@ -116,7 +116,7 @@ Shared components live under `src/common/components/`, one directory per compone
 
 ### Routing
 
-Expo App Development owns the routing layer. These three rules have no owner there and are stated here instead.
+Expo App Development owns the routing layer. These rules have no owner there and are stated here instead.
 
 **Guidelines:**
 
@@ -124,6 +124,32 @@ Expo App Development owns the routing layer. These three rules have no owner the
 - MUST keep the root error boundary (the error-reporter wrap in `src/app/_layout.tsx`) intact; a route needing custom error UI adds its own boundary beneath it.
 - SHOULD give unmatched routes a friendly `+not-found.tsx` screen once the app has more than one route (tracked as issue #8).
 - Every route is reachable via the `nakami://` deep-link scheme (`app.json` → `scheme`); parameters arriving through it are untrusted input.
+
+#### Safe-Area Insets
+
+`app.json` enables `react-native-edge-to-edge`, so the app draws beneath the system bars and every screen is responsible for the edges its navigator does not clear. Unistyles' mini runtime is this app's **one** inset mechanism — `react-native-safe-area-context` is present only as the navigator stack's own dependency and MUST NOT be reached for directly.
+
+Which edges each screen owns follows from its chrome. The stack header clears the top; the tab bar clears the bottom (it pads itself by `insets.bottom` — see `expo-router`'s bundled `BottomTabBar`); nothing clears the horizontal pair, so every screen owns it.
+
+| Screen                      | Chrome                                 | Edges the screen owns |
+| --------------------------- | -------------------------------------- | --------------------- |
+| `welcome-screen`            | none                                   | all four              |
+| `sign-in-screen`            | stack header                           | bottom + horizontal   |
+| `home-screen`               | tab bar (the tab group hides its header) | top + horizontal    |
+| `collections-screen`        | stack header + tab bar                 | horizontal            |
+| `collection-records-screen` | stack header + tab bar                 | horizontal            |
+| `settings-screen`           | stack header + tab bar                 | horizontal            |
+| `licenses-screen`           | stack header + tab bar                 | horizontal            |
+
+**Guidelines:**
+
+- MUST read insets from the Unistyles mini runtime inside the stylesheet — `StyleSheet.create((theme, rt) => …)`, then `rt.insets.*` — and MUST NOT introduce a safe-area provider or `useSafeAreaInsets` hook for a value a style consumes.
+- MUST apply an inset only at an edge the table above marks owned, and MUST re-derive that row when a screen's header or tab-bar arrangement changes.
+- MUST combine an inset with the surface's own gutter as `Math.max(inset, gutter)`; where the gutter lives on the surface's children instead (`settings-screen`'s rows), the surface carries the bare inset and a comment says so.
+- MUST use `paddingStart` / `paddingEnd` (or `marginStart` / `marginEnd`) for horizontal insets, never the `Left` / `Right` forms.
+- MUST put a scrolling screen's inset on its `contentContainerStyle`, not on the `ScrollView`/`FlatList` container, so content scrolls under the chrome; a skeleton that mirrors a loaded list MUST mirror its inset too, or the placeholder shifts when data arrives.
+- `src/common/components/message-state/message-state.tsx` fills its screen and already carries the horizontal inset; a screen composing it adds only the vertical edges it owns, through the `style` prop.
+- `app.json` pins `orientation` to `"portrait"`, so horizontal insets are zero on every device today — they are correctness for a future unlock and for right-to-left mirroring, and they cannot be exercised by a manual landscape check while that pin stands.
 
 ### Data Layer
 

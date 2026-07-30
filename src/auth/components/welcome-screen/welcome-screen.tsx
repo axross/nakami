@@ -19,6 +19,10 @@ import { MessageState } from "~/common/components/message-state/message-state";
  * feedback is the codebase's standard pressed-opacity dip, applied through the
  * `Pressable`'s own render-prop `style` (the same pattern as `CollectionRow`,
  * which proves it paints on release) — no `Link asChild` cloning involved.
+ *
+ * It is the app's only screen with neither a stack header nor a tab bar, so it
+ * owns all four edges: the horizontal pair comes from `MessageState`, and the
+ * vertical pair is added here.
  */
 export function WelcomeScreen(): JSX.Element {
 	const router = useRouter();
@@ -41,6 +45,7 @@ export function WelcomeScreen(): JSX.Element {
 				</Pressable>
 			}
 			icon={Database}
+			style={styles.root}
 			subtitle="Sign in to your Payload CMS to browse your collections."
 			testID="welcome-screen"
 			title="Connect to Payload"
@@ -48,7 +53,7 @@ export function WelcomeScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	button: {
 		alignItems: "center",
 		alignSelf: "stretch",
@@ -65,5 +70,9 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	buttonPressed: {
 		opacity: 0.6,
+	},
+	root: {
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.lg),
+		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
 	},
 }));

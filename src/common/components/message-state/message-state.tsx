@@ -9,6 +9,11 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
  * connect prompt, the Collections empty/error/detail states). Callers pass
  * their own action element so each keeps its distinct control (a navigation
  * link, a retry button).
+ *
+ * It fills its screen, so it carries the horizontal safe-area inset itself —
+ * the one edge pair no navigator chrome ever clears. A caller that also owns a
+ * vertical edge (the welcome screen, which has neither a header nor a tab bar)
+ * overrides `paddingTop`/`paddingBottom` through `style`.
  */
 export function MessageState({
 	icon: Icon,
@@ -43,7 +48,7 @@ export function MessageState({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	mark: {
 		alignItems: "center",
 		aspectRatio: 1,
@@ -58,7 +63,10 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 		justifyContent: "center",
-		padding: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.xs,
 	},
 	subtitle: {

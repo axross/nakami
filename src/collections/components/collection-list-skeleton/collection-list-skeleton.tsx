@@ -67,13 +67,18 @@ export function CollectionListSkeleton(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// Mirrors the loaded list's card, horizontal safe-area inset included, so the
+	// placeholder does not shift when the collections arrive.
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.gap.sm,
 		borderWidth: 1,
-		margin: theme.gap.md,
+		marginBottom: theme.gap.md,
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginTop: theme.gap.md,
 		overflow: "hidden",
 	},
 	monogram: {

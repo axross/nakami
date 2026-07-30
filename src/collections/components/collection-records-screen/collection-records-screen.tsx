@@ -136,7 +136,7 @@ export function CollectionRecordsScreen({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	count: {
 		color: theme.colors.text.neutral.base,
 		fontFamily: theme.fonts.paragraph,
@@ -147,9 +147,15 @@ const styles = StyleSheet.create((theme) => ({
 	footer: {
 		paddingVertical: theme.gap.md,
 	},
+	// The stack header and the tab bar clear this screen's vertical edges, so
+	// only the horizontal inset is its own — carried by the scrolled feed so the
+	// cards still scroll under the chrome.
 	list: {
 		gap: theme.gap.sm,
-		padding: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingTop: theme.gap.md,
 	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
