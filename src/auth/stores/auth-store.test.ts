@@ -28,6 +28,16 @@ jest.mock("~/auth/helpers/payload-client", () => {
 	return { __esModule: true, ...actual, fetchMe: jest.fn() };
 });
 
+// `deauthenticate()` hard-imports the app's one query client, so substitute a
+// test client for it rather than letting this suite mutate the instance the
+// rest of the app shares. The store's real eviction logic still runs.
+jest.mock("~/core/helpers/query-client", () => {
+	const { createTestQueryClient } = jest.requireActual(
+		"~/common/helpers/test-query-client",
+	) as typeof import("~/common/helpers/test-query-client");
+	return { __esModule: true, queryClient: createTestQueryClient() };
+});
+
 const session: Session = {
 	serverUrl: "https://cms.example.com",
 	collectionSlug: "users",
@@ -38,6 +48,7 @@ const session: Session = {
 
 beforeEach(() => {
 	jest.clearAllMocks();
+	// The substituted client lives for the file, so empty it between tests.
 	queryClient.clear();
 	useAuthStore.setState({ status: "loading", session: null });
 });
