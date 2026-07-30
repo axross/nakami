@@ -23,7 +23,7 @@ output — they exist for self-review, not for the pull-request thread.
 
 - **Important** — MUST be addressed before merge: a finding that breaks
   behavior, corrupts persisted state, leaks data, regresses accessibility,
-  violates a MUST rule of a matching skill in the `AGENTS.md` skill index, or
+  violates a MUST rule of a matching skill under `.claude/skills/`, or
   leaves an acceptance criterion unmet or unverifiable from the diff.
 - **Nit** — safe to defer: style, naming, and refactoring suggestions.
 
@@ -31,10 +31,10 @@ output — they exist for self-review, not for the pull-request thread.
 
 - MUST label every posted finding exactly **Important** or **Nit** — no other
   labels appear in a posted review.
-- MUST label as Important every violated MUST rule of a matching
-  `AGENTS.md`-indexed skill, every acceptance criterion that is unmet or cannot
-  be confirmed from the diff, and every mandatory-check miss that breaks a hard
-  requirement.
+- MUST label as Important every violated MUST rule of a matching installed
+  skill, every violated MUST rule of [`AGENTS.md`](AGENTS.md)'s own Project
+  Conventions, every acceptance criterion that is unmet or cannot be confirmed
+  from the diff, and every mandatory-check miss that breaks a hard requirement.
 - MUST label style, naming, and refactoring suggestions Nit at most.
 
 ## Mandatory Checks
@@ -44,10 +44,12 @@ not skippable. Grade each miss by its real impact: a miss that breaks a hard
 requirement is **Important**, a gap that does not is a **Nit**. Cite the owning
 skill in the finding.
 
-- **Skill conformance** — verify the change conforms to **every** skill in the
-  [`AGENTS.md`](AGENTS.md) skill index whose routing condition matches the
-  changed files, and flag any deviation from a skill's stated rule, citing the
-  skill and the rule. A violated skill **MUST** rule is Important.
+- **Skill conformance** — verify the change conforms to **every** skill under
+  [`.claude/skills/`](.claude/skills) whose routing condition — its own
+  `description`/`when_to_use` — matches the changed files, and to the matching
+  [`AGENTS.md`](AGENTS.md) Project Conventions subsection, which wins where the
+  two collide. Flag any deviation from a stated rule, citing the skill (or the
+  convention) and the rule. A violated **MUST** rule is Important.
 - **Acceptance criteria** — verify the diff against **every** acceptance
   criterion in the linked issue (the pull request body's `Closes #<n>`), when
   the pull request links one. Each criterion that is unmet, or that cannot be
