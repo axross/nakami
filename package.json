@@ -68,5 +68,9 @@
 		"react-native-svg-transformer": "^1.5.3",
 		"react-test-renderer": "19.2.3",
 		"typescript": "~6.0.3"
+	},
+	"overrides": {
+		"brace-expansion@^5.0.0": "^5.0.8",
+		"fast-uri@^3.0.0": "^3.1.4"
 	}
 }
