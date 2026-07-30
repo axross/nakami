@@ -82,11 +82,11 @@ Reconnect the MCP server after starting or stopping the dev server so the local 
 
 ## Development workflow
 
-Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`AGENTS.md`](./AGENTS.md) (loaded through `CLAUDE.md`), which carries this repository's own conventions and makes [Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) the mandatory change loop: every change goes through **plan → approve → code → verify → independent review → address → ready**, stepped through under [Delivering a unit of work end-to-end](#delivering-a-unit-of-work-end-to-end). There is no size threshold and no self-approval shortcut — that independent review is the only authoritative review of an agent's own change.
+Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`CLAUDE.md`](./CLAUDE.md), which carries this repository's own conventions and makes [Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) the mandatory change loop: every change goes through **plan → approve → code → verify → independent review → address → ready**, stepped through under [Delivering a unit of work end-to-end](#delivering-a-unit-of-work-end-to-end). There is no size threshold and no self-approval shortcut — that independent review is the only authoritative review of an agent's own change.
 
 ### Agent skills
 
-Every skill under [`.claude/skills/`](./.claude/skills) is an **installed copy** from [`axross/skills`](https://github.com/axross/skills), pinned by [`skills-lock.json`](./skills-lock.json). Nothing there is hand-written, and a hand-edit is discarded by the next reinstall — repository-specific rules live in [`AGENTS.md`](./AGENTS.md) instead.
+Every skill under [`.claude/skills/`](./.claude/skills) is an **installed copy** from [`axross/skills`](https://github.com/axross/skills), pinned by [`skills-lock.json`](./skills-lock.json). Nothing there is hand-written, and a hand-edit is discarded by the next reinstall — repository-specific rules live in [`CLAUDE.md`](./CLAUDE.md) instead.
 
 Refresh them with the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, then commit the regenerated directories together with `skills-lock.json`:
 
@@ -138,7 +138,7 @@ Unit tests (Jest via jest-expo, colocated with their subject) cover helpers, sch
 
 ## Commands
 
-This table is the authoritative list of the repository's commands, for human contributors and agents alike. Run format + lint after every change, and the suites relevant to the changed surface before opening a pull request — see the Verification section of [`AGENTS.md`](./AGENTS.md).
+This table is the authoritative list of the repository's commands, for human contributors and agents alike. Run format + lint after every change, and the suites relevant to the changed surface before opening a pull request — see the Verification section of [`CLAUDE.md`](./CLAUDE.md).
 
 | Command                     | What it does                                                                                                                              | When to run it                                                                                          |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -183,7 +183,7 @@ Store/production builds and on-demand dev clients are not wired into CI — the 
 | Maestro                                                                                                   | Test runner configuration, snapshot behavior, locator/assertion APIs.                                                                                                                                                                                                                                                                                                  |
 | Biome                                                                                                     | Formatter/linter configuration, suppression syntax, rule names.                                                                                                                                                                                                                                                                                                        |
 
-**Some files fail globally rather than locally.** A small mismatch in one of these breaks the app at launch or the gate outright, not just one screen — refresh the owning tool's docs before editing: `app.json` and config plugins, `babel.config.js`, `metro.config.js`, `drizzle.config.ts` and `src/core/db/`, and the Sentry/Unistyles initialization in `src/core/helpers/` and `src/unistyles.ts`.
+**Some files fail globally rather than locally.** A small mismatch in one of these breaks the app at launch or the gate outright, not just one screen — refresh the owning tool's docs before editing: `app.json` and config plugins, `app.config.ts` (the dynamic layer that extends `app.json` at build time — it overrides `version` from `PREVIEW_VERSION_NAME` and injects `extra.commitHash`, so a value set only in `app.json` may not be the one that ships), `babel.config.js`, `metro.config.js`, `drizzle.config.ts` and `src/core/db/`, and the Sentry/Unistyles initialization in `src/core/helpers/` and `src/unistyles.ts`.
 
 **The installed agent skills are generated, not source.** `.claude/skills/` is produced by `npx skills` from [`axross/skills`](https://github.com/axross/skills); a hand-edit there is discarded by the next reinstall. Biome deliberately excludes `.claude/skills` and `.claude/assets` (see `biome.json`) so formatting never rewrites an upstream artifact and breaks its lockfile hash.
 

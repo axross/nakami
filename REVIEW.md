@@ -32,7 +32,7 @@ output — they exist for self-review, not for the pull-request thread.
 - MUST label every posted finding exactly **Important** or **Nit** — no other
   labels appear in a posted review.
 - MUST label as Important every violated MUST rule of a matching installed
-  skill, every violated MUST rule of [`AGENTS.md`](AGENTS.md)'s own Project
+  skill, every violated MUST rule of [`CLAUDE.md`](CLAUDE.md)'s own Project
   Conventions, every acceptance criterion that is unmet or cannot be confirmed
   from the diff, and every mandatory-check miss that breaks a hard requirement.
 - MUST label style, naming, and refactoring suggestions Nit at most.
@@ -47,7 +47,7 @@ skill in the finding.
 - **Skill conformance** — verify the change conforms to **every** skill under
   [`.claude/skills/`](.claude/skills) whose routing condition — its own
   `description`/`when_to_use` — matches the changed files, and to the matching
-  [`AGENTS.md`](AGENTS.md) Project Conventions subsection, which wins where the
+  [`CLAUDE.md`](CLAUDE.md) Project Conventions subsection, which wins where the
   two collide. Flag any deviation from a stated rule, citing the skill (or the
   convention) and the rule. A violated **MUST** rule is Important.
 - **Acceptance criteria** — verify the diff against **every** acceptance
