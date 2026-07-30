@@ -2,190 +2,34 @@
 
 ## Project Overview
 
-- **Nakami** is a companion mobile app for Payload CMS, built for iOS and Android.
-- Primary language: TypeScript. App framework: Expo (React Native) with Expo Router file-based routing.
-- Core stack: Zustand + TanStack Query for state, Drizzle ORM over expo-sqlite for on-device data, Zod for validation, react-native-unistyles for styling/theming, hand-rolled compound components.
-- [`README.md`](./README.md) is the contributor documentation: the command table, the tech stack with versions, the fast-moving dependencies that need a docs refresh, the preview-build mechanism, and the skill install command. Consult it before running any project operation.
-- The skills under [`.claude/skills/`](./.claude/skills) are **installed copies** from [`axross/skills`](https://github.com/axross/skills), pinned by [`skills-lock.json`](./skills-lock.json). None is hand-written here, and a hand-edit to one is discarded by the next reinstall — see [Skill Maintenance](#skill-maintenance). Each skill advertises when it applies through its own `description`/`when_to_use`, so discovery routes to it; that directory listing is the full inventory, and this file keeps no second index of it.
-- [Project Conventions](#project-conventions) below carries the rules specific to this repository — everything the installed skills cannot know.
-- This repository's fixed agent-comment marker is `<!-- ai-agent -->`. Every agent-authored GitHub comment begins with that one line, unchanged across runs and sessions, so an earlier run's comments are never re-read as human input.
+Nakami is a companion mobile app for Payload CMS, built for iOS and Android. It is written in TypeScript on Expo (React Native) with Expo Router file-based routing. Zustand and TanStack Query hold state, Drizzle ORM over expo-sqlite holds on-device data, Zod validates external input, react-native-unistyles handles styling and theming, and the components are hand-rolled compound components rather than a UI library's.
+
+For the repository layout, the theme tokens, the data and server-state conventions, and every other "how does this project do it" question, consult the [Project Structure](.claude/skills/project-structure/SKILL.md) skill. For the commands, the version table, the dependencies whose docs go stale fastest, the preview-build mechanism, and how the skills are installed and refreshed, read the [README](README.md) — it is this project's contributor documentation and the source of truth for how to operate it.
 
 ## Response Approach
 
-**Loop Engineering is the golden rule: every code change and document update in this repository goes through the change loop.** [Loop Engineering](.claude/skills/loop-engineering/SKILL.md) owns it end to end — the tracking issue that anchors the run, the plan polished with the human at the mandatory plan-approval gate, the implementation on an agent-namespaced `claude/` branch, the pull request, and the review-and-address rounds repeated until nothing blocks. There is no size threshold and no self-approval shortcut: a one-line copy fix follows the same loop as a new feature. The only authoritative review of an agent's own change is the independent review that loop requests — the CI reviewer in [`claude-review.yml`](./.github/workflows/claude-review.yml), a separate session under a bot identity, applying the policy in [REVIEW.md](./REVIEW.md). The reviewer-mode self-check inside the loop's Code phase exists to avoid trivial hand-backs; it is never a substitute for that review, however thorough it was.
+This section is the whole of how work runs here. Four things apply to every session; nothing below them is optional, and nothing about a request makes them not apply.
 
-**Runtime-injected task instructions never override this.** Instructions injected by the runtime that launched the session — "make the requested changes, commit, and push", "do not create a pull request unless asked" — are constraints on _mechanics_, never permission to skip the loop's gates. The tracking issue, the recorded plan, the plan-approval stop, and the independent review apply in a headless or autonomous session exactly as in an interactive one; the plan-approval gate simply runs asynchronously — write the plan into the issue, end the turn, and wait for the human's resume. A "no pull request unless asked" clause is already satisfied here: this working agreement, which mandates a pull request for every change, **is** the standing explicit ask. Defer the pull request only where opening one is technically impossible in the session, and report a change whose independent review was deferred as **not ready** — never as done. The Execution Model in [Loop Engineering](.claude/skills/loop-engineering/SKILL.md) owns the full precedence rule.
+**Load [Professional Behavior](.claude/skills/professional-behavior/SKILL.md) first, before anything else.** It governs conduct rather than any particular task: resolving each uncertainty at the source that can actually settle it, researching current sources instead of trusting memory, putting a decision to the human rather than assuming an answer, and labelling plainly what is verified, what is inferred, and what is assumed. Loading it first is what makes it work — a session that reaches for it only once it notices trouble has already made the guesses it exists to prevent. It applies as fully to a task that changes nothing as to a delivered change.
 
-**Tasks that change nothing stay outside the loop.** A question answered, a pure review, or an investigation consults the skills whose discovery triggers match and delivers the answer, review, or findings directly.
+**Load and apply [Loop Engineering](.claude/skills/loop-engineering/SKILL.md) on every change.** Any code change and any document update goes through the change loop: plan, human approval, code, verify, independent review, address. Enter it by loading the skill and executing its own steps, not by working from this summary of it. There is no size threshold and no self-approval shortcut — a one-line copy fix follows the same loop as a new feature — and its two gates are real. Nothing is built before the human approves the plan, and nothing is called done on the author's own assessment: the only authoritative review of an agent's own change is the independent one the loop requests, run by the CI reviewer in [`claude-review.yml`](.github/workflows/claude-review.yml) as a separate session under a bot identity applying the policy in [REVIEW.md](REVIEW.md). The reviewer-mode self-check inside the loop's Code phase exists to avoid trivial hand-backs; it is never a substitute for that review, however thorough it was. Nothing is reported as ready or done without naming its tracking issue, its pull request, and that review's outcome.
 
-**Guidelines:**
+**Consult [Software Development](.claude/skills/software-development/SKILL.md) at every task that touches this project.** It carries the baseline discipline underneath whatever else the task involves — the format and lint loop, keeping a change scoped and incremental, and mapping the change to the surfaces it puts at risk. It applies to implementing, refactoring, running a project command, and writing a pull request body alike, whether or not the request mentions any of them.
 
-- MUST enter [Loop Engineering](.claude/skills/loop-engineering/SKILL.md) before any code change or document update — by loading the skill and executing its own steps, not by working from this section's summary of it — whatever else discovery surfaces for the task.
-- MUST NOT treat a self-review as the independent review, and MUST NOT call a change ready or done without naming its tracking issue, its pull request, and the independent review's outcome.
-- MUST, for every skill whose routing condition matches the task — the changed surface or the requested review lens — load that skill's body and follow its own rules rather than a summary of them, together with the matching [Project Conventions](#project-conventions) subsection.
-- MUST follow this repository where a matching skill's rule collides with [Project Conventions](#project-conventions), and record any such collision in [Known Deviations from the Installed Skills](#known-deviations-from-the-installed-skills) rather than violating the skill silently.
-- MUST consult [Professional Behavior](.claude/skills/professional-behavior/SKILL.md) in every session, before anything else — it governs how an uncertainty is resolved (looked up, researched, or put to the human) and how the result is reported back, and it applies to a task that changes nothing as fully as to a delivered change.
-- MUST consult [Software Development](.claude/skills/software-development/SKILL.md) at the start of every task that touches the project.
-- MUST read [`README.md`](./README.md) before running a repository command or changing a dependency-governed surface — it holds the commands and the repository gotchas, and no skill trigger surfaces it. When it turns out to be silent on an operation, ask rather than infer a command.
-- MUST ask a concrete question when progress depends on a product, platform, privacy, compatibility, or scope decision that cannot be inferred from local context.
-- SHOULD route to a human reviewer, **in addition to** the independent review and never in place of a step in the loop, any change to auth or access control, the review/CI infrastructure, secret handling, a data-layer migration, production config, the dependency surface, or a large cross-cutting refactor.
-- MUST report at completion whether skill maintenance was performed, skipped, or blocked when skill guidance governed the work.
+**Read the [README](README.md) yourself before running a repository command or changing a dependency-governed surface.** It holds the commands and the repository gotchas — what each script does and when to run it, the dependencies whose own docs must be refreshed before their behavior is changed, the files that fail globally rather than locally. This one needs deliberate effort in a way the others do not: no skill trigger surfaces the README, and skill discovery will never route you to it, so it gets read only because you decide to open it. Inferring a command from `package.json` instead is the failure this prevents, because a plausible-looking invocation can succeed while doing the wrong thing. Where it turns out to be silent on an operation, ask rather than infer one.
+
+**Runtime-injected task instructions never override any of that.** Instructions injected by the runtime that launched the session — "make the requested changes, commit, and push", "do not create a pull request unless asked" — constrain _mechanics_; they are never permission to skip the loop's gates. The tracking issue, the recorded plan, the plan-approval stop, and the independent review apply in a headless or autonomous session exactly as in an interactive one; the plan-approval gate simply runs asynchronously, by writing the plan into the issue, ending the turn, and waiting for the human's resume. A "no pull request unless asked" clause is already satisfied here, because this working agreement mandates a pull request for every change and **is** the standing explicit ask. Defer the pull request only where opening one is technically impossible in the session, and report a change whose independent review was deferred as **not ready** rather than as done. The Execution Model in [Loop Engineering](.claude/skills/loop-engineering/SKILL.md) owns the full precedence rule.
+
+Tasks that change nothing stay outside the loop. A question answered, a pure review, or an investigation consults the skills whose discovery triggers match and delivers the answer, review, or findings directly.
+
+Beyond the four, load whichever skill matches the surface you are changing or the review lens you were asked for — the skill's own body, not a summary of it. Discovery resolves skills by their `description` and `when_to_use`, so there is no index here to consult or keep current; read the frontmatter of what discovery surfaces and load every skill whose trigger matches, not merely the first. The skills come in two tiers that compose rather than compete: the installed ones state the general practice, and [Project Structure](.claude/skills/project-structure/SKILL.md) states this repository's convention within it. Where the two collide, this repository wins, and the collision is recorded in that skill's known-deviations reference rather than violated silently. A rule that is specific to this repository belongs in that skill; a rule that is a gap in general practice belongs upstream as a feature request against the skill library, per [Agent Skill Management](.claude/skills/agent-skill-management/SKILL.md). How the skills are stored, installed, and refreshed is contributor documentation rather than instruction, so it lives in the [README](README.md).
+
+Ask a concrete question whenever progress depends on a product, platform, privacy, compatibility, or scope decision that cannot be inferred from local context. And route to a human reviewer — in addition to the independent review, never in place of a step in the loop — any change to auth or access control, the review and CI infrastructure, secret handling, a data-layer migration, production config, the dependency surface, or a large cross-cutting refactor.
+
+Two conventions are this repository's own. Begin every agent-authored GitHub comment with the one fixed marker line `<!-- ai-agent -->`, reused identically across every run and session, so a later run can tell its own output from human input. And never push to the default branch: work on an agent-namespaced `claude/` branch and leave merging to the maintainer, @axross.
 
 ### Verification
 
-Verification matches the changed surface, and its evidence belongs in the pull request the loop opens. Documentation-only changes need link and format checks; routes, user-facing output, data-layer, and runtime changes need stronger evidence. [`README.md`](./README.md) carries the full command table.
+Verify against the surface the change actually touched, and put the evidence in the pull request the loop opens. Every edit to code or documentation ends with `npm run format` and `npm run lint`; past that pair the changed surface decides the rest. A change to any TypeScript surface adds `npm run typecheck`, one to code the unit suite covers adds `npm run test:unit`, one to a user-facing output surface or to e2e coverage adds `npm run test:e2e` — falling back to `npm run test:e2e:coverage` alone when no simulator is available, with the skipped on-device run reported — and one to routes, app config, data-layer config, runtime config, dependencies, or public type signatures adds `npm run build`. Documentation-only changes need link and format checks and little else. The [README](README.md) carries the full command table.
 
-**Guidelines:**
-
-- MUST run `npm run format` and `npm run lint` after code or documentation edits.
-- MUST run `npm run typecheck` after a change to any TypeScript surface.
-- MUST run `npm run test:unit` after a change affects code it covers.
-- MUST run `npm run test:e2e` after a change affects a user-facing output surface or e2e coverage (at minimum `npm run test:e2e:coverage` when no simulator is available, reporting the skipped on-device run).
-- MUST run `npm run build` after a change affects routes, app config, data-layer config, runtime config, dependencies, or public type signatures.
-- SHOULD perform focused manual checks when platform-specific native behavior, deep-link handling, or responsive layout across device sizes changes.
-- MUST report a required check that could not run — naming the command, the reason, and the residual risk — instead of presenting the change as fully verified, and MUST name every unverified acceptance criterion in the final summary.
-
-### Skill Maintenance
-
-The skills are installed from [`axross/skills`](https://github.com/axross/skills), not authored here. That changes where a rule change goes.
-
-**Guidelines:**
-
-- MUST NOT hand-edit a file under `.claude/skills/` — the next reinstall discards it. Consult [Agent Skill Management](.claude/skills/agent-skill-management/SKILL.md) for the correct route.
-- MUST record a rule that is specific to this repository in [Project Conventions](#project-conventions) below, not in an installed skill.
-- MUST open a feature request against `axross/skills` for a rule that belongs upstream — a gap in general practice rather than a nakami fact.
-- MUST refresh the installed copies with the command documented in [`README.md`](./README.md), and commit the regenerated directories together with `skills-lock.json`.
-
-## Project Conventions
-
-Rules specific to this repository. The installed skills own the general practice; this section owns what only this codebase can say. Consult it alongside whichever skill matches the surface being changed.
-
-### Repository Map
-
-| Path                 | Owns                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `src/app/`           | Expo Router routes — thin entry points only                                                                                    |
-| `src/<feature>/`     | One domain feature: `components/`, `queries/`, `mutations/`, `models/`, `helpers/`, `hooks/`, `stores/` as needed              |
-| `src/common/`        | Code shared by ≥ 2 features: `components/`, `constants/`, `helpers/`                                                           |
-| `src/core/`          | App bootstrap and infrastructure: `db/` (`schema.ts`, `client.ts`, and `migrations/` once one is generated), `helpers/` (env, logging, error-reporting, query-client) |
-| `src/unistyles.ts`   | Unistyles theme/breakpoint registration (imported first by the root layout)                                                    |
-| `e2e/`               | Maestro flows (`flows/`), the scenario catalog (`scenarios.md`), and the coverage gate (`check-scenario-coverage.mjs`)         |
-| `assets/`            | App icons, splash, bundled fonts (registered through `app.json`'s `expo-font` plugin — there is no `useFonts` call), and other bundled binary assets |
-| `jest/`              | Hand-written module mocks that `jest.config.cjs` maps in (`reanimated-mock.js`, `lucide-react-native-mock.js`); each carries the comment explaining why it exists |
-| `fastlane/`          | The Android preview lane (`Fastfile`, `Appfile`, `Pluginfile`) the preview-build workflow drives                                |
-| `.claude/`           | Installed agent skills (`skills/`), the high-fidelity design kit (`assets/hifi-design-kit.html`), hooks, and harness settings  |
-| `.github/workflows/` | Merge checks CI, the independent Claude reviewer, and the Android preview build                                                |
-| `app.json` + `app.config.ts` | Expo app configuration in **two** layers: `app.json` is the static config, and `app.config.ts` receives it at build time, overriding `version` (from `PREVIEW_VERSION_NAME`, which the Android preview build sets) and injecting `extra.commitHash` |
-
-**Guidelines:**
-
-- MUST place feature code in `src/<feature>/…`; create the feature directory when the first file of a new domain lands.
-- MUST place a module used by two or more features in `src/common/`, and keep single-consumer modules feature-local.
-- MUST keep `src/core/` free of feature logic — only cross-cutting infrastructure lives there.
-- MUST keep imports flowing one way through the layers — `src/app/` → `src/<feature>/` → `src/common/` → `src/core/` — and MUST NOT import from a layer above: `src/common/` and `src/core/` never import a feature. The one ratified exception is `src/core/helpers/query-client.ts` importing `PayloadRequestError` from `src/common/helpers/payload-client.ts`; relocating that client to remove the exception is tracked as issue #89.
-- MUST NOT import one feature from another, and MUST move a module two features need into `src/common/` instead. `src/auth/` is the ratified exception: its **session surface** — `stores/auth-store`, `models/session`, and `mutations/sign-out-mutation` — is the app's session state, which `src/collections/` and `src/settings/` already consume. Everything else inside a feature, `src/auth/` included, stays private to it.
-- MUST consider **both** app-config layers when changing app configuration: a `version` or `extra` value set only in `app.json` is replaced at build time by `app.config.ts`, and `expo prebuild` bakes the resolved value into the native project.
-- MUST colocate unit tests with their subject as `<name>.test.ts(x)`.
-- MUST use the `~/*` alias (→ `src/*`) for cross-directory imports, and `~/assets/*` (→ `assets/*`) for bundled assets; both are declared in `tsconfig.json` and mirrored in `jest.config.cjs`. Relative paths only within the same directory subtree.
-- MUST name files kebab-case, matching the porousel convention (`button-icon.tsx`, `feed-create-form.tsx`).
-
-### Components and Theming
-
-Components are hand-rolled on React Native primitives — no UI component library, icons excepted — following the composition and theming pattern of [axross/porousel](https://github.com/axross/porousel).
-
-Shared components live under `src/common/components/`, one directory per component. Keep this catalog current as components land:
-
-| Component       | Purpose                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------- |
-| `message-state` | Centered mark + title + subtitle surface with an optional action slot, shared by empty/error/placeholder screens |
-
-**Guidelines:**
-
-- MUST compose an existing catalog component instead of re-creating its look, and MUST add a catalog row when a new shared component lands.
-- MUST give each component its own kebab-case directory with one file per part; the main file bears the component's name, and child parts (`button-text.tsx`, `button-icon.tsx`) read variant state from a private `<name>-context.tsx` rather than re-declaring props.
-- MUST throw from the context hook when a child part renders outside its parent (`<ButtonText> must be used within a <Button> component.`).
-- MUST style with `StyleSheet.create((theme) => ({ … }))` from `react-native-unistyles` and consume tokens from `src/common/constants/style.ts`:
-  - `theme.colors.<role>.<tone>.<step>` — roles `foundation` / `surface` / `border` / `solid` / `text`, each × tones `neutral` / `accent` / `destructive`. Step names differ per role (`bare`/`subtle` for foundation, `base`/`highlight` for surface, `subtle`/`base`/`intense` for border, `base`/`intense` plus accent-only `baseAlpha`/`intenseAlpha` for solid, `base`/`intense` for text). `theme.colors.text.onAccent` is the one flat token — text drawn on a solid accent fill. The scales mirror [axross/cunnpe](https://github.com/axross/cunnpe): Radix Slate for neutral, Teal for accent, Ruby for destructive.
-  - `theme.gap.*` (`xs` 8 / `sm` 12 / `md` 16 / `lg` 24 / `xl` 32) for scale spacing **and** border radii — there is no separate radius token.
-  - `theme.fonts.*` (`heading` / `paragraph` / `label` / `monospace`).
-- MUST write responsive style values against the `breakpoints` exported from the same file (`xs` 0 / `sm` 380 / `md` 768) and registered in `src/unistyles.ts`, which also sets `adaptiveThemes: true` — the theme follows the OS color scheme with no in-app toggle, so a scheme switch swaps the theme object underneath a mounted screen.
-- MUST NOT hard-code a color, or an on-scale spacing or radius value. Inlined numeric literals are limited to a text style's `fontSize` (paired with a `theme.fonts.*` family, since the theme carries no size scale), fixed element dimensions, and 1px hairlines.
-- MUST pick a color token by its semantic role, not its resemblance: a glyph uses a `text.*` or `solid.*` token, never `border.*`; an inset element uses `surface.*`, not `foundation.*`.
-- MUST add a new token to `src/common/constants/style.ts` in **both** themes rather than inlining a one-off value; light and dark MUST keep identical token shapes.
-- MUST source in-app icons from `lucide-react-native` — the app's single icon set, and the one exception to "no UI component library". A component that chooses its own icon imports the Lucide component directly and sizes/colors it from the theme; a component that lets its caller choose accepts a `LucideIcon` component prop, never a glyph-name string.
-- MUST promote a repeated UI pattern to `src/common/components/` once a third feature needs it (or a second needs it identically); until then it stays in the owning feature's `components/`.
-- MUST give interactive components an `accessibilityRole` and an accessible name, keep touch targets at least 44×44 points, and never encode meaning in color alone.
-- MUST put a kebab-case `testID` on each screen's root element and on every element an e2e flow asserts; Maestro locates by `id:`.
-- MAY import a bespoke `.svg` as a React component (via `react-native-svg-transformer`, configured in `metro.config.js` and typed by `declarations.d.ts`) when a design needs a vector Lucide does not cover.
-
-### The High-Fidelity Design Kit
-
-`.claude/assets/hifi-design-kit.html` is a self-contained, theme-aware HTML template that renders this app's components and screens with the **real** tokens above, in light and dark. Use it for the high-fidelity round of a design exhibit — the round where concrete color, type, and spacing are the subject — after the layout has been settled with the wireframe kit that ships inside [Wireframe Design](.claude/skills/wireframe-design/SKILL.md) (`assets/wireframe-kit.html`). [High-Fidelity UI Design](.claude/skills/high-fidelity-ui-design/SKILL.md) owns the design rationale; this kit only supplies the tokens.
-
-**Guidelines:**
-
-- MUST re-read `src/common/constants/style.ts` before each high-fidelity round and reconcile any drift into the kit — a static HTML file cannot import the TypeScript, so its token block is a hand-maintained mirror.
-- MUST keep the kit self-contained: no external fetches, system fonts and inline SVG only.
-
-### Routing
-
-[Expo App Development](.claude/skills/expo-app-development/SKILL.md) owns the routing layer. These rules have no owner there and are stated here instead.
-
-**Guidelines:**
-
-- MUST give each data-backed screen a loading state that renders without the loaded data, propagating the screen's `testID` convention to the fallback so e2e flows can assert it.
-- MUST keep the root error boundary (the error-reporter wrap in `src/app/_layout.tsx`) intact; a route needing custom error UI adds its own boundary beneath it.
-- SHOULD give unmatched routes a friendly `+not-found.tsx` screen once the app has more than one route (tracked as issue #8).
-- Every route is reachable via the `nakami://` deep-link scheme (`app.json` → `scheme`); parameters arriving through it are untrusted input.
-
-### Data Layer
-
-**Guidelines:**
-
-- MUST define tables in `src/core/db/schema.ts` and commit the migration generated by `npm run db-migrate:generate` alongside the schema change.
-- MUST NOT hand-edit or amend a file under `src/core/db/migrations/` — they are generated. Change the schema and generate a new migration instead.
-- MUST reach the database only through the shared client in `src/core/db/client.ts`; feature-level access (queries/mutations wrapping that client) stays in the owning feature.
-- MUST wire Drizzle's expo-sqlite migrator (`useMigrations`) into `src/app/_layout.tsx` as part of the change that lands the first migration — it is **not** wired yet, so until then a migration would never run.
-- MUST give every data-layer read an explicit projection, filter, and result limit where the dataset can grow, and MUST NOT iterate a list re-fetching each related record.
-
-### Server State
-
-[TanStack Query Development](.claude/skills/tanstack-query-development/SKILL.md) owns the pattern in full, and this codebase already follows it: `get<Name>QueryOptions` / `get<Name>MutationOptions` factories under each feature's `queries/` and `mutations/`, consumed directly with `useQuery()` / `useMutation()`.
-
-**Guidelines:**
-
-- MUST use the shared `queryClient` from `src/core/helpers/query-client.ts`; there is exactly one.
-- MUST read the Zustand store through `useAuthStore.getState()` **inside** the `queryFn`/`mutationFn`, never in the factory body.
-- Existing query keys (`src/collections/queries/collection-list-query.ts`, `collection-records-query.ts`) put tenancy in a trailing filter object — `["collections", scope]` — which the installed skill marks as a Major finding. New queries MUST use the tenancy-rooted form (`["users", userId, "collections", …]`); migrating the existing two is tracked as issue #67.
-
-### Observability
-
-**Guidelines:**
-
-- MUST log through the root logger in `src/core/helpers/logging.ts`, which runs at `debug` severity with two transports: a console transport (`debug` in development only; `info`/`warn`/`error` always) and a breadcrumb transport mirroring every line to the error tracker.
-- MUST reach error reporting through the wrappers in `src/core/helpers/error-reporting.ts` — `initializeErrorReporter`, `reportError`, `wrapRootComponent`, `addBreadcrumb` — and MUST NOT import `@sentry/react-native` for capture, breadcrumbs, or initialization anywhere else. (A Sentry **UI** component is a separate matter: `settings-screen.tsx` imports `showFeedbackWidget` directly, which is not error capture.)
-- MUST write log messages as a message string first and a single trailing context object, ending the message with a period, and MUST bracket a failable operation with "Started …" / "Completed …" lines.
-- MUST NOT put credentials, tokens, raw request bodies, or PII in a log context — every line becomes a breadcrumb.
-
-### Security and Privacy
-
-**Guidelines:**
-
-- MUST validate all external input with Zod: environment variables, deep-link route and search params, API payloads, and database-row parsing.
-- MUST NOT place a secret behind an `EXPO_PUBLIC_` variable — those are inlined into the client bundle. The committed `.env` carries only the public Sentry DSN.
-- MUST keep Sentry's content collection off. This project is on `@sentry/react-native` 7.x, where that is the `sendDefaultPii: false` currently set in `src/core/helpers/error-reporting.ts`. Newer SDK lines replace that boolean with a structured `dataCollection` option, so MUST check which one the installed SDK accepts before changing it — [Sentry Instrumentation](.claude/skills/sentry-instrumentation/SKILL.md) owns that question, and its rules are verified against the 8.x line.
-- MUST NOT perform a state-changing action directly from deep-link parameters without user confirmation.
-
-### Performance
-
-**Guidelines:**
-
-- MUST render remote images through `expo-image` with explicit dimensions, a cache policy, and a priority hint, and MUST give an image inside a virtualized list a `recyclingKey`.
-- SHOULD size a bundled asset for its largest rendered use, not the design-tool original.
-
-### Known Deviations from the Installed Skills
-
-Two installed rules disagree with this codebase. Both are deliberate, accepted deviations, recorded here rather than silently violated — neither is sanctioned by an upstream escape hatch.
-
-- **Screen bodies live in `components/`, not `screens/`.** Expo App Development's route-modules reference states a MUST: the screen body belongs in the owning domain's `screens/` directory. This repository has no `screens/` — routes compose from `src/<feature>/components/`. Follow this repository. Note that `expo-app-development` carries **no** general "existing convention wins" carve-out (unlike `tanstack-query-development` and `react-component-development`, which do); its established-convention allowances are each scoped to one subject — the source-root name, the path alias, and the safe-area inset mechanism — and none reaches the screen-body rule. This deviation is therefore a standing, accepted violation of that MUST, not a permitted variation — revisit it if the cost of diverging grows.
-- **Two existing query keys use the trailing-filter tenancy shape** the TanStack Query skill forbids. See [Server State](#server-state); new code follows the skill, and migrating the two is tracked as issue #67.
+Focused manual checks are worth the time on top of these whenever platform-specific native behavior, deep-link handling, or responsive layout across device sizes changes. A required check that could not run is reported as such — naming the command, the reason, and the residual risk — rather than left to read as fully verified, and the final summary names every acceptance criterion that stayed unverified, along with whether skill maintenance was performed, skipped, or blocked when skill guidance governed the work.
