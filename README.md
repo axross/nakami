@@ -82,7 +82,7 @@ Reconnect the MCP server after starting or stopping the dev server so the local 
 
 ## Development workflow
 
-Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`AGENTS.md`](./AGENTS.md) (loaded through `CLAUDE.md`), which carries this repository's own conventions and routes to the skills under [`.claude/skills/`](./.claude/skills). Human and agent contributors follow the same loop: plan → implement → self-review → verify → report.
+Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`AGENTS.md`](./AGENTS.md) (loaded through `CLAUDE.md`), which carries this repository's own conventions and makes [Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) the mandatory change loop: every change goes through **plan → approve → code → verify → independent review → address → ready**, stepped through under [Delivering a unit of work end-to-end](#delivering-a-unit-of-work-end-to-end). There is no size threshold and no self-approval shortcut — that independent review is the only authoritative review of an agent's own change.
 
 ### Agent skills
 
@@ -114,7 +114,7 @@ If npx cannot resolve the CLI (`npm error could not determine executable to run`
 
 ### Delivering a unit of work end-to-end
 
-[Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) is the repository's change loop. It runs **model-invoked** — there is no slash command; describe the work (a GitHub issue, a pull request, or a free-form request) and the loop drives it from intake to a merge-ready pull request in a single continuing session:
+[Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) is the repository's **mandatory** change loop — every code change and document update goes through it, a one-line copy fix as much as a new feature. It runs **model-invoked** — there is no slash command; describe the work (a GitHub issue, a pull request, or a free-form request) and the loop drives it from intake to a merge-ready pull request in a single continuing session:
 
 1. **Plan** — reads the issue and its thread, asks you the product and scope questions the spec leaves open, and rewrites the issue body into a reviewable plan with acceptance criteria. It then **always pauses for your approval**: nothing gets built until you review the plan and tell it to continue.
 2. **Code + verify** — implements the approved plan on an agent-namespaced `claude/` branch, runs the checks the changed surface requires, and self-reviews the diff.
@@ -126,7 +126,7 @@ Kick it off by naming the work — "deliver issue #42", "pick up PR 57", or a fr
 
 ### `@claude review` — get findings on any PR
 
-Comment **`@claude review`** on a pull request to run this repository's review policy ([`REVIEW.md`](./REVIEW.md)) — severity-tagged findings with `file:line` evidence and concrete fixes, posted as inline comments by the CI reviewer ([`claude-review.yml`](./.github/workflows/claude-review.yml)). Use it for a pre-merge check on a hand-written change or a second opinion before merging; the same review runs automatically against pull requests the loop opens.
+Comment **`@claude review`** on a pull request to run this repository's review policy ([`REVIEW.md`](./REVIEW.md)) — severity-tagged findings with `file:line` evidence and concrete fixes, posted as inline comments by the CI reviewer ([`claude-review.yml`](./.github/workflows/claude-review.yml)). Use it for a pre-merge check on a hand-written change or a second opinion before merging. It is the same reviewer the change loop relies on: step 3 above requests it by posting that comment itself, so no review starts without one.
 
 Changes made without an agent follow the same bar: branch, implement, run the checks below, open a pull request, and get it reviewed before merge.
 
