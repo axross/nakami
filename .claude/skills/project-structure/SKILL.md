@@ -1,6 +1,6 @@
 ---
 name: project-structure
-description: The structure and conventions of Nakami, an Expo (React Native) companion app for Payload CMS — the facts the installed skill library cannot know about it. Covers the source-tree layer model and its one-way import direction, feature/common/core placement, the `~/*` path aliases, kebab-case naming and colocated tests, the two-layer Expo app config, hand-rolled compound components and the shared-component catalog, the Unistyles theme tokens and breakpoints, Lucide icons, accessibility and `testID` conventions, the high-fidelity design kit, screen loading and error states, Drizzle over expo-sqlite, TanStack Query option factories and query-key shape, the root logger and error-reporting wrappers, Zod validation and the `EXPO_PUBLIC_` secret boundary, image performance rules, and the two accepted deviations from installed skill rules.
+description: The structure and conventions of Nakami, an Expo (React Native) companion app for Payload CMS — the facts the installed skill library cannot know about it. Covers the source-tree layer model and its one-way import direction, feature/common/core placement, the `~/*` path aliases, kebab-case naming and colocated tests, the two-layer Expo app config, hand-rolled compound components and the shared-component catalog, the Unistyles theme tokens and breakpoints, Lucide icons, accessibility and `testID` conventions, the high-fidelity design kit, screen loading and error states, Drizzle over expo-sqlite, TanStack Query option factories and query-key shape, the root logger and error-reporting wrappers, Zod validation and the `EXPO_PUBLIC_` secret boundary, image performance rules, and the one accepted deviation from an installed skill rule.
 when_to_use: Use when locating a file, placing or naming a new module, or resolving any "how does this project do it" question an installed capability defers to the project on — which directory a module belongs in, whether one module may import another, which theme token to reach for, how a component splits into parts, what a screen renders while loading, how a query key is shaped, which logger or error-reporting wrapper to call, or where a secret may not go. Consult it alongside the installed capability for the surface being changed, which owns the underlying practice; this skill owns only what is specific to this repository.
 user-invocable: false
 ---
@@ -76,7 +76,7 @@ See [runtime-conventions.md](./references/runtime-conventions.md) for:
 
 See [known-deviations.md](./references/known-deviations.md) for:
 
-- the two installed rules this codebase deliberately does not follow, and why each was accepted
-- where screen bodies live here, and why the installed allowance does not cover it
+- the one installed rule this codebase deliberately does not follow, and why it was accepted
+- why screen bodies living in `components/` rather than `screens/` is a naming choice and not a violation, so it is not raised as one
 - the query-key shape two existing modules still use, and the issue tracking their migration
 - recording a new collision here rather than violating an installed skill silently

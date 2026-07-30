@@ -2,19 +2,23 @@
 
 Apply this reference when an installed capability's rule appears to conflict with this codebase, and when reviewing a change that looks like a skill violation.
 
-Two installed rules disagree with this codebase. Both are deliberate, accepted deviations, recorded here rather than silently violated — and neither is sanctioned by an escape hatch in the skill it departs from. A reviewer who finds this codebase doing one of these two things has found a recorded decision, not a defect; anything else that departs from an installed rule is a finding.
+One installed rule genuinely disagrees with this codebase — the query-key shape below. It is a deliberate, accepted deviation, recorded here rather than silently violated. A reviewer who finds this codebase doing it has found a recorded decision, not a defect; anything else that departs from an installed rule is a finding.
 
-## Screen Bodies Live in `components/`, Not `screens/`
+The first section below is **not** a deviation. It is recorded because the directory name looks like one at a glance, and a reviewer who assumes a violation without reading the rule closely will raise a finding that is not there.
 
-The Expo app development capability's route-modules reference states a MUST: the screen body belongs in the owning domain's `screens/` directory. This repository has no `screens/` — routes compose from `src/<feature>/components/`. Follow this repository.
+## Screen Bodies Live in `components/`, Not `screens/` — a Naming Choice, Not a Deviation
 
-Worth knowing why this one is a standing violation rather than a permitted variation. That capability carries **no** general "existing convention wins" carve-out, unlike the TanStack Query and React component development capabilities, which do. Its established-convention allowances are each scoped to a single subject — the source-root name, the path alias, and the safe-area inset mechanism — and none of them reaches the screen-body rule.
+Routes here compose from `src/<feature>/components/`; this repository has no `screens/` directory. That is a departure from a stated **convention**, not from a rule.
+
+The Expo app development capability's route-modules reference is explicit about which part binds. Its prose reads "the screen body lives in the owning domain directory — _conventionally_ `screens/` inside that domain", and its guideline is "MUST place the screen body in the owning domain's screen directory **rather than in the route file**". The force of the MUST is route-file-versus-domain-directory; the `screens/` name is marked conventional in the same sentence that introduces it.
+
+This repository satisfies that MUST. `src/app/welcome.tsx` is a default export that renders `WelcomeScreen` from `~/auth/components/welcome-screen/welcome-screen` — the screen body sits in the owning domain's directory, and nothing but mounting lives in the route file.
 
 **Guidelines:**
 
-- MUST place a screen body in `src/<feature>/components/`, not in a `screens/` directory.
-- MUST NOT read this deviation as a general licence to override the capability's other MUST rules; it is scoped to screen-body placement alone.
-- SHOULD revisit the deviation if the cost of diverging grows — it is accepted, not settled forever.
+- MUST place a screen body in `src/<feature>/components/`, not in the route file.
+- MUST NOT raise the absence of a `screens/` directory as a skill violation; the installed rule does not require that name.
+- SHOULD keep the route file to its default export, its own screen options, and the literals only that route needs, exactly as the installed capability requires.
 
 ## Two Existing Query Keys Use the Trailing-Filter Shape
 
