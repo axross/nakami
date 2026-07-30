@@ -28,7 +28,7 @@ Beyond the four, load whichever skill matches the surface you are changing or th
 
 Ask a concrete question whenever progress depends on a product, platform, privacy, compatibility, or scope decision that cannot be inferred from local context. And on top of the independent review — never in place of a step in the loop — a human reviewer is worth pulling in for any change to auth or access control, the review and CI infrastructure, secret handling, a data-layer migration, production config, the dependency surface, or a large cross-cutting refactor.
 
-Two conventions are this repository's own. Begin every agent-authored GitHub comment with the one fixed marker line `<!-- ai-agent -->`, reused identically across every run and session, so a later run can tell its own output from human input. And never push to the default branch: work on an agent-namespaced `claude/` branch and leave merging to the maintainer, @axross.
+One convention is this repository's own: begin every agent-authored GitHub comment with the one fixed marker line `<!-- ai-agent -->`, reused identically across every run and session, so a later run can tell its own output from human input.
 
 ### Verification
 
