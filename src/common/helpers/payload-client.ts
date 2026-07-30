@@ -23,8 +23,19 @@ export class PayloadRequestError extends Error {
 	readonly kind: PayloadErrorKind;
 	readonly status: number | undefined;
 
-	constructor(kind: PayloadErrorKind, message: string, status?: number) {
-		super(message);
+	/**
+	 * `status` is the HTTP status when the server answered, and undefined when
+	 * it never did. `options.cause` carries the error this one wraps — the error
+	 * tracker unwraps the chain into linked exceptions, so the underlying
+	 * failure stays diagnosable behind the user-facing message.
+	 */
+	constructor(
+		kind: PayloadErrorKind,
+		message: string,
+		status?: number,
+		options?: ErrorOptions,
+	) {
+		super(message, options);
 		this.name = "PayloadRequestError";
 		this.kind = kind;
 		this.status = status;
@@ -64,7 +75,7 @@ export async function request(
 	let response: Response;
 	try {
 		response = await fetch(url, { ...init, signal: controller.signal });
-	} catch {
+	} catch (error) {
 		// Network down, DNS failure, timeout/abort — the server was unreachable.
 		// Close the bracket at debug (callers report the failure at their own
 		// level) so the breadcrumb trail doesn't go quiet on the failure path.
@@ -72,9 +83,14 @@ export async function request(
 			operation,
 			duration: performance.now() - startedAt,
 		});
+		// The taxonomy collapses these into one kind on purpose; the cause is
+		// what tells DNS failure, connection refused, and this client's own
+		// timeout abort apart once the failure reaches the error tracker.
 		throw new PayloadRequestError(
 			"network",
 			"The server could not be reached.",
+			undefined,
+			{ cause: error },
 		);
 	} finally {
 		clearTimeout(timeout);
@@ -104,10 +120,14 @@ export async function request(
 
 	try {
 		return await response.json();
-	} catch {
+	} catch (error) {
+		// The cause is the only record of how the body was invalid — truncated,
+		// an HTML proxy error page, or a syntax error at a given offset.
 		throw new PayloadRequestError(
 			"server",
 			"The server returned an invalid response.",
+			undefined,
+			{ cause: error },
 		);
 	}
 }

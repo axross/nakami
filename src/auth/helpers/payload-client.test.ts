@@ -74,6 +74,24 @@ describe("login", () => {
 		).rejects.toMatchObject({ kind: "network" });
 	});
 
+	it("attaches the transport failure as the cause of the network error", async () => {
+		const transportFailure = new TypeError("Network request failed");
+		const fetchMock = jest.fn(async () => {
+			throw transportFailure;
+		});
+		(globalThis as { fetch: typeof fetch }).fetch =
+			fetchMock as unknown as typeof fetch;
+
+		const error = await login(server, {
+			email: "you@example.com",
+			password: "secret",
+		}).catch((caught) => caught);
+
+		expect(error).toBeInstanceOf(PayloadRequestError);
+		expect((error as PayloadRequestError).kind).toBe("network");
+		expect((error as PayloadRequestError).cause).toBe(transportFailure);
+	});
+
 	it("throws a server error on an unexpected status", async () => {
 		mockFetch({ ok: false, status: 500 });
 
@@ -84,6 +102,28 @@ describe("login", () => {
 
 		expect(error).toBeInstanceOf(PayloadRequestError);
 		expect((error as PayloadRequestError).kind).toBe("server");
+	});
+
+	it("attaches the parse failure as the cause when the body is not JSON", async () => {
+		const parseFailure = new SyntaxError(
+			"Unexpected token < in JSON at position 0",
+		);
+		mockFetch({
+			ok: true,
+			status: 200,
+			json: async () => {
+				throw parseFailure;
+			},
+		});
+
+		const error = await login(server, {
+			email: "you@example.com",
+			password: "secret",
+		}).catch((caught) => caught);
+
+		expect(error).toBeInstanceOf(PayloadRequestError);
+		expect((error as PayloadRequestError).kind).toBe("server");
+		expect((error as PayloadRequestError).cause).toBe(parseFailure);
 	});
 });
 
