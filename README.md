@@ -100,12 +100,15 @@ npx skills add axross/skills --agent claude-code --yes --copy \
   --skill loop-engineering --skill product-requirement-document-authoring \
   --skill professional-behavior --skill quality-assurance \
   --skill react-component-development --skill react-component-styling \
-  --skill software-development --skill software-instrumentation \
-  --skill tanstack-query-development --skill unit-testing \
+  --skill sentry-instrumentation --skill software-development \
+  --skill software-instrumentation --skill tanstack-query-development \
+  --skill technical-document-authoring --skill unit-testing \
   --skill wireframe-design
 ```
 
-Each skill is named deliberately rather than passing `--skill '*'`: the library also ships `next-app-development`, which has no call site in an Expo app, and a wildcard refresh would keep reinstalling it. Add a skill to the list when the library gains one worth taking.
+Each skill is named deliberately rather than passing `--skill '*'`: the library also ships vendor and framework layers this app has no call site for — `next-app-development` (no Next.js) and `amplitude-instrumentation` (no Amplitude) — and a wildcard refresh would keep reinstalling them. Add a skill to the list when the library gains one worth taking.
+
+The library moves quickly, so re-run this periodically rather than only when adding a skill: skills are pinned to upstream's default-branch HEAD by the hashes in `skills-lock.json`, with no version tag to hold them still. A refresh that produces no diff is the evidence they are current.
 
 If npx cannot resolve the CLI (`npm error could not determine executable to run`), pin the version: `npx --yes skills@latest add …`.
 

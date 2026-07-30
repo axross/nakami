@@ -30,6 +30,7 @@ The skills under [`.claude/skills/`](./.claude/skills) are **installed copies** 
 | [Software Development](.claude/skills/software-development/SKILL.md)                                     | Every task that touches the project — the format/lint loop, scoped changes, project docs, verification, current docs, pull request descriptions        |
 | [Loop Engineering](.claude/skills/loop-engineering/SKILL.md)                                             | Driving a change end-to-end through plan → code → review, including the plan-approval gate and the independent review                                  |
 | [Product Requirement Document Authoring](.claude/skills/product-requirement-document-authoring/SKILL.md) | Writing or refining a requirement, spec, plan document, or issue description, and deciding which sections it needs                                     |
+| [Technical Document Authoring](.claude/skills/technical-document-authoring/SKILL.md)                     | Drafting, structuring, or editing a technical document — a design doc, ADR, runbook, README, or this file's prose                                       |
 | [Conventional Commits](.claude/skills/conventional-commits/SKILL.md)                                     | Authoring a commit message or a pull request title                                                                                                     |
 | [GitHub Operation](.claude/skills/github-operation/SKILL.md)                                             | Any GitHub read or write — issues, pull requests, comments, labels, reviews, branches — through the harness's tool channel                             |
 | [Code Review](.claude/skills/code-review/SKILL.md)                                                       | Reviewing a diff, pull request, or your own change before calling it done                                                                              |
@@ -37,6 +38,7 @@ The skills under [`.claude/skills/`](./.claude/skills) are **installed copies** 
 | [Code Maintainability](.claude/skills/code-maintainability/SKILL.md)                                     | Naming, file organization, abstraction boundaries, complexity, dead code, scope discipline                                                              |
 | [Application Security](.claude/skills/application-security/SKILL.md)                                     | Untrusted input, secrets, outbound requests, rendered content, access control, dependency risk                                                          |
 | [Software Instrumentation](.claude/skills/software-instrumentation/SKILL.md)                             | Logging, throwing, catching, reporting an error, tracking an event, or configuring a logger or error tracker                                            |
+| [Sentry Instrumentation](.claude/skills/sentry-instrumentation/SKILL.md)                                 | The Sentry vendor layer beneath the above — `Sentry.init`, the DSN, data-collection options, source maps, capture and scopes, the Expo/React Native wiring |
 | [Expo App Development](.claude/skills/expo-app-development/SKILL.md)                                     | The framework layer — project layout, routes and navigators, app config and config plugins, permissions, safe areas, assets, startup, SDK upgrades      |
 | [React Component Development](.claude/skills/react-component-development/SKILL.md)                       | A component's composition, props contract, extracted logic, state, memoization, loading and error surfaces, test hooks, virtualization                  |
 | [React Component Styling](.claude/skills/react-component-styling/SKILL.md)                               | A component's styles — Unistyles stylesheets, tokens, theming, adaptive and responsive behavior                                                         |
@@ -158,7 +160,7 @@ TanStack Query Development owns the pattern in full, and this codebase already f
 
 - MUST validate all external input with Zod: environment variables, deep-link route and search params, API payloads, and database-row parsing.
 - MUST NOT place a secret behind an `EXPO_PUBLIC_` variable — those are inlined into the client bundle. The committed `.env` carries only the public Sentry DSN.
-- MUST keep Sentry's `sendDefaultPii` set to `false`.
+- MUST keep Sentry's content collection off. This project is on `@sentry/react-native` 7.x, where that is the `sendDefaultPii: false` currently set in `src/core/helpers/error-reporting.ts`. Newer SDK lines replace that boolean with a structured `dataCollection` option, so MUST check which one the installed SDK accepts before changing it — Sentry Instrumentation owns that question, and its rules are verified against the 8.x line.
 - MUST NOT perform a state-changing action directly from deep-link parameters without user confirmation.
 
 ### Performance
