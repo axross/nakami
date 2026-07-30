@@ -1,5 +1,4 @@
-import type { LucideIcon } from "lucide-react-native";
-import type { JSX } from "react";
+import type { ComponentProps, JSX } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { MessageState } from "~/common/components/message-state/message-state";
@@ -13,22 +12,17 @@ interface MessageAction {
 /**
  * The Collections screen's empty and error surfaces: the shared
  * {@link MessageState} with a primary retry button when an action is given.
+ * `action` is the only prop it reshapes; every other one passes straight
+ * through, `style` included.
  */
 export function CollectionsMessageState({
-	icon,
-	iconColor,
-	title,
-	subtitle,
 	action,
-	testID,
-}: Readonly<{
-	icon: LucideIcon;
-	iconColor?: string;
-	title: string;
-	subtitle: string;
-	action?: MessageAction;
-	testID?: string;
-}>): JSX.Element {
+	...props
+}: Readonly<
+	Omit<ComponentProps<typeof MessageState>, "action"> & {
+		action?: MessageAction;
+	}
+>): JSX.Element {
 	return (
 		<MessageState
 			action={
@@ -43,11 +37,7 @@ export function CollectionsMessageState({
 					</Pressable>
 				) : undefined
 			}
-			icon={icon}
-			iconColor={iconColor}
-			subtitle={subtitle}
-			testID={testID}
-			title={title}
+			{...props}
 		/>
 	);
 }

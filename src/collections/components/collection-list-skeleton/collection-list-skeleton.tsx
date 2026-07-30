@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { ComponentPropsWithoutRef, JSX } from "react";
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -23,8 +23,17 @@ const PULSE_DURATION_MS = 700;
  * loaded list, gently pulsing. Honors the OS "reduce motion" setting (via
  * reanimated's `useReducedMotion`) by holding a steady opacity instead of
  * animating.
+ *
+ * `testID` defaults to the value the loaded list's callers already assert, so a
+ * caller only names it when two skeletons must be told apart.
  */
-export function CollectionListSkeleton(): JSX.Element {
+export function CollectionListSkeleton({
+	style,
+	testID = "collections-loading",
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithoutRef<typeof View>, "children">
+>): JSX.Element {
 	const reduceMotion = useReducedMotion();
 	const opacity = useSharedValue(0.5);
 
@@ -49,13 +58,14 @@ export function CollectionListSkeleton(): JSX.Element {
 	const pulse = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
 	return (
-		<View style={styles.root}>
-			<View
-				accessible
-				accessibilityLabel="Loading collections"
-				style={styles.card}
-				testID="collections-loading"
-			>
+		<View
+			accessible
+			accessibilityLabel="Loading collections"
+			testID={testID}
+			{...props}
+			style={[styles.root, style]}
+		>
+			<View style={styles.card}>
 				{ROW_WIDTHS.map((width, index) => (
 					<View key={width} style={styles.row(index > 0)}>
 						<Animated.View style={[styles.monogram, pulse]} />

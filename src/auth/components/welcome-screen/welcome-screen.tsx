@@ -41,6 +41,7 @@ export function WelcomeScreen(): JSX.Element {
 				</Pressable>
 			}
 			icon={Database}
+			style={styles.root}
 			subtitle="Sign in to your Payload CMS to browse your collections."
 			testID="welcome-screen"
 			title="Connect to Payload"
@@ -65,5 +66,10 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	buttonPressed: {
 		opacity: 0.6,
+	},
+	// `MessageState` leaves the fill to its consumer; as this screen's only
+	// surface it claims the whole route.
+	root: {
+		flex: 1,
 	},
 }));

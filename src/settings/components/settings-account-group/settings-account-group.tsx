@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { LogOut, UserRound } from "lucide-react-native";
-import { type JSX, useCallback } from "react";
+import { type ComponentProps, type JSX, useCallback } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { getSignOutMutationOptions } from "~/auth/mutations/sign-out-mutation";
@@ -16,7 +16,9 @@ import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-gr
  * Sign out action. Rendered only while authenticated (the parent gates it), so
  * the session is always present here.
  */
-export function SettingsAccountGroup(): JSX.Element | null {
+export function SettingsAccountGroup(
+	props: Readonly<Omit<ComponentProps<typeof SettingMenuGroup>, "children">>,
+): JSX.Element | null {
 	const { theme } = useUnistyles();
 	const session = useAuthSession();
 	const { mutate: signOut, isPending } = useMutation(
@@ -32,7 +34,7 @@ export function SettingsAccountGroup(): JSX.Element | null {
 	}
 
 	return (
-		<SettingMenuGroup>
+		<SettingMenuGroup {...props}>
 			<SettingMenuGroupHeading>Account</SettingMenuGroupHeading>
 
 			<SettingMenuGroupBody>

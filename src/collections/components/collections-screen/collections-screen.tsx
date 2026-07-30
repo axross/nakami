@@ -65,6 +65,7 @@ export function CollectionsScreen(): JSX.Element {
 						? theme.colors.text.destructive.base
 						: theme.colors.text.neutral.base
 				}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collections-error"
 				title={copy.title}
@@ -85,6 +86,7 @@ export function CollectionsScreen(): JSX.Element {
 		content = (
 			<CollectionsMessageState
 				icon={FolderOpen}
+				style={styles.messageState}
 				subtitle="There are no collections to show for this account."
 				testID="collections-empty"
 				title="No collections"
@@ -114,6 +116,11 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	list: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
+		flex: 1,
+	},
+	// `CollectionsMessageState` leaves the fill to its consumer; here the empty
+	// and error surfaces stand in for the whole list.
+	messageState: {
 		flex: 1,
 	},
 	root: {

@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react-native";
-import type { JSX, ReactNode } from "react";
-import { type StyleProp, Text, View, type ViewStyle } from "react-native";
+import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
+import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
@@ -9,6 +9,9 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
  * connect prompt, the Collections empty/error/detail states). Callers pass
  * their own action element so each keeps its distinct control (a navigation
  * link, a retry button).
+ *
+ * The root deliberately carries no `flex`: how much of the surrounding layout
+ * this surface claims is the consumer's call, supplied through `style`.
  */
 export function MessageState({
 	icon: Icon,
@@ -16,21 +19,21 @@ export function MessageState({
 	title,
 	subtitle,
 	action,
-	testID,
 	style,
-}: Readonly<{
-	icon: LucideIcon;
-	iconColor?: string;
-	title: string;
-	subtitle: string;
-	action?: ReactNode;
-	testID?: string;
-	style?: StyleProp<ViewStyle>;
-}>): JSX.Element {
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithoutRef<typeof View>, "children"> & {
+		icon: LucideIcon;
+		iconColor?: string;
+		title: string;
+		subtitle: string;
+		action?: ReactNode;
+	}
+>): JSX.Element {
 	const { theme } = useUnistyles();
 
 	return (
-		<View style={[styles.root, style]} testID={testID}>
+		<View {...props} style={[styles.root, style]}>
 			<View style={styles.mark}>
 				<Icon color={iconColor ?? theme.colors.text.accent.base} size={34} />
 			</View>
@@ -56,7 +59,6 @@ const styles = StyleSheet.create((theme) => ({
 	root: {
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.bare,
-		flex: 1,
 		justifyContent: "center",
 		padding: theme.gap.lg,
 		rowGap: theme.gap.xs,
