@@ -157,6 +157,8 @@ This table is the authoritative list of the repository's commands, for human con
 
 Files under `src/core/db/migrations/` are generated — never hand-edit or amend a committed migration; change the schema and generate a new one. The generated migrations are meant to be applied on-device at startup via Drizzle's expo-sqlite migrator (`useMigrations`), which is **not wired yet**: the change that lands the first migration must also wire it into `src/app/_layout.tsx`.
 
+The data layer is scaffolding: `src/core/db/schema.ts` declares no table and nothing in `src/` imports `src/core/db/client.ts`, so the only thing exercising the client is its own smoke test — which mocks `expo-sqlite` and therefore leaves the native database open unverified. Everything the app persists today goes to the keychain, and everything it reads comes from the Payload REST API through TanStack Query.
+
 If a required command cannot be run, say so — naming the command, the reason, and the residual risk — rather than presenting the change as fully verified.
 
 ## Preview builds
