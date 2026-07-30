@@ -25,11 +25,19 @@ Worth knowing why this one is a standing violation rather than a permitted varia
 - MUST NOT copy the trailing-filter key shape into new code; the tenancy-rooted form applies.
 - SHOULD fold the migration of these two keys into issue #67 rather than changing them opportunistically inside an unrelated change.
 
-## Recording a New Deviation
+## Recording a New Deviation or Gap
 
-A collision between an installed capability and this repository is resolved in this repository's favor, but never silently: an unrecorded deviation reads to the next agent, and to the CI reviewer, as a plain violation of a MUST rule.
+Two different things send you to this file, and they resolve the same way. A **deviation** is a collision — an installed capability requires one thing, this repository does another. A **gap** is an installed capability being wrong, outdated, or simply silent on a case this repository hits. Either way the installed skill is left exactly as it is, and the resolution is written down here.
+
+That matters because an unrecorded deviation reads to the next agent, and to the CI reviewer, as a plain violation of a MUST rule; and an unrecorded gap gets rediscovered from scratch by whoever hits it next.
+
+Editing the installed copy is never how either is resolved. Every skill under `.claude/skills/` except this one is installed from [`axross/skills`](https://github.com/axross/skills), and the next reinstall overwrites a hand-edit without reporting it — so the change is lost, and until it is lost it poses as a rule the library agrees with.
 
 **Guidelines:**
 
-- MUST record a new collision here — the rule, the capability it departs from, and why the deviation was accepted — rather than violating an installed skill silently.
-- MUST route a rule that belongs upstream to a feature request against the skill library instead, per the agent skill management capability; a deviation is for what only this repository can decide.
+- MUST NOT edit an installed skill to fix a rule that is wrong, outdated, or missing; the edit does not survive a reinstall and misrepresents the library until it is discarded.
+- MUST record a new deviation here — the rule, the capability it departs from, and why the deviation was accepted — rather than violating an installed skill silently.
+- MUST resolve a gap in an installed capability by one or both of the two available routes: an issue opened on the upstream library when the gap generalizes beyond this project, and a written note here (or in `CLAUDE.md`) saying what the capability says, what this repository does instead, and how to handle the case meanwhile.
+- MUST obtain the human's go-ahead before opening an upstream issue — it is a public write on a repository this project does not own — and MUST record the gap locally in the meantime rather than leaving the finding to depend on that issue landing.
+- MUST continue the task that exposed the finding under the skill exactly as installed; routing a change never blocks the work, and never licenses acting as though the proposed rule were already in force.
+- SHOULD name any upstream issue filed or left pending in the work's completion report, so the finding outlives the session that produced it.
