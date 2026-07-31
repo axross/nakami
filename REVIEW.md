@@ -31,10 +31,12 @@ output — they exist for self-review, not for the pull-request thread.
 
 - MUST label every posted finding exactly **Important** or **Nit** — no other
   labels appear in a posted review.
-- MUST label as Important every violated MUST rule of a matching installed
-  skill, every violated MUST rule of [`CLAUDE.md`](CLAUDE.md)'s own Project
-  Conventions, every acceptance criterion that is unmet or cannot be confirmed
-  from the diff, and every mandatory-check miss that breaks a hard requirement.
+- MUST label as Important every violated MUST rule of a matching skill —
+  installed or repository-local — every rule of [`CLAUDE.md`](CLAUDE.md) that
+  the change violates, every acceptance criterion that is unmet or cannot be
+  confirmed from the diff, and every mandatory-check miss that breaks a hard
+  requirement. `CLAUDE.md` states its rules as plain prose rather than
+  RFC 2119 keywords; a rule there binds no less for carrying no MUST.
 - MUST label style, naming, and refactoring suggestions Nit at most.
 
 ## Mandatory Checks
@@ -46,10 +48,14 @@ skill in the finding.
 
 - **Skill conformance** — verify the change conforms to **every** skill under
   [`.claude/skills/`](.claude/skills) whose routing condition — its own
-  `description`/`when_to_use` — matches the changed files, and to the matching
-  [`CLAUDE.md`](CLAUDE.md) Project Conventions subsection, which wins where the
-  two collide. Flag any deviation from a stated rule, citing the skill (or the
-  convention) and the rule. A violated **MUST** rule is Important.
+  `description`/`when_to_use` — matches the changed files. Those skills come in
+  two tiers: the installed capabilities state the general practice, and the
+  repository-local
+  [`project-structure`](.claude/skills/project-structure/SKILL.md) states this
+  repository's convention within it and wins where the two collide — except
+  where its known-deviations reference already records the collision, which is
+  an accepted decision rather than a finding. Flag any deviation from a stated
+  rule, citing the skill and the rule. A violated **MUST** rule is Important.
 - **Acceptance criteria** — verify the diff against **every** acceptance
   criterion in the linked issue (the pull request body's `Closes #<n>`), when
   the pull request links one. Each criterion that is unmet, or that cannot be
