@@ -11,7 +11,7 @@
       "source": "axross/skills",
       "sourceType": "github",
       "skillPath": "skills/agent-skill-management/SKILL.md",
-      "computedHash": "3c7173f9d6052e62fbaf7e5d72dfaa8df72e40ebfa9d45405e668e8706c1b967"
+      "computedHash": "420d25e0b8b5d78ea824fe634ad1aae764b461c1a0b49ea0859c4a48a8b86b48"
     },
     "application-security": {
       "source": "axross/skills",
@@ -47,7 +47,7 @@
       "source": "axross/skills",
       "sourceType": "github",
       "skillPath": "skills/expo-app-development/SKILL.md",
-      "computedHash": "dd1f351a40dfdf9843267e0a382bfc8d5e0c6bca709cedc039859857cf72e1e7"
+      "computedHash": "753dbbdcf95aa586971babe5ddbb0ce541195e0ace77d0d614fa65ee4d3e33ce"
     },
     "github-operation": {
       "source": "axross/skills",
@@ -113,7 +113,7 @@
       "source": "axross/skills",
       "sourceType": "github",
       "skillPath": "skills/software-instrumentation/SKILL.md",
-      "computedHash": "aa07d034426123113e6df69da171e7b3906195ea43ad4fd7d5768dbe2661afb5"
+      "computedHash": "6f5976dffbf87a90f842251a5202ce1cbd1275a0d819188591a5ded1f120dd42"
     },
     "tanstack-query-development": {
       "source": "axross/skills",

@@ -9,13 +9,13 @@ user-invocable: false
 
 Use this capability whenever you add, edit, rename, move, or remove an agent skill in a project that holds its skills in two tiers. **Distributable** skills — portable capabilities other projects can install — are authored in a source directory (conventionally `skills/`, the source of truth) and **installed** into the skill root (the directory the agent actually loads, conventionally `.claude/skills/`) with the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI (`npx skills`); a `skills-lock.json` file records what was installed. **Repository-local** skills — the ones that encode a single project's own conventions — are committed directly under the skill root and are never touched by the CLI.
 
-One index — the host project's master skill index — routes to every skill regardless of tier.
+Discovery is what routes to a skill in either tier: each skill advertises when it applies through its own `description`/`when_to_use`, so no written index is required. Some hosts maintain one anyway (e.g. an `AGENTS.md` table), which then becomes a second record to keep current.
 
 This skill is **self-contained**: it names no repository-specific file or layout and references no repository-root index, so it works installed on its own. The directory names `skills/` and `.claude/skills/` and the tooling below are the conventional defaults; substitute the host project's chosen paths where they differ.
 
 **Guidelines:**
 
-- MUST keep the host project's master skill index in sync whenever a skill in either tier is added, renamed, moved, or removed, per your project's skill-authoring conventions.
+- MUST, where the host project maintains a written skill index, keep it in sync whenever a skill in either tier is added, renamed, moved, or removed, per your project's skill-authoring conventions; where it maintains none, each skill's `description`/`when_to_use` frontmatter is the whole of discovery and no index is owed.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html).
 
@@ -61,8 +61,14 @@ A distributable skill is authored under `skills/<name>/SKILL.md` (with its `refe
   npx skills add ./skills --agent claude-code --skill <name> --yes --copy
   ```
 
+- Refresh several named skills — one `--skill` flag each:
+
+  ```bash
+  npx skills add ./skills --agent claude-code --skill <name> --skill <other-name> --yes --copy
+  ```
+
 - List installed skills: `npx skills list`
-- Remove an installed skill: `npx skills remove <name>` (then delete its `skills/<name>/` source and update the master skill index).
+- Remove an installed skill: `npx skills remove <name>` (then delete its `skills/<name>/` source, and update the host's written skill index where it keeps one).
 
 **Guidelines:**
 
@@ -71,9 +77,10 @@ A distributable skill is authored under `skills/<name>/SKILL.md` (with its `refe
 - MUST re-run the install after editing any source skill so the committed installed copy and `skills-lock.json` match the source.
 - MUST commit the installed `.claude/skills/<name>/` copies and `skills-lock.json` alongside the `skills/` source; they are tracked artifacts, not gitignored.
 - MUST pass `--copy` when symlinks are unsupported; a symlink install leaves the skill root empty or broken there.
-- MUST use `--skill '*'` to refresh all managed skills after a broad change, or `--skill <name>` for a targeted one.
+- MUST use `--skill '*'` to refresh all managed skills after a broad change, or `--skill <name>` for a targeted one; `--skill` takes exactly one skill per flag, so installing several means repeating it (`--skill <name> --skill <other-name>`), not passing a list.
+- MUST read a `No matching skills found` response — the CLI answering with the source's available-skill list where an install summary belongs — as a run that installed nothing: no skill reaches the skill root and no lockfile is written. A comma-separated `--skill a,b,c` is the usual cause, since the CLI does not split the value and so matches no skill at all, and that available-skill list reads like ordinary help rather than a failure.
 - SHOULD run `npx skills add` from the repository root so `./skills` resolves and `skills-lock.json` is written there.
-- SHOULD confirm the install summary lists every expected skill as `copied` before committing.
+- SHOULD confirm the install summary lists every expected skill as `copied` before committing — the check that catches a run which matched nothing and installed nothing.
 - SHOULD retry with an explicit version specifier (`npx --yes skills@latest …`) when `npx skills` aborts with `could not determine executable to run`; the plain form above stays canonical, and the specifier is a fallback for environments where `npx` cannot resolve the bare package name.
 
 ## Proposing a Change to an Installed Skill
