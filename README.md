@@ -41,6 +41,7 @@ The app is linked to Sentry (`axross/payload-mobile`, DSN committed in `.env`). 
 | `SENTRY_ORG` / `SENTRY_PROJECT`                                            | sentry-cli / source-map tooling in any workflow that builds the app                          |
 | `SENTRY_AUTH_TOKEN`                                                        | Authorizes Sentry source-map upload during builds (incl. the Fastlane Android preview build) |
 | `CLAUDE_CODE_OAUTH_TOKEN`                                                  | The `@claude review` CI reviewer (add when enabling it)                                      |
+| `CLAUDE_OTEL_EXPORTER_OTLP_HEADERS`                                        | Authorizes the review session's OpenTelemetry export to Grafana Cloud. Scope the access-policy token to `metrics:write` and `logs:write` only — the review session's own shell can read any job-level value. Optional; unset, telemetry is off. |
 | `ANDROID_KEYSTORE_BASE64`                                                  | base64 of the release keystore (`.jks`) used to sign the Android preview build               |
 | `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` | Release keystore credentials for signing                                                     |
 | `FIREBASE_SERVICE_ACCOUNT_JSON`                                            | Service-account JSON authorizing the Firebase App Distribution upload                        |
@@ -51,6 +52,7 @@ Repo **variables** (Settings → Secrets and variables → Actions → Variables
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `FIREBASE_ANDROID_APP_ID` | Firebase Android app id (`1:…:android:…`) the preview APK is distributed to. A **variable, not a secret**, so the tester install link (which embeds the app id) is not redacted out of the run summary / PR comment. |
 | `FIREBASE_GROUPS` (optional) | Comma-separated Firebase tester group names to target the distribution at specific groups.                                                                                              |
+| `CLAUDE_OTEL_EXPORTER_OTLP_ENDPOINT` (optional) | Grafana Cloud's OTLP endpoint, which the review workflow ([`claude-review.yml`](./.github/workflows/claude-review.yml)) exports Claude Code's own usage metrics and events to. This variable is the enablement switch: unset, no exporter starts and the reviewer behaves exactly as it does without telemetry. A **variable, not a secret**, so it stays readable in the workflow file's resolved configuration; the credential lives in `CLAUDE_OTEL_EXPORTER_OTLP_HEADERS` above. |
 
 ## Expo MCP
 
