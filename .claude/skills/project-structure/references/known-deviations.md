@@ -2,7 +2,7 @@
 
 Apply this reference when an installed capability's rule appears to conflict with this codebase, and when reviewing a change that looks like a skill violation.
 
-One installed rule genuinely disagrees with this codebase — the query-key shape below. It is a deliberate, accepted deviation, recorded here rather than silently violated. A reviewer who finds this codebase doing it has found a recorded decision, not a defect; anything else that departs from an installed rule is a finding.
+Two installed rules genuinely disagree with this codebase — the query-key shape and the `common/` tier definition below. Each is a deliberate, accepted deviation, recorded here rather than silently violated. A reviewer who finds this codebase doing either has found a recorded decision, not a defect; anything else that departs from an installed rule is a finding.
 
 The first section below is **not** a deviation. It is recorded because the directory name looks like one at a glance, and a reviewer who assumes a violation without reading the rule closely will raise a finding that is not there.
 
@@ -27,6 +27,22 @@ This repository satisfies that MUST. `src/app/welcome.tsx` is a default export t
 
 - MUST NOT copy the trailing-filter key shape into new code; the tenancy-rooted form applies.
 - SHOULD fold the migration of these two keys into issue #67 rather than changing them opportunistically inside an unrelated change.
+
+## `src/common/` Holds the Payload HTTP Client, Which Carries Domain Vocabulary
+
+The Expo app development capability's project-layout reference draws the `common/`/`core/` line by what each tier *knows*. `common/` holds "reusable UI and utility primitives that know nothing about the application", and its guideline is "MUST keep `common/` to primitives that carry no domain vocabulary and no application configuration". `core/` gets "app-wide infrastructure and the singletons the application is wired from" — with "the HTTP or query client" named as an example.
+
+`src/common/helpers/payload-client.ts` is that HTTP client, and its exported surface — `PayloadRequestError`, `PayloadErrorKind`, `PayloadServer`, `collectionSlug` — is Payload vocabulary end to end. Under the installed rule it belongs in `src/core/`.
+
+It sits in `src/common/` because this repository's own placement rule in [repository-map.md](./repository-map.md) decides by consumer count rather than by content — "MUST place a module used by two or more features in `src/common/`" — and `src/auth/`, `src/collections/`, and `src/core/` all consume it. Each rule is followed as written; they disagree about this one file. (Only the domain-vocabulary half is breached: the server identity is caller-supplied, so the module carries no application configuration.)
+
+The resolution is the move already tracked as issue #89, which relocates the client into `src/core/` and removes the ratified upward-import exception at the same time. Until it lands the file stays where it is, because moving it touches every importing module and is that issue's whole content.
+
+**Guidelines:**
+
+- MUST NOT raise `payload-client.ts`'s placement as a fresh finding; it is recorded here and resolved by issue #89.
+- MUST place a **new** cross-cutting module by the installed rule rather than by the precedent this file sets: one carrying domain vocabulary or application configuration goes to `src/core/`, whatever its consumer count.
+- SHOULD leave [repository-map.md](./repository-map.md)'s consumer-count rule alone while issue #103 rewrites that file; folding the content test into it now means writing and reviewing it twice.
 
 ## Recording a New Deviation or Gap
 
