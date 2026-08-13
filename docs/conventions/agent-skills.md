@@ -66,6 +66,23 @@ A reader weighing one of the five against a change that would overturn it should
 it accordingly: three of them are a copy of a comment that is still in the code, and
 two of them are a reconstruction with no rejected alternative behind it.
 
+## The app has no error boundary of its own beneath the Sentry wrap
+
+The installed `expo-app-development` capability requires an application-owned error
+boundary **in addition to** the error tracker's root wrapper: the wrapper reports a
+crash, and the boundary is what renders something other than a blank screen once it
+has. This repository has only the wrapper — `src/app/_layout.tsx` exports
+`wrapRootComponent(RootLayout)` and nothing beneath it catches a render failure.
+
+That gap is issue #91's, and it is recorded here rather than fixed in passing because
+the correct rule is contested and #91 is where it is being settled. Until it lands, a
+reviewer who finds no application error boundary has found a known gap rather than a
+fresh finding, and a route that needs custom error UI still adds its own boundary.
+
+The rule this replaced said the opposite — that keeping the root wrapper intact was
+itself sufficient. It was wrong as written and was deliberately not carried into
+`docs/`.
+
 ## Screen bodies in `components/` are not a deviation
 
 Routes here compose from `src/<feature>/components/`, and this repository has no
