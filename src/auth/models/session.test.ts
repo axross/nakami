@@ -43,6 +43,9 @@ describe("payloadUserSchema (via loginResponseSchema)", () => {
 		expect(result.user.id).toBe("42");
 	});
 
+	// Asserting the issue path, not just the rejection: without it these pass
+	// when some other field in the fixture is what failed, which would leave the
+	// field this change actually constrains untested.
 	it.each(["", "not an email"])("rejects %p as an email", (email) => {
 		const result = loginResponseSchema.safeParse({
 			user: { id: "1", email },
@@ -51,6 +54,9 @@ describe("payloadUserSchema (via loginResponseSchema)", () => {
 		});
 
 		expect(result.success).toBe(false);
+		expect(result.error?.issues.map((issue) => issue.path)).toEqual([
+			["user", "email"],
+		]);
 	});
 
 	it("rejects an empty id, which the session's schema would reject too", () => {
@@ -61,6 +67,9 @@ describe("payloadUserSchema (via loginResponseSchema)", () => {
 		});
 
 		expect(result.success).toBe(false);
+		expect(result.error?.issues.map((issue) => issue.path)).toEqual([
+			["user", "id"],
+		]);
 	});
 });
 
@@ -72,13 +81,22 @@ describe("sessionUserSchema", () => {
 	});
 
 	it.each(["", "not an email"])("rejects %p as an email", (email) => {
-		expect(sessionUserSchema.safeParse({ id: "1", email }).success).toBe(false);
+		const result = sessionUserSchema.safeParse({ id: "1", email });
+
+		expect(result.success).toBe(false);
+		expect(result.error?.issues.map((issue) => issue.path)).toEqual([
+			["email"],
+		]);
 	});
 
 	it("rejects an empty id", () => {
-		expect(
-			sessionUserSchema.safeParse({ id: "", email: "you@example.com" }).success,
-		).toBe(false);
+		const result = sessionUserSchema.safeParse({
+			id: "",
+			email: "you@example.com",
+		});
+
+		expect(result.success).toBe(false);
+		expect(result.error?.issues.map((issue) => issue.path)).toEqual([["id"]]);
 	});
 });
 

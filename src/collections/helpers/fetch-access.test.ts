@@ -16,7 +16,7 @@ beforeEach(() => {
 	jest.restoreAllMocks();
 });
 
-describe("fetchAccess", () => {
+describe("fetchAccess()", () => {
 	it("GETs the server access endpoint with the JWT header and parses collections", async () => {
 		const fetchMock = mockFetch({
 			ok: true,

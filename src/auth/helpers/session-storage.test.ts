@@ -10,9 +10,7 @@ jest.mock("expo-secure-store", () => ({
 	deleteItemAsync: jest.fn(),
 }));
 
-jest.mock("~/core/helpers/error-reporting", () => ({
-	reportError: jest.fn(),
-}));
+jest.mock("~/core/helpers/error-reporting");
 
 const KEY = "nakami.session";
 
@@ -36,7 +34,7 @@ beforeEach(() => {
 	jest.mocked(SecureStore.deleteItemAsync).mockResolvedValue(undefined);
 });
 
-describe("readSession", () => {
+describe("readSession()", () => {
 	it("returns null when nothing is stored", async () => {
 		jest.mocked(SecureStore.getItemAsync).mockResolvedValue(null);
 
@@ -62,13 +60,16 @@ describe("readSession", () => {
 	});
 });
 
-describe("writeSession", () => {
+describe("writeSession()", () => {
 	it("stores the session under its keychain entry", async () => {
 		await writeSession(session);
 
+		// The exact stored bytes, not merely "a string": this is the assertion
+		// that would catch the write half starting to store a different shape
+		// from the one the read half expects.
 		expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
 			KEY,
-			expect.any(String),
+			JSON.stringify(session),
 		);
 	});
 });
@@ -86,7 +87,7 @@ describe("the keychain round trip", () => {
 	});
 });
 
-describe("clearSession", () => {
+describe("clearSession()", () => {
 	it("removes the keychain entry", async () => {
 		await clearSession();
 

@@ -23,7 +23,7 @@ beforeEach(() => {
 	jest.restoreAllMocks();
 });
 
-describe("fetchRecords", () => {
+describe("fetchRecords()", () => {
 	it("GETs the bounded, unpopulated page with the JWT header and parses it", async () => {
 		const fetchMock = mockFetch({
 			ok: true,

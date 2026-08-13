@@ -32,7 +32,7 @@ beforeEach(() => {
 	jest.restoreAllMocks();
 });
 
-describe("login", () => {
+describe("login()", () => {
 	it("POSTs credentials to the collection login endpoint and parses the session", async () => {
 		const fetchMock = mockFetch({
 			ok: true,
@@ -85,10 +85,7 @@ describe("login", () => {
 	it("throws a server error on an unexpected status", async () => {
 		mockFetch({ ok: false, status: 500 });
 
-		const error = await login(server, {
-			email: "you@example.com",
-			password: "secret",
-		}).catch((caught) => caught);
+		const error = await attemptSignIn();
 
 		expect(error).toBeInstanceOf(PayloadRequestError);
 		expect((error as PayloadRequestError).kind).toBe("server");
@@ -129,7 +126,7 @@ describe("login", () => {
 	);
 });
 
-describe("fetchMe", () => {
+describe("fetchMe()", () => {
 	it("sends the JWT authorization header and returns a null user for a rejected token", async () => {
 		const fetchMock = mockFetch({
 			ok: true,
@@ -151,7 +148,7 @@ describe("fetchMe", () => {
 	});
 });
 
-describe("refreshToken", () => {
+describe("refreshToken()", () => {
 	it("returns the refreshed token", async () => {
 		mockFetch({
 			ok: true,
