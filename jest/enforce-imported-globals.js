@@ -15,7 +15,7 @@
 // is required, which is the one window where the globals can be taken away
 // without breaking anything that legitimately needed them.
 
-// These two requires MUST stay ahead of the deletion below. Both libraries
+// These two requires have to stay ahead of the deletion below. Both libraries
 // touch the injected globals at module scope, and a test file would otherwise
 // load them after the globals are gone:
 //
