@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { ZodError } from "zod";
 import {
 	fetchMe,
 	login,
@@ -18,6 +19,13 @@ function mockFetch(
 	(globalThis as { fetch: typeof fetch }).fetch =
 		fetchMock as unknown as typeof fetch;
 	return fetchMock;
+}
+
+/** Signs in against the mocked fetch, resolving with its outcome either way. */
+function attemptSignIn(): Promise<unknown> {
+	return login(server, { email: "you@example.com", password: "secret" }).catch(
+		(caught: unknown) => caught,
+	);
 }
 
 beforeEach(() => {
@@ -85,6 +93,40 @@ describe("login", () => {
 		expect(error).toBeInstanceOf(PayloadRequestError);
 		expect((error as PayloadRequestError).kind).toBe("server");
 	});
+
+	it("throws a server error when a 200 body does not match the schema", async () => {
+		mockFetch({
+			ok: true,
+			status: 200,
+			json: async () => ({ notALoginResponse: true }),
+		});
+
+		const error = await attemptSignIn();
+
+		expect(error).toBeInstanceOf(PayloadRequestError);
+		expect((error as PayloadRequestError).kind).toBe("server");
+		expect((error as PayloadRequestError).cause).toBeInstanceOf(ZodError);
+	});
+
+	it.each(["", "not an email"])(
+		"throws a server error when the user email is %p",
+		async (email) => {
+			mockFetch({
+				ok: true,
+				status: 200,
+				json: async () => ({
+					user: { id: "1", email },
+					token: "jwt-token",
+					exp: 1_800_000_000,
+				}),
+			});
+
+			const error = await attemptSignIn();
+
+			expect(error).toBeInstanceOf(PayloadRequestError);
+			expect((error as PayloadRequestError).kind).toBe("server");
+		},
+	);
 });
 
 describe("fetchMe", () => {
