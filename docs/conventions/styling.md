@@ -27,6 +27,10 @@ A colour token is addressed as `theme.colors.<role>.<tone>.<step>`. The roles ar
 | `solid`      | `base`, `intense` — the accent tone adds `baseAlpha`, `intenseAlpha` |
 | `text`       | `base`, `intense`                                                  |
 
+Within a role the steps run from least to most emphatic, which is what decides between
+them: a secondary or muted label takes `theme.colors.text.<tone>.base` and the primary
+one takes `intense` — Radix steps 11 and 12 respectively.
+
 `theme.colors.text.onAccent` is the one flat token, with no tone or step: text drawn on
 top of a solid accent fill. The scales mirror
 [axross/cunnpe](https://github.com/axross/cunnpe) — Radix Slate for neutral, Teal for
