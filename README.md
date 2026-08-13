@@ -90,7 +90,7 @@ Development in this repository is agent-assisted via [Claude Code](https://claud
 
 The skills under [`.claude/skills/`](./.claude/skills) come in **two tiers**, and which tier a skill is in decides how you change it. [`skills-lock.json`](./skills-lock.json) is the way to tell them apart: a skill listed there is installed, and one absent from it is repository-local.
 
-- **Installed copies** — the 23 general capabilities from [`axross/skills`](https://github.com/axross/skills), pinned by `skills-lock.json`. Nothing there is hand-written, and a hand-edit is discarded by the next reinstall, so never edit one to fix it. A rule that is wrong, outdated, or missing gets resolved one of two ways instead: open an issue against `axross/skills` when the gap generalizes beyond this project, or leave the skill untouched and write the gap and its workaround into [`CLAUDE.md`](./CLAUDE.md) or the `project-structure` skill. Often both — the upstream issue is slow, and the local note keeps work moving until it lands.
+- **Installed copies** — the 26 general capabilities from [`axross/skills`](https://github.com/axross/skills), pinned by `skills-lock.json`. Nothing there is hand-written, and a hand-edit is discarded by the next reinstall, so never edit one to fix it. A rule that is wrong, outdated, or missing gets resolved one of two ways instead: open an issue against `axross/skills` when the gap generalizes beyond this project, or leave the skill untouched and write the gap and its workaround into [`CLAUDE.md`](./CLAUDE.md) or the `project-structure` skill. Often both — the upstream issue is slow, and the local note keeps work moving until it lands.
 - **Repository-local skills** — currently just [`project-structure`](./.claude/skills/project-structure/SKILL.md), which holds this repository's own conventions. Its committed copy under `.claude/skills/` **is** its source: edit it in place and commit, exactly as you would any other document here. It never appears in `skills-lock.json`, and the refresh command below names each installed skill explicitly rather than passing `--skill '*'`, so no reinstall reaches it. A rule specific to this repository goes here, not into an installed copy.
 
 Refresh the installed copies with the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, then commit the regenerated directories together with `skills-lock.json`:
@@ -102,16 +102,17 @@ npx skills add axross/skills --agent claude-code --yes --copy \
   --skill code-review --skill conventional-commits \
   --skill end-to-end-testing --skill expo-app-development \
   --skill github-operation --skill high-fidelity-ui-design \
+  --skill jest-testing --skill living-project-documentation \
   --skill loop-engineering --skill product-requirement-document-authoring \
   --skill professional-behavior --skill quality-assurance \
   --skill react-component-development --skill react-component-styling \
   --skill sentry-instrumentation --skill software-development \
   --skill software-instrumentation --skill tanstack-query-development \
   --skill technical-document-authoring --skill unit-testing \
-  --skill wireframe-design
+  --skill wireframe-design --skill zod-schema
 ```
 
-Each skill is named deliberately rather than passing `--skill '*'`: the library also ships vendor and framework layers this app has no call site for — `next-app-development` (no Next.js) and `amplitude-instrumentation` (no Amplitude) — and a wildcard refresh would keep reinstalling them. Add a skill to the list when the library gains one worth taking.
+Each skill is named deliberately rather than passing `--skill '*'`: the library also ships vendor, framework, and test-runner layers this app has no call site for — `next-app-development` (no Next.js), `amplitude-instrumentation` (no Amplitude), and `vitest-testing` (this project's runner is Jest, and upstream treats Jest and Vitest as alternatives rather than companions) — and a wildcard refresh would keep reinstalling them. Add a skill to the list when the library gains one worth taking.
 
 The library moves quickly, so re-run this periodically rather than only when adding a skill: skills are pinned to upstream's default-branch HEAD by the hashes in `skills-lock.json`, with no version tag to hold them still. A refresh that produces no diff is the evidence they are current.
 
@@ -190,7 +191,18 @@ Store/production builds and on-demand dev clients are not wired into CI — the 
 
 **Some files fail globally rather than locally.** A small mismatch in one of these breaks the app at launch or the gate outright, not just one screen — refresh the owning tool's docs before editing: `app.json` and config plugins, `app.config.ts` (the dynamic layer that extends `app.json` at build time — it overrides `version` from `PREVIEW_VERSION_NAME` and injects `extra.commitHash`, so a value set only in `app.json` may not be the one that ships), `babel.config.js`, `metro.config.js`, `drizzle.config.ts` and `src/core/db/`, and the Sentry/Unistyles initialization in `src/core/helpers/` and `src/unistyles.ts`.
 
-**Most of `.claude/skills/` is generated, not source.** Every skill there except `project-structure` is produced by `npx skills` from [`axross/skills`](https://github.com/axross/skills); a hand-edit to one of those is discarded by the next reinstall. Biome deliberately excludes `.claude/skills` and `.claude/assets` (see `biome.json`) so formatting never rewrites an upstream artifact and breaks its lockfile hash. That exclusion is belt-and-braces for Markdown either way — Biome does not process `.md` at all, so no document in this repository is formatted or linted by it. What does check the skills are the two Node scripts that ship inside the installed `agent-skill-authoring` skill: `node .claude/skills/agent-skill-authoring/scripts/check-skill.mjs .claude/skills/project-structure` validates a skill's frontmatter, naming, routing-section format, and reference linkage, and `check-links.mjs` beside it checks Markdown link integrity. Run both after editing a repository-local skill.
+**Most of `.claude/skills/` is generated, not source.** Every skill there except `project-structure` is produced by `npx skills` from [`axross/skills`](https://github.com/axross/skills); a hand-edit to one of those is discarded by the next reinstall. Biome deliberately excludes `.claude/skills` and `.claude/assets` (see `biome.json`) so formatting never rewrites an upstream artifact and breaks its lockfile hash. That exclusion is belt-and-braces for Markdown either way — Biome does not process `.md` at all, so no document in this repository is formatted or linted by it. What does check the skills are the Node scripts that ship inside the installed `agent-skill-authoring` skill. The single `check-skill.mjs` that used to cover all of it is gone — upstream split it into one validator per kind of edit, so a frontmatter tweak no longer has to clear body and reference checks it never touched:
+
+```sh
+node .claude/skills/agent-skill-authoring/scripts/check-skill-frontmatter.mjs .claude/skills/project-structure
+node .claude/skills/agent-skill-authoring/scripts/check-skill-body.mjs .claude/skills/project-structure
+node .claude/skills/agent-skill-authoring/scripts/check-skill-references.mjs .claude/skills/project-structure
+node .claude/skills/agent-skill-authoring/scripts/check-links.mjs .claude/skills
+```
+
+The first three validate a skill's frontmatter and naming, its body and routing-section format, and its reference linkage; `check-links.mjs` checks Markdown link integrity and is worth pointing at the whole `.claude/skills` tree rather than one skill. Run all four after editing a repository-local skill.
+
+`agent-skill-management` also ships `check-installed-copies.mjs`, which fails when an installed copy has drifted from its source. It takes a source root and an installed root, and **does not apply here**: this repository authors no distributable skills of its own, so there is no `skills/` source tree for it to compare against. Drift from `axross/skills` is detected by re-running the refresh above and looking at the diff.
 
 ## Related links
 
