@@ -23,6 +23,12 @@ const pageSchema = z.object({
 	totalDocs: z.number(),
 });
 
+// Shaped like the access response: a map whose keys come from the server, which
+// is the one case where an issue path carries a value the response chose.
+const accessLikeSchema = z.object({
+	collections: z.record(z.string(), z.object({ read: z.boolean() })),
+});
+
 // A body that fails in two places at once, carrying a value that must never
 // reach a log line, a breadcrumb, or an error report.
 const SENSITIVE_VALUE = "sensitive-value-from-the-response-body";
@@ -45,7 +51,7 @@ beforeEach(() => {
 	jest.clearAllMocks();
 });
 
-describe("parseResponse", () => {
+describe("parseResponse()", () => {
 	it("returns the parsed body and strips what the schema does not model", () => {
 		const parsed = parseResponse("fetchRecords", pageSchema, {
 			docs: [{ id: "1", email: "you@example.com" }],
@@ -82,9 +88,30 @@ describe("parseResponse", () => {
 		expect(logger.warn).toHaveBeenCalledTimes(1);
 		const [message, context] = logger.warn.mock.calls[0] ?? [];
 		expect(message).toBe("Rejected an unexpected response shape.");
+		// `toEqual` on the whole object is what proves "and nothing else"; the
+		// paths themselves are compared order-insensitively, since their order is
+		// Zod's business rather than this helper's.
 		expect(context).toEqual({
 			operation: "fetchRecords",
-			issuePaths: ["docs.0.email", "totalDocs"],
+			issuePaths: expect.arrayContaining(["docs.0.email", "totalDocs"]),
+		});
+		expect((context as { issuePaths: string[] }).issuePaths).toHaveLength(2);
+	});
+
+	it("puts a failing map key into the issue path, since the path is what names the failure", () => {
+		thrownFrom(() =>
+			parseResponse("fetchAccess", accessLikeSchema, {
+				collections: { "acme-invoices": { read: "yes" } },
+			}),
+		);
+
+		// Documented behavior rather than an oversight: a `z.record` key is part
+		// of the path, so it is logged. Slugs are schema-level identifiers, not
+		// user content — see the helper's own note on what a path can carry.
+		const [, context] = logger.warn.mock.calls[0] ?? [];
+		expect(context).toEqual({
+			operation: "fetchAccess",
+			issuePaths: ["collections.acme-invoices.read"],
 		});
 	});
 

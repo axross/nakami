@@ -134,10 +134,17 @@ export async function request(
  * as the thrown error's `cause`, so the detail survives without `ZodError`
  * entering any caller's signature.
  *
- * Only the operation label and the failing issue paths are logged. The body
- * itself is untrusted server content, it may carry user data, and every log
- * line here becomes an error-tracker breadcrumb — so neither it nor any value
- * from it is recorded.
+ * Only the operation label and the failing issue paths are logged, because
+ * every log line here becomes an error-tracker breadcrumb and the body is
+ * untrusted server content that may carry user data. A path is built from the
+ * schema's own field names and array indices, so no field *value* is recorded
+ * — with one exception worth naming rather than leaving to be discovered:
+ * where the schema models a map (`z.record`), the failing key is itself part
+ * of the path, and that key comes from the response. The only such schema in
+ * this app keys by collection slug, which is a schema-level identifier rather
+ * than user content, and identifiers are what a parse-failure line is supposed
+ * to carry. A schema keying a map by something sensitive would need this
+ * revisited.
  */
 export function parseResponse<Schema extends z.ZodType>(
 	operation: string,
