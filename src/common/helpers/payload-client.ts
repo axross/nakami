@@ -1,10 +1,11 @@
 /**
  * Low-level Payload REST transport shared across features. Feature clients
  * (auth operations, collection access, …) build their typed calls on top of
- * {@link request}; the error taxonomy and server identifier live here so the
- * whole app maps Payload failures the same way.
+ * {@link request} and {@link parseResponse}; the error taxonomy and server
+ * identifier live here so the whole app maps Payload failures the same way.
  */
 
+import type { z } from "zod";
 import { createModuleLogger } from "~/core/helpers/logging";
 
 const logger = createModuleLogger("common/payload-client");
@@ -23,8 +24,18 @@ export class PayloadRequestError extends Error {
 	readonly kind: PayloadErrorKind;
 	readonly status: number | undefined;
 
-	constructor(kind: PayloadErrorKind, message: string, status?: number) {
-		super(message);
+	/**
+	 * `options.cause` carries the originating failure (a `ZodError` from
+	 * {@link parseResponse}, for instance) for diagnosis only: nothing branches
+	 * on it, so no caller's signature learns about it.
+	 */
+	constructor(
+		kind: PayloadErrorKind,
+		message: string,
+		status?: number,
+		options?: ErrorOptions,
+	) {
+		super(message, options);
 		this.name = "PayloadRequestError";
 		this.kind = kind;
 		this.status = status;
@@ -110,4 +121,44 @@ export async function request(
 			"The server returned an invalid response.",
 		);
 	}
+}
+
+/**
+ * Parses a body returned by {@link request} against the schema the caller
+ * expects, bringing a shape mismatch inside the same error taxonomy every other
+ * failure mode already uses. The app points at whatever Payload server the user typed
+ * in, across unknown versions and configurations, so a 200 whose body does not
+ * match is an ordinary runtime outcome rather than a defect — and a raw
+ * `ZodError` escaping here would fall through every consumer's `kind` branch
+ * instead of rendering the bad-response state. The validation error rides along
+ * as the thrown error's `cause`, so the detail survives without `ZodError`
+ * entering any caller's signature.
+ *
+ * Only the operation label and the failing issue paths are logged. The body
+ * itself is untrusted server content, it may carry user data, and every log
+ * line here becomes an error-tracker breadcrumb — so neither it nor any value
+ * from it is recorded.
+ */
+export function parseResponse<Schema extends z.ZodType>(
+	operation: string,
+	schema: Schema,
+	body: unknown,
+): z.infer<Schema> {
+	const result = schema.safeParse(body);
+
+	if (!result.success) {
+		logger.warn("Rejected an unexpected response shape.", {
+			operation,
+			issuePaths: result.error.issues.map((issue) => issue.path.join(".")),
+		});
+
+		throw new PayloadRequestError(
+			"server",
+			"The server returned an unexpected response.",
+			undefined,
+			{ cause: result.error },
+		);
+	}
+
+	return result.data;
 }
