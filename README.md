@@ -84,14 +84,13 @@ Reconnect the MCP server after starting or stopping the dev server so the local 
 
 ## Development workflow
 
-Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`CLAUDE.md`](./CLAUDE.md), which states how work runs here and makes [Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) the mandatory change loop: every change goes through **plan → approve → code → verify → independent review → address → ready**, stepped through under [Delivering a unit of work end-to-end](#delivering-a-unit-of-work-end-to-end). There is no size threshold and no self-approval shortcut — that independent review is the only authoritative review of an agent's own change. This repository's own conventions — layout, components and theming, routing, data, observability, security — live in the [Project Structure](./.claude/skills/project-structure/SKILL.md) skill, which agents load by discovery alongside whichever installed skill matches the surface they are changing.
+Development in this repository is agent-assisted via [Claude Code](https://claude.com/claude-code). The working agreement lives in [`CLAUDE.md`](./CLAUDE.md), which states how work runs here and makes [Loop Engineering](./.claude/skills/loop-engineering/SKILL.md) the mandatory change loop: every change goes through **plan → approve → code → verify → independent review → address → ready**, stepped through under [Delivering a unit of work end-to-end](#delivering-a-unit-of-work-end-to-end). There is no size threshold and no self-approval shortcut — that independent review is the only authoritative review of an agent's own change. This repository's own conventions — layout, styling and components, the data and server-state layers, logging, and the deviations from an installed skill it has accepted — live under [`docs/`](./docs/index.md), beside the product specs and the decision log. No skill trigger surfaces them and skill discovery never will, so [`CLAUDE.md`](./CLAUDE.md) routes to each document by name; an agent reads the one governing the surface it is changing, alongside whichever installed skill matches that surface.
 
 ### Agent skills
 
-The skills under [`.claude/skills/`](./.claude/skills) come in **two tiers**, and which tier a skill is in decides how you change it. [`skills-lock.json`](./skills-lock.json) is the way to tell them apart: a skill listed there is installed, and one absent from it is repository-local.
+Every skill under [`.claude/skills/`](./.claude/skills) is an **installed copy** — the 26 general capabilities from [`axross/skills`](https://github.com/axross/skills), every one of them pinned by [`skills-lock.json`](./skills-lock.json). Nothing there is hand-written, and a hand-edit to any of them is discarded by the next reinstall, so never edit one to fix it. A rule that is wrong, outdated, or missing gets resolved one of two ways instead: open an issue against `axross/skills` when the gap generalizes beyond this project, or leave the skill untouched and write the gap and its workaround into [`docs/conventions/agent-skills.md`](./docs/conventions/agent-skills.md). Often both — the upstream issue is slow, and the local note keeps work moving until it lands.
 
-- **Installed copies** — the 26 general capabilities from [`axross/skills`](https://github.com/axross/skills), pinned by `skills-lock.json`. Nothing there is hand-written, and a hand-edit is discarded by the next reinstall, so never edit one to fix it. A rule that is wrong, outdated, or missing gets resolved one of two ways instead: open an issue against `axross/skills` when the gap generalizes beyond this project, or leave the skill untouched and write the gap and its workaround into [`CLAUDE.md`](./CLAUDE.md) or the `project-structure` skill. Often both — the upstream issue is slow, and the local note keeps work moving until it lands.
-- **Repository-local skills** — currently just [`project-structure`](./.claude/skills/project-structure/SKILL.md), which holds this repository's own conventions. Its committed copy under `.claude/skills/` **is** its source: edit it in place and commit, exactly as you would any other document here. It never appears in `skills-lock.json`, and the refresh command below names each installed skill explicitly rather than passing `--skill '*'`, so no reinstall reaches it. A rule specific to this repository goes here, not into an installed copy.
+This repository authors no skill of its own, so there is no second tier to tell apart. A rule specific to this repository is a document under [`docs/conventions/`](./docs/conventions/) instead, which [`CLAUDE.md`](./CLAUDE.md) routes to by name — the route the installed `agent-skill-management` capability asks for wherever an always-loaded instruction file can carry it. The one repository-local skill this project had, `project-structure`, was retired into `docs/` on those grounds.
 
 Refresh the installed copies with the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, then commit the regenerated directories together with `skills-lock.json`:
 
@@ -138,9 +137,9 @@ Changes made without an agent follow the same bar: branch, implement, run the ch
 
 ## Testing
 
-Unit tests (Jest via jest-expo, colocated with their subject) cover helpers, schemas, and component behavior; Maestro flows in `e2e/` assert whole user journeys on a simulator, tracked against the journey catalog in `e2e/scenarios.md`. Merges are gated by CI ([`merge-checks.yml`](./.github/workflows/merge-checks.yml)), which runs on every PR update as four independent, parallel jobs — **Lint** (Biome), **Typecheck** (TypeScript), **Unit Tests** (Jest), and **E2E Scenario Coverage** — so a red check names exactly one failing tool.
+Unit tests (Jest via jest-expo, colocated with their subject) cover helpers, schemas, and component behavior; Maestro flows in `e2e/` assert whole user journeys on a simulator, tracked against the journey catalog in `e2e/scenarios.md`. Merges are gated by CI ([`merge-checks.yml`](./.github/workflows/merge-checks.yml)), which runs on every PR update as five independent, parallel jobs — **Lint** (Biome), **Typecheck** (TypeScript), **Unit Tests** (Jest), **E2E Scenario Coverage**, and **Docs** (the `docs/` validators below) — so a red check names exactly one failing tool.
 
-> Branch protection: the `Lint` and `Unit Tests` check names are unchanged, but `Typecheck` and `E2E Scenario Coverage` are now **separate** checks (they used to be bundled into `Lint` and `Unit Tests` respectively). To keep gating merges on them, add both to the required status checks under Settings → Branches → branch protection for `main`.
+> Branch protection: the `Lint` and `Unit Tests` check names are unchanged, but `Typecheck` and `E2E Scenario Coverage` are now **separate** checks (they used to be bundled into `Lint` and `Unit Tests` respectively). To keep gating merges on them, add both to the required status checks under Settings → Branches → branch protection for `main` — and `Docs` alongside them, which is new and gates nothing until it is added there.
 
 ## Commands
 
@@ -162,6 +161,19 @@ This table is the authoritative list of the repository's commands, for human con
 | `npm run db-migrate:generate` | Generates a SQL migration under `src/core/db/migrations/` from changes to `src/core/db/schema.ts`.                                       | Immediately after changing the data-layer schema; commit the migration with the schema change.           |
 
 Files under `src/core/db/migrations/` are generated — never hand-edit or amend a committed migration; change the schema and generate a new one. The generated migrations are meant to be applied on-device at startup via Drizzle's expo-sqlite migrator (`useMigrations`), which is **not wired yet**: the change that lands the first migration must also wire it into `src/app/_layout.tsx`.
+
+The documentation under [`docs/`](./docs/index.md) has five checks of its own. They ship inside the installed `living-project-documentation` skill rather than as npm scripts, and the `Docs` job in [`merge-checks.yml`](./.github/workflows/merge-checks.yml) runs all five — plus the skills' link checker, pointed at `docs` — on every pull request. Run the same sequence locally after changing any document there:
+
+```sh
+failed=
+for check in .claude/skills/living-project-documentation/scripts/check-*.mjs; do
+  node "$check" docs || failed=1
+done
+node .claude/skills/agent-skill-authoring/scripts/check-links.mjs docs || failed=1
+[ -z "$failed" ]
+```
+
+Each answers one question: `check-index.mjs` that every document is listed in `docs/index.md`, `check-references.mjs` that every relative link resolves, `check-glossary.mjs` that every spec has a glossary heading, `check-decision-naming.mjs` that every decision filename conforms, and `check-decision-supersede.mjs` that the supersede chain is sound and nothing cites replaced rationale. The loop runs all of them before failing, so one broken document does not hide the next.
 
 If a required command cannot be run, say so — naming the command, the reason, and the residual risk — rather than presenting the change as fully verified.
 
@@ -191,16 +203,19 @@ Store/production builds and on-demand dev clients are not wired into CI — the 
 
 **Some files fail globally rather than locally.** A small mismatch in one of these breaks the app at launch or the gate outright, not just one screen — refresh the owning tool's docs before editing: `app.json` and config plugins, `app.config.ts` (the dynamic layer that extends `app.json` at build time — it overrides `version` from `PREVIEW_VERSION_NAME` and injects `extra.commitHash`, so a value set only in `app.json` may not be the one that ships), `babel.config.js`, `metro.config.js`, `drizzle.config.ts` and `src/core/db/`, and the Sentry/Unistyles initialization in `src/core/helpers/` and `src/unistyles.ts`.
 
-**Most of `.claude/skills/` is generated, not source.** Every skill there except `project-structure` is produced by `npx skills` from [`axross/skills`](https://github.com/axross/skills); a hand-edit to one of those is discarded by the next reinstall. Biome deliberately excludes `.claude/skills` and `.claude/assets` (see `biome.json`) so formatting never rewrites an upstream artifact and breaks its lockfile hash. That exclusion is belt-and-braces for Markdown either way — Biome does not process `.md` at all, so no document in this repository is formatted or linted by it. What does check the skills are the Node scripts that ship inside the installed `agent-skill-authoring` skill. The single `check-skill.mjs` that used to cover all of it is gone — upstream split it into one validator per kind of edit, so a frontmatter tweak no longer has to clear body and reference checks it never touched:
+**Sentry's content collection stays off.** This project is on `@sentry/react-native` 7.x, where that is the `sendDefaultPii: false` set in `src/core/helpers/error-reporting.ts`. Newer SDK lines replace that boolean with a structured `dataCollection` option, so check which option the installed SDK actually accepts before changing it rather than applying the newer line's shape to this one.
+
+**`src/core/helpers/error-reporting.ts` is the only module that imports `@sentry/react-native`** for capture, breadcrumbs, or initialization — everything else reaches Sentry through its wrappers, which is what keeps the capture surface auditable in one file. One exemption is deliberate: `settings-screen.tsx` imports `showFeedbackWidget` directly, which is a UI component rather than error capture. (The installed `sentry-instrumentation` capability asks a project to name its exempt files in its own documentation; this is that.)
+
+**Every route is reachable through the `nakami://` deep-link scheme**, declared as `app.json`'s `scheme`. That makes route and search parameters an external input surface rather than an internal one: they arrive from outside the app, from a sender it cannot vouch for.
+
+**All of `.claude/skills/` is generated, not source.** Every skill there is produced by `npx skills` from [`axross/skills`](https://github.com/axross/skills); a hand-edit to any of them is discarded by the next reinstall. Biome deliberately excludes `.claude/skills` and `.claude/assets` (see `biome.json`) so formatting never rewrites an upstream artifact and breaks its lockfile hash. That exclusion is belt-and-braces for Markdown either way — Biome does not process `.md` at all, so no document in this repository is formatted or linted by it. What does check the skills are the Node scripts that ship inside the installed `agent-skill-authoring` skill, and one of the four applies here:
 
 ```sh
-node .claude/skills/agent-skill-authoring/scripts/check-skill-frontmatter.mjs .claude/skills/project-structure
-node .claude/skills/agent-skill-authoring/scripts/check-skill-body.mjs .claude/skills/project-structure
-node .claude/skills/agent-skill-authoring/scripts/check-skill-references.mjs .claude/skills/project-structure
 node .claude/skills/agent-skill-authoring/scripts/check-links.mjs .claude/skills
 ```
 
-The first three validate a skill's frontmatter and naming, its body and routing-section format, and its reference linkage; `check-links.mjs` checks Markdown link integrity and is worth pointing at the whole `.claude/skills` tree rather than one skill. Run all four after editing a repository-local skill.
+`check-links.mjs` checks Markdown link integrity and is worth pointing at the whole `.claude/skills` tree rather than one skill — a refresh that drops or renames a reference file leaves a dead link inside an installed copy, and this is what catches it. Its three siblings — `check-skill-frontmatter.mjs`, `check-skill-body.mjs`, and `check-skill-references.mjs` — each take one skill directory and validate the skill being **authored** there: its frontmatter and naming, its body and routing-section format, and its reference linkage. This repository authors none, so there is nothing to point them at; running them over an installed copy only reports on upstream's own text, which is `axross/skills`' to fix rather than this repository's.
 
 `agent-skill-management` also ships `check-installed-copies.mjs`, which fails when an installed copy has drifted from its source. It takes a source root and an installed root, and **does not apply here**: this repository authors no distributable skills of its own, so there is no `skills/` source tree for it to compare against. Drift from `axross/skills` is detected by re-running the refresh above and looking at the diff.
 

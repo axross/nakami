@@ -23,16 +23,18 @@ output — they exist for self-review, not for the pull-request thread.
 
 - **Important** — MUST be addressed before merge: a finding that breaks
   behavior, corrupts persisted state, leaks data, regresses accessibility,
-  violates a MUST rule of a matching skill under `.claude/skills/`, or
-  leaves an acceptance criterion unmet or unverifiable from the diff.
+  violates a MUST rule of a matching skill under `.claude/skills/` or of a
+  matching convention document under `docs/conventions/`, or leaves an
+  acceptance criterion unmet or unverifiable from the diff.
 - **Nit** — safe to defer: style, naming, and refactoring suggestions.
 
 **Guidelines:**
 
 - MUST label every posted finding exactly **Important** or **Nit** — no other
   labels appear in a posted review.
-- MUST label as Important every violated MUST rule of a matching skill —
-  installed or repository-local — every rule of [`CLAUDE.md`](CLAUDE.md) that
+- MUST label as Important every violated MUST rule of a matching skill or of
+  a matching document under [`docs/conventions/`](docs/conventions/), every rule
+  of [`CLAUDE.md`](CLAUDE.md) that
   the change violates, every acceptance criterion that is unmet or cannot be
   confirmed from the diff, and every mandatory-check miss that breaks a hard
   requirement. `CLAUDE.md` states its rules as plain prose rather than
@@ -46,16 +48,20 @@ not skippable. Grade each miss by its real impact: a miss that breaks a hard
 requirement is **Important**, a gap that does not is a **Nit**. Cite the owning
 skill in the finding.
 
-- **Skill conformance** — verify the change conforms to **every** skill under
-  [`.claude/skills/`](.claude/skills) whose routing condition — its own
-  `description`/`when_to_use` — matches the changed files. Those skills come in
-  two tiers: the installed capabilities state the general practice, and the
-  repository-local
-  [`project-structure`](.claude/skills/project-structure/SKILL.md) states this
-  repository's convention within it and wins where the two collide — except
-  where its known-deviations reference already records the collision, which is
-  an accepted decision rather than a finding. Flag any deviation from a stated
-  rule, citing the skill and the rule. A violated **MUST** rule is Important.
+- **Skill and convention conformance** — verify the change conforms to
+  **every** skill under [`.claude/skills/`](.claude/skills) whose routing
+  condition — its own `description`/`when_to_use` — matches the changed files,
+  and to **every** document under [`docs/conventions/`](docs/conventions/) that
+  governs a surface the change touches. Every skill there is an installed
+  capability stating the general practice; the convention documents state this
+  repository's own answer within it and win where the two collide — except
+  where
+  [`docs/conventions/agent-skills.md`](docs/conventions/agent-skills.md)
+  already records the collision, which is an accepted decision rather than a
+  finding. Read that document before raising anything that looks like a
+  deviation from an installed rule. Flag any deviation from a stated rule,
+  citing the skill or the document and the rule. A violated **MUST** rule is
+  Important.
 - **Acceptance criteria** — verify the diff against **every** acceptance
   criterion in the linked issue (the pull request body's `Closes #<n>`), when
   the pull request links one. Each criterion that is unmet, or that cannot be
@@ -78,8 +84,14 @@ attention without adding a gate. This exclusion governs **posted** reviews
 only; internal self-review triage still flags these findings.
 
 - Anything CI already enforces — the Biome lint/format check, the TypeScript
-  typecheck, the Jest unit-test run, and the e2e scenario-coverage gate run by
-  the merge-checks workflow (`.github/workflows/merge-checks.yml`).
+  typecheck, the Jest unit-test run, the e2e scenario-coverage gate, and the
+  documentation validators, all run by the merge-checks workflow
+  (`.github/workflows/merge-checks.yml`). Its `Docs` job covers a document
+  under `docs/` that `docs/index.md` does not list, a decision record listed
+  individually instead of through its directory, a relative link under `docs/`
+  that does not resolve, a spec with no matching heading in `docs/glossary.md`,
+  a decision filename that is not `YYYY-MM-DD-<kebab>.md` or whose date is not
+  real, and an inconsistent supersede chain.
 - Lockfiles and generated files (`package-lock.json`,
   `src/core/db/migrations/`).
 
