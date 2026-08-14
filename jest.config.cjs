@@ -1,4 +1,13 @@
-module.exports = {
+// @ts-check
+// The `// @ts-check` pragma above, together with this file being listed in
+// tsconfig.json's `include`, is what makes the annotation below enforced rather
+// than documentary: without both, `npm run typecheck` reports nothing for a
+// misspelled option. The annotation also has to sit on a named binding —
+// a JSDoc `@type` written directly on `module.exports = { … }` does not trigger
+// excess-property checking.
+
+/** @type {import("jest").Config} */
+const config = {
 	preset: "jest-expo",
 	testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
 	moduleNameMapper: {
@@ -30,4 +39,12 @@ module.exports = {
 	// RNTL's render synchronously, and v14 made render async. Do not bump RNTL
 	// to v14 until expo-router's testing library supports it.
 	setupFiles: ["react-native-unistyles/mocks", "<rootDir>/src/unistyles.ts"],
+	// Removes Jest's injected globals after the preset's setup files have used
+	// them, so a test file that inherits a Jest symbol instead of importing it
+	// from @jest/globals fails with a ReferenceError. See
+	// jest/enforce-imported-globals.js for why `injectGlobals: false` cannot be
+	// set here instead.
+	setupFilesAfterEnv: ["<rootDir>/jest/enforce-imported-globals.js"],
 };
+
+module.exports = config;
