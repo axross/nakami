@@ -33,7 +33,7 @@ Documents under `conventions/` use MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY a
   file goes, what it is called, and which module may import which, including the three
   ratified exceptions to the import direction.
 - [conventions/styling.md](./conventions/styling.md) — the theme tokens: colour roles,
-  tones, and steps, the shared spacing-and-radius scale, the font families, the
+  tones, and steps, the shared spacing-and-radius scale, the composite text roles, the
   breakpoints, and the adaptive-theme setting.
 - [conventions/components.md](./conventions/components.md) — the shared-component
   catalog, splitting a component into one file per part, Lucide as the single icon set,

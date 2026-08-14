@@ -112,15 +112,13 @@ const styles = StyleSheet.create((theme) => ({
 		flex: 1,
 	},
 	technicalDetails: {
+		...theme.typography.code,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.monospace,
-		fontSize: 13,
 		paddingHorizontal: theme.gap.md,
 	},
 	disclaimer: {
+		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 13,
 		paddingHorizontal: theme.gap.md,
 	},
 }));

@@ -14,9 +14,8 @@ export function LicensesScreen(): JSX.Element {
 
 const styles = StyleSheet.create((theme) => ({
 	placeholder: {
+		...theme.typography.body,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 16,
 		textAlign: "center",
 	},
 	root: {

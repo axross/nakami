@@ -6,11 +6,46 @@ const gap = {
 	xl: 32,
 } as const;
 
+// The bundled font files. Deliberately module-private rather than a theme
+// token: a family without its size is half a typography decision, and exposing
+// one invites a style to pick a family and then invent a size. Every text style
+// goes through `typography` below.
 const fonts = {
 	heading: "InnovatorGrotesk-SemiBold",
 	paragraph: "InnovatorGrotesk-Regular",
-	label: "InnovatorGrotesk-Regular",
 	monospace: "JetBrainsMono-Regular",
+} as const;
+
+// Composite text roles, named for the content they carry rather than their
+// size. A style applies a role whole — `...theme.typography.body` — instead of
+// picking values out of it, so family, size, and line height can never drift
+// apart across screens.
+//
+// Weight is not a field here: the bundled families encode it in the file name
+// (InnovatorGrotesk-SemiBold vs -Regular), and pairing a weight-bearing family
+// with an explicit `fontWeight` makes React Native synthesize a second weight
+// on top of the real one.
+//
+// 22 is the shared line box of every role that fills a title or body line
+// (`heading`, `body`, `code`). That is what keeps a record card's height
+// deterministic — see `RECORD_CARD_LINE` in collection-record-card.tsx.
+const typography = {
+	// A screen's hero title — the Home landing.
+	display: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 34 },
+	// The title of a centered message state (empty, error, placeholder).
+	title: { fontFamily: fonts.heading, fontSize: 20, lineHeight: 26 },
+	// Body metrics, emphasized: button labels, card titles, section headings.
+	heading: { fontFamily: fonts.heading, fontSize: 16, lineHeight: 22 },
+	// Default running text: body copy, text inputs, list row labels.
+	body: { fontFamily: fonts.paragraph, fontSize: 16, lineHeight: 22 },
+	// Anything supporting something else: a form field's name, hints, errors,
+	// counts, metadata. One role rather than a separate `label`, because the two
+	// carried identical values and naming them apart implied a distinction the
+	// design does not draw.
+	caption: { fontFamily: fonts.paragraph, fontSize: 13, lineHeight: 18 },
+	// Machine-readable text: a record id standing in for a missing title, an id
+	// chip, build details.
+	code: { fontFamily: fonts.monospace, fontSize: 14, lineHeight: 22 },
 } as const;
 
 // Semantic color roles mirror axross/cunnpe's theme structure
@@ -134,8 +169,8 @@ const defaultTheme = {
 			onAccent: "#ffffff",
 		},
 	},
-	fonts,
 	gap,
+	typography,
 };
 
 type ThemeName = "light" | "dark";

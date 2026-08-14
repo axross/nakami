@@ -138,9 +138,8 @@ export function CollectionRecordsScreen({
 
 const styles = StyleSheet.create((theme) => ({
 	count: {
+		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 13,
 		paddingBottom: theme.gap.xs,
 		paddingHorizontal: theme.gap.xs,
 	},

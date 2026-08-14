@@ -57,20 +57,39 @@ it lands, the shared scale is what the code uses.
 
 ## Typography
 
-`theme.fonts.*` carries four role names, each mapping to a family bundled under
-`assets/fonts/`:
+`theme.typography.*` carries six composite text roles, each bundling a font family, a
+size, and a line height, and each named for the content it carries rather than for its
+size:
 
-| Role        | Family                       |
-| ----------- | ---------------------------- |
-| `heading`   | `InnovatorGrotesk-SemiBold`  |
-| `paragraph` | `InnovatorGrotesk-Regular`   |
-| `label`     | `InnovatorGrotesk-Regular`   |
-| `monospace` | `JetBrainsMono-Regular`      |
+| Role       | Family                      | Size / leading | Carries                                                            |
+| ---------- | --------------------------- | -------------- | ------------------------------------------------------------------ |
+| `display`  | `InnovatorGrotesk-SemiBold` | 28 / 34        | A screen's hero title — the Home landing                           |
+| `title`    | `InnovatorGrotesk-SemiBold` | 20 / 26        | A centered message state's title                                   |
+| `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings, the collection monogram |
+| `body`     | `InnovatorGrotesk-Regular`  | 16 / 22        | Running text, text inputs, list row labels                         |
+| `caption`  | `InnovatorGrotesk-Regular`  | 13 / 18        | A form field's name, hints, errors, counts, metadata               |
+| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | A record id standing in for a title, id chips, build details       |
 
-The theme carries no font-size scale, so a text style pairs one of these families with
-a size that has no token behind it. The `fontSize` literals inlined across the codebase
-today are a standing violation rather than a permitted exception, and issue #71 owns
-them.
+A text style MUST apply a role **whole** — `...theme.typography.body` — and MUST NOT
+pick values out of one or override a part of it at the use site. A numeric `fontSize`
+MUST NOT be inlined in a component: every size this app uses is a role, and a size with
+no role is a missing role rather than an exception.
+
+The three bundled families are module-private inside `src/common/constants/style.ts`
+and are deliberately not reachable as a token. A family without its size is half a
+typography decision, and exposing one invites a style to pick a family and then invent
+a size — which is how the app came to have eight independently chosen sizes and one
+line height in the first place.
+
+No role sets `fontWeight`, and one MUST NOT be added. The bundled families encode
+weight in the file itself (`InnovatorGrotesk-SemiBold` against `-Regular`), so pairing
+an explicit weight with one makes React Native synthesize a second weight on top of the
+real one.
+
+`heading`, `body`, and `code` share a 22pt line box, which is what makes a record
+card's height deterministic: `RECORD_CARD_LINE` in
+`src/collections/components/collection-record-card/collection-record-card.tsx` is a
+geometry constant sizing elements to that same 22, and no text style sets it.
 
 ## Breakpoints
 
