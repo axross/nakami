@@ -30,10 +30,10 @@ of what it is for.
 
 This binds the session and nothing else. A comment posted under a **distinct bot
 login** — this repository's CI reviewer, which posts under the Claude App rather than
-the operator — carries no marker and MUST be told apart by that login instead. Adding a
-marker to it would be worse than leaving it off, because a later run would then read
-the independent review's own findings as its own earlier output and skip answering
-them.
+the operator — MUST be told apart by that login, whether or not it happens to carry a
+marker. Nothing here directs what that reviewer writes, which is exactly why the login
+rather than the marker settles it: a run classifying by the marker alone would read the
+independent review's own findings as its own earlier output and skip answering them.
 
 ## A session assigns the issues and pull requests it creates
 
