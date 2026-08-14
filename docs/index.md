@@ -54,9 +54,9 @@ Documents under `specs/` describe rather than instruct, and use none of them.
 ## Operations
 
 - [operations/github.md](./operations/github.md) — how a session operates GitHub: the
-  marker line every agent-authored comment begins with, assigning what a session
-  creates and verifying that the assignment landed, and the route boundary that keeps
-  merging a human decision.
+  marker line a session's own comments begin with, assigning what a session creates
+  and verifying that the assignment landed, and the route boundary that keeps merging
+  a human decision.
 
 ## Decisions
 
