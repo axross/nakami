@@ -4,19 +4,20 @@ Everything this repository knows about itself. Which body answers your question:
 
 - **What does the app do?** → `specs/` — how each product domain behaves today.
 - **How is the code written?** → `conventions/` — the rules a change has to satisfy.
+- **How is something carried out?** → `operations/` — the procedures someone executes.
 
-`decisions/` sits beside both and holds why a constraint exists, for the constraints
-whose reasoning cannot be recovered from the code. The vocabulary all three bodies use
-— the product's words and the repository's alike — is in [glossary.md](./glossary.md).
+`decisions/` sits beside all three and holds why a constraint exists, for the
+constraints whose reasoning cannot be recovered from the code. The vocabulary all four
+bodies use — the product's words and the repository's alike — is in
+[glossary.md](./glossary.md).
 
-There is no `operations/` body here. The procedures someone executes — the commands,
-the preview build, the skill refresh — are in [README.md](../README.md), and how work
-runs is in [CLAUDE.md](../CLAUDE.md); the first procedure belonging to neither is what
-creates `operations/`.
+The commands, the preview build, and the skill refresh stay in
+[README.md](../README.md), and how work runs stays in [CLAUDE.md](../CLAUDE.md);
+`operations/` holds the procedures belonging to neither.
 
-Documents under `conventions/` use MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY as
-[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html) describes. Documents under
-`specs/` describe rather than instruct, and use none of them.
+Documents under `conventions/` and `operations/` use MUST, MUST NOT, SHOULD, SHOULD
+NOT, and MAY as [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html) describes.
+Documents under `specs/` describe rather than instruct, and use none of them.
 
 ## Specifications
 
@@ -49,6 +50,13 @@ Documents under `conventions/` use MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY a
 - [conventions/agent-skills.md](./conventions/agent-skills.md) — where this repository
   departs from an installed skill, or hits a case one is silent on, and how a new
   deviation or gap is recorded.
+
+## Operations
+
+- [operations/github.md](./operations/github.md) — how a session operates GitHub: the
+  marker line a session's own comments begin with, assigning what a session creates
+  and verifying that the assignment landed, and the route boundary that keeps merging
+  a human decision.
 
 ## Decisions
 
