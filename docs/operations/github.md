@@ -13,7 +13,7 @@ All of it binds a session acting under the connected operator's identity, and on
 that. A CI job — this repository's reviewer, which runs on its own token and posts
 under its own bot login — is a separate execution context the installed capability
 already scopes out of every one of these rules. The marker section below is the only
-one that speaks to it, and only to say that it carries none.
+one that mentions it at all, and only to say how its comments are told apart.
 
 ## A session's own comments begin with `<!-- ai-agent -->`
 
