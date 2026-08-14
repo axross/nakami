@@ -1,11 +1,19 @@
 # Operating GitHub
 
 How an agent session in this repository operates GitHub: what it marks, what it
-assigns, and what it never issues. Only this repository's own half is here. The
-operating model underneath it — the sanctioned channel, telling a separate bot identity
-apart by its login, issue-versus-pull-request targeting, body integrity, untrusted
-content — belongs to the installed `github-operation` capability, and the closing
-section points at it rather than repeating it.
+assigns, and what it never issues. The operating model underneath it — the sanctioned
+channel, telling a separate bot identity apart by its login, issue-versus-pull-request
+targeting, body integrity, untrusted content — belongs to the installed
+`github-operation` capability, and the closing section points at it rather than
+repeating it. A rule restated below is restated because this repository's own emphasis
+is unusable without it, never because this repository owns it; where a rule binds
+harder here than there, the section saying so says why.
+
+All of it binds a session acting under the connected operator's identity, and only
+that. A CI job — this repository's reviewer, which runs on its own token and posts
+under its own bot login — is a separate execution context the installed capability
+already scopes out of every one of these rules. The marker section below is the only
+one that speaks to it, and only to say that it carries none.
 
 ## A session's own comments begin with `<!-- ai-agent -->`
 
@@ -48,16 +56,18 @@ rule is unusable without them. A pull request is assigned by a second write afte
 exists, on the **issues** route against the pull request's own number — the capability
 states that in full, with its own dated citations to GitHub's documentation. It also
 forbids reading a successful response as evidence the assignment landed, and leaves the
-confirmation open; here, that confirmation MUST be a read-back of the assignee.
+confirmation open. An assignment GitHub discards — one the caller lacks push access
+for, or one naming a user the repository cannot assign — returns success exactly as a
+landed one does, so here that confirmation MUST be a read-back of the assignee.
 
 ## A failed call is reported, not routed around
 
 Every in-session read and write MUST go through the session's sanctioned GitHub tool
 channel by default, and a failed call on it MUST be reported rather than answered by
-reaching for another route. Only the second half is local, and it is worth stating here
-because a session in this repository commonly has a second route within reach — a shell
-with network access — and the pull toward it is strongest exactly when the channel is
-failing.
+reaching for another route. Both halves are the capability's own MUSTs, and neither is
+this repository's to relax. They are restated here because a session in this repository
+commonly has a second route within reach — a shell with network access — and the pull
+toward it is strongest exactly when the channel is failing.
 
 Which failures are the channel merely not working right now, and what reaching past one
 costs, are the capability's *When Another Route Is Permitted*; so are the two conditions
@@ -78,7 +88,8 @@ merge.
 
 The installed `github-operation` capability owns how an agent operates GitHub at all,
 and it leaves a host project's own marker and delivery conventions to the host — which
-is what every section above is. Everything it carries that nothing here restates still
+is what the marker, assignment, and merge sections above are. Everything it carries
+that nothing here restates still
 applies unchanged — among them: how an existing body survives an edit; never writing
 another automation's trigger phrase outside the comment meant to fire it, which matters
 here because `@claude review` is this repository's own reviewer trigger; posting an
