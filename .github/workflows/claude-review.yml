@@ -108,7 +108,8 @@ jobs:
       # base ref (the default branch), NEVER the PR head: the review reads the
       # diff through the GitHub API, so untrusted head code is never executed
       # on the runner. The checkout only supplies CLAUDE.md,
-      # REVIEW.md, and the project skills as trusted review context.
+      # REVIEW.md, the documentation under docs/, and the project skills as
+      # trusted review context.
       - name: Checkout
         uses: actions/checkout@v4
 

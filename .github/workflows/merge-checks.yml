@@ -1,9 +1,13 @@
 name: Merge Checks
 
-# The project's own CI: lint, typecheck, unit tests, and the e2e
-# scenario-coverage gate that gate merges to the default branch. Each check is
-# its OWN parallel job (never folded together) so a red check names exactly one
-# failing tool and branch protection can require each independently. This is the
+# The project's own CI: lint, typecheck, unit tests, the e2e scenario-coverage
+# gate, and the docs/ validators that gate merges to the default branch. Each
+# check is its OWN parallel job (never folded together) so a red check names
+# exactly one failing tool and branch protection can require each
+# independently. The five documentation validators share the single Docs job on
+# purpose and without breaking that rule: they are one tool with one owner (the
+# installed living-project-documentation skill), split by which kind of edit
+# each answers to rather than by who fixes them. This is the
 # CI the change loop's tail polls after a push (see
 # .claude/skills/loop-engineering/SKILL.md). Keep REVIEW.md's do-not-report list
 # in sync with exactly what these jobs enforce.
@@ -90,3 +94,29 @@ jobs:
         run: "npm ci"
       - name: E2E Scenario-Coverage Gate
         run: "npm run test:e2e:coverage"
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Dependency Installation
+        run: "npm ci"
+      # Every validator runs even when an earlier one fails, so one broken
+      # document never hides the next; the step fails if any of them did. The
+      # loop is the shape the skill's own validators reference prescribes —
+      # there is deliberately no run-all script to call.
+      - name: Documentation Validators
+        run: |
+          failed=
+          for check in .claude/skills/living-project-documentation/scripts/check-*.mjs; do
+            node "$check" docs || failed=1
+          done
+          node .claude/skills/agent-skill-authoring/scripts/check-links.mjs docs || failed=1
+          [ -z "$failed" ]
