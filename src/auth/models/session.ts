@@ -1,17 +1,38 @@
 import { z } from "zod";
 
 /**
- * A Payload user as the app needs it. Payload auth collections carry many more
- * fields; we keep only what the UI shows and tolerate (strip) the rest so the
- * app works against any collection shape. `id` is a string or number depending
- * on the database adapter, normalized to a string.
+ * A user id in its normalized, in-app form. Shared by both user schemas below
+ * so the network side cannot produce an id the domain side would reject.
+ */
+const userIdSchema = z.string().min(1);
+
+/**
+ * A Payload user as it arrives over the network. Payload auth collections carry
+ * many more fields; we keep only what the UI shows and tolerate (strip) the
+ * rest so the app works against any collection shape. `id` is a string or a
+ * number depending on the database adapter, and this is the one place it is
+ * normalized to a string.
  */
 export const payloadUserSchema = z.object({
-	id: z.union([z.string(), z.number()]).transform(String),
-	email: z.string(),
+	id: z.union([userIdSchema, z.number()]).transform(String),
+	email: z.email(),
 });
 
-export type PayloadUser = z.infer<typeof payloadUserSchema>;
+/**
+ * The same user once it is inside the app, where `id` is already a string. The
+ * absence of a transform is the point rather than an omission: a `.transform()`
+ * anywhere inside a schema makes `encode` throw, so keeping one here would make
+ * {@link storedSessionCodec} unusable and leave the keychain's write half
+ * bypassing the schema its read half re-runs. It infers the same
+ * `{ id: string; email: string }` as {@link payloadUserSchema}, so the two are
+ * interchangeable to every consumer.
+ */
+export const sessionUserSchema = z.object({
+	id: userIdSchema,
+	email: z.email(),
+});
+
+export type PayloadUser = z.infer<typeof sessionUserSchema>;
 
 /** `POST /api/{collection}/login` success payload. */
 export const loginResponseSchema = z.object({
@@ -40,7 +61,8 @@ export const refreshResponseSchema = z.object({
 
 /**
  * The persisted session. Stored as a single JSON value in the platform
- * keychain (never the database or plain storage). `exp` is the token's Unix
+ * keychain (never the database or plain storage), through
+ * {@link storedSessionCodec} in both directions. `exp` is the token's Unix
  * expiry in seconds, as returned by Payload.
  */
 export const sessionSchema = z.object({
@@ -48,7 +70,40 @@ export const sessionSchema = z.object({
 	collectionSlug: z.string().min(1),
 	token: z.string().min(1),
 	exp: z.number(),
-	user: payloadUserSchema,
+	user: sessionUserSchema,
 });
 
 export type Session = z.infer<typeof sessionSchema>;
+
+/**
+ * The keychain boundary in both directions at once: the stored entry is a JSON
+ * **string**, the domain value is a {@link Session}. Pairing them in one codec
+ * is what stops the write half from serializing a shape the read half would
+ * reject — the drift a separate `JSON.stringify` invites.
+ *
+ * Adapted from the `json(schema)` template in Zod's codec documentation, which
+ * is published to be copied rather than imported (the package exports no such
+ * codec and has no `./codecs` subpath). One difference is deliberate: the
+ * template puts the offending input, and the JSON parser's own message, onto
+ * the issue it raises. Here the input is the stored session, which carries a
+ * bearer token, and the parser's message quotes a fragment of it — so the issue
+ * names the failure and nothing else. The caller reports this error, and a
+ * reported error leaves the device.
+ */
+export const storedSessionCodec = z.codec(z.string(), sessionSchema, {
+	decode: (storedJson, ctx) => {
+		try {
+			return JSON.parse(storedJson);
+		} catch {
+			ctx.issues.push({
+				code: "invalid_format",
+				format: "json",
+				input: undefined,
+				message: "The stored session is not valid JSON.",
+			});
+
+			return z.NEVER;
+		}
+	},
+	encode: (session) => JSON.stringify(session),
+});

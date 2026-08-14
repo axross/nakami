@@ -1,5 +1,9 @@
 import { accessResponseSchema } from "~/collections/models/collection";
-import { request, serverBaseUrl } from "~/common/helpers/payload-client";
+import {
+	parseResponse,
+	request,
+	serverBaseUrl,
+} from "~/common/helpers/payload-client";
 
 /**
  * Fetches the current user's access map from `GET {serverUrl}/api/access`. This
@@ -17,5 +21,5 @@ export async function fetchAccess(serverUrl: string, token: string) {
 		},
 	);
 
-	return accessResponseSchema.parse(body);
+	return parseResponse("fetchAccess", accessResponseSchema, body);
 }

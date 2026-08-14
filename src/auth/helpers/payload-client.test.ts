@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { ZodError } from "zod";
 import {
 	fetchMe,
 	login,
@@ -20,11 +21,18 @@ function mockFetch(
 	return fetchMock;
 }
 
+/** Signs in against the mocked fetch, resolving with its outcome either way. */
+function attemptSignIn(): Promise<unknown> {
+	return login(server, { email: "you@example.com", password: "secret" }).catch(
+		(caught: unknown) => caught,
+	);
+}
+
 beforeEach(() => {
 	jest.restoreAllMocks();
 });
 
-describe("login", () => {
+describe("login()", () => {
 	it("POSTs credentials to the collection login endpoint and parses the session", async () => {
 		const fetchMock = mockFetch({
 			ok: true,
@@ -77,17 +85,48 @@ describe("login", () => {
 	it("throws a server error on an unexpected status", async () => {
 		mockFetch({ ok: false, status: 500 });
 
-		const error = await login(server, {
-			email: "you@example.com",
-			password: "secret",
-		}).catch((caught) => caught);
+		const error = await attemptSignIn();
 
 		expect(error).toBeInstanceOf(PayloadRequestError);
 		expect((error as PayloadRequestError).kind).toBe("server");
 	});
+
+	it("throws a server error when a 200 body does not match the schema", async () => {
+		mockFetch({
+			ok: true,
+			status: 200,
+			json: async () => ({ notALoginResponse: true }),
+		});
+
+		const error = await attemptSignIn();
+
+		expect(error).toBeInstanceOf(PayloadRequestError);
+		expect((error as PayloadRequestError).kind).toBe("server");
+		expect((error as PayloadRequestError).cause).toBeInstanceOf(ZodError);
+	});
+
+	it.each(["", "not an email"])(
+		"throws a server error when the user email is %p",
+		async (email) => {
+			mockFetch({
+				ok: true,
+				status: 200,
+				json: async () => ({
+					user: { id: "1", email },
+					token: "jwt-token",
+					exp: 1_800_000_000,
+				}),
+			});
+
+			const error = await attemptSignIn();
+
+			expect(error).toBeInstanceOf(PayloadRequestError);
+			expect((error as PayloadRequestError).kind).toBe("server");
+		},
+	);
 });
 
-describe("fetchMe", () => {
+describe("fetchMe()", () => {
 	it("sends the JWT authorization header and returns a null user for a rejected token", async () => {
 		const fetchMock = mockFetch({
 			ok: true,
@@ -109,7 +148,7 @@ describe("fetchMe", () => {
 	});
 });
 
-describe("refreshToken", () => {
+describe("refreshToken()", () => {
 	it("returns the refreshed token", async () => {
 		mockFetch({
 			ok: true,

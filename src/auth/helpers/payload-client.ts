@@ -5,6 +5,7 @@ import {
 } from "~/auth/models/session";
 import {
 	type PayloadServer,
+	parseResponse,
 	request,
 	serverBaseUrl,
 } from "~/common/helpers/payload-client";
@@ -38,7 +39,7 @@ export async function login(
 		body: JSON.stringify(credentials),
 	});
 
-	return loginResponseSchema.parse(body);
+	return parseResponse("login", loginResponseSchema, body);
 }
 
 /** Re-validates a token; `user` is null when the token is no longer valid. */
@@ -48,7 +49,7 @@ export async function fetchMe(server: PayloadServer, token: string) {
 		headers: { Authorization: `JWT ${token}` },
 	});
 
-	return meResponseSchema.parse(body);
+	return parseResponse("fetchMe", meResponseSchema, body);
 }
 
 /** Exchanges a still-valid token for a fresh one with a later expiry. */
@@ -65,7 +66,7 @@ export async function refreshToken(server: PayloadServer, token: string) {
 		},
 	);
 
-	return refreshResponseSchema.parse(body);
+	return parseResponse("refreshToken", refreshResponseSchema, body);
 }
 
 /** Best-effort remote logout; the caller clears local state regardless. */

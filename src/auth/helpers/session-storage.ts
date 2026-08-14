@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import { type Session, sessionSchema } from "~/auth/models/session";
+import { type Session, storedSessionCodec } from "~/auth/models/session";
 import { reportError } from "~/core/helpers/error-reporting";
 
 // The single keychain entry that holds the session. Session material is a
@@ -19,18 +19,34 @@ export async function readSession(): Promise<Session | null> {
 		return null;
 	}
 
-	try {
-		return sessionSchema.parse(JSON.parse(raw));
-	} catch (error) {
-		reportError(error, { extra: { scope: "auth/session-storage.read" } });
+	// An unreadable entry is an outcome, not a defect: the app is pointed at
+	// whatever server the user typed in, and a build that tightens the schema
+	// can meet an entry an older build wrote. Hence the safe decode.
+	const decoded = storedSessionCodec.safeDecode(raw);
+
+	if (!decoded.success) {
+		reportError(decoded.error, {
+			extra: { scope: "auth/session-storage.read" },
+		});
 		await clearSession();
 		return null;
 	}
+
+	return decoded.data;
 }
 
-/** Persists the session to the keychain, replacing any previous entry. */
+/**
+ * Persists the session to the keychain, replacing any previous entry. Encoding
+ * through the same codec `readSession` decodes with is what keeps the stored
+ * form and the domain form from drifting; it throws rather than storing a
+ * session the read half would reject, which for a value the compiler already
+ * typed as a {@link Session} is a defect.
+ */
 export async function writeSession(session: Session): Promise<void> {
-	await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session));
+	await SecureStore.setItemAsync(
+		SESSION_KEY,
+		storedSessionCodec.encode(session),
+	);
 }
 
 /** Removes the persisted session from the keychain. */
