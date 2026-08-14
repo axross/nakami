@@ -15,9 +15,9 @@ infer.
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/app/`                   | Expo Router routes — thin entry points only                                                                                                       |
 | `src/<feature>/`             | One feature: `components/`, `queries/`, `mutations/`, `models/`, `helpers/`, `hooks/`, `stores/` as needed                                         |
-| `src/common/`                | Primitives shared across features: `components/`, `constants/`, `helpers/`                                                                        |
+| `src/common/`                | Primitives shared across features: `components/` and `helpers/`                                                                                   |
 | `src/core/`                  | App bootstrap and infrastructure: `db/` (the schema, the shared client, and generated migrations) and `helpers/` (env, logging, error reporting, the query client) |
-| `src/unistyles.ts`           | Unistyles theme and breakpoint registration, imported first by the root layout                                                                    |
+| `src/unistyles.ts`           | Unistyles theme and breakpoints — declared and registered here, imported first by the root layout                                                 |
 | `e2e/`                       | Maestro flows (`flows/`), the scenario catalog (`scenarios.md`), and the coverage gate (`check-scenario-coverage.mjs`)                            |
 | `assets/`                    | App icons, splash images, and the bundled fonts that `app.json`'s `expo-font` plugin registers — there is no `useFonts` call                       |
 | `jest/`                      | Hand-written module mocks that `jest.config.cjs` maps in; each carries the comment explaining why it exists                                        |
@@ -63,8 +63,11 @@ cross-feature import is a violation, not a precedent.
 
 `src/core/helpers/query-client.ts` MAY import `PayloadRequestError` from
 `src/common/helpers/payload-client.ts`, so that a failed query can be classified before
-it is reported. Relocating that client removes the exception and is tracked as issue
-#89; see [agent-skills.md](./agent-skills.md).
+it is reported. That client stays in `src/common/`: it encodes none of this
+application's configuration, and it is not one of the singletons the app is wired from.
+The crossing is therefore permitted rather than a debt to be paid off — see
+[agent-skills.md](./agent-skills.md) for what that placement rests on and where a
+reviewer could reasonably differ.
 
 `src/collections/` and `src/settings/` MAY import `src/auth/`'s session surface —
 `stores/auth-store`, `models/session`, and `mutations/sign-out-mutation` — because that

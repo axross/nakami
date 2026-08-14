@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { themes } from "./style";
+import { themes } from "./unistyles";
 
 /**
  * Recursively collects a value's leaf paths (`colors.text.accent.base`), so two

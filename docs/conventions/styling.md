@@ -10,8 +10,8 @@ role rather than by resemblance. Design rationale — hierarchy, contrast target
 taste — belongs to `high-fidelity-ui-design`. What follows is the token vocabulary
 those capabilities are spent through, which only this repository defines.
 
-Every token is declared in `src/common/constants/style.ts` and registered, with the
-breakpoints, in `src/unistyles.ts`.
+`src/unistyles.ts` declares every token and the breakpoints, and registers them with
+Unistyles — one file does both.
 
 ## Colours
 
@@ -39,8 +39,8 @@ beyond that structure, because cunnpe never draws text on a solid accent fill an
 app's filled buttons do.
 
 A colour MUST come from a token. A shade the tokens do not already carry MUST be added
-to `src/common/constants/style.ts` rather than inlined at the use site, so that the
-value has one definition and the dark theme cannot silently miss it.
+to `src/unistyles.ts` rather than inlined at the use site, so that the value has one
+definition and the dark theme cannot silently miss it.
 
 ## Spacing and radii
 
@@ -75,8 +75,8 @@ pick values out of one or override a part of it at the use site. A numeric `font
 MUST NOT be inlined in a component: every size this app uses is a role, and a size with
 no role is a missing role rather than an exception.
 
-The three bundled families are module-private inside `src/common/constants/style.ts`
-and are deliberately not reachable as a token. A family without its size is half a
+The three bundled families are module-private inside `src/unistyles.ts` and are
+deliberately not reachable as a token. A family without its size is half a
 typography decision, and exposing one invites a style to pick a family and then invent
 a size — which is how the app came to have eight independently chosen sizes and one
 line height in the first place.
@@ -94,10 +94,10 @@ geometry constant sizing elements to that same 22, and no text style sets it.
 ## Breakpoints
 
 The registered breakpoints are `xs` 0, `sm` 380, and `md` 768, exported as
-`breakpoints` from `src/common/constants/style.ts`. A responsive style value is written
-against these names — the installed `react-component-styling` capability already
-requires responsive values to be written against the project's declared breakpoints,
-and these are they.
+`breakpoints` from `src/unistyles.ts`. A responsive style value is written against
+these names — the installed `react-component-styling` capability already requires
+responsive values to be written against the project's declared breakpoints, and these
+are they.
 
 ## Adaptive themes
 
@@ -116,7 +116,7 @@ colour, type, and spacing are the subject — after the layout has been settled 
 wireframe kit that ships inside the installed `wireframe-design` capability.
 
 A static HTML file cannot import the TypeScript, so the kit's token block is a
-hand-maintained mirror that drifts silently. `src/common/constants/style.ts` MUST be
-re-read before each high-fidelity round and any drift reconciled into the kit, and the
-kit MUST stay self-contained — no external fetches, system fonts and inline SVG only —
-because it is opened straight from disk with no server behind it.
+hand-maintained mirror that drifts silently. `src/unistyles.ts` MUST be re-read before
+each high-fidelity round and any drift reconciled into the kit, and the kit MUST stay
+self-contained — no external fetches, system fonts and inline SVG only — because it is
+opened straight from disk with no server behind it.

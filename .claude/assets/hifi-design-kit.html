@@ -5,7 +5,7 @@
   design exhibit: the app's components and screens rendered with the real
   design tokens, in light AND dark. For the WIREFRAME round, use the
   wireframe-design skill's own kit (.claude/skills/wireframe-design/assets/).
-  SYNC SOURCE OF TRUTH: src/common/constants/style.ts — the tokens below MIRROR
+  SYNC SOURCE OF TRUTH: src/unistyles.ts — the tokens below MIRROR
   that module (a static file cannot import the TS). Re-read it before each hi-fi
   round and reconcile drift. Design rationale — hierarchy, contrast, states —
   lives in .claude/skills/high-fidelity-ui-design/SKILL.md; this repository's
@@ -82,15 +82,16 @@
   /* =========================================================================
      HIGH-FIDELITY MODE — device rendered with the app's REAL tokens.
      -------------------------------------------------------------------------
-     SYNC SOURCE OF TRUTH: src/common/constants/style.ts
+     SYNC SOURCE OF TRUTH: src/unistyles.ts
      The values below MIRROR that module (a static HTML file cannot import the
-     TypeScript). style.ts is a semantic-role theme (foundation / surface /
-     border / solid / text, each x neutral / accent / destructive; accent = Radix
-     Teal), with radii from `gap` (8/12/16 = gap.xs/sm/md) and typography as six
-     composite roles in `theme.typography.*`, each bundling family, size, and
-     line height. The kit flattens those roles into the internal vars below;
-     before a high-fidelity round, RE-READ style.ts and reconcile any drift.
-     Do NOT treat this block as the source of truth; style.ts is.
+     TypeScript). src/unistyles.ts is a semantic-role theme (foundation /
+     surface / border / solid / text, each x neutral / accent / destructive;
+     accent = Radix Teal), with radii from `gap` (8/12/16 = gap.xs/sm/md) and
+     typography as six composite roles in `theme.typography.*`, each bundling
+     family, size, and line height. The kit flattens those roles into the
+     internal vars below; before a high-fidelity round, RE-READ src/unistyles.ts
+     and reconcile any drift. Do NOT treat this block as the source of truth;
+     src/unistyles.ts is.
      ========================================================================= */
   .theme-band { margin-top: 40px; }
   .theme-band > h3.band { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 18px; padding-bottom: 9px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
@@ -101,10 +102,10 @@
   .frameblock .cap { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--ink-soft); text-align: center; }
 
   /* Shared real-token block — the phone (.device) and the isolated element
-     surfaces (.el-surface) both consume it, so the style.ts mirror stays
+     surfaces (.el-surface) both consume it, so the src/unistyles.ts mirror stays
      single-point. Edit tokens HERE, never per-component. */
   .device, .el-surface {
-    /* light — mirror style.ts: neutral=Slate, destructive=Ruby, accent=Teal.
+    /* light — mirror src/unistyles.ts: neutral=Slate, destructive=Ruby, accent=Teal.
        --accent-d is the accent TEXT/tint role (text.accent.base); solid fills
        use --accent-solid; muted accent grounds use --accent-surface. */
     --bg: #fcfcfd; --elev: #f9f9fb; --surface: #f0f0f3; --txt: #1c2024; --txt2: #60646c;
@@ -128,7 +129,7 @@
     --t-code:    400 14px/22px var(--app-mono);
   }
   .device.dark, .el-surface.dark {
-    /* dark — mirror style.ts dark theme */
+    /* dark — mirror the src/unistyles.ts dark theme */
     --bg: #111113; --elev: #18191b; --surface: #212225; --txt: #edeef0; --txt2: #b0b4ba;
     --line-d: #363a3f; --accent-d: #0bd8b6; --accent-solid: #12a594; --accent-surface: #0d2d2a;
     --accentC: #ffffff; --danger-d: #ff949d;
@@ -224,23 +225,23 @@
   <header class="masthead">
     <p class="eyebrow">Hi-Fi Design Kit · High fidelity</p>
     <h1>Real-token render for high-fidelity design rounds</h1>
-    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, radii, and the six composite text roles of <code>theme.typography.*</code> from <code>src/common/constants/style.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
+    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, radii, and the six composite text roles of <code>theme.typography.*</code> from <code>src/unistyles.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
     <div class="meta">
       <span class="tag"><strong>Fidelity</strong> high · real tokens</span>
-      <span class="tag"><strong>Tokens</strong> mirror src/common/constants/style.ts</span>
+      <span class="tag"><strong>Tokens</strong> mirror src/unistyles.ts</span>
       <span class="tag">Light + dark · self-contained</span>
     </div>
   </header>
 
   <h2 class="section">Element palette — real tokens (light + dark)</h2>
-  <p class="lead-note">The app's components in isolation, rendered on paired light and dark grounds that consume the mirrored <code>src/common/constants/style.ts</code> tokens. Built from one template so the two themes never drift. <!-- FILL: keep only the elements your screen(s) use. --></p>
+  <p class="lead-note">The app's components in isolation, rendered on paired light and dark grounds that consume the mirrored <code>src/unistyles.ts</code> tokens. Built from one template so the two themes never drift. <!-- FILL: keep only the elements your screen(s) use. --></p>
   <div class="el-surfaces">
     <div class="el-surface" id="elLight"></div>
     <div class="el-surface dark" id="elDark"></div>
   </div>
 
   <h2 class="section">Screen render — real tokens (light + dark)</h2>
-  <p class="lead-note">Full screens rendered with the app's real tokens in both themes. <b>Re-read <code>src/common/constants/style.ts</code> before each hi-fi round</b> and reconcile any drift with the mirrored values in this file's CSS. Nothing here is committed to the repo.</p>
+  <p class="lead-note">Full screens rendered with the app's real tokens in both themes. <b>Re-read <code>src/unistyles.ts</code> before each hi-fi round</b> and reconcile any drift with the mirrored values in this file's CSS. Nothing here is committed to the repo.</p>
 
   <!-- SVG icon symbols (inline; no external fetches). Swap for the app's real icons where they matter. -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -262,7 +263,7 @@
   </section>
 
   <footer>
-    Hi-Fi Design Kit (high fidelity) — real-token UI render. Tokens mirror <code>src/common/constants/style.ts</code> — that module is the source of truth. For low-fidelity wireframes, see the wireframe design guidelines. Fill guidance: the high-fidelity UI design guidelines.
+    Hi-Fi Design Kit (high fidelity) — real-token UI render. Tokens mirror <code>src/unistyles.ts</code> — that module is the source of truth. For low-fidelity wireframes, see the wireframe design guidelines. Fill guidance: the high-fidelity UI design guidelines.
   </footer>
 </div>
 
