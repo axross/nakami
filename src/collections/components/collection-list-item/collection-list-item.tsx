@@ -76,10 +76,9 @@ export function CollectionListItem({
 
 const styles = StyleSheet.create((theme) => ({
 	label: {
+		...theme.typography.body,
 		color: theme.colors.text.neutral.intense,
 		flexShrink: 1,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 16,
 	},
 	monogram: {
 		alignItems: "center",
@@ -90,9 +89,8 @@ const styles = StyleSheet.create((theme) => ({
 		width: 34,
 	},
 	monogramText: {
+		...theme.typography.heading,
 		color: theme.colors.text.accent.base,
-		fontFamily: theme.fonts.heading,
-		fontSize: 16,
 	},
 	row: (pressed: boolean) => ({
 		alignItems: "center",

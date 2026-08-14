@@ -59,9 +59,8 @@ const styles = StyleSheet.create((theme) => ({
 		minHeight: 50,
 	},
 	buttonLabel: {
+		...theme.typography.heading,
 		color: theme.colors.text.onAccent,
-		fontFamily: theme.fonts.heading,
-		fontSize: 16,
 	},
 	buttonPressed: {
 		opacity: 0.6,

@@ -107,6 +107,32 @@ The rule this replaced said the opposite — that keeping the root wrapper intac
 itself sufficient. It was wrong as written and was deliberately not carried into
 `docs/`.
 
+## No text role carries a `fontWeight`
+
+The installed `react-component-styling` capability requires a composite text role to
+bundle four things:
+
+> MUST declare typography as named text roles that bundle family, size, line height,
+> and weight, and MUST apply a role whole rather than picking values out of it.
+> — [theming.md](../../.claude/skills/react-component-styling/references/theming.md)
+
+The six roles in `theme.typography.*` bundle three of them and deliberately omit
+weight, which [styling.md](./styling.md) states as its own MUST NOT.
+
+Weight here is carried by the font **file**, not by a style property. The three faces
+bundled under `assets/fonts/` and registered in `app.json` are
+`InnovatorGrotesk-Regular`, `InnovatorGrotesk-SemiBold`, and `JetBrainsMono-Regular`;
+a role selects its weight by naming the file it wants. Setting `fontWeight` beside one
+of those families does not select a weight — React Native synthesizes a second one on
+top of the weight already in the file, which renders heavier than either face and
+differs between iOS and Android. The rule assumes a variable or multi-weight family
+registered under one name, which is the common web and React Native setup and is not
+this app's.
+
+The deviation would end, rather than be re-argued, if the app ever registers one family
+name spanning several weights. Until then a role MUST NOT set `fontWeight`, and a unit
+test in `src/unistyles.test.ts` holds it.
+
 ## Screen bodies in `components/` are not a deviation
 
 Routes here compose from `src/<feature>/components/`, and this repository has no
