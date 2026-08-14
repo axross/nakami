@@ -27,20 +27,44 @@ under the old one and is worth reviewing on its own.
 `src/common/helpers/payload-client.ts` is this app's Payload HTTP client, and its
 exported surface is Payload vocabulary end to end: `PayloadErrorKind`,
 `PayloadRequestError`, `PayloadServer` — whose fields are a server URL and an auth
-collection slug — `serverBaseUrl`, and `request`. Under the content test in
-[directory-structure.md](./directory-structure.md) it belongs in `src/core/`, since a
-module carrying domain vocabulary goes there whatever its consumer count. Only that
-half of the test is breached: the server identity is caller-supplied, so the module
-carries no application configuration.
+collection slug — `serverBaseUrl`, `request`, and `parseResponse`. On the strictest
+reading of the content test in [directory-structure.md](./directory-structure.md), that
+vocabulary puts it in `src/core/`, since a module carrying domain vocabulary goes there
+whatever its consumer count. It stays in `src/common/` anyway. That is the maintainer's
+decision, and what follows is what it rests on.
 
-It is in `src/common/` because this repository's placement rule used to decide by
-consumer count, and three consumers had earned it a place there. That rule is gone, but
-the file has not moved: relocating it touches every importing module and is the whole
-content of issue #89, which also removes the upward import from
-`src/core/helpers/query-client.ts` that the client's current placement forces.
+**It passes the content test's prose form.** *A `common/` module could be lifted into a
+different application unchanged; a `core/` module could not, because it encodes this
+one's configuration.* This module encodes no configuration of **this** application: the
+server identity arrives as a `PayloadServer` parameter, the timeout is a transport
+constant, and no host, credential, or setting appears in the file. It lifts into any
+other Payload client unchanged. The theme was weighed against the same sentence and
+failed it outright — the Radix palette, the two font families, and the `xs`/`sm`/`md`
+breakpoints are this application — which is why it was folded into `src/unistyles.ts`
+while the client stayed put. The two modules got different answers because the test
+separates them, not because it was applied inconsistently.
 
-Its placement MUST NOT be raised as a fresh finding, and MUST NOT be copied as
-precedent — a new cross-cutting module is placed by the content test, not by this file.
+**It is not the kind of module `src/core/` holds.** Every module there is a configured
+singleton or a process-wide side effect: `env.ts` reads this app's environment,
+`error-reporting.ts` initializes Sentry, `logging.ts` builds the root logger,
+`query-client.ts` exports a constructed `QueryClient`, and `db/client.ts` opens the
+database. `payload-client.ts` is none of those — it exports an error class and
+stateless functions that take everything they act on as arguments, and nothing in the
+app is wired from it. The word "clients" in that tier's list sits among the singletons
+the application is configured with.
+
+**The domain-vocabulary half is where a reviewer could reasonably land the other way.**
+[glossary.md](../glossary.md) defines Collection, record, access, and session as
+Payload's own words used unchanged, so "Payload vocabulary is not this app's domain
+vocabulary" is not a free move. The reading taken here is that `PayloadRequestError`
+and `PayloadServer` name the wire protocol the app speaks — as an `HttpError` would —
+while the app's own model lives in `src/auth/models/` and `src/collections/models/`.
+That is a judgment rather than something the rule forces, and this entry records it as
+one.
+
+The placement is settled, so it MUST NOT be raised as a fresh finding, and MUST NOT be
+copied as precedent — a new cross-cutting module is placed by the content test, not by
+this file.
 
 ## Five decision records were backfilled
 
