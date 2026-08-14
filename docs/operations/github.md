@@ -9,9 +9,9 @@ section points at it rather than repeating it.
 
 ## Every agent-authored comment begins with `<!-- ai-agent -->`
 
-A session here writes under the repository owner's identity, so nothing about a
-comment's author tells a later reader — or a later run — that an agent wrote it. One
-fixed marker line does that instead.
+A session here writes under the connected operator's identity, whoever that is, so
+nothing about a comment's author tells a later reader — or a later run — that an agent
+wrote it. One fixed marker line does that instead.
 
 Every agent-authored GitHub comment MUST begin with the marker line
 `<!-- ai-agent -->`, reused identically across every run and session, and a comment
@@ -35,29 +35,30 @@ the repository owner. The installed capability states the assignment itself as a
 recommendation; here it binds, because a session in this repository has already opened
 a tracking issue unassigned and had to correct it mid-run (#106).
 
-## A pull request is assigned after it exists, and the write is verified
+Both of the capability's mechanics bind here along with it, because a rule that binds is
+no use while the two ways of getting it wrong stay optional reading. A pull request MUST
+be assigned by a second write after it exists, sent on the **issues** route against the
+pull request's own number; and that write MUST be verified by reading the assignee back
+rather than trusted from its response, because an assignment GitHub discards still
+returns success. The capability states both in full, with its own dated citations to
+GitHub's documentation — read the mechanics there rather than from this paragraph, which
+is here to say that they bind, not to re-explain them.
 
-A pull request cannot be assigned as it is created: neither the create call nor the
-update call carries assignees. Its assignment MUST be a second write, sent through the
-**issues** route while targeting the **pull request's own number** — what the write
-concerns decides the number, which endpoint family carries it decides the route, and
-holding those two apart is what keeps the write off the tracking issue.
+## A failed call is reported, not routed around
 
-That write MUST then be verified by reading the assignee back, rather than trusted from
-the response. An assignment the caller lacks push access for, and one naming a user the
-repository cannot assign, are both discarded rather than rejected — and both return
-success, so a successful response is not evidence the assignment landed.
+A failed call on the session's sanctioned GitHub tool channel MUST be reported rather
+than answered by reaching for another route. This is the half worth stating here,
+because a session in this repository commonly has a second route within reach — a shell
+with network access — and the pull toward it is strongest exactly when the channel is
+failing. An authentication failure, a timeout, a rate limit, or a 5xx is the sanctioned
+channel not working right now rather than the channel being unable to carry the
+operation, and switching routes on one turns an outage into an unreviewed write under
+different credentials while burying the failure that was the thing worth reporting.
 
-## The sanctioned channel carries every read and write
-
-Every GitHub read and write MUST go through the session's sanctioned GitHub tool
-channel, and a failed call on it MUST be reported rather than answered by reaching for
-another route. That second half is the one worth stating here, because another route
-does exist: this environment offers a shell with network access. An authentication
-failure, a timeout, a rate limit, or a 5xx is the sanctioned channel not working right
-now, not the channel being unable to carry the operation — and switching routes on one
-turns an outage into an unreviewed write under different credentials, while burying the
-failure that was the thing worth reporting.
+The channel stays the default for every read and write. The two conditions that put
+another route in play — a channel that is absent, and one that cannot complete or verify
+an operation faithfully — stay exactly as the installed capability states them, and
+nothing here widens or narrows either.
 
 ## No session issues a merge
 

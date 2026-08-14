@@ -11,11 +11,9 @@ constraints whose reasoning cannot be recovered from the code. The vocabulary al
 bodies use — the product's words and the repository's alike — is in
 [glossary.md](./glossary.md).
 
-`operations/` exists because a procedure turned up belonging to neither of the two
-files that held the rest: the commands, the preview build, and the skill refresh are in
-[README.md](../README.md), and how work runs is in [CLAUDE.md](../CLAUDE.md), but how a
-session operates GitHub is neither of those, so it moved out of `CLAUDE.md` into
-[operations/github.md](./operations/github.md).
+The commands, the preview build, and the skill refresh stay in
+[README.md](../README.md), and how work runs stays in [CLAUDE.md](../CLAUDE.md);
+`operations/` holds the procedures belonging to neither.
 
 Documents under `conventions/` and `operations/` use MUST, MUST NOT, SHOULD, SHOULD
 NOT, and MAY as [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html) describes.

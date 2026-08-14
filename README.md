@@ -90,7 +90,7 @@ Development in this repository is agent-assisted via [Claude Code](https://claud
 
 Every skill under [`.claude/skills/`](./.claude/skills) is an **installed copy** — the 26 general capabilities from [`axross/skills`](https://github.com/axross/skills), every one of them pinned by [`skills-lock.json`](./skills-lock.json). Nothing there is hand-written, and a hand-edit to any of them is discarded by the next reinstall, so never edit one to fix it. A rule that is wrong, outdated, or missing gets resolved one of two ways instead: open an issue against `axross/skills` when the gap generalizes beyond this project, or leave the skill untouched and write the gap and its workaround into [`docs/conventions/agent-skills.md`](./docs/conventions/agent-skills.md). Often both — the upstream issue is slow, and the local note keeps work moving until it lands.
 
-This repository authors no skill of its own, so there is no second tier to tell apart. A rule specific to this repository is a document under [`docs/conventions/`](./docs/conventions/) instead, which [`CLAUDE.md`](./CLAUDE.md) routes to by name — the route the installed `agent-skill-management` capability asks for wherever an always-loaded instruction file can carry it. The one repository-local skill this project had, `project-structure`, was retired into `docs/` on those grounds.
+This repository authors no skill of its own, so there is no second tier to tell apart. A rule specific to this repository is a document under [`docs/conventions/`](./docs/conventions/) or [`docs/operations/`](./docs/operations/) instead, which [`CLAUDE.md`](./CLAUDE.md) routes to by name — the route the installed `agent-skill-management` capability asks for wherever an always-loaded instruction file can carry it. The one repository-local skill this project had, `project-structure`, was retired into `docs/` on those grounds.
 
 Refresh the installed copies with the [vercel-labs/skills](https://github.com/vercel-labs/skills) CLI, then commit the regenerated directories together with `skills-lock.json`:
 
@@ -127,7 +127,7 @@ If npx cannot resolve the CLI (`npm error could not determine executable to run`
 2. **Code + verify** — implements the approved plan on an agent-namespaced `claude/` branch, runs the checks the changed surface requires, and self-reviews the diff. The implementation itself may be delegated to a single bounded worker rather than run in the session you are talking to; where the harness's delegation policy is undetermined, the run asks you that one question before it edits its first project file. Nothing about the loop changes either way — same approved plan, same checks, same independent review.
 3. **Independent review** — opens a draft pull request and requests the CI reviewer, a separate bot session, so the code's author never certifies its own work.
 4. **Address** — fixes review findings and CI failures, tying each resolved thread to the resolving commit, for up to eight rounds.
-5. **Ready** — flips the pull request to ready once CI is green and the review is clean. Merging always stays a human decision.
+5. **Ready** — flips the pull request to ready once CI is green and the review is clean. No session issues the merge itself; [`docs/operations/github.md`](./docs/operations/github.md) states why.
 
 Kick it off by naming the work — "deliver issue #42", "pick up PR 57", or a free-form request (with no issue yet, it files a tracking issue first, then delivers it). To approve a paused plan or resume after a question, continue the session and tell it to continue.
 
