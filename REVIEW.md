@@ -24,8 +24,8 @@ output — they exist for self-review, not for the pull-request thread.
 - **Important** — MUST be addressed before merge: a finding that breaks
   behavior, corrupts persisted state, leaks data, regresses accessibility,
   violates a MUST rule of a matching skill under `.claude/skills/` or of a
-  matching convention document under `docs/conventions/`, or leaves an
-  acceptance criterion unmet or unverifiable from the diff.
+  matching document under `docs/conventions/` or `docs/operations/`, or
+  leaves an acceptance criterion unmet or unverifiable from the diff.
 - **Nit** — safe to defer: style, naming, and refactoring suggestions.
 
 **Guidelines:**
@@ -33,7 +33,8 @@ output — they exist for self-review, not for the pull-request thread.
 - MUST label every posted finding exactly **Important** or **Nit** — no other
   labels appear in a posted review.
 - MUST label as Important every violated MUST rule of a matching skill or of
-  a matching document under [`docs/conventions/`](docs/conventions/), every rule
+  a matching document under [`docs/conventions/`](docs/conventions/) or
+  [`docs/operations/`](docs/operations/), every rule
   of [`CLAUDE.md`](CLAUDE.md) that
   the change violates, every acceptance criterion that is unmet or cannot be
   confirmed from the diff, and every mandatory-check miss that breaks a hard
@@ -51,9 +52,10 @@ skill in the finding.
 - **Skill and convention conformance** — verify the change conforms to
   **every** skill under [`.claude/skills/`](.claude/skills) whose routing
   condition — its own `description`/`when_to_use` — matches the changed files,
-  and to **every** document under [`docs/conventions/`](docs/conventions/) that
+  and to **every** document under [`docs/conventions/`](docs/conventions/) or
+  [`docs/operations/`](docs/operations/) that
   governs a surface the change touches. Every skill there is an installed
-  capability stating the general practice; the convention documents state this
+  capability stating the general practice; those documents state this
   repository's own answer within it and win where the two collide — except
   where
   [`docs/conventions/agent-skills.md`](docs/conventions/agent-skills.md)
