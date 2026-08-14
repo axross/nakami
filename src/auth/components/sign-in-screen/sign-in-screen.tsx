@@ -226,28 +226,25 @@ const styles = StyleSheet.create((theme) => ({
 		rowGap: theme.gap.md,
 	},
 	error: {
+		...theme.typography.caption,
 		color: theme.colors.text.destructive.base,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 13,
 	},
 	field: {
 		rowGap: theme.gap.xs,
 	},
 	input: {
+		...theme.typography.body,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.gap.sm,
 		borderWidth: 1,
 		color: theme.colors.text.neutral.intense,
-		fontFamily: theme.fonts.paragraph,
-		fontSize: 16,
 		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
 	},
 	label: {
+		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
-		fontFamily: theme.fonts.label,
-		fontSize: 13,
 	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
@@ -264,9 +261,8 @@ const styles = StyleSheet.create((theme) => ({
 		opacity: 0.5,
 	},
 	submitLabel: {
+		...theme.typography.heading,
 		color: theme.colors.text.onAccent,
-		fontFamily: theme.fonts.heading,
-		fontSize: 16,
 	},
 	submitPressed: {
 		opacity: 0.6,

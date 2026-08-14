@@ -84,12 +84,12 @@
      -------------------------------------------------------------------------
      SYNC SOURCE OF TRUTH: src/common/constants/style.ts
      The values below MIRROR that module (a static HTML file cannot import the
-     TypeScript). style.ts is now a semantic-role theme (foundation / surface /
+     TypeScript). style.ts is a semantic-role theme (foundation / surface /
      border / solid / text, each x neutral / accent / destructive; accent = Radix
-     Teal), with radii from `gap` (8/12/16 = gap.xs/sm/md) and font sizes inlined
-     per component (no size scale) paired with InnovatorGrotesk / JetBrains Mono.
-     The kit flattens those roles into the internal vars below; before a
-     high-fidelity round, RE-READ style.ts and reconcile any drift.
+     Teal), with radii from `gap` (8/12/16 = gap.xs/sm/md) and typography as six
+     composite roles in `theme.typography.*`, each bundling family, size, and
+     line height. The kit flattens those roles into the internal vars below;
+     before a high-fidelity round, RE-READ style.ts and reconcile any drift.
      Do NOT treat this block as the source of truth; style.ts is.
      ========================================================================= */
   .theme-band { margin-top: 40px; }
@@ -111,6 +111,21 @@
     --line-d: #d9d9e0; --accent-d: #008573; --accent-solid: #12a594; --accent-surface: #e0f8f3;
     --accentC: #ffffff; --danger-d: #ca244d;
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --tabInactive: #8b8d98;
+
+    /* theme.typography.* — the six composite text roles, one CSS `font`
+       shorthand each so a rule applies a role WHOLE (`font: var(--t-body)`),
+       the way a style spreads `...theme.typography.body` rather than picking
+       values out of it. Never set font-size or font-weight beside one.
+       The app carries weight in the font FILE (InnovatorGrotesk-SemiBold vs
+       -Regular) and sets no fontWeight; the kit has only system faces, so the
+       600 below stands in for the SemiBold file. */
+    --app-sans: var(--sans); --app-mono: var(--mono);
+    --t-display: 600 28px/34px var(--app-sans);
+    --t-title:   600 20px/26px var(--app-sans);
+    --t-heading: 600 16px/22px var(--app-sans);
+    --t-body:    400 16px/22px var(--app-sans);
+    --t-caption: 400 13px/18px var(--app-sans);
+    --t-code:    400 14px/22px var(--app-mono);
   }
   .device.dark, .el-surface.dark {
     /* dark — mirror style.ts dark theme */
@@ -128,53 +143,57 @@
     box-shadow: 0 18px 44px -20px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.35);
   }
   .scr { position: relative; border-radius: 30px; overflow: hidden; background: var(--bg); height: 560px; display: flex; flex-direction: column; }
+  /* The four sizes below are deliberately NOT typography roles: the status bar
+     and the nav back affordance are OS/React Navigation chrome the app does not
+     theme, and the chevron and tab labels are drawn glyphs and navigator
+     defaults. Everything the app itself styles goes through --t-* above. */
   .statusbar { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 12px; font-weight: 600; color: var(--txt); }
   .statusbar .dots i { width: 15px; height: 9px; border: 1.4px solid var(--txt); border-radius: 2px; display: inline-block; opacity: 0.85; }
   .nav { height: 44px; display: flex; align-items: center; padding: 0 8px; background: var(--elev); border-bottom: 1px solid var(--line-d); }
   .nav .back { color: var(--accent-d); font-size: 17px; display: flex; align-items: center; width: 64px; }
   .nav .back::before { content: "\2039"; font-size: 26px; line-height: 1; margin-top: -2px; }
-  .nav .navtitle { flex: 1; text-align: center; font-size: 16px; font-weight: 600; color: var(--txt); }  /* 16 · heading (fonts.heading) */
+  .nav .navtitle { flex: 1; text-align: center; font: var(--t-heading); color: var(--txt); }  /* typography.heading */
   .nav .navspace { width: 64px; }
   .content { flex: 1; overflow: hidden; }
 
   .empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px; }
   .mark { width: 66px; height: 66px; border-radius: var(--r-lg); background: var(--accent-surface); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
   .mark svg { width: 34px; height: 34px; color: var(--accent-d); }
-  .empty h4 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; color: var(--txt); }  /* 20 · heading (fonts.heading) */
-  .empty p { margin: 0; font-size: 16px; color: var(--txt2); max-width: 24ch; line-height: 1.45; }
-  .cta { margin-top: 22px; width: 100%; height: 50px; border-radius: var(--r-md); background: var(--accent-solid); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .empty h4 { margin: 0; font: var(--t-title); letter-spacing: -0.01em; color: var(--txt); }  /* typography.title */
+  .empty p { margin: 0; font: var(--t-body); color: var(--txt2); max-width: 24ch; }  /* typography.body */
+  .cta { margin-top: 22px; width: 100%; height: 50px; border-radius: var(--r-md); background: var(--accent-solid); color: var(--accentC); font: var(--t-heading); display: flex; align-items: center; justify-content: center; }  /* typography.heading */
 
   .placeholder { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 8px; }
-  .placeholder h4 { margin: 0; font-size: 28px; font-weight: 600; color: var(--txt); letter-spacing: -0.01em; }  /* 28 · heading (fonts.heading) */
-  .placeholder p { margin: 0; font-size: 16px; color: var(--txt2); }
+  .placeholder h4 { margin: 0; font: var(--t-display); color: var(--txt); letter-spacing: -0.01em; }  /* typography.display */
+  .placeholder p { margin: 0; font: var(--t-body); color: var(--txt2); }  /* typography.body */
 
   .form { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
   .form .field { gap: 0; }
-  .form label { display: block; font-size: 13px; font-weight: 500; color: var(--txt2); margin: 0 0 6px 2px; }  /* 13 · label (fonts.label) */
-  .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font-size: 16px; color: var(--txt); }
+  .form label { display: block; font: var(--t-caption); color: var(--txt2); margin: 0 0 6px 2px; }  /* typography.caption */
+  .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font: var(--t-body); color: var(--txt); }  /* typography.body */
   .input.ph { color: var(--txt2); }
   .input .dotpw { letter-spacing: 3px; }
-  .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font-size: 14px; margin-top: -4px; border: 0; }
+  .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font: var(--t-caption); margin-top: -4px; border: 0; }  /* typography.caption */
   .form .err svg, .el-surface .err svg { width: 16px; height: 16px; flex: none; }
-  .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-solid); color: var(--accentC); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }
+  .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-solid); color: var(--accentC); font: var(--t-heading); display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }  /* typography.heading */
   .submit.busy { opacity: 0.75; }
   .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45); border-top-color: #fff; }
 
   .settings { padding: 20px 0; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
   .grp { display: flex; flex-direction: column; gap: 9px; }
-  .grp .gh { font-size: 16px; font-weight: 700; color: var(--txt); padding: 0 16px; }
+  .grp .gh { font: var(--t-heading); color: var(--txt); padding: 0 16px; }  /* typography.heading */
   .grp .rows { margin: 0 16px; border: 0; background: transparent; }
   .item { min-height: 48px; background: var(--elev); display: flex; align-items: center; gap: 14px; padding: 9px 14px; border: 0; }
   .item + .item { border-top: 1px solid var(--line-d); }
   .grp .rows .item:first-child { border-top-left-radius: var(--r-md); border-top-right-radius: var(--r-md); }
   .grp .rows .item:last-child { border-bottom-left-radius: var(--r-md); border-bottom-right-radius: var(--r-md); }
-  .item .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex: none; }
+  .item .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font: var(--t-heading); flex: none; }  /* typography.heading */
   .item .ico { width: 22px; height: 22px; color: var(--txt2); flex: none; display: flex; }
   .item .ico svg { width: 22px; height: 22px; }
   .item .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .item .txt .a { font-size: 16px; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item .txt .b { font-size: 13px; color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item .lbl { flex: 1; font-size: 16px; color: var(--txt); }
+  .item .txt .a { font: var(--t-body); color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }  /* typography.body */
+  .item .txt .b { font: var(--t-caption); color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }  /* typography.caption */
+  .item .lbl { flex: 1; font: var(--t-body); color: var(--txt); }  /* typography.body */
   .item.signout .ico, .item.signout .lbl { color: var(--danger-d); }
   .item .chev::after { content: "\203A"; color: var(--txt2); font-size: 20px; }
 
@@ -190,7 +209,7 @@
   .el-spec > .el-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt2); }
   .el-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-  .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font-size: 16px; font-weight: 600; }
+  .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font: var(--t-heading); }  /* typography.heading */
   .el-btn.primary { background: var(--accent-solid); color: var(--accentC); }
   .el-btn.secondary { background: transparent; color: var(--accent-d); border: 1px solid var(--line-d); }
   .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.75; }
@@ -205,7 +224,7 @@
   <header class="masthead">
     <p class="eyebrow">Hi-Fi Design Kit · High fidelity</p>
     <h1>Real-token render for high-fidelity design rounds</h1>
-    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, radii, and the 13 / 16 / 20 / 28 type scale from <code>src/common/constants/style.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
+    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, radii, and the six composite text roles of <code>theme.typography.*</code> from <code>src/common/constants/style.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
     <div class="meta">
       <span class="tag"><strong>Fidelity</strong> high · real tokens</span>
       <span class="tag"><strong>Tokens</strong> mirror src/common/constants/style.ts</span>
