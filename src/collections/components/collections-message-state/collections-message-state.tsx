@@ -1,5 +1,4 @@
-import type { LucideIcon } from "lucide-react-native";
-import type { JSX } from "react";
+import type { ComponentProps, JSX } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { CollectionsMessageStateStatus } from "~/collections/components/collections-message-state/collections-message-state-status";
@@ -16,24 +15,22 @@ interface MessageAction {
  * {@link MessageState} with a primary retry button when an action is given, and
  * a pulsing status line when a status label is. The status line's own test hook
  * is derived from this surface's, so a test targets the two by related names.
+ *
+ * `status` narrows the shared slot from a node to a label: every collections
+ * status line is that one pulsing shape, and taking a node here would let a
+ * caller put something else in it.
  */
 export function CollectionsMessageState({
-	icon,
-	iconColor,
-	title,
-	subtitle,
-	status,
 	action,
+	status,
 	testID,
-}: Readonly<{
-	icon: LucideIcon;
-	iconColor?: string;
-	title: string;
-	subtitle: string;
-	status?: string;
-	action?: MessageAction;
-	testID?: string;
-}>): JSX.Element {
+	...props
+}: Readonly<
+	Omit<ComponentProps<typeof MessageState>, "action" | "status"> & {
+		action?: MessageAction;
+		status?: string;
+	}
+>): JSX.Element {
 	return (
 		<MessageState
 			action={
@@ -48,8 +45,6 @@ export function CollectionsMessageState({
 					</Pressable>
 				) : undefined
 			}
-			icon={icon}
-			iconColor={iconColor}
 			status={
 				status ? (
 					<CollectionsMessageStateStatus
@@ -58,9 +53,8 @@ export function CollectionsMessageState({
 					/>
 				) : undefined
 			}
-			subtitle={subtitle}
 			testID={testID}
-			title={title}
+			{...props}
 		/>
 	);
 }
@@ -69,7 +63,7 @@ const styles = StyleSheet.create((theme) => ({
 	button: (pressed: boolean) => ({
 		alignItems: "center",
 		backgroundColor: theme.colors.solid.accent.base,
-		borderRadius: theme.gap.sm,
+		borderRadius: theme.radius.md,
 		justifyContent: "center",
 		marginTop: theme.gap.md,
 		minHeight: 48,

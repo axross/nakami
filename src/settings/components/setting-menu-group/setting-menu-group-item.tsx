@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { Pressable, type StyleProp, type ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -8,7 +8,7 @@ export function SettingMenuGroupItem({
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof Pressable>, "style"> & {
+	Omit<ComponentPropsWithRef<typeof Pressable>, "style"> & {
 		first?: boolean;
 		last?: boolean;
 		style?: StyleProp<ViewStyle>;
@@ -26,10 +26,10 @@ const styles = StyleSheet.create((theme) => ({
 	item: (first: boolean, last: boolean, pressed: boolean) => ({
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderBottomLeftRadius: last ? theme.gap.sm : 0,
-		borderBottomRightRadius: last ? theme.gap.sm : 0,
-		borderTopLeftRadius: first ? theme.gap.sm : 0,
-		borderTopRightRadius: first ? theme.gap.sm : 0,
+		borderBottomLeftRadius: last ? theme.radius.md : 0,
+		borderBottomRightRadius: last ? theme.radius.md : 0,
+		borderTopLeftRadius: first ? theme.radius.md : 0,
+		borderTopRightRadius: first ? theme.radius.md : 0,
 		columnGap: theme.gap.md,
 		flexDirection: "row",
 		minHeight: 48,

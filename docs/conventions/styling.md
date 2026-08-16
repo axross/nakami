@@ -42,18 +42,62 @@ A colour MUST come from a token. A shade the tokens do not already carry MUST be
 to `src/unistyles.ts` rather than inlined at the use site, so that the value has one
 definition and the dark theme cannot silently miss it.
 
-## Spacing and radii
+## Spacing
 
-`theme.gap.*` is the scale: `xs` 8, `sm` 12, `md` 16, `lg` 24, `xl` 32. It is the
-spacing scale and the radius scale at once — there is no separate radius family — so a
-border radius MUST be taken from `theme.gap.*` as well, and an on-scale spacing or
-radius value MUST NOT be hard-coded.
+`theme.gap.*` is the spacing scale, and only the spacing scale: `xs` 8, `sm` 12, `md`
+16, `lg` 24, `xl` 32. It covers padding, margin, and the gap between children. An
+on-scale spacing value MUST NOT be hard-coded, and a radius MUST NOT be taken from it —
+radius is its own family, below.
 
-Folding the two families together is a departure from the installed
-`react-component-styling` capability, which requires that radius and spacing stay
-separate precisely because one can move without the other. Splitting them out, along
-with a duration family the theme does not have at all, is tracked as issue #72; until
-it lands, the shared scale is what the code uses.
+## Radii
+
+`theme.radius.*` carries four steps, each named for the role a surface plays rather
+than for its value, so a surface picks by role instead of by eye:
+
+| Step   | Value | Role                                                              |
+| ------ | ----- | ------------------------------------------------------------------- |
+| `sm`   | 8     | Inset marks and placeholder bars — a collection monogram, a skeleton bar |
+| `md`   | 12    | The default surface corner — cards, inputs, buttons, menu-group ends |
+| `lg`   | 16    | Large marks — a message state's icon plate                        |
+| `pill` | 999   | Fully rounded — the record-id chip, the account avatar            |
+
+A border radius MUST come from this family. `pill` needs no per-surface measurement:
+React Native clamps a radius to half the shorter side, so one step draws a pill on a
+short chip and a circle on a square avatar.
+
+## Border widths
+
+`theme.borderWidth.*` has two steps. `hairline` is `StyleSheet.hairlineWidth` — the
+thinnest line the display can draw, a third of a point on a 3x screen — and is what
+every border, divider, and flush-row separator in this app uses. `thin` is 1, the step
+up for a border meant to read as a weight rather than as a separator; nothing consumes
+it yet.
+
+A border width MUST come from this family, and a hairline MUST NOT be written as the
+literal `1`. That applies past `borderWidth` itself: a divider drawn as a filled `View`
+takes its `height` from here, and rows sitting flush take the `rowGap` that separates
+them from here too.
+
+## Motion
+
+`theme.duration.*` is `fast` 150, `base` 250, and `slow` 700 — named by magnitude
+rather than by milliseconds, so retuning a step does not turn its name into a lie.
+`slow` is the skeleton pulse; `fast` and `base` are the interaction tier and have no
+consumer yet.
+
+`theme.easing.standard` is the app's one curve, an ease-in-out quad. An animation MUST
+draw its duration and its curve from these two rather than inlining either, including
+when the value goes to reanimated rather than to a stylesheet — a component reads them
+off the theme through `useUnistyles()` in that case.
+
+Two things about `easing.standard` are worth knowing before changing it. It is written
+out by hand rather than imported as reanimated's `Easing.inOut(Easing.quad)`, because
+`src/unistyles.ts` is the root layout's first import and a `setupFiles` entry in
+`jest.config.cjs` — importing `react-native-reanimated` there loads the real native
+module, which fails every unit suite and pulls native initialization into the app's
+first tick. And it carries the `"worklet"` directive, which is what lets reanimated run
+it on the UI thread; `src/unistyles.test.ts` asserts that metadata survives being read
+back off the registered theme, because no use site would catch its loss.
 
 ## Typography
 

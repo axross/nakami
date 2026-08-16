@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentProps, ComponentPropsWithRef, JSX } from "react";
 import {
 	Pressable,
 	type StyleProp,
@@ -24,7 +24,7 @@ function CollectionRow({
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof Pressable>, "style" | "children"> & {
+	Omit<ComponentPropsWithRef<typeof Pressable>, "style" | "children"> & {
 		collection: Collection;
 		style?: StyleProp<ViewStyle>;
 	}
@@ -57,10 +57,21 @@ function CollectionRow({
  * is declarative via `Link`; the row body lives in
  * {@link CollectionRow} so `Link asChild` targets a wrapper component rather
  * than the Unistyles-styled `Pressable` directly (see that component's note).
+ *
+ * `style` is the one prop this row deliberately does **not** publish, against
+ * the general rule that a component rendering a styled root accepts one.
+ * `Link asChild` slots its child through `@radix-ui/react-slot`, which composes
+ * a `style` by spreading it into an object literal — which throws in
+ * development for the array form, and silently detaches a Unistyles style from
+ * the updates it applies through its own reference. A `style` accepted here
+ * would type-check and not work, which is the exact failure this component's
+ * props contract exists to remove. Size and place the row from the list's
+ * `contentContainerStyle` instead.
  */
 export function CollectionListItem({
 	collection,
-}: Readonly<{ collection: Collection }>): JSX.Element {
+	...props
+}: Readonly<Omit<ComponentProps<typeof CollectionRow>, "style">>): JSX.Element {
 	return (
 		<Link
 			asChild
@@ -69,7 +80,7 @@ export function CollectionListItem({
 				params: { slug: collection.slug },
 			}}
 		>
-			<CollectionRow collection={collection} />
+			<CollectionRow collection={collection} {...props} />
 		</Link>
 	);
 }
@@ -84,7 +95,7 @@ const styles = StyleSheet.create((theme) => ({
 		alignItems: "center",
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.accent.base,
-		borderRadius: theme.gap.xs,
+		borderRadius: theme.radius.sm,
 		justifyContent: "center",
 		width: 34,
 	},

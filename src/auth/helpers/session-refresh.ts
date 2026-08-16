@@ -43,21 +43,44 @@ export async function refreshSessionIfDue(): Promise<void> {
 	}
 
 	refreshing = true;
+	const startedAt = performance.now();
+	// Routine bracket-open at debug; each of the three closes below carries the
+	// terminal `outcome`, mirroring `auth-store.hydrate`. Log the endpoint only —
+	// never the token.
+	logger.debug("Started refreshing the session token.", {
+		serverUrl: session.serverUrl,
+	});
+
 	try {
 		const result = await refreshToken(
 			{ serverUrl: session.serverUrl, collectionSlug: session.collectionSlug },
 			session.token,
 		);
 		await applyRefresh(result.refreshedToken, result.exp, result.user);
-		logger.info("Refreshed session token.");
+		logger.info("Completed refreshing the session token.", {
+			outcome: "refreshed",
+			duration: performance.now() - startedAt,
+		});
 	} catch (error) {
 		if (error instanceof PayloadRequestError && error.kind === "auth") {
+			// This is where a session ends for a user who was away long enough for
+			// the token to expire. It is the only line that attributes the
+			// involuntary sign-out, so it names the reason and stays at info — a
+			// rejected token is an expected operational state, not a defect, so it
+			// is deliberately not reported to the error tracker.
+			logger.info("Completed refreshing the session token.", {
+				outcome: "signed-out",
+				reason: "token-rejected",
+				duration: performance.now() - startedAt,
+			});
 			await deauthenticate();
 			return;
 		}
 
-		logger.warn("Token refresh deferred.", {
+		logger.warn("Completed refreshing the session token.", {
+			outcome: "deferred",
 			reason: error instanceof Error ? error.message : "unknown",
+			duration: performance.now() - startedAt,
 		});
 	} finally {
 		refreshing = false;

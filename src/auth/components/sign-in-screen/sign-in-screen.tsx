@@ -220,9 +220,17 @@ export function SignInScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// The stack header clears the top edge, so this screen owns the bottom and
+	// the horizontal pair. The insets sit on the scrolled content rather than on
+	// the `ScrollView` itself: padding the scroll view would inset its scroll
+	// indicators with it and leave the form stopping short of the screen edge
+	// with a dead band beyond it.
 	content: {
-		padding: theme.gap.md,
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingTop: theme.gap.md,
 		rowGap: theme.gap.md,
 	},
 	error: {
@@ -236,8 +244,8 @@ const styles = StyleSheet.create((theme) => ({
 		...theme.typography.body,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.gap.sm,
-		borderWidth: 1,
+		borderRadius: theme.radius.md,
+		borderWidth: theme.borderWidth.hairline,
 		color: theme.colors.text.neutral.intense,
 		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
@@ -253,7 +261,7 @@ const styles = StyleSheet.create((theme) => ({
 	submit: {
 		alignItems: "center",
 		backgroundColor: theme.colors.solid.accent.base,
-		borderRadius: theme.gap.sm,
+		borderRadius: theme.radius.md,
 		justifyContent: "center",
 		minHeight: 50,
 	},

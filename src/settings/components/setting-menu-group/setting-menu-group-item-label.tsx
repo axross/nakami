@@ -1,11 +1,11 @@
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export function SettingMenuGroupItemLabel({
 	style,
 	...props
-}: Readonly<ComponentPropsWithoutRef<typeof Text>>): JSX.Element {
+}: Readonly<ComponentPropsWithRef<typeof Text>>): JSX.Element {
 	return <Text style={[styles.label, style]} {...props} />;
 }
 

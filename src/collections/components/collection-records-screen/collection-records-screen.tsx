@@ -58,7 +58,6 @@ export function CollectionRecordsScreen({
 		isFetchingNextPage,
 	} = useInfiniteQuery({
 		...getCollectionRecordsInfiniteQueryOptions({
-			serverUrl: session?.serverUrl ?? "",
 			userId: session?.user.id ?? "",
 			slug,
 		}),
@@ -77,6 +76,7 @@ export function CollectionRecordsScreen({
 				icon={copy.icon}
 				iconColor={theme.colors.text.neutral.base}
 				status={copy.status}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collection-records-offline"
 				title={copy.title}
@@ -105,6 +105,7 @@ export function CollectionRecordsScreen({
 						? theme.colors.text.destructive.base
 						: theme.colors.text.neutral.base
 				}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collection-records-error"
 				title={copy.title}
@@ -117,6 +118,7 @@ export function CollectionRecordsScreen({
 			content = (
 				<CollectionsMessageState
 					icon={FileText}
+					style={styles.messageState}
 					subtitle="There are no records in this collection yet."
 					testID="collection-records-empty"
 					title="No records"
@@ -159,7 +161,7 @@ export function CollectionRecordsScreen({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	count: {
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
@@ -169,9 +171,23 @@ const styles = StyleSheet.create((theme) => ({
 	footer: {
 		paddingVertical: theme.gap.md,
 	},
+	// A stack header clears the top edge and the tab bar the bottom, so this
+	// screen owns only the horizontal pair — carried on the feed's content
+	// container, not on the list itself, which would inset its scroll indicators
+	// and leave the cards stopping short of the screen edge.
+	// `CollectionRecordsSkeleton` mirrors these values, or the feed would shift
+	// when the records arrive.
 	list: {
 		gap: theme.gap.sm,
-		padding: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingTop: theme.gap.md,
+	},
+	// The message state claims no space of its own, so this screen — which gives
+	// it the whole surface — supplies the fill.
+	messageState: {
+		flex: 1,
 	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,

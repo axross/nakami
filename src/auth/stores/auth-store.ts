@@ -7,8 +7,10 @@ import {
 	writeSession,
 } from "~/auth/helpers/session-storage";
 import type { PayloadUser, Session } from "~/auth/models/session";
+import { getSessionQueryKeyRoot } from "~/common/helpers/session-query-key";
 import { reportError } from "~/core/helpers/error-reporting";
 import { createModuleLogger } from "~/core/helpers/logging";
+import { queryClient } from "~/core/helpers/query-client";
 
 const logger = createModuleLogger("auth/auth-store");
 
@@ -30,7 +32,12 @@ interface AuthStore {
 	hydrate: () => Promise<void>;
 	/** Persists a freshly obtained session and marks the app authenticated. */
 	authenticate: (session: Session) => Promise<void>;
-	/** Clears the stored session and marks the app unauthenticated. */
+	/**
+	 * Clears the stored session, marks the app unauthenticated, and evicts the
+	 * ending session's cached server state. Every sign-out path runs through
+	 * here, including the one {@link AuthStore.hydrate} takes when the server
+	 * rejects a stored session.
+	 */
 	deauthenticate: () => Promise<void>;
 	/** Replaces the token/expiry (and user) after a successful refresh. */
 	applyRefresh: (
@@ -129,11 +136,38 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 		// the session but deliberately leaves this value in place.
 		await writeLastServerUrl(session.serverUrl);
 		set({ status: "authenticated", session });
+		// One line per terminal store transition, at debug: each of these is an
+		// internal step of an operation (sign-in, sign-out, refresh, hydration)
+		// that already closes its own bracket at info. Logged after the keychain
+		// write so the line only appears once the transition actually happened;
+		// a throwing write is closed by the calling operation's failure line.
+		// Never log the token or the user's email.
+		logger.debug("Stored the session.", { serverUrl: session.serverUrl });
 	},
 
 	async deauthenticate() {
+		// Read the id before the session is gone — the eviction is keyed on it.
+		const userId = get().session?.user.id ?? null;
+
 		await clearSession();
+		// Unauthenticate before evicting, not after: the collections queries gate
+		// on an active session and the root navigator unmounts the tab group with
+		// them, so closing that gate first is what stops a still-mounted observer
+		// from refetching the entries the eviction below is about to remove.
 		set({ status: "unauthenticated", session: null });
+
+		if (userId !== null) {
+			// Clearing the session does not clear the cache. Without this, the
+			// ended session's collections and records stay readable in memory
+			// until gcTime expires them. `removeQueries` rather than
+			// `invalidateQueries`: invalidation leaves the data resident and can
+			// refetch with a token that has already been discarded.
+			queryClient.removeQueries({ queryKey: getSessionQueryKeyRoot(userId) });
+		}
+
+		// Last, so the line stands for the whole terminal transition — the
+		// keychain clear, the status flip, and the cache eviction above.
+		logger.debug("Cleared the session.");
 	},
 
 	async applyRefresh(token, exp, user) {
@@ -151,6 +185,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 		};
 		await writeSession(next);
 		set({ session: next });
+		logger.debug("Replaced the session token.", { exp });
 	},
 }));
 

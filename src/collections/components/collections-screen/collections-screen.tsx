@@ -40,10 +40,7 @@ export function CollectionsScreen(): JSX.Element {
 	const { theme } = useUnistyles();
 	const session = useAuthSession();
 	const { data, isPending, fetchStatus, isError, error, refetch } = useQuery({
-		...getCollectionListQueryOptions({
-			serverUrl: session?.serverUrl ?? "",
-			userId: session?.user.id ?? "",
-		}),
+		...getCollectionListQueryOptions({ userId: session?.user.id ?? "" }),
 		enabled: session !== null,
 	});
 
@@ -58,13 +55,14 @@ export function CollectionsScreen(): JSX.Element {
 				icon={copy.icon}
 				iconColor={theme.colors.text.neutral.base}
 				status={copy.status}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collections-offline"
 				title={copy.title}
 			/>
 		);
 	} else if (isPending) {
-		content = <CollectionListSkeleton />;
+		content = <CollectionListSkeleton style={styles.skeleton} />;
 	} else if (isError) {
 		const copy = describeLoadError(error, COLLECTIONS_LOAD_ERROR);
 		content = (
@@ -86,6 +84,7 @@ export function CollectionsScreen(): JSX.Element {
 						? theme.colors.text.destructive.base
 						: theme.colors.text.neutral.base
 				}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collections-error"
 				title={copy.title}
@@ -100,12 +99,14 @@ export function CollectionsScreen(): JSX.Element {
 				keyExtractor={(collection) => collection.slug}
 				renderItem={({ item }) => <CollectionListItem collection={item} />}
 				style={styles.list}
+				testID="collections-list"
 			/>
 		);
 	} else {
 		content = (
 			<CollectionsMessageState
 				icon={FolderOpen}
+				style={styles.messageState}
 				subtitle="There are no collections to show for this account."
 				testID="collections-empty"
 				title="No collections"
@@ -120,25 +121,46 @@ export function CollectionsScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// A stack header clears the top edge and the tab bar the bottom, so this
+	// screen owns only the horizontal pair — carried on the list's content
+	// container, not on the list itself, which would inset its scroll indicators
+	// and leave the rows stopping short of the screen edge.
+	// `CollectionListSkeleton` mirrors these values, or the card would shift
+	// when the collections arrive.
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.gap.sm,
-		borderWidth: 1,
-		margin: theme.gap.md,
+		borderRadius: theme.radius.md,
+		borderWidth: theme.borderWidth.hairline,
+		marginBottom: theme.gap.md,
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginTop: theme.gap.md,
 		overflow: "hidden",
 	},
+	// Drawn as a filled `View` rather than a border, so the hairline is its
+	// height.
 	divider: {
 		backgroundColor: theme.colors.border.neutral.subtle,
-		height: 1,
+		height: theme.borderWidth.hairline,
 	},
 	list: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
+	// The message state claims no space of its own, so this screen — which gives
+	// it the whole tab — supplies the fill.
+	messageState: {
+		flex: 1,
+	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
+		flex: 1,
+	},
+	// The skeleton claims no space of its own either, and it stands in for the
+	// whole list.
+	skeleton: {
 		flex: 1,
 	},
 }));

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { LogOut, UserRound } from "lucide-react-native";
-import { type JSX, useCallback } from "react";
+import { type ComponentProps, type JSX, useCallback } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { getSignOutMutationOptions } from "~/auth/mutations/sign-out-mutation";
@@ -16,7 +16,9 @@ import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-gr
  * Sign out action. Rendered only while authenticated (the parent gates it), so
  * the session is always present here.
  */
-export function SettingsAccountGroup(): JSX.Element | null {
+export function SettingsAccountGroup(
+	props: Readonly<Omit<ComponentProps<typeof SettingMenuGroup>, "children">>,
+): JSX.Element | null {
 	const { theme } = useUnistyles();
 	const session = useAuthSession();
 	const { mutate: signOut, isPending } = useMutation(
@@ -32,7 +34,7 @@ export function SettingsAccountGroup(): JSX.Element | null {
 	}
 
 	return (
-		<SettingMenuGroup>
+		<SettingMenuGroup {...props}>
 			<SettingMenuGroupHeading>Account</SettingMenuGroupHeading>
 
 			<SettingMenuGroupBody>
@@ -72,8 +74,8 @@ const styles = StyleSheet.create((theme) => ({
 	accountRow: {
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderTopLeftRadius: theme.gap.sm,
-		borderTopRightRadius: theme.gap.sm,
+		borderTopLeftRadius: theme.radius.md,
+		borderTopRightRadius: theme.radius.md,
 		columnGap: theme.gap.md,
 		flexDirection: "row",
 		minHeight: 48,
@@ -84,11 +86,13 @@ const styles = StyleSheet.create((theme) => ({
 		flexShrink: 1,
 		rowGap: theme.gap.xs,
 	},
+	// Square by `aspectRatio`, so the pill radius clamps to half the side and
+	// draws a true circle — matching how the design kit already renders it.
 	avatar: {
 		alignItems: "center",
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.neutral.base,
-		borderRadius: theme.gap.md,
+		borderRadius: theme.radius.pill,
 		justifyContent: "center",
 		width: 36,
 	},

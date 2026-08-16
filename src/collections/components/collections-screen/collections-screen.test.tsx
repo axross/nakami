@@ -15,6 +15,7 @@ import {
 	waitFor,
 } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
+import { StyleSheet } from "react-native";
 import CollectionRecordsRoute from "~/app/(tabs)/collections/[slug]";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
@@ -22,6 +23,7 @@ import { fetchAccess } from "~/collections/helpers/fetch-access";
 import { fetchRecords } from "~/collections/helpers/fetch-records";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { themes } from "~/unistyles";
 import { CollectionsScreen } from "./collections-screen";
 
 // Mock only the data layer the real query calls; the query, its factory, and
@@ -267,5 +269,29 @@ describe("<CollectionsScreen>", () => {
 			expect(getByTestId("collection-records-empty")).toBeTruthy();
 		});
 		expect(getByText("No records")).toBeTruthy();
+	});
+
+	// A stack header and the tab bar clear this screen's vertical edges, so it
+	// owns only the horizontal pair — carried on the list's content container
+	// rather than the list itself. Unistyles' jest mock reports zero insets, so
+	// this is the zero-inset device: the card's margin has to fall back to the
+	// design gutter rather than collapsing to the raw inset.
+	it("keeps the list card's horizontal gutter when the runtime reports no insets", async () => {
+		jest
+			.mocked(fetchAccess)
+			.mockResolvedValue({ collections: { posts: { read: true } } });
+
+		const { getByTestId } = renderScreen();
+
+		await waitFor(() => {
+			expect(getByTestId("collection-list-item-posts")).toBeTruthy();
+		});
+
+		const card = StyleSheet.flatten(
+			getByTestId("collections-list").props.contentContainerStyle,
+		);
+
+		expect(card.marginStart).toBe(themes.light.gap.md);
+		expect(card.marginEnd).toBe(themes.light.gap.md);
 	});
 });

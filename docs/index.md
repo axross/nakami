@@ -34,11 +34,14 @@ Documents under `specs/` describe rather than instruct, and use none of them.
   file goes, what it is called, and which module may import which, including the three
   ratified exceptions to the import direction.
 - [conventions/styling.md](./conventions/styling.md) — the theme tokens: colour roles,
-  tones, and steps, the shared spacing-and-radius scale, the composite text roles, the
-  breakpoints, and the adaptive-theme setting.
+  tones, and steps, the spacing, radius, border-width, and motion scales, the composite
+  text roles, the breakpoints, and the adaptive-theme setting.
 - [conventions/components.md](./conventions/components.md) — the shared-component
   catalog, splitting a component into one file per part, Lucide as the single icon set,
   and the image rules that go beyond the installed ones.
+- [conventions/safe-areas.md](./conventions/safe-areas.md) — Unistyles' mini runtime as
+  the app's only inset source, which edges each screen owns, flooring an inset against
+  the surface's own gutter, and why horizontal insets are unverifiable today.
 - [conventions/data-layer.md](./conventions/data-layer.md) — where this app's on-device
   tables are defined, and the projection, filter, and result limit a read has to state.
 - [conventions/server-state.md](./conventions/server-state.md) — the single TanStack
