@@ -86,12 +86,15 @@
      The values below MIRROR that module (a static HTML file cannot import the
      TypeScript). src/unistyles.ts is a semantic-role theme (foundation /
      surface / border / solid / text, each x neutral / accent / destructive;
-     accent = Radix Teal), with radii from `gap` (8/12/16 = gap.xs/sm/md) and
-     typography as six composite roles in `theme.typography.*`, each bundling
-     family, size, and line height. The kit flattens those roles into the
-     internal vars below; before a high-fidelity round, RE-READ src/unistyles.ts
-     and reconcile any drift. Do NOT treat this block as the source of truth;
-     src/unistyles.ts is.
+     accent = Radix Teal), with radii from `theme.radius.*` (sm/md/lg/pill),
+     border widths from `theme.borderWidth.*`, motion from `theme.duration.*`
+     and `theme.easing.*`, and typography as six composite roles in
+     `theme.typography.*`, each bundling family, size, and line height. Radius
+     is its own family and is NOT the spacing scale — `theme.gap.*` is spacing
+     only, and nothing here should resolve a corner through it. The kit flattens
+     those roles into the internal vars below; before a high-fidelity round,
+     RE-READ src/unistyles.ts and reconcile any drift. Do NOT treat this block
+     as the source of truth; src/unistyles.ts is.
      ========================================================================= */
   .theme-band { margin-top: 40px; }
   .theme-band > h3.band { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 18px; padding-bottom: 9px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
@@ -111,7 +114,22 @@
     --bg: #fcfcfd; --elev: #f9f9fb; --surface: #f0f0f3; --txt: #1c2024; --txt2: #60646c;
     --line-d: #d9d9e0; --accent-d: #008573; --accent-solid: #12a594; --accent-surface: #e0f8f3;
     --accentC: #ffffff; --danger-d: #ca244d;
-    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --tabInactive: #8b8d98;
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-pill: 999px; --tabInactive: #8b8d98;
+
+    /* theme.borderWidth.* — `hairline` is StyleSheet.hairlineWidth on device
+       (1/pixelRatio, so 0.33px at 3x); a browser has no equivalent, and 0.5px
+       stands in for it here. The device is the truth for line weight. `thin`
+       has no consumer in the app yet. */
+    --bw-hairline: 0.5px; --bw-thin: 1px;
+
+    /* theme.duration.* / theme.easing.* — the motion scale, named by magnitude.
+       `slow` is the skeleton pulse; `fast` and `base` are the interaction tier
+       and have no consumer yet. `standard` is the app's one curve — an
+       ease-in-out quad, which is also what reanimated's withTiming defaults to;
+       the app writes it out by hand rather than importing reanimated's Easing
+       (see docs/conventions/styling.md for why). */
+    --dur-fast: 150ms; --dur-base: 250ms; --dur-slow: 700ms;
+    --ease-standard: cubic-bezier(0.455, 0.03, 0.515, 0.955);
 
     /* theme.typography.* — the six composite text roles, one CSS `font`
        shorthand each so a rule applies a role WHOLE (`font: var(--t-body)`),
@@ -171,7 +189,7 @@
   .form { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
   .form .field { gap: 0; }
   .form label { display: block; font: var(--t-caption); color: var(--txt2); margin: 0 0 6px 2px; }  /* typography.caption */
-  .input { height: 46px; border: 1px solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font: var(--t-body); color: var(--txt); }  /* typography.body */
+  .input { height: 46px; border: var(--bw-hairline) solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font: var(--t-body); color: var(--txt); }  /* typography.body */
   .input.ph { color: var(--txt2); }
   .input .dotpw { letter-spacing: 3px; }
   .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font: var(--t-caption); margin-top: -4px; border: 0; }  /* typography.caption */
@@ -185,10 +203,12 @@
   .grp .gh { font: var(--t-heading); color: var(--txt); padding: 0 16px; }  /* typography.heading */
   .grp .rows { margin: 0 16px; border: 0; background: transparent; }
   .item { min-height: 48px; background: var(--elev); display: flex; align-items: center; gap: 14px; padding: 9px 14px; border: 0; }
-  .item + .item { border-top: 1px solid var(--line-d); }
+  /* The app draws this separator as the rowGap between flush rows, not as a
+     border, but it is the same hairline either way. */
+  .item + .item { border-top: var(--bw-hairline) solid var(--line-d); }
   .grp .rows .item:first-child { border-top-left-radius: var(--r-md); border-top-right-radius: var(--r-md); }
   .grp .rows .item:last-child { border-bottom-left-radius: var(--r-md); border-bottom-right-radius: var(--r-md); }
-  .item .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font: var(--t-heading); flex: none; }  /* typography.heading */
+  .item .avatar { width: 34px; height: 34px; border-radius: var(--r-pill); background: var(--surface); color: var(--accent-d); display: flex; align-items: center; justify-content: center; font: var(--t-heading); flex: none; }  /* radius.pill — a true circle, as the app now draws it */
   .item .ico { width: 22px; height: 22px; color: var(--txt2); flex: none; display: flex; }
   .item .ico svg { width: 22px; height: 22px; }
   .item .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -212,11 +232,25 @@
 
   .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font: var(--t-heading); }  /* typography.heading */
   .el-btn.primary { background: var(--accent-solid); color: var(--accentC); }
-  .el-btn.secondary { background: transparent; color: var(--accent-d); border: 1px solid var(--line-d); }
+  .el-btn.secondary { background: transparent; color: var(--accent-d); border: var(--bw-hairline) solid var(--line-d); }
   .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.75; }
   .input.focus { border-color: var(--accent-solid); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-solid) 30%, transparent); }
   .input.error { border-color: var(--danger-d); }
   .caret { width: 1.5px; height: 20px; background: var(--accent-d); margin-left: 1px; display: inline-block; }
+
+  /* The loading skeletons' pulse, on the two motion tokens both of the app's
+     skeletons share: each leg runs for theme.duration.slow, so a full cycle is
+     twice that. The bar heights are fixed line-box dimensions matched to the
+     typography roles they stand in for, which is why they are literals in the
+     app too. Held at a steady opacity under reduced motion, exactly as the app
+     does through reanimated's useReducedMotion. */
+  .skel { display: flex; flex-direction: column; gap: 9px; }
+  .skel .bar { height: 11px; border-radius: var(--r-sm); background: var(--line-d); animation: skel-pulse calc(var(--dur-slow) * 2) var(--ease-standard) infinite; }
+  .skel .bar.tall { height: 13px; }
+  @keyframes skel-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .skel .bar { animation: none; opacity: 0.6; }
+  }
   footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; }
   footer code { font-family: var(--mono); font-size: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 </style>
@@ -225,7 +259,7 @@
   <header class="masthead">
     <p class="eyebrow">Hi-Fi Design Kit · High fidelity</p>
     <h1>Real-token render for high-fidelity design rounds</h1>
-    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, radii, and the six composite text roles of <code>theme.typography.*</code> from <code>src/unistyles.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
+    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, the <code>theme.radius.*</code> corner roles, <code>theme.borderWidth.*</code>, the <code>theme.duration.*</code> / <code>theme.easing.*</code> motion scale, and the six composite text roles of <code>theme.typography.*</code> from <code>src/unistyles.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
     <div class="meta">
       <span class="tag"><strong>Fidelity</strong> high · real tokens</span>
       <span class="tag"><strong>Tokens</strong> mirror src/unistyles.ts</span>
@@ -365,6 +399,12 @@
       <div class="grp"><div class="rows">
         <div class="item signout"><span class="ico"><svg><use href="#i-logout"/></svg></span><span class="lbl">Sign out</span></div>
       </div></div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Loading skeleton — duration.slow · easing.standard</span>
+      <div class="skel">
+        <div class="bar tall" style="width:82%"></div>
+        <div class="bar" style="width:40%"></div>
+      </div>
     </div>
     <div class="el-spec"><span class="el-lbl">Tab bar — active / inactive</span>
       <div class="tabs" style="border-radius:var(--r-md);border:1px solid var(--line-d)">

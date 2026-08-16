@@ -66,6 +66,36 @@ describe("themes", () => {
 		},
 	);
 
+	// Both loading skeletons hand `easing.standard` to reanimated, which runs it
+	// on the UI thread and rejects a function the worklets Babel plugin never
+	// transformed. Nothing at a use site catches that: the curve is read through
+	// the theme like any other token, and a missing directive surfaces only as a
+	// failed animation on a device. These assertions are also what confirm the
+	// metadata survives being registered as part of the theme object.
+	describe.each(["light", "dark"] as const)("%s theme easing", (name) => {
+		const { standard } = themes[name].easing;
+
+		it("carries worklet metadata in standard", () => {
+			expect(standard).toHaveProperty("__workletHash");
+		});
+
+		// An empty closure is what makes the curve shareable on its own; a worklet
+		// that captured a module-scope binding would drag that binding across too.
+		it("captures nothing from module scope in standard", () => {
+			expect(standard).toHaveProperty("__closure", {});
+		});
+
+		// The ease-in-out quad `withTiming` already defaults to, so naming the
+		// curve explicitly leaves every existing animation rendering as it did.
+		it("eases in and out around the midpoint in standard", () => {
+			expect(standard(0)).toBe(0);
+			expect(standard(0.25)).toBe(0.125);
+			expect(standard(0.5)).toBe(0.5);
+			expect(standard(0.75)).toBe(0.875);
+			expect(standard(1)).toBe(1);
+		});
+	});
+
 	// A record card's height is fixed by RECORD_CARD_LINE (22), which the title
 	// row reaches from its own role rather than from an override at the use site.
 	it("gives heading, body, and code the record card's 22pt line box", () => {

@@ -10,17 +10,34 @@ Every entry is a recorded decision, not a defect. A reviewer who finds this code
 doing one of the things below has found this document; anything else that departs from
 an installed rule is a finding.
 
-## Two query keys use the trailing-filter shape
+## Query keys carry no server URL
 
-`src/collections/queries/collection-list-query.ts` and `collection-records-query.ts`
-put tenancy in a trailing filter object — `["collections", scope]` — which the
-installed `tanstack-query-development` capability marks as a Major finding. Migrating
-them is tracked as issue #67.
+The installed `tanstack-query-development` capability's
+[query-keys.md](../../.claude/skills/tanstack-query-development/references/query-keys.md)
+states a MUST:
 
-New code MUST use the tenancy-rooted key shape that capability states, and MUST NOT
-take these two as precedent. Their migration SHOULD be left to issue #67 rather than
-folded into an unrelated change, because changing a key invalidates whatever was cached
-under the old one and is worth reviewing on its own.
+> MUST include every dimension of tenancy the deployment actually has — the account, and
+> the server or region where those vary independently.
+
+Both dimensions do vary independently here. A user signs in to whichever self-hosted
+Payload server they name, and Payload's sequential ids make one id plausible on two
+installs, so by that rule `serverUrl` belongs in the key. This repository instead treats
+server and user as one authentication session and roots every session-scoped key at the
+user id alone — [server-state.md](./server-state.md) states the rule.
+
+What keeps that correct is an invariant outside the key. Every session end runs through
+the auth store's `deauthenticate()`, which evicts the whole `["users", userId]` root,
+and a cold start begins with an empty cache, so two servers' entries are never resident
+at once. That invariant is the deviation's entire safety margin: a path that swapped
+sessions **without** deauthenticating would let two installs sharing a user id collide
+on one cache entry, and adding one means revisiting this entry rather than working
+around it.
+
+That capability's "the host project's existing convention wins" carve-out does **not**
+sanction this. It preserves a question the surrounding codebase already answered,
+whereas this convention arrived with the change that adopted it. The deviation is a
+standing, accepted violation of that MUST — revisit it if the app ever holds more than
+one session at a time.
 
 ## The Payload HTTP client sits in `src/common/`
 

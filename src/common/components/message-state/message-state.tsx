@@ -53,7 +53,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		alignItems: "center",
 		aspectRatio: 1,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderRadius: theme.gap.md,
+		borderRadius: theme.radius.lg,
 		justifyContent: "center",
 		marginBottom: theme.gap.xs,
 		width: 66,

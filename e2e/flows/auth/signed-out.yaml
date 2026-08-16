@@ -10,5 +10,7 @@ tags:
 - assertVisible:
     id: "welcome-sign-in-button"
 # The tab UI mounts only after authentication, so no tab bar is shown here.
-- assertNotVisible: "Collections"
-- assertNotVisible: "Settings"
+- assertNotVisible:
+    id: "tab-collections"
+- assertNotVisible:
+    id: "tab-settings"
