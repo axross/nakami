@@ -1,5 +1,6 @@
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
+import { describeQueryKey } from "~/common/helpers/session-query-key";
 import { reportError } from "~/core/helpers/error-reporting";
 
 /**
@@ -22,7 +23,9 @@ export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error, query) => {
 			if (isReportableQueryError(error)) {
-				reportError(error, { extra: { queryKey: query.queryKey[0] } });
+				reportError(error, {
+					extra: { queryKey: describeQueryKey(query.queryKey) },
+				});
 			}
 		},
 	}),
