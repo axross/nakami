@@ -150,6 +150,39 @@ the route file.
 This entry exists because the directory name looks like a violation at a glance, and a
 finding raised anyway costs a review round to answer.
 
+## A horizontal inset pairs a physical measurement with a mirroring property
+
+The installed `react-component-styling` capability requires the direction-agnostic
+properties for insets, and gives the reason:
+
+> MUST apply insets with the direction-agnostic properties (`paddingStart` /
+> `paddingEnd`), not `paddingLeft` / `paddingRight`, so a right-to-left layout mirrors
+> correctly.
+> — [unistyles.md](../../.claude/skills/react-component-styling/references/unistyles.md)
+
+Its worked example pairs `paddingStart` with `rt.insets.left` and `paddingEnd` with
+`rt.insets.right`. Half of that mirrors and half does not. `paddingStart` resolves to
+the physically-right edge under a right-to-left layout, but `rt.insets.left` is a
+physical-edge measurement on both platforms — iOS `UIEdgeInsets`, Android
+`WindowInsetsCompat` — and does not swap with the writing direction. The pairing
+therefore applies the physically-left measurement to the physically-right edge under
+RTL, which is the opposite of the mirroring the rule promises. The reason given is
+sound for the property and wrong for the value beside it; the rule is silent on how the
+two compose.
+
+**This repository follows the rule as written**, in every surface
+[safe-areas.md](./safe-areas.md) lists. Two things make that the right call rather than
+a concession. The values are structurally zero here — `app.json` pins `orientation` to
+`"portrait"`, so `rt.insets.left` and `rt.insets.right` never differ from each other or
+from zero on any device this app ships to — so the defect is unobservable. And
+departing would mean inventing a pairing this repository could not test, in place of one
+the capability prescribes.
+
+The gap is recorded rather than fixed because the case that exercises it does not exist
+yet. A change that unlocks orientation MUST re-derive the pairing rather than inherit
+it, and that is the point at which raising it upstream on
+[`axross/skills`](https://github.com/axross/skills) becomes worth the human's go-ahead.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this
