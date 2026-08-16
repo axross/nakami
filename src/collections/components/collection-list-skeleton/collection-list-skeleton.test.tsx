@@ -1,22 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
+import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import { themes } from "~/unistyles";
 import { CollectionListSkeleton } from "./collection-list-skeleton";
-
-/**
- * Flattens whatever React Native accepts as a `style` prop (an object, or an
- * arbitrarily nested array of them) into the single resolved object the
- * renderer would apply.
- */
-function resolveStyle(style: unknown): Record<string, unknown> {
-	if (Array.isArray(style)) {
-		return Object.assign({}, ...style.map(resolveStyle));
-	}
-
-	return typeof style === "object" && style !== null
-		? (style as Record<string, unknown>)
-		: {};
-}
 
 describe("<CollectionListSkeleton>", () => {
 	// The hook and the accessible label now sit on the root rather than on the

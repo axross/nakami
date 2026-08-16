@@ -33,8 +33,8 @@ jest.mock("~/auth/helpers/payload-client", () => {
 // rest of the app shares. The store's real eviction logic still runs.
 jest.mock("~/core/helpers/query-client", () => {
 	const { createTestQueryClient } = jest.requireActual(
-		"~/common/helpers/test-query-client",
-	) as typeof import("~/common/helpers/test-query-client");
+		"~/common/test-helpers/query-client",
+	) as typeof import("~/common/test-helpers/query-client");
 	return { __esModule: true, queryClient: createTestQueryClient() };
 });
 

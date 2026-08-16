@@ -5,7 +5,7 @@ import { renderRouter } from "expo-router/testing-library";
 import { StyleSheet } from "react-native";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { SettingsScreen } from "./settings-screen";
 
