@@ -75,10 +75,13 @@ export async function request(
 	let response: Response;
 	try {
 		response = await fetch(url, { ...init, signal: controller.signal });
-	} catch {
+	} catch (error) {
 		// Network down, DNS failure, timeout/abort — the server was unreachable.
 		// Close the bracket at debug (callers report the failure at their own
 		// level) so the breadcrumb trail doesn't go quiet on the failure path.
+		// The rejection itself stays out of the line and rides on the thrown
+		// error's `cause` instead, where the tracker links it as its own
+		// exception rather than mirroring it onto the breadcrumb trail.
 		logger.debug("Failed request.", {
 			operation,
 			duration: performance.now() - startedAt,
@@ -86,6 +89,8 @@ export async function request(
 		throw new PayloadRequestError(
 			"network",
 			"The server could not be reached.",
+			undefined,
+			{ cause: error },
 		);
 	} finally {
 		clearTimeout(timeout);
@@ -115,10 +120,12 @@ export async function request(
 
 	try {
 		return await response.json();
-	} catch {
+	} catch (error) {
 		throw new PayloadRequestError(
 			"server",
 			"The server returned an invalid response.",
+			undefined,
+			{ cause: error },
 		);
 	}
 }

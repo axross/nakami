@@ -1,7 +1,14 @@
-import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	jest,
+} from "@jest/globals";
 import { z } from "zod";
 import { createModuleLogger } from "~/core/helpers/logging";
-import { PayloadRequestError, parseResponse } from "./payload-client";
+import { PayloadRequestError, parseResponse, request } from "./payload-client";
 
 jest.mock("~/core/helpers/logging", () => {
 	const moduleLogger = {
@@ -47,8 +54,146 @@ function thrownFrom(run: () => unknown): unknown {
 	throw new Error("Expected the call to throw, but it returned.");
 }
 
+const originalFetch = globalThis.fetch;
+
+/**
+ * Stands in for the global fetch, following the idiom the auth client's own
+ * test file established. The `afterEach` below puts the original back.
+ */
+function stubFetch(implementation: () => Promise<Response>): void {
+	(globalThis as { fetch: typeof fetch }).fetch = jest.fn(
+		implementation,
+	) as unknown as typeof fetch;
+}
+
+/**
+ * A 200 whose body cannot be decoded — a truncated payload, or a proxy's HTML
+ * error page — modelled as the rejection `Response.json()` produces for it.
+ */
+function unparseableResponse(parseFailure: Error): Response {
+	return {
+		ok: true,
+		status: 200,
+		json: async () => {
+			throw parseFailure;
+		},
+	} as unknown as Response;
+}
+
+/** Runs `request()` against the stubbed fetch, resolving with what it threw. */
+async function attemptRequest(): Promise<unknown> {
+	try {
+		await request("fetchRecords", "https://cms.example.com/api/users", {});
+	} catch (error) {
+		return error;
+	}
+
+	throw new Error("Expected the request to reject, but it resolved.");
+}
+
 beforeEach(() => {
 	jest.clearAllMocks();
+});
+
+afterEach(() => {
+	(globalThis as { fetch: typeof fetch }).fetch = originalFetch;
+});
+
+describe("PayloadRequestError", () => {
+	it("forwards an error-options object to the built-in cause", () => {
+		const underlying = new Error("The socket closed.");
+
+		const error = new PayloadRequestError("server", "Failed.", 500, {
+			cause: underlying,
+		});
+
+		expect(error.cause).toBe(underlying);
+		expect(error.kind).toBe("server");
+		expect(error.status).toBe(500);
+	});
+
+	describe("when constructed without options", () => {
+		it("leaves the cause undefined and the rest of the error unchanged", () => {
+			const error = new PayloadRequestError("network", "Failed.");
+
+			expect(error.cause).toBeUndefined();
+			expect(error.name).toBe("PayloadRequestError");
+			expect(error.message).toBe("Failed.");
+			expect(error.kind).toBe("network");
+			expect(error.status).toBeUndefined();
+		});
+	});
+});
+
+describe("request()", () => {
+	describe("when fetch rejects", () => {
+		it("throws a network-kind PayloadRequestError with no status", async () => {
+			stubFetch(async () => {
+				throw new TypeError("Network request failed");
+			});
+
+			const error = await attemptRequest();
+
+			expect(error).toBeInstanceOf(PayloadRequestError);
+			expect((error as PayloadRequestError).kind).toBe("network");
+			expect((error as PayloadRequestError).status).toBeUndefined();
+		});
+
+		it("carries the rejection itself as the cause", async () => {
+			const rejection = new TypeError("Network request failed");
+			stubFetch(async () => {
+				throw rejection;
+			});
+
+			const error = await attemptRequest();
+
+			expect((error as PayloadRequestError).cause).toBe(rejection);
+		});
+
+		it("closes the breadcrumb bracket without disclosing the rejection", async () => {
+			stubFetch(async () => {
+				throw new TypeError("Network request failed for cms.example.com");
+			});
+
+			await attemptRequest();
+
+			const failure = logger.debug.mock.calls.find(
+				([message]) => message === "Failed request.",
+			);
+			// The closing half of the bracket the logging convention requires: a
+			// start with no completion is what would read as a request still hanging.
+			expect(failure).toBeDefined();
+			// The rejection reaches the error tracker as a linked exception via the
+			// cause. It stays off this line deliberately: every log line becomes a
+			// breadcrumb that leaves the device, so the trail gains nothing here
+			// that triage does not already get from the linked exception.
+			expect(failure?.[1]).toEqual({
+				operation: "fetchRecords",
+				duration: expect.any(Number),
+			});
+		});
+	});
+
+	describe("when the response body does not parse", () => {
+		it("throws a server-kind PayloadRequestError with no status", async () => {
+			stubFetch(async () => unparseableResponse(new SyntaxError("Bad JSON")));
+
+			const error = await attemptRequest();
+
+			expect(error).toBeInstanceOf(PayloadRequestError);
+			expect((error as PayloadRequestError).kind).toBe("server");
+			expect((error as PayloadRequestError).status).toBeUndefined();
+		});
+
+		it("carries the parse failure itself as the cause", async () => {
+			const parseFailure = new SyntaxError("Unexpected end of input");
+			stubFetch(async () => unparseableResponse(parseFailure));
+
+			const error = await attemptRequest();
+
+			expect((error as PayloadRequestError).cause).toBe(parseFailure);
+		});
+	});
 });
 
 describe("parseResponse()", () => {
