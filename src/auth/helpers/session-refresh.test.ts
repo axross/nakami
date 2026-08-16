@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
+import { addBreadcrumb } from "~/core/helpers/error-reporting";
 import { PayloadRequestError, refreshToken } from "./payload-client";
 import {
 	isWithinRefreshWindow,
 	REFRESH_LEAD_SECONDS,
 	refreshSessionIfDue,
 } from "./session-refresh";
+
+// Assert the log lines through the breadcrumb transport rather than the logger:
+// reaching the error tracker's trail is the point of these lines, and it is the
+// same seam `core/helpers/logging.test.ts` asserts against.
+jest.mock("~/core/helpers/error-reporting");
 
 jest.mock("~/auth/helpers/session-storage", () => ({
 	readSession: jest.fn(async () => null),
@@ -29,6 +35,18 @@ function sessionExpiringIn(seconds: number): Session {
 		exp: Math.floor(Date.now() / 1000) + seconds,
 		user: { id: "1", email: "you@example.com" },
 	};
+}
+
+/**
+ * The breadcrumbs this module emitted, in order. Filtering by category keeps
+ * the assertions to `refreshSessionIfDue`'s own bracket, so the store's
+ * transition lines do not count toward it.
+ */
+function refreshBreadcrumbs() {
+	return jest
+		.mocked(addBreadcrumb)
+		.mock.calls.map(([breadcrumb]) => breadcrumb)
+		.filter((breadcrumb) => breadcrumb.category === "auth/session-refresh");
 }
 
 beforeEach(() => {
@@ -62,6 +80,9 @@ describe("refreshSessionIfDue", () => {
 		await refreshSessionIfDue();
 
 		expect(refreshToken).not.toHaveBeenCalled();
+		// A no-op tick stays silent: the bracket opens after the due check, so a
+		// signed-out app does not fill the breadcrumb trail with interval noise.
+		expect(refreshBreadcrumbs()).toEqual([]);
 	});
 
 	it("does nothing when the token is not yet due", async () => {
@@ -73,6 +94,7 @@ describe("refreshSessionIfDue", () => {
 		await refreshSessionIfDue();
 
 		expect(refreshToken).not.toHaveBeenCalled();
+		expect(refreshBreadcrumbs()).toEqual([]);
 	});
 
 	it("refreshes and applies the new token when due", async () => {
@@ -89,6 +111,20 @@ describe("refreshSessionIfDue", () => {
 		await refreshSessionIfDue();
 
 		expect(useAuthStore.getState().session?.token).toBe("fresh-token");
+		expect(refreshBreadcrumbs()).toEqual([
+			{
+				message: "Started refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "debug",
+				data: { serverUrl: "https://cms.example.com" },
+			},
+			{
+				message: "Completed refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "info",
+				data: { outcome: "refreshed", duration: expect.any(Number) },
+			},
+		]);
 	});
 
 	it("signs out when the refresh is rejected", async () => {
@@ -105,6 +141,40 @@ describe("refreshSessionIfDue", () => {
 		expect(useAuthStore.getState().status).toBe("unauthenticated");
 	});
 
+	// The line that makes an involuntary sign-out attributable from the
+	// breadcrumb trail alone — without it the app just drops to the welcome
+	// screen with nothing saying why.
+	it("brackets the refresh and attributes the sign-out when the token is rejected", async () => {
+		useAuthStore.setState({
+			status: "authenticated",
+			session: sessionExpiringIn(60),
+		});
+		jest
+			.mocked(refreshToken)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		await refreshSessionIfDue();
+
+		expect(refreshBreadcrumbs()).toEqual([
+			{
+				message: "Started refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "debug",
+				data: { serverUrl: "https://cms.example.com" },
+			},
+			{
+				message: "Completed refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "info",
+				data: {
+					outcome: "signed-out",
+					reason: "token-rejected",
+					duration: expect.any(Number),
+				},
+			},
+		]);
+	});
+
 	it("keeps the session when the refresh is unreachable", async () => {
 		useAuthStore.setState({
 			status: "authenticated",
@@ -118,5 +188,46 @@ describe("refreshSessionIfDue", () => {
 
 		expect(useAuthStore.getState().status).toBe("authenticated");
 		expect(useAuthStore.getState().session?.token).toBe("current-token");
+		expect(refreshBreadcrumbs()).toEqual([
+			{
+				message: "Started refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "debug",
+				data: { serverUrl: "https://cms.example.com" },
+			},
+			{
+				message: "Completed refreshing the session token.",
+				category: "auth/session-refresh",
+				level: "warning",
+				data: {
+					outcome: "deferred",
+					reason: "unreachable",
+					duration: expect.any(Number),
+				},
+			},
+		]);
+	});
+
+	it("keeps credentials out of every breadcrumb it emits", async () => {
+		useAuthStore.setState({
+			status: "authenticated",
+			session: sessionExpiringIn(60),
+		});
+		jest
+			.mocked(refreshToken)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		await refreshSessionIfDue();
+
+		// Every line here becomes a breadcrumb shipped off-device, so assert
+		// across all of them — the store's transition lines included. Assert the
+		// trail is non-empty first, so an implementation that stopped logging
+		// entirely cannot satisfy the two `not.toContain`s vacuously.
+		const calls = jest.mocked(addBreadcrumb).mock.calls;
+		expect(calls.length).toBeGreaterThan(0);
+
+		const emitted = JSON.stringify(calls);
+		expect(emitted).not.toContain("current-token");
+		expect(emitted).not.toContain("you@example.com");
 	});
 });
