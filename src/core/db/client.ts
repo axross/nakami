@@ -11,7 +11,9 @@
 // the migration `npm run db-migrate:generate` produces under ./migrations/, and
 // wire Drizzle's expo-sqlite migrator (useMigrations) into src/app/_layout.tsx.
 // The migrator is not wired yet, so until then a committed migration would
-// never run.
+// never run. It must also correct the four places that say this module has no
+// consumer — this comment, ./client.test.ts's header, README.md, and
+// docs/conventions/data-layer.md — because nothing checks that claim for them.
 //
 // Because no other module imports it, ./client.test.ts is the only thing that
 // executes this module. That test mocks expo-sqlite, so the native open below

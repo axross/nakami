@@ -15,14 +15,20 @@ jest.mock("expo-sqlite", () => ({
 // tracker. Use the manual mock, as logging.test.ts does.
 jest.mock("~/core/helpers/error-reporting");
 
-// Nothing imports ./client but this file (see that file), so this is the only
-// thing that runs it. What it covers is the module's construction: that
-// drizzle() still accepts the handle and yields a query builder, which is the
-// drift a drizzle-orm bump would cause — README.md lists Drizzle among the
-// dependencies that move fast enough to need re-reading. It deliberately covers
-// no data-layer behavior: the expo-sqlite mock above means no SQL runs and the
-// native open is never exercised. That coverage arrives with the first table
-// and its consumer.
+// Nothing imports ./client but this file (see ./client.ts), so this is the only
+// thing that runs it. What it covers is narrow: drizzle() still returns an
+// object carrying the select, insert, update, and delete builders, so a
+// drizzle-orm bump that drops or renames one turns this red — README.md lists
+// Drizzle among the dependencies that move fast enough to need re-reading. A
+// bump that keeps those names and changes what they build does not. It covers
+// no data-layer behavior at all: the expo-sqlite mock above means no SQL runs
+// and the native open is never exercised. That coverage arrives with the first
+// table and its consumer.
+//
+// openDatabaseSync is called once, while ./client is imported, so the first
+// case below reads a call recorded before any test body ran. Clearing or
+// resetting mocks between cases would turn it red for a reason that has nothing
+// to do with the database.
 describe("db", () => {
 	it("opens the on-device database with change listening enabled", () => {
 		expect(openDatabaseSync).toHaveBeenCalledWith("nakami.db", {
