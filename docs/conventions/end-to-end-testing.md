@@ -24,15 +24,16 @@ parser strips them.
 
 `Priority` MUST be one of `must`, `should`, or `may`. The capability also allows a
 `manual` entry for a journey that truly requires the external network, and no row
-here uses it: every journey this app has needs *a* Payload server, not a live
-third-party endpoint, and a server the suite supplies is a deterministic input
-rather than an excuse. A journey nobody has automated yet stays in the table with an
-honest priority and a gap note, which is what makes the report show real gaps.
+here uses it: no cataloged journey depends on a live third-party endpoint, and the
+six that need a server at all need *a* Payload server, which a fixture supplies
+deterministically. A journey nobody has automated yet SHOULD stay in the table with
+an honest priority and a gap note rather than leave the table, which is what makes
+the report show real gaps.
 
-A `Title` stays short. Each journey's full description — what a flow has to assert,
-and what a missing flow is waiting on — lives under the table instead, because two
-paragraphs of prose in a table cell make the source unreadable for the reader who
-needs it most.
+A `Title` SHOULD stay short, and each journey's full description — what a flow has
+to assert, and what a missing flow is waiting on — MUST live under the table rather
+than inside it, because two paragraphs of prose in a table cell make the source
+unreadable for the reader who needs it most.
 
 ## The tag vocabulary
 
@@ -122,10 +123,12 @@ default in this document — and anything a run persists stays out of version co
 `NAKAMI_E2E_SERVER_URL` cannot have one value for both platforms. An iOS simulator
 shares the host's loopback interface, so a server on the developer's machine is
 `http://localhost:3000`; an Android emulator does not, and reaches the same host at
-`http://10.0.2.2:3000`. The variable is therefore set per run rather than baked into
-a flow.
+`http://10.0.2.2:3000`. The variable MUST therefore be set per run rather than baked
+into a flow.
 
 ### The seed data a fixture must carry
+
+A fixture MUST carry all three:
 
 - **An auth-enabled collection holding the user the variables above name.** Every
   authenticated journey starts by signing in as that user, so nothing else works
