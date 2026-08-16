@@ -5,10 +5,15 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
  * A centered "mark + title + subtitle" surface with an optional action slot —
- * the shared shape behind feature empty/error/placeholder screens (Home's
- * connect prompt, the Collections empty/error/detail states). Callers pass
+ * the shared shape behind feature empty/error/placeholder screens. Callers pass
  * their own action element so each keeps its distinct control (a navigation
  * link, a retry button).
+ *
+ * Rendered by `welcome-screen` directly and by `collections-message-state`, which
+ * the Collections list and record screens both use. That inventory is load-bearing
+ * rather than descriptive: the horizontal safe-area inset below is carried here on
+ * every call site's behalf, so it only reaches the screen edge while each of them
+ * renders this component full-bleed.
  */
 export function MessageState({
 	icon: Icon,
