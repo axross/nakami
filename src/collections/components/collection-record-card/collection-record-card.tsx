@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { CollectionRecord } from "~/collections/models/record";
@@ -30,7 +30,7 @@ export function CollectionRecordCard({
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof View>, "children"> & {
+	Omit<ComponentPropsWithRef<typeof View>, "children"> & {
 		record: CollectionRecord;
 	}
 >): JSX.Element {

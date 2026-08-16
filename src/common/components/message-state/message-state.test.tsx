@@ -1,6 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import { Database } from "lucide-react-native";
+import { createRef } from "react";
+import type { View } from "react-native";
 import { MessageState } from "./message-state";
 
 /**
@@ -34,6 +36,27 @@ describe("<MessageState>", () => {
 		);
 
 		expect(getByTestId("welcome-screen").props.pointerEvents).toBe("none");
+	});
+
+	// `ref` is an ordinary prop on React 19, so a props type that strips it leaves
+	// a caller unable to measure or focus the surface at all. Asserting the
+	// populated instance rather than only that the call type-checks is what
+	// proves the spread carried it the whole way to the root.
+	it("populates a caller's ref with the root node it renders", () => {
+		const ref = createRef<View>();
+
+		render(
+			<MessageState
+				icon={Database}
+				ref={ref}
+				subtitle="Sign in to browse your collections."
+				testID="welcome-screen"
+				title="Connect to Payload"
+			/>,
+		);
+
+		expect(ref.current).not.toBeNull();
+		expect(ref.current?.props.testID).toBe("welcome-screen");
 	});
 
 	// The consumer owns where the surface sits; the component owns what it looks

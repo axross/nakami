@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
-import type { ComponentProps, ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentProps, ComponentPropsWithRef, JSX } from "react";
 import {
 	Pressable,
 	type StyleProp,
@@ -24,7 +24,7 @@ function CollectionRow({
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof Pressable>, "style" | "children"> & {
+	Omit<ComponentPropsWithRef<typeof Pressable>, "style" | "children"> & {
 		collection: Collection;
 		style?: StyleProp<ViewStyle>;
 	}

@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -30,7 +30,7 @@ export function CollectionListSkeleton({
 	testID = "collections-loading",
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof View>, "children">
+	Omit<ComponentPropsWithRef<typeof View>, "children">
 >): JSX.Element {
 	const { theme } = useUnistyles();
 	const reduceMotion = useReducedMotion();

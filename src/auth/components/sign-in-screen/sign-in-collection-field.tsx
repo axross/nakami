@@ -1,5 +1,5 @@
 import { Pencil } from "lucide-react-native";
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
@@ -17,7 +17,7 @@ export function SignInCollectionField({
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof View>, "children"> & {
+	Omit<ComponentPropsWithRef<typeof View>, "children"> & {
 		value: string;
 		editing: boolean;
 		onEdit: () => void;
