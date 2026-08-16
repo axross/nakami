@@ -37,8 +37,8 @@ Six of the nine carry a gap note. Each names what it is waiting on in its own
 terms, and all six wait on the same thing: a session signed in against a Payload
 fixture, which this suite does not have.
 [docs/conventions/end-to-end-testing.md](../docs/conventions/end-to-end-testing.md)
-states the contract such a fixture satisfies, and the flows themselves are tracked
-by the follow-up issue for the authenticated journeys. Nothing else covers these
+states the contract such a fixture satisfies, and the flows themselves are tracked by
+[#135](https://github.com/axross/nakami/issues/135). Nothing else covers these
 journeys end-to-end in the meantime: the unit suite exercises their components in
 isolation, which is not the same claim.
 

@@ -102,9 +102,10 @@ repository is a second stack to maintain, for a suite that needs a simulator and
 cannot run in CI either way.
 
 No flow reads these variables today. The six journeys are cataloged as gaps in
-[`e2e/scenarios.md`](../../e2e/scenarios.md) and tracked by a follow-up issue; the
-contract is written down first so those flows are built against a settled shape
-rather than each inventing one.
+[`e2e/scenarios.md`](../../e2e/scenarios.md) and tracked by
+[#135](https://github.com/axross/nakami/issues/135); the contract is written down
+first so those flows are built against a settled shape rather than each inventing
+one.
 
 ### The environment variables an authenticated run reads
 
