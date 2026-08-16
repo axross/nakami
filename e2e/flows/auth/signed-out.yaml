@@ -1,7 +1,9 @@
 appId: app.axross.nakami
 name: auth-signed-out — signed out shows the welcome screen with no tab bar
 tags:
-  - scenario:auth-signed-out
+  - scenario:auth.signed-out
+  - area:auth
+  - priority:must
 ---
 - launchApp:
     clearState: true
