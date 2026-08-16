@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { LogOut, UserRound } from "lucide-react-native";
 import { type ComponentProps, type JSX, useCallback } from "react";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { getSignOutMutationOptions } from "~/auth/mutations/sign-out-mutation";
 import { useAuthSession } from "~/auth/stores/auth-store";
@@ -60,9 +60,18 @@ export function SettingsAccountGroup(
 					onPress={onSignOutPress}
 					testID="settings-sign-out-row"
 				>
-					<LogOut color={theme.colors.text.destructive.base} size={24} />
+					{isPending ? (
+						<View style={styles.signOutMark}>
+							<ActivityIndicator
+								color={theme.colors.text.destructive.base}
+								size="small"
+							/>
+						</View>
+					) : (
+						<LogOut color={theme.colors.text.destructive.base} size={24} />
+					)}
 					<SettingMenuGroupItemLabel style={styles.signOutLabel}>
-						Sign out
+						{isPending ? "Signing out…" : "Sign out"}
 					</SettingMenuGroupItemLabel>
 				</SettingMenuGroupItem>
 			</SettingMenuGroupBody>
@@ -106,5 +115,13 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	signOutLabel: {
 		color: theme.colors.text.destructive.base,
+	},
+	// Sized to the `LogOut` icon it stands in for, so swapping the two while a
+	// sign-out is in flight does not shift the label beside them.
+	signOutMark: {
+		alignItems: "center",
+		height: 24,
+		justifyContent: "center",
+		width: 24,
 	},
 }));
