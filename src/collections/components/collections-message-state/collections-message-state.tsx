@@ -44,7 +44,7 @@ const styles = StyleSheet.create((theme) => ({
 	button: (pressed: boolean) => ({
 		alignItems: "center",
 		backgroundColor: theme.colors.solid.accent.base,
-		borderRadius: theme.gap.sm,
+		borderRadius: theme.radius.md,
 		justifyContent: "center",
 		marginTop: theme.gap.md,
 		minHeight: 48,

@@ -1,3 +1,7 @@
+// `hairlineWidth` is React Native's, not Unistyles' — the two `StyleSheet`s are
+// unrelated, so both are imported and the React Native one is aliased. Every
+// stylesheet in the app still uses the Unistyles export below.
+import { StyleSheet as ReactNativeStyleSheet } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 const gap = {
@@ -6,6 +10,70 @@ const gap = {
 	md: 16,
 	lg: 24,
 	xl: 32,
+} as const;
+
+// Corner radii, each step named for the role a surface plays rather than for
+// its value, so a surface picks by role instead of by eye.
+//
+// Deliberately its own family rather than steps borrowed from `gap`: a radius
+// is not a spacing step, and while the two scales happen to share numbers
+// today, folding them together means retuning spacing silently reshapes every
+// corner in the app.
+const radius = {
+	// Inset marks and placeholder bars — a collection monogram, a skeleton bar.
+	sm: 8,
+	// The default surface corner: cards, inputs, buttons, menu-group ends.
+	md: 12,
+	// Large marks — a message state's icon plate.
+	lg: 16,
+	// Fully rounded. React Native clamps a radius to half the shorter side, so
+	// one step covers both a pill (the record-id chip) and a circle (the account
+	// avatar) without either naming a measurement of its own.
+	pill: 999,
+} as const;
+
+// `hairline` is the thinnest line the display can actually draw — a third of a
+// point on a 3x screen, where the literal `1` it replaced was three physical
+// pixels. `thin` is the step up, for a border meant to read as a weight rather
+// than as a separator; nothing consumes it yet, and it is declared so that the
+// next surface needing one picks a step instead of inventing a number.
+const borderWidth = {
+	hairline: ReactNativeStyleSheet.hairlineWidth,
+	thin: 1,
+} as const;
+
+// Named by magnitude rather than by milliseconds, so retuning a step does not
+// turn its name into a lie. `fast` and `base` are the interaction tier and are
+// declared ahead of their first consumer, for the same reason `thin` is.
+const duration = {
+	fast: 150,
+	base: 250,
+	// The skeleton pulse — an ambient cadence rather than a response to a tap.
+	slow: 700,
+} as const;
+
+// The app's one motion curve. Role-named, so retuning the curve neither renames
+// the token nor makes it false — which `standard` survives and `easeInOutQuad`
+// would not.
+//
+// Written out rather than imported as reanimated's `Easing.inOut(Easing.quad)`:
+// this module is the root layout's first import and a `setupFiles` entry in
+// jest.config.cjs, so importing `react-native-reanimated` here would load the
+// real native module — failing every jest suite and pulling reanimated's native
+// initialization into the app's first tick. The curve below is that same
+// ease-in-out quad, which is also the default `withTiming` already applies, so
+// naming it explicitly changes no existing animation.
+//
+// The `"worklet"` directive is what lets reanimated run this on the UI thread.
+// `babel-preset-expo` transforms it through react-native-worklets' plugin,
+// which attaches the worklet metadata inline and adds no module-scope require,
+// so the directive costs this module nothing at load time.
+const easing = {
+	standard: (t: number): number => {
+		"worklet";
+
+		return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+	},
 } as const;
 
 // The bundled font files. Deliberately module-private rather than a theme
@@ -57,6 +125,7 @@ const typography = {
 // Nakami adds beyond cunnpe's structure — cunnpe never draws text on a solid
 // accent fill, but Nakami's filled buttons do (Radix teal pairs with white).
 const defaultTheme = {
+	borderWidth,
 	colors: {
 		foundation: {
 			neutral: {
@@ -171,7 +240,10 @@ const defaultTheme = {
 			onAccent: "#ffffff",
 		},
 	},
+	duration,
+	easing,
 	gap,
+	radius,
 	typography,
 };
 
