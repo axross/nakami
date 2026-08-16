@@ -100,14 +100,16 @@ const styles = StyleSheet.create((theme) => ({
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.gap.sm,
-		borderWidth: 1,
+		borderRadius: theme.radius.md,
+		borderWidth: theme.borderWidth.hairline,
 		margin: theme.gap.md,
 		overflow: "hidden",
 	},
+	// Drawn as a filled `View` rather than a border, so the hairline is its
+	// height.
 	divider: {
 		backgroundColor: theme.colors.border.neutral.subtle,
-		height: 1,
+		height: theme.borderWidth.hairline,
 	},
 	list: {
 		backgroundColor: theme.colors.foundation.neutral.bare,

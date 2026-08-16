@@ -72,8 +72,8 @@ const styles = StyleSheet.create((theme) => ({
 	accountRow: {
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderTopLeftRadius: theme.gap.sm,
-		borderTopRightRadius: theme.gap.sm,
+		borderTopLeftRadius: theme.radius.md,
+		borderTopRightRadius: theme.radius.md,
 		columnGap: theme.gap.md,
 		flexDirection: "row",
 		minHeight: 48,
@@ -84,11 +84,13 @@ const styles = StyleSheet.create((theme) => ({
 		flexShrink: 1,
 		rowGap: theme.gap.xs,
 	},
+	// Square by `aspectRatio`, so the pill radius clamps to half the side and
+	// draws a true circle — matching how the design kit already renders it.
 	avatar: {
 		alignItems: "center",
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.neutral.base,
-		borderRadius: theme.gap.md,
+		borderRadius: theme.radius.pill,
 		justifyContent: "center",
 		width: 36,
 	},

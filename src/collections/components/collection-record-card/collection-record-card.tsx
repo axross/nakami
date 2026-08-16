@@ -68,8 +68,8 @@ const styles = StyleSheet.create((theme) => ({
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.gap.sm,
-		borderWidth: 1,
+		borderRadius: theme.radius.md,
+		borderWidth: theme.borderWidth.hairline,
 		gap: theme.gap.xs,
 		paddingHorizontal: theme.gap.md,
 		paddingVertical: theme.gap.sm,
@@ -78,8 +78,8 @@ const styles = StyleSheet.create((theme) => ({
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.gap.md,
-		borderWidth: 1,
+		borderRadius: theme.radius.pill,
+		borderWidth: theme.borderWidth.hairline,
 		// Fixed pill height (a fixed element dimension, not scale spacing) keeps
 		// the chip compact around its id text and equal to the row line box; the
 		// theme's smallest gap step (xs: 8) as vertical padding would make the
