@@ -308,6 +308,40 @@ yet. A change that unlocks orientation MUST re-derive the pairing rather than in
 it, and that is the point at which raising it upstream on
 [`axross/skills`](https://github.com/axross/skills) becomes worth the human's go-ahead.
 
+## The e2e coverage gate counts a scenario covered on `declared`
+
+The installed `end-to-end-testing` capability's
+[scenario-coverage.md](../../.claude/skills/end-to-end-testing/references/scenario-coverage.md)
+states a MUST:
+
+> MUST count a scenario as covered only when a **passing** test carries its tag; a
+> failing or skipped test leaves it uncovered.
+
+`e2e/check-scenario-coverage.mjs` hands the core one result per flow with
+`status: "declared"`, and `declared` is not passing. Every row this gate reports as
+covered is therefore counted on something that rule does not accept.
+
+The same reference is why it cannot do otherwise, in its closing section:
+
+> SHOULD keep the gate fast and free of the system under test (pure file/report
+> bookkeeping) so it can run anywhere, including where the app cannot be launched.
+
+A gate that never launches the app has observed no execution, so it has no pass to
+count — one static gate cannot satisfy both rules. This repository keeps the static
+one, because that is what lets the `E2E Scenario Coverage` job run on a plain Ubuntu
+runner with no simulator and catch a tag error on every pull request, and `declared`
+is the honest word for what such a run saw. Reporting `passed` for a flow nobody ran
+would satisfy the MUST by lying about the thing it exists to protect.
+[end-to-end-testing.md](./end-to-end-testing.md) states the repository's answer in
+full, including what a green gate does and does not prove.
+
+The deviation ends, rather than being re-argued, the moment an adapter reads a real
+Maestro report: the core already counts a scenario covered only when a result
+carrying its tag neither failed nor was skipped, so true statuses satisfy that MUST
+with no change to the join. Until that exists, `status: "declared"` MUST NOT be
+raised as a fresh finding — and a green gate MUST NOT be reported as e2e
+verification, which is that same capability's rule rather than a departure from it.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this

@@ -91,6 +91,10 @@ core already counts a scenario covered only when a result carrying its tag neith
 failed nor was skipped, so an adapter that later reads a real Maestro report supplies
 true statuses without any change to the join.
 
+Counting a row covered on `declared` departs from the capability's own "covered only
+when a **passing** test carries its tag", which is why it is recorded as an accepted
+deviation in [agent-skills.md](./agent-skills.md) rather than left to be found here.
+
 ## The Payload fixture contract
 
 Six cataloged journeys need the app to be signed in, and signing in needs a Payload
