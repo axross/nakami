@@ -145,4 +145,20 @@ describe("<SettingsScreen>", () => {
 
 		expect(content.paddingBottom).toBe(themes.light.gap.lg);
 	});
+
+	// The horizontal pair is the bare inset by design — the child rows carry the
+	// gutter — so this screen is the one that asserts zero rather than a gutter.
+	// Flooring it against `theme.gap.md` would read as a fix and would stack a
+	// second gutter on every row; pinning it here is what makes that regression
+	// fail a test instead of shipping.
+	it("leaves the horizontal pair as the bare inset, since the rows carry the gutter", () => {
+		const { getByTestId } = renderSettingsScreen();
+
+		const content = StyleSheet.flatten(
+			getByTestId("settings-screen").props.contentContainerStyle,
+		);
+
+		expect(content.paddingStart).toBe(0);
+		expect(content.paddingEnd).toBe(0);
+	});
 });
