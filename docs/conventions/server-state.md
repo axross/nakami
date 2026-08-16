@@ -1,15 +1,32 @@
 # Server State
 
-The one thing about this app's TanStack Query layer that its own wiring decides.
+What this app's TanStack Query layer decides for itself.
 
 The installed `tanstack-query-development` capability owns the server-state layer in
 full, and this repository follows it rather than restating it: the
 `get<Name>QueryOptions` and `get<Name>MutationOptions` option factories that live under
 each feature's `queries/` and `mutations/`, the tenancy-rooted query-key shape, cache
 lifetime, invalidation, and reading a store through its non-reactive accessor inside the
-query function rather than in the factory body. Two existing query keys predate that
-shape; [agent-skills.md](./agent-skills.md) records them and the issue that migrates
-them.
+query function rather than in the factory body.
+
+## One session root
+
+Every session-scoped query key MUST be rooted at `getSessionQueryKeyRoot(userId)` from
+`src/common/helpers/session-query-key.ts`, as in
+`[...getSessionQueryKeyRoot(userId), "collections"]`, and MUST NOT retype the
+`["users", userId]` literal that helper returns. The auth store's `deauthenticate()` hands the same helper's result to
+`removeQueries`, and that is what a retyped prefix breaks: a literal that drifts from a
+factory's root stops matching without failing anything, so the ended session's
+collections and records stay readable in memory until `gcTime` expires them.
+
+A query key MUST NOT carry the server URL. Server and user are one authentication
+session here, so the user id identifies the tenant on its own, and a `queryFn` reads the
+URL from the session alongside the token rather than taking it as a factory argument —
+an argument the key omitted would be a result-changing input sitting outside cache
+identity, which the installed capability forbids in the same breath. This knowingly
+diverges from that capability's tenancy-dimension MUST and rests on the eviction above;
+[agent-skills.md](./agent-skills.md) records the decision and the invariant holding it
+up, and is the thing to read before relaxing either half.
 
 ## One query client
 
