@@ -4,7 +4,7 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
- * The Collection slug field. Because most Payload instances use `users`, it
+ * the Collection slug field. because most Payload instances use `users`, it
  * shows the value as plain text with a pencil affordance by default and only
  * becomes an editable input once the pencil is pressed — keeping the common
  * case zero-interaction while staying configurable.

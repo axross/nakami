@@ -15,7 +15,7 @@ import { queryClient } from "~/core/helpers/query-client";
 
 initializeErrorReporter();
 
-// Hold the native splash screen until launch-time auth status settles; the
+// hold the native splash screen until launch-time auth status settles; the
 // bootstrap hook hides it once `/me` verification resolves.
 void SplashScreen.preventAutoHideAsync();
 

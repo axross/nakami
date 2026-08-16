@@ -32,12 +32,12 @@ function messageForError(error: unknown): string {
 }
 
 /**
- * The Payload sign-in form: server URL, auth collection (defaulted), email, and
- * password. The Server URL field pre-fills on mount with the last successful
+ * the Payload sign-in form: server URL, auth collection (defaulted), email, and
+ * password. the Server URL field pre-fills on mount with the last successful
  * sign-in's endpoint (kept in the keychain) so a returning user need not retype
- * it. On success it persists the session (via the sign-in mutation), which
+ * it. on success it persists the session (via the sign-in mutation), which
  * flips the app to authenticated — the root navigator then swaps this
- * signed-out stack for the tab UI. Failures surface inline without leaving the
+ * signed-out stack for the tab UI. failures surface inline without leaving the
  * screen.
  */
 export function SignInScreen(): JSX.Element {
@@ -54,7 +54,7 @@ export function SignInScreen(): JSX.Element {
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const serverUrlEdited = useRef(false);
 
-	// Pre-fill the server URL with the last successful sign-in's endpoint, but
+	// pre-fill the server URL with the last successful sign-in's endpoint, but
 	// never overwrite input the user has already started typing before this
 	// keychain read resolves.
 	useEffect(() => {
@@ -71,7 +71,7 @@ export function SignInScreen(): JSX.Element {
 		};
 	}, []);
 
-	// Clears any prior error as soon as the user changes an input.
+	// clears any prior error as soon as the user changes an input.
 	const clearErrors = useCallback(() => {
 		setValidationError(null);
 		if (error) {
@@ -221,8 +221,8 @@ export function SignInScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// The stack header clears the top edge, so this screen owns the bottom and
-	// the horizontal pair. The insets sit on the scrolled content rather than on
+	// the stack header clears the top edge, so this screen owns the bottom and
+	// the horizontal pair. the insets sit on the scrolled content rather than on
 	// the `ScrollView` itself: padding the scroll view would inset its scroll
 	// indicators with it and leave the form stopping short of the screen edge
 	// with a dead band beyond it.
