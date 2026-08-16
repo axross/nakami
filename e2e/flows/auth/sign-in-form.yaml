@@ -1,5 +1,5 @@
 appId: app.axross.nakami
-name: auth-sign-in-form — the sign-in form toggles Collection and reports an unreachable server
+name: auth-sign-in-form — the sign-in form names its blank fields, toggles Collection, and reports an unreachable server
 tags:
   - scenario:auth-sign-in-form
 ---
@@ -9,6 +9,16 @@ tags:
     id: "welcome-sign-in-button"
 - assertVisible:
     id: "sign-in-screen"
+# Sign in stays pressable with the form blank: the press is what explains what
+# is missing, field by field, rather than the button greying itself out.
+- tapOn:
+    id: "sign-in-submit"
+- assertVisible:
+    id: "sign-in-error-summary"
+- assertVisible:
+    id: "sign-in-error-email"
+- assertVisible:
+    id: "sign-in-error-password"
 # Collection starts as plain text with an edit affordance, then becomes an input.
 - assertVisible:
     id: "sign-in-collection-value"
