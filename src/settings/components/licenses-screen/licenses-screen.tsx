@@ -12,17 +12,22 @@ export function LicensesScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	placeholder: {
 		...theme.typography.body,
 		color: theme.colors.text.neutral.base,
 		textAlign: "center",
 	},
+	// A stack header clears the top edge and the tab bar the bottom, so this
+	// screen owns only the horizontal pair.
 	root: {
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 		justifyContent: "center",
-		padding: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingTop: theme.gap.lg,
 	},
 }));

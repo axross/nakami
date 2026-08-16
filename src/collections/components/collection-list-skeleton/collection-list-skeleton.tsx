@@ -70,7 +70,11 @@ export function CollectionListSkeleton({
 			{...props}
 			style={[styles.root, style]}
 		>
-			<View style={styles.card}>
+			{/* Hooked separately from the root: the root carries the accessible
+			    label and the caller-overridable hook, while the safe-area inset
+			    this card mirrors from the loaded list is what a guard has to be
+			    able to read. */}
+			<View style={styles.card} testID="collections-loading-card">
 				{ROW_WIDTHS.map((width, index) => (
 					<View key={width} style={styles.row(index > 0)}>
 						<Animated.View style={[styles.monogram, pulse]} />
@@ -82,13 +86,18 @@ export function CollectionListSkeleton({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// Mirrors the loaded list's card, safe-area inset included (see
+	// collections-screen), so the placeholder does not shift when data arrives.
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.md,
 		borderWidth: theme.borderWidth.hairline,
-		margin: theme.gap.md,
+		marginBottom: theme.gap.md,
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginTop: theme.gap.md,
 		overflow: "hidden",
 	},
 	monogram: {

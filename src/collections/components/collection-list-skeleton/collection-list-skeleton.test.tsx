@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
+import { themes } from "~/unistyles";
 import { CollectionListSkeleton } from "./collection-list-skeleton";
 
 /**
@@ -53,5 +54,23 @@ describe("<CollectionListSkeleton>", () => {
 		// below by returning an empty object.
 		expect(resolved).toHaveProperty("backgroundColor");
 		expect(resolved).not.toHaveProperty("flex");
+	});
+
+	// The placeholder card has to sit exactly where the loaded list's card sits,
+	// safe-area inset included, or the list jumps sideways when the collections
+	// arrive. Unistyles' jest mock reports zero insets, so this is the zero-inset
+	// device: the margin has to fall back to the design gutter rather than
+	// collapsing to the raw inset.
+	//
+	// Read from the card rather than the root, which carries no inset of its own.
+	it("keeps the loaded card's horizontal gutter when the runtime reports no insets", () => {
+		const { getByTestId } = render(<CollectionListSkeleton />);
+
+		const card = resolveStyle(
+			getByTestId("collections-loading-card").props.style,
+		);
+
+		expect(card.marginStart).toBe(themes.light.gap.md);
+		expect(card.marginEnd).toBe(themes.light.gap.md);
 	});
 });

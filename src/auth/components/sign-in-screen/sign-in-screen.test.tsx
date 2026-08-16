@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
+import { StyleSheet } from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
 import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { themes } from "~/unistyles";
 import { SignInScreen } from "./sign-in-screen";
 
 // Mock only the data layer the real mutation calls — `login` — keeping
@@ -144,5 +146,22 @@ describe("<SignInScreen>", () => {
 			expect(readLastServerUrl).toHaveBeenCalled();
 		});
 		expect(getByTestId("sign-in-server-url").props.value).toBe("");
+	});
+
+	// The stack header clears the top edge, so this screen owns the bottom and
+	// the horizontal pair, carried on the scrolled content. Unistyles' jest mock
+	// reports zero insets, so this is the zero-inset device: each owned edge has
+	// to fall back to its design gutter — the submit button in particular, which
+	// is what sits against the home indicator.
+	it("keeps the form's gutters when the runtime reports no insets", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		const content = StyleSheet.flatten(
+			getByTestId("sign-in-screen").props.contentContainerStyle,
+		);
+
+		expect(content.paddingBottom).toBe(themes.light.gap.md);
+		expect(content.paddingStart).toBe(themes.light.gap.md);
+		expect(content.paddingEnd).toBe(themes.light.gap.md);
 	});
 });

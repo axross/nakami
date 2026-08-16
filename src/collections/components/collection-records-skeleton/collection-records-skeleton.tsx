@@ -93,7 +93,7 @@ export function CollectionRecordsSkeleton({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	// Mirrors the record card's container (see collection-record-card).
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
@@ -115,9 +115,15 @@ const styles = StyleSheet.create((theme) => ({
 		height: 13,
 		width: 72,
 	},
+	// Mirrors the loaded feed's content container, safe-area inset included (see
+	// collection-records-screen), so the placeholder does not shift when data
+	// arrives.
 	feed: {
 		gap: theme.gap.sm,
-		padding: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingTop: theme.gap.md,
 	},
 	// A card's title and metadata rows are each one fixed line box; the thin bar
 	// sits centered inside it, so the placeholder card is exactly as tall as a
