@@ -46,6 +46,11 @@ A flow declares what it asserts in its flow-config `tags:` list, above the first
 | `area:<area>`           | Facet, for filtered runs and grouped reporting                     |
 | `priority:<must\|should\|may>` | Facet, likewise                                              |
 
+A facet tag joins its row case-insensitively — `priority:Must` and a `Must` cell both
+normalize to `must`, and `area:` the same way — so one spelling of a value is never
+reported as disagreeing with another. A `scenario:` tag joins exactly instead: an `Id`
+is already required to be lower-case, and the id is the contract.
+
 A `scenario:` tag MUST go on the flow that asserts the journey's **outcome**, never
 on one that merely passes through it on the way somewhere else — executed is not
 asserted, and a tag on a pass-through flow overstates coverage.
@@ -72,7 +77,8 @@ join:
 - [`e2e/check-scenario-coverage.mjs`](../../e2e/check-scenario-coverage.mjs) — the
   Maestro adapter and the CLI reporting, run by `npm run test:e2e:coverage` and as
   the first step of `npm run test:e2e`. It walks `e2e/flows/`, reads each flow's
-  `name` and `tags:`, and hands the core one result per flow.
+  `name` and `tags:`, and hands the core one result per flow, titled
+  `<name> (<path>)` so every finding names both the flow and the file to open.
 
 The gate exits non-zero on a flow tagging an id the catalog does not list, on a
 facet tag that disagrees with a row the flow tags, on a facet tag carried without a

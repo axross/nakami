@@ -26,11 +26,34 @@ import {
 	parseScenarioCatalog,
 } from "./scenario-coverage.mjs";
 
+/** Whether a YAML scalar is written in quotes, so its content is literal. */
+function isQuoted(value) {
+	return /^(".*"|'.*')$/s.test(value);
+}
+
 /** Strips the quotes a YAML scalar may be written with. */
 function stripQuotes(value) {
 	const trimmed = value.trim();
 
-	return /^(".*"|'.*')$/s.test(trimmed) ? trimmed.slice(1, -1) : trimmed;
+	return isQuoted(trimmed) ? trimmed.slice(1, -1) : trimmed;
+}
+
+/**
+ * Strips the `# …` comment a YAML scalar may be followed by. A quoted scalar
+ * may hold a `#` of its own, so only an unquoted value is cut, and only at a
+ * `#` that starts a token rather than one sitting inside a word.
+ */
+function stripComment(value) {
+	const trimmed = value.trim();
+
+	return isQuoted(trimmed)
+		? trimmed
+		: trimmed.replace(/(^|\s)#.*$/s, "").trim();
+}
+
+/** Whether a line inside a block sequence holds no entry — blank, or a comment. */
+function isBlankOrComment(line) {
+	return /^[ \t]*(#.*)?$/.test(line);
 }
 
 /** Reads a flow config's `name:` — Maestro's own label for the flow. */
@@ -43,6 +66,11 @@ function readFlowName(config) {
 /**
  * Reads a flow config's `tags:` entries. Maestro declares them as a YAML block
  * sequence; the inline `[a, b]` form is accepted too.
+ *
+ * A blank line or a whole-line comment inside the block is skipped rather than
+ * ending it, and a trailing comment is stripped off an entry — the flows here
+ * carry comments, and reading a commented flow as untagged would skip the very
+ * checks this gate exists to run.
  */
 function readFlowTags(config) {
 	const tags = [];
@@ -51,29 +79,35 @@ function readFlowTags(config) {
 	for (const line of config.split(/\r?\n/)) {
 		const header = line.match(/^tags:[ \t]*(.*)$/);
 		if (header !== null) {
-			const inline = header[1].trim();
-			inList = !(inline.startsWith("[") && inline.endsWith("]"));
+			const value = header[1].trim();
+			// The inline form ends at its closing bracket; a comment may follow.
+			const closing = value.startsWith("[") ? value.lastIndexOf("]") : -1;
+			inList = closing === -1;
 			if (!inList) {
 				tags.push(
-					...inline
-						.slice(1, -1)
+					...value
+						.slice(1, closing)
 						.split(",")
-						.map(stripQuotes)
+						.map((entry) => stripQuotes(stripComment(entry)))
 						.filter((tag) => tag !== ""),
 				);
 			}
 			continue;
 		}
 
-		if (!inList) {
+		if (!inList || isBlankOrComment(line)) {
 			continue;
 		}
 
 		const item = line.match(/^[ \t]*-[ \t]*(.+)$/);
 		if (item === null) {
 			inList = false;
-		} else {
-			tags.push(stripQuotes(item[1]));
+			continue;
+		}
+
+		const tag = stripQuotes(stripComment(item[1]));
+		if (tag !== "") {
+			tags.push(tag);
 		}
 	}
 
@@ -106,9 +140,13 @@ const results = await Promise.all(
 		// Only the flow config — everything above the first `---` — declares tags.
 		const config = source.split(/^---$/m)[0];
 		const path = `e2e/flows/${file.split(sep).join("/")}`;
+		const name = readFlowName(config);
 
 		return {
-			title: readFlowName(config) || path,
+			// Both, because neither identifies a flow on its own: two flows may
+			// share a `name:`, and CI has no tree for the reader to grep. The
+			// path is repository-relative, so it reads the same wherever it ran.
+			title: name === "" ? path : `${name} (${path})`,
 			tags: readFlowTags(config),
 			status: "declared",
 		};

@@ -10,6 +10,14 @@
 // A per-runner adapter maps its own report into that array and reports what
 // comes back, so switching runners replaces the adapter and leaves the join
 // and the gate conditions untouched.
+//
+// Tokens are read from `tags` only, and a runner that carries them in the test
+// title instead — Vitest and Jest append them there — normalizes them into
+// `tags` in its adapter before calling in. The installed `end-to-end-testing`
+// capability's `references/scenario-coverage.md` has the reporter read
+// `@`-tokens from both fields; this core deliberately reads the one, because
+// the Maestro adapter's `title` is a compound `<name> (<path>)` string and
+// scanning it would risk lifting a token out of a file path or a flow name.
 
 const REQUIRED_COLUMNS = ["id", "title", "area", "priority"];
 const PRIORITIES = ["must", "should", "may"];
@@ -40,6 +48,14 @@ function stripBackticks(value) {
 	const trimmed = value.trim();
 
 	return /^`.*`$/s.test(trimmed) ? trimmed.slice(1, -1).trim() : trimmed;
+}
+
+/**
+ * Normalizes a facet value — a catalog cell or a tag's value — so the two join
+ * case-insensitively and one spelling of a value never disagrees with another.
+ */
+function normalizeFacet(value) {
+	return value.trim().toLowerCase();
 }
 
 /** Capitalizes the caller's noun for the thing a finding is about. */
@@ -98,8 +114,8 @@ export function parseScenarioCatalog(source) {
 		const cell = (column) => stripBackticks(cells[columns.get(column)] ?? "");
 		const id = cell("id");
 		const title = cell("title");
-		const area = cell("area");
-		const priority = cell("priority").toLowerCase();
+		const area = normalizeFacet(cell("area"));
+		const priority = normalizeFacet(cell("priority"));
 
 		if (!ID_PATTERN.test(id)) {
 			errors.push(
@@ -201,7 +217,9 @@ export function evaluateScenarioCoverage({
 		for (const { kind, value } of facets) {
 			for (const id of scenarios) {
 				const row = catalog.get(id);
-				if (row === undefined || row[kind] === value) {
+				// The tag is reported as the author wrote it, so it can be found
+				// in the file, and compared normalized, so only the value differs.
+				if (row === undefined || row[kind] === normalizeFacet(value)) {
 					continue;
 				}
 
