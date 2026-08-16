@@ -86,6 +86,18 @@ Both screens map a load failure the same way, differing only in the noun:
 - A server that could not be reached, and any other unexpected response, are
   stated as failures and offer a Try again action that reloads.
 
+A failure that came from the device having no connection clears itself. Once
+the device is back online, what failed is loaded again without Try again being
+pressed, and the screen goes from the failure straight to the content. Try
+again stays the route out of the other unexpected responses, which regaining a
+connection does nothing about.
+
+What is already on screen goes stale a short while after it arrives, and a
+stale screen loads again when the app returns to the foreground. A feed left
+open across a long absence is therefore current by the time it is looked at
+again, rather than showing what the server held when the app was last put
+down.
+
 ## Switching server or account
 
 The collection list and each record feed are scoped to the server and the user
