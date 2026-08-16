@@ -10,6 +10,7 @@ import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/s
 import { SettingMenuGroupHeading } from "~/settings/components/setting-menu-group/setting-menu-group-heading";
 import { SettingMenuGroupItem } from "~/settings/components/setting-menu-group/setting-menu-group-item";
 import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
+import { SettingMenuGroupStaticItem } from "~/settings/components/setting-menu-group/setting-menu-group-static-item";
 
 /**
  * The signed-in Account section: the current user's email and server, plus a
@@ -38,7 +39,7 @@ export function SettingsAccountGroup(
 			<SettingMenuGroupHeading>Account</SettingMenuGroupHeading>
 
 			<SettingMenuGroupBody>
-				<View style={styles.accountRow} testID="settings-account-row">
+				<SettingMenuGroupStaticItem testID="settings-account-row">
 					<View style={styles.avatar}>
 						<UserRound color={theme.colors.text.accent.base} size={22} />
 					</View>
@@ -50,13 +51,12 @@ export function SettingsAccountGroup(
 							{session.serverUrl}
 						</Text>
 					</View>
-				</View>
+				</SettingMenuGroupStaticItem>
 
 				<SettingMenuGroupItem
 					accessibilityRole="button"
 					accessibilityState={{ disabled: isPending }}
 					disabled={isPending}
-					last
 					onPress={onSignOutPress}
 					testID="settings-sign-out-row"
 				>
@@ -71,17 +71,6 @@ export function SettingsAccountGroup(
 }
 
 const styles = StyleSheet.create((theme) => ({
-	accountRow: {
-		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderTopLeftRadius: theme.radius.md,
-		borderTopRightRadius: theme.radius.md,
-		columnGap: theme.gap.md,
-		flexDirection: "row",
-		minHeight: 48,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.xs,
-	},
 	accountText: {
 		flexShrink: 1,
 		rowGap: theme.gap.xs,

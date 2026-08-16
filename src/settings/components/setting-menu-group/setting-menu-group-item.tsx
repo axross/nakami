@@ -1,40 +1,54 @@
 import type { ComponentPropsWithRef, JSX } from "react";
 import { Pressable, type StyleProp, type ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { useSettingMenuGroupContext } from "./setting-menu-group-context";
+import {
+	getSettingMenuGroupItemChrome,
+	getSettingMenuGroupItemPositionVariants,
+} from "./setting-menu-group-item-style";
 
+/**
+ * An interactive row of a setting menu group. Which corners it rounds comes from
+ * the position its `<SettingMenuGroupBody>` publishes, never from the caller —
+ * moving a row is a change to the JSX order and nothing else.
+ */
 export function SettingMenuGroupItem({
-	first = false,
-	last = false,
 	style,
 	...props
 }: Readonly<
 	Omit<ComponentPropsWithRef<typeof Pressable>, "style"> & {
-		first?: boolean;
-		last?: boolean;
 		style?: StyleProp<ViewStyle>;
 	}
 >): JSX.Element {
+	const position = useSettingMenuGroupContext({
+		componentName: "SettingMenuGroupItem",
+	});
+
+	styles.useVariants({ position });
+
 	return (
 		<Pressable
-			style={({ pressed }) => [styles.item(first, last, pressed), style]}
+			style={({ pressed }) => [
+				styles.item,
+				pressed ? styles.itemPressed : null,
+				style,
+			]}
 			{...props}
 		/>
 	);
 }
 
 const styles = StyleSheet.create((theme) => ({
-	item: (first: boolean, last: boolean, pressed: boolean) => ({
-		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderBottomLeftRadius: last ? theme.radius.md : 0,
-		borderBottomRightRadius: last ? theme.radius.md : 0,
-		borderTopLeftRadius: first ? theme.radius.md : 0,
-		borderTopRightRadius: first ? theme.radius.md : 0,
-		columnGap: theme.gap.md,
-		flexDirection: "row",
-		minHeight: 48,
-		opacity: pressed ? 0.7 : 1,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.xs,
-	}),
+	item: {
+		...getSettingMenuGroupItemChrome(theme),
+		variants: {
+			position: getSettingMenuGroupItemPositionVariants(theme),
+		},
+	},
+	// The press feedback stays its own style rather than a `pressed` variant: the
+	// render prop already hands the flag to the array, and a variant would have to
+	// be selected from the component body, which cannot see it.
+	itemPressed: {
+		opacity: 0.7,
+	},
 }));
