@@ -19,17 +19,17 @@ only when the journey itself is removed from the product. Each journey's full
 description is under [Journeys](#journeys) below, so a `Title` can stay short
 without losing what a flow has to assert.
 
-| Id                     | Title                                                                 | Area        | Priority |
-| ---------------------- | --------------------------------------------------------------------- | ----------- | -------- |
-| `app.launch`           | Cold start reaches the welcome screen                                 | app         | must     |
-| `auth.signed-out`      | Signed out, the welcome screen offers sign-in and shows no tab bar    | auth        | must     |
-| `auth.sign-in-form`    | The sign-in form toggles Collection and reports an unreachable server | auth        | must     |
-| `auth.session`         | Signing in mounts the tab UI, and Sign out returns to the welcome     | auth        | should   |
-| `auth.last-server-url` | Reopening sign-in pre-fills the last-used server URL                  | auth        | should   |
-| `tabs.navigation`      | The bottom tabs reach Home, Collections, and Settings                 | tabs        | should   |
-| `collections.list`     | The Collections tab lists the server's readable collections           | collections | should   |
-| `collections.records`  | A collection's records load as a paging card feed                     | collections | should   |
-| `settings.menu`        | The Settings menu shows About and pushes the Licenses screen          | settings    | should   |
+| Id                     | Title                                                                   | Area        | Priority |
+| ---------------------- | ----------------------------------------------------------------------- | ----------- | -------- |
+| `app.launch`           | Cold start reaches the welcome screen                                   | app         | must     |
+| `auth.signed-out`      | Signed out, the welcome screen offers sign-in and shows no tab bar      | auth        | must     |
+| `auth.sign-in-form`    | The sign-in form toggles Collection and reports an unreachable server   | auth        | must     |
+| `auth.session`         | Signing in mounts the tab UI, and Sign out returns to the welcome screen | auth       | should   |
+| `auth.last-server-url` | Reopening sign-in pre-fills the last-used server URL                    | auth        | should   |
+| `tabs.navigation`      | The bottom tabs reach Home, Collections, and Settings                   | tabs        | should   |
+| `collections.list`     | The Collections tab lists the server's readable collections             | collections | should   |
+| `collections.records`  | A collection's records load as a paging card feed                       | collections | should   |
+| `settings.menu`        | The Settings menu shows About and pushes the Licenses screen            | settings    | should   |
 
 ## Journeys
 

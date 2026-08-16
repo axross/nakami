@@ -171,7 +171,7 @@ export function evaluateScenarioCoverage({
 }) {
 	const errors = [];
 	const facetMismatches = [];
-	const covered = new Map();
+	const covered = new Set();
 
 	for (const result of results) {
 		const what = describe(subject, result.title);
@@ -184,7 +184,7 @@ export function evaluateScenarioCoverage({
 					`${what} tags scenario \`${id}\`, which the catalog does not list.`,
 				);
 			} else if (asserted) {
-				covered.set(id, [...(covered.get(id) ?? []), result.title]);
+				covered.add(id);
 			}
 		}
 

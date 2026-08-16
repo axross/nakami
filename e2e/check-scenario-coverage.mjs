@@ -81,15 +81,16 @@ function readFlowTags(config) {
 }
 
 const e2eDir = dirname(fileURLToPath(import.meta.url));
-const catalogPath = "e2e/scenarios.md";
+const catalogFile = "scenarios.md";
 
 const { scenarios, errors: catalogErrors } = parseScenarioCatalog(
-	await readFile(join(e2eDir, "scenarios.md"), "utf-8"),
+	await readFile(join(e2eDir, catalogFile), "utf-8"),
 );
 
 if (catalogErrors.length > 0) {
+	// Reported repository-relative, so the path is the same wherever it ran.
 	for (const error of catalogErrors) {
-		console.error(`${catalogPath}: ${error}`);
+		console.error(`e2e/${catalogFile}: ${error}`);
 	}
 	process.exit(1);
 }
