@@ -11,8 +11,8 @@ connectivity source, and the app had none — so this decision is which module b
 `expo-network` was taken. It is a first-party Expo SDK module installed through
 `expo install`, which resolves it against the installed SDK rather than against whatever
 npm currently publishes, so its version stays managed alongside every other native
-module here. That matters more than it sounds: a native module whose version has drifted from
-the SDK is a hard crash at launch with no JS error behind it, and it is one of the
+module here. That matters more than it sounds: a native module whose version has drifted
+from the SDK is a hard crash at launch with no JS error behind it, and it is one of the
 hazards this repository already tracks by hand. It is also the module TanStack Query's
 own React Native documentation gives a recipe for, and it resolves with no transitive
 dependencies at all — one entry in the lockfile, two peers already installed.
