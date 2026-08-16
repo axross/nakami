@@ -44,9 +44,14 @@ describe("<CollectionListSkeleton>", () => {
 	// Collections screen passes the fill in through `style`.
 	it("claims no fill of its own", () => {
 		const { getByTestId } = render(<CollectionListSkeleton />);
+		const resolved = resolveStyle(
+			getByTestId("collections-loading").props.style,
+		);
 
-		expect(
-			resolveStyle(getByTestId("collections-loading").props.style),
-		).not.toHaveProperty("flex");
+		// Anchored on a property the root does set, so a `resolveStyle` that ever
+		// resolved to nothing would fail here rather than satisfy the assertion
+		// below by returning an empty object.
+		expect(resolved).toHaveProperty("backgroundColor");
+		expect(resolved).not.toHaveProperty("flex");
 	});
 });
