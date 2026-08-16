@@ -103,14 +103,13 @@ a longhand always wins over a shorthand for the same edge, whatever the declarat
 array order, so mixing the two leaves a reader working out which value applies. It also
 keeps a single edge readable from a unit test, which is what the guards below assert.
 
-`settings-screen`'s content container is the one exception, and it carries a comment
-saying so. Its horizontal value is the bare `rt.insets.left` / `rt.insets.right`,
-because the container has no horizontal gutter of its own: the gutter lives on the
-child rows, which each set `paddingHorizontal: theme.gap.md`
-(`SettingMenuGroupBody`, `SettingMenuGroupHeading`, and the screen's two paragraphs).
-Flooring the inset there would stack a second gutter on top of theirs. Any future
-surface taking this exception MUST carry the same comment, naming the children that
-hold the gutter.
+`settings-screen`'s content container is the one exception: its horizontal value is the
+bare `rt.insets.left` / `rt.insets.right`, because the gutter lives on its child rows
+rather than on the container. It carries a comment saying so, and the collision with the
+installed rule — along with what the exception costs — is recorded as a deviation in
+[agent-skills.md](./agent-skills.md#settings-screens-content-container-carries-a-raw-inset).
+Any future surface taking this exception MUST carry the same comment, naming the
+children that hold the gutter, and MUST be recorded there too.
 
 Every inset-bearing surface has a colocated unit test pinning what its owned edges
 resolve to. Unistyles' jest mock reports zero insets, which makes the whole suite a
@@ -119,6 +118,15 @@ replaced its `Math.max` with a raw inset fails its own test. `settings-screen` i
 asserted the other way round — its horizontal pair is pinned at `0`, because the bare
 inset above is a decision rather than an oversight, and flooring it would go unnoticed
 otherwise.
+
+Two limits of those guards are worth stating rather than discovering. **No unit test
+here observes a non-zero inset at all**: the mock's insets are fixed at zero and
+`StyleSheet.create` resolves once at module load, so what the suite holds is the gutter
+fallback, never the clearance the change exists to produce — that is the manual
+on-device pass. And the guards import `StyleSheet` from React Native rather than from
+Unistyles, against that package's usual rule, because they read an already-rendered
+style array and Unistyles' own `flatten` mock returns its argument untouched. The rule
+governs the stylesheet-declaration path, which these tests do not touch.
 
 ## A scrolling screen insets its content, not its container
 
