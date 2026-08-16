@@ -9,7 +9,13 @@ import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { themes } from "~/unistyles";
 import { SettingsScreen } from "./settings-screen";
 
+// `addBreadcrumb` is not used by this screen: it is reached at import time,
+// because the shared query client logs the start of its launch-time
+// connectivity probe while registering `onlineManager` at module scope, and the
+// root logger's breadcrumb transport forwards every line here. A factory that
+// names only what the screen calls makes the whole suite fail to load.
 jest.mock("@sentry/react-native", () => ({
+	addBreadcrumb: jest.fn(),
 	showFeedbackWidget: jest.fn(),
 }));
 

@@ -21,7 +21,7 @@ component adds its row here.
 
 | Component       | Purpose                                                                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `message-state` | Centred mark, title, and subtitle with an optional action slot — the shared shape behind the feature empty, error, and placeholder screens |
+| `message-state` | Centred mark, title, and subtitle with optional status and action slots — the shared shape behind the feature empty, error, offline, and placeholder screens |
 
 ## One file per part
 
