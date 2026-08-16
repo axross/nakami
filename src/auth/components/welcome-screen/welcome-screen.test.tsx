@@ -56,4 +56,26 @@ describe("<WelcomeScreen>", () => {
 		expect(root.paddingStart).toBe(themes.light.gap.lg);
 		expect(root.paddingEnd).toBe(themes.light.gap.lg);
 	});
+
+	// The assertion above cannot see the override, so this one pins the wiring
+	// instead of the value: that this screen passes a vertical pair down at all.
+	// Without it, deleting `style={styles.screen}` removes the only thing giving
+	// the welcome screen its owned top and bottom edges, and every other test
+	// stays green — `MessageState`'s own gutter answers with the same 24.
+	it("passes its own vertical pair down to MessageState", () => {
+		renderRouter(
+			{ index: WelcomeScreen, "sign-in": () => null },
+			{ initialUrl: "/" },
+		);
+
+		const style = screen.getByTestId("welcome-screen").props.style;
+
+		expect(Array.isArray(style)).toBe(true);
+		expect(style.at(-1)).toEqual(
+			expect.objectContaining({
+				paddingBottom: expect.any(Number),
+				paddingTop: expect.any(Number),
+			}),
+		);
+	});
 });
