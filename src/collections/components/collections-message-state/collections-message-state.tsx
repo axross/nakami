@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react-native";
 import type { JSX } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { CollectionsMessageStateStatus } from "~/collections/components/collections-message-state/collections-message-state-status";
 import { MessageState } from "~/common/components/message-state/message-state";
 
 interface MessageAction {
@@ -11,14 +12,17 @@ interface MessageAction {
 }
 
 /**
- * The Collections screen's empty and error surfaces: the shared
- * {@link MessageState} with a primary retry button when an action is given.
+ * The Collections screen's empty, error, and offline surfaces: the shared
+ * {@link MessageState} with a primary retry button when an action is given, and
+ * a pulsing status line when a status label is. The status line's own test hook
+ * is derived from this surface's, so a test targets the two by related names.
  */
 export function CollectionsMessageState({
 	icon,
 	iconColor,
 	title,
 	subtitle,
+	status,
 	action,
 	testID,
 }: Readonly<{
@@ -26,6 +30,7 @@ export function CollectionsMessageState({
 	iconColor?: string;
 	title: string;
 	subtitle: string;
+	status?: string;
 	action?: MessageAction;
 	testID?: string;
 }>): JSX.Element {
@@ -45,6 +50,14 @@ export function CollectionsMessageState({
 			}
 			icon={icon}
 			iconColor={iconColor}
+			status={
+				status ? (
+					<CollectionsMessageStateStatus
+						label={status}
+						testID={testID ? `${testID}-status` : undefined}
+					/>
+				) : undefined
+			}
 			subtitle={subtitle}
 			testID={testID}
 			title={title}

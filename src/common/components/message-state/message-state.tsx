@@ -4,17 +4,18 @@ import { type StyleProp, Text, View, type ViewStyle } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
- * A centered "mark + title + subtitle" surface with an optional action slot —
- * the shared shape behind feature empty/error/placeholder screens (Home's
- * connect prompt, the Collections empty/error/detail states). Callers pass
- * their own action element so each keeps its distinct control (a navigation
- * link, a retry button).
+ * A centered "mark + title + subtitle" surface with optional status and action
+ * slots — the shared shape behind feature empty/error/placeholder screens
+ * (Home's connect prompt, the Collections empty/error/offline states). Callers
+ * pass their own elements so each keeps its distinct control (a navigation
+ * link, a retry button) and its own read-out of what the screen is waiting on.
  */
 export function MessageState({
 	icon: Icon,
 	iconColor,
 	title,
 	subtitle,
+	status,
 	action,
 	testID,
 	style,
@@ -23,6 +24,7 @@ export function MessageState({
 	iconColor?: string;
 	title: string;
 	subtitle: string;
+	status?: ReactNode;
 	action?: ReactNode;
 	testID?: string;
 	style?: StyleProp<ViewStyle>;
@@ -38,6 +40,7 @@ export function MessageState({
 			<Text style={styles.title}>{title}</Text>
 			<Text style={styles.subtitle}>{subtitle}</Text>
 
+			{status}
 			{action}
 		</View>
 	);

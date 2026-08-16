@@ -8,6 +8,7 @@ import { CollectionListItem } from "~/collections/components/collection-list-ite
 import { CollectionListSkeleton } from "~/collections/components/collection-list-skeleton/collection-list-skeleton";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
 import { describeLoadError } from "~/collections/helpers/describe-collections-error";
+import { describeOfflineLoad } from "~/collections/helpers/describe-collections-offline";
 import { getCollectionListQueryOptions } from "~/collections/queries/collection-list-query";
 
 // Subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
@@ -20,20 +21,25 @@ const COLLECTIONS_LOAD_ERROR = {
 		"Something went wrong loading collections. Please try again.",
 } as const;
 
+// The subject-specific half of the offline surface; its title, status line, and
+// icon are shared with the records list.
+const COLLECTIONS_OFFLINE_SUBTITLE =
+	"Collections will load as soon as you're back online.";
+
 function CollectionListDivider(): JSX.Element {
 	return <View style={styles.divider} />;
 }
 
 /**
  * The Collections tab: lists the signed-in server's readable, non-system
- * collections, each row opening that collection's record list. Renders a
- * loading skeleton, an error state (with a message tailored to the failure),
- * an empty state, or the list.
+ * collections, each row opening that collection's record list. Renders an
+ * offline state, a loading skeleton, an error state (with a message tailored to
+ * the failure), an empty state, or the list.
  */
 export function CollectionsScreen(): JSX.Element {
 	const { theme } = useUnistyles();
 	const session = useAuthSession();
-	const { data, isPending, isError, error, refetch } = useQuery({
+	const { data, isPending, fetchStatus, isError, error, refetch } = useQuery({
 		...getCollectionListQueryOptions({
 			serverUrl: session?.serverUrl ?? "",
 			userId: session?.user.id ?? "",
@@ -42,7 +48,22 @@ export function CollectionsScreen(): JSX.Element {
 	});
 
 	let content: JSX.Element;
-	if (isPending) {
+	// Ahead of the skeleton on purpose. With no connection the query pauses
+	// rather than failing, so it stays `pending` with nothing cached and the
+	// skeleton below would pulse indefinitely with nothing on its way.
+	if (isPending && fetchStatus === "paused") {
+		const copy = describeOfflineLoad(COLLECTIONS_OFFLINE_SUBTITLE);
+		content = (
+			<CollectionsMessageState
+				icon={copy.icon}
+				iconColor={theme.colors.text.neutral.base}
+				status={copy.status}
+				subtitle={copy.subtitle}
+				testID="collections-offline"
+				title={copy.title}
+			/>
+		);
+	} else if (isPending) {
 		content = <CollectionListSkeleton />;
 	} else if (isError) {
 		const copy = describeLoadError(error, COLLECTIONS_LOAD_ERROR);
