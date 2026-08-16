@@ -76,10 +76,18 @@ function unparseableResponse(parseFailure: Error): Response {
 	} as unknown as Response;
 }
 
-/** runs `request()` against the stubbed fetch, resolving with what it threw. */
+/** the call under test, as a promise the rejection matchers can take directly. */
+function sendRequest(): Promise<unknown> {
+	return request("fetchRecords", "https://cms.example.com/api/users", {});
+}
+
+/**
+ * runs `sendRequest()` and resolves with whatever it threw, for the cases that
+ * need the thrown object itself rather than a match against its shape.
+ */
 async function attemptRequest(): Promise<unknown> {
 	try {
-		await request("fetchRecords", "https://cms.example.com/api/users", {});
+		await sendRequest();
 	} catch (error) {
 		return error;
 	}
@@ -128,14 +136,17 @@ describe("request()", () => {
 				throw new TypeError("Network request failed");
 			});
 
-			const error = await attemptRequest();
+			const attempt = sendRequest();
 
-			expect(error).toBeInstanceOf(PayloadRequestError);
-			expect((error as PayloadRequestError).kind).toBe("network");
-			expect((error as PayloadRequestError).status).toBeUndefined();
+			await expect(attempt).rejects.toThrow(PayloadRequestError);
+			await expect(attempt).rejects.toMatchObject({
+				kind: "network",
+				status: undefined,
+			});
 		});
 
 		it("carries the rejection itself as the cause", async () => {
+			expect.assertions(1);
 			const rejection = new TypeError("Network request failed");
 			stubFetch(async () => {
 				throw rejection;
@@ -143,10 +154,14 @@ describe("request()", () => {
 
 			const error = await attemptRequest();
 
+			// identity, not equality: `.rejects.toHaveProperty("cause", …)` compares
+			// an `Error` recursively by `name` and `message`, which would still pass
+			// if the wrapper attached a different error that happened to read alike.
 			expect((error as PayloadRequestError).cause).toBe(rejection);
 		});
 
 		it("closes the breadcrumb bracket without disclosing the rejection", async () => {
+			expect.assertions(2);
 			stubFetch(async () => {
 				throw new TypeError("Network request failed for cms.example.com");
 			});
@@ -159,10 +174,8 @@ describe("request()", () => {
 			// the closing half of the bracket the logging convention requires: a
 			// start with no completion is what would read as a request still hanging.
 			expect(failure).toBeDefined();
-			// the rejection rides on the thrown error's `cause` instead:
-			// `isReportableQueryError()` keeps `"network"` out of the tracker, and a
-			// breadcrumb leaves the device either way, so the underlying message on
-			// this line would add a telemetry surface for no triage gain.
+			// the operation and the duration, and nothing else: no underlying
+			// message. `request()` explains why at the throw site.
 			expect(failure?.[1]).toEqual({
 				operation: "fetchRecords",
 				duration: expect.any(Number),
@@ -174,19 +187,23 @@ describe("request()", () => {
 		it("throws a server-kind PayloadRequestError with no status", async () => {
 			stubFetch(async () => unparseableResponse(new SyntaxError("Bad JSON")));
 
-			const error = await attemptRequest();
+			const attempt = sendRequest();
 
-			expect(error).toBeInstanceOf(PayloadRequestError);
-			expect((error as PayloadRequestError).kind).toBe("server");
-			expect((error as PayloadRequestError).status).toBeUndefined();
+			await expect(attempt).rejects.toThrow(PayloadRequestError);
+			await expect(attempt).rejects.toMatchObject({
+				kind: "server",
+				status: undefined,
+			});
 		});
 
 		it("carries the parse failure itself as the cause", async () => {
+			expect.assertions(1);
 			const parseFailure = new SyntaxError("Unexpected end of input");
 			stubFetch(async () => unparseableResponse(parseFailure));
 
 			const error = await attemptRequest();
 
+			// identity again, for the same reason as the network case above.
 			expect((error as PayloadRequestError).cause).toBe(parseFailure);
 		});
 	});
