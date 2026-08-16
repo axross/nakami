@@ -79,9 +79,11 @@ export async function request(
 		// Network down, DNS failure, timeout/abort — the server was unreachable.
 		// Close the bracket at debug (callers report the failure at their own
 		// level) so the breadcrumb trail doesn't go quiet on the failure path.
-		// The rejection itself stays out of the line and rides on the thrown
-		// error's `cause` instead, where the tracker links it as its own
-		// exception rather than mirroring it onto the breadcrumb trail.
+		// the rejection rides on the thrown error's `cause` rather than this line:
+		// `isReportableQueryError()` keeps `"network"` out of the tracker, so the
+		// cause serves local diagnosis and whatever path does capture the error,
+		// while a breadcrumb leaves the device either way — putting the underlying
+		// message on one would add a telemetry surface for no triage gain.
 		logger.debug("Failed request.", {
 			operation,
 			duration: performance.now() - startedAt,

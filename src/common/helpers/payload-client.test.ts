@@ -54,20 +54,16 @@ function thrownFrom(run: () => unknown): unknown {
 	throw new Error("Expected the call to throw, but it returned.");
 }
 
-const originalFetch = globalThis.fetch;
-
 /**
- * Stands in for the global fetch, following the idiom the auth client's own
- * test file established. The `afterEach` below puts the original back.
+ * stands in for the global fetch. spying rather than assigning is what lets
+ * `jest.restoreAllMocks()` in the hook below put the real one back.
  */
 function stubFetch(implementation: () => Promise<Response>): void {
-	(globalThis as { fetch: typeof fetch }).fetch = jest.fn(
-		implementation,
-	) as unknown as typeof fetch;
+	jest.spyOn(globalThis, "fetch").mockImplementation(implementation);
 }
 
 /**
- * A 200 whose body cannot be decoded — a truncated payload, or a proxy's HTML
+ * a 200 whose body cannot be decoded — a truncated payload, or a proxy's HTML
  * error page — modelled as the rejection `Response.json()` produces for it.
  */
 function unparseableResponse(parseFailure: Error): Response {
@@ -80,7 +76,7 @@ function unparseableResponse(parseFailure: Error): Response {
 	} as unknown as Response;
 }
 
-/** Runs `request()` against the stubbed fetch, resolving with what it threw. */
+/** runs `request()` against the stubbed fetch, resolving with what it threw. */
 async function attemptRequest(): Promise<unknown> {
 	try {
 		await request("fetchRecords", "https://cms.example.com/api/users", {});
@@ -96,7 +92,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-	(globalThis as { fetch: typeof fetch }).fetch = originalFetch;
+	jest.restoreAllMocks();
 });
 
 describe("PayloadRequestError", () => {
@@ -160,13 +156,13 @@ describe("request()", () => {
 			const failure = logger.debug.mock.calls.find(
 				([message]) => message === "Failed request.",
 			);
-			// The closing half of the bracket the logging convention requires: a
+			// the closing half of the bracket the logging convention requires: a
 			// start with no completion is what would read as a request still hanging.
 			expect(failure).toBeDefined();
-			// The rejection reaches the error tracker as a linked exception via the
-			// cause. It stays off this line deliberately: every log line becomes a
-			// breadcrumb that leaves the device, so the trail gains nothing here
-			// that triage does not already get from the linked exception.
+			// the rejection rides on the thrown error's `cause` instead:
+			// `isReportableQueryError()` keeps `"network"` out of the tracker, and a
+			// breadcrumb leaves the device either way, so the underlying message on
+			// this line would add a telemetry surface for no triage gain.
 			expect(failure?.[1]).toEqual({
 				operation: "fetchRecords",
 				duration: expect.any(Number),
