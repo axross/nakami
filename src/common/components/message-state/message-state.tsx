@@ -61,9 +61,11 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// This surface is `flex: 1` and full-bleed at every call site, so it carries
 	// the horizontal safe-area inset once on their behalf. The vertical pair is
 	// left as the plain gutter: a caller that owns its top or bottom edge (the
-	// welcome screen) overrides it through `style`, which comes last in the
-	// array — so both sides are written as longhands, never the `padding`
-	// shorthand, and which value wins is not a question of resolution order.
+	// welcome screen) overrides it through `style`, which comes last in the array
+	// and therefore wins. That array order is load-bearing — reversing it would
+	// make every consumer override lose — and the test that holds it lives beside
+	// this file. Both sides are written as longhands so no shorthand-versus-
+	// longhand precedence is involved in reading which value applies.
 	root: {
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.bare,
