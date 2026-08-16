@@ -103,7 +103,8 @@ export function CollectionsScreen(): JSX.Element {
 const styles = StyleSheet.create((theme, rt) => ({
 	// A stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the list's content
-	// container, not on the list itself, so rows scroll under the chrome.
+	// container, not on the list itself, which would inset its scroll indicators
+	// and leave the rows stopping short of the screen edge.
 	// `CollectionListSkeleton` mirrors these values, or the card would shift
 	// when the collections arrive.
 	card: {

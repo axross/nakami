@@ -196,8 +196,8 @@ describe("<CollectionRecordsScreen>", () => {
 	});
 
 	// A stack header and the tab bar clear this screen's vertical edges, so it
-	// owns only the horizontal pair — carried on the feed's content container so
-	// cards scroll under the chrome. Unistyles' jest mock reports zero insets, so
+	// owns only the horizontal pair — carried on the feed's content container
+	// rather than the list itself. Unistyles' jest mock reports zero insets, so
 	// this is the zero-inset device: the feed's padding has to fall back to the
 	// design gutter rather than collapsing to the raw inset.
 	it("keeps the feed's horizontal gutter when the runtime reports no insets", async () => {

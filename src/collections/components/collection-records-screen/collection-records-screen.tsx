@@ -148,7 +148,8 @@ const styles = StyleSheet.create((theme, rt) => ({
 	},
 	// A stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the feed's content
-	// container, not on the list itself, so cards scroll under the chrome.
+	// container, not on the list itself, which would inset its scroll indicators
+	// and leave the cards stopping short of the screen edge.
 	// `CollectionRecordsSkeleton` mirrors these values, or the feed would shift
 	// when the records arrive.
 	list: {

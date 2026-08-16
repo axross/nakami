@@ -171,8 +171,8 @@ describe("<CollectionsScreen>", () => {
 	});
 
 	// A stack header and the tab bar clear this screen's vertical edges, so it
-	// owns only the horizontal pair — carried on the list's content container so
-	// rows scroll under the chrome. Unistyles' jest mock reports zero insets, so
+	// owns only the horizontal pair — carried on the list's content container
+	// rather than the list itself. Unistyles' jest mock reports zero insets, so
 	// this is the zero-inset device: the card's margin has to fall back to the
 	// design gutter rather than collapsing to the raw inset.
 	it("keeps the list card's horizontal gutter when the runtime reports no insets", async () => {
