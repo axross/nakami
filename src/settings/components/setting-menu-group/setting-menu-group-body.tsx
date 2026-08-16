@@ -10,7 +10,7 @@ export function SettingMenuGroupBody({
 }
 
 const styles = StyleSheet.create((theme) => ({
-	// The rows sit flush and are separated by the gap between them rather than by
+	// the rows sit flush and are separated by the gap between them rather than by
 	// a border, so this `rowGap` is a hairline rather than a spacing step — the
 	// group's ground shows through it as the separator.
 	body: {

@@ -7,7 +7,7 @@ import { themes } from "~/unistyles";
 import { MessageState } from "./message-state";
 
 /**
- * Flattens whatever React Native accepts as a `style` prop (an object, or an
+ * flattens whatever React Native accepts as a `style` prop (an object, or an
  * arbitrarily nested array of them) into the single resolved object the
  * renderer would apply.
  */
@@ -22,7 +22,7 @@ function resolveStyle(style: unknown): Record<string, unknown> {
 }
 
 describe("<MessageState>", () => {
-	// A dropped rest object type-checks and fails silently — the caller's prop
+	// a dropped rest object type-checks and fails silently — the caller's prop
 	// simply never reaches a node — so this is the only place the forwarding is
 	// actually proven.
 	it("forwards an undeclared prop and the caller's test hook to the root", () => {
@@ -40,7 +40,7 @@ describe("<MessageState>", () => {
 	});
 
 	// `ref` is an ordinary prop on React 19, so a props type that strips it leaves
-	// a caller unable to measure or focus the surface at all. Asserting the
+	// a caller unable to measure or focus the surface at all. asserting the
 	// populated instance rather than only that the call type-checks is what
 	// proves the spread carried it the whole way to the root.
 	it("populates a caller's ref with the root node it renders", () => {
@@ -60,13 +60,13 @@ describe("<MessageState>", () => {
 		expect(ref.current?.props.testID).toBe("welcome-screen");
 	});
 
-	// The consumer owns where the surface sits; the component owns what it looks
-	// like. Merging last is what makes the first half true without discarding the
+	// the consumer owns where the surface sits; the component owns what it looks
+	// like. merging last is what makes the first half true without discarding the
 	// second — and two consumers now depend on it: every call site supplies the
 	// `flex` this root deliberately omits, and the welcome screen clears its own
 	// top and bottom edges through the same prop.
 	//
-	// The asserted value is deliberately one no gutter here produces. At zero
+	// the asserted value is deliberately one no gutter here produces. at zero
 	// insets the welcome screen's override resolves to the same 24 as this root's
 	// own padding, so reversing the array would make every override lose while
 	// that screen's test stayed green and the notch stopped being cleared.
@@ -90,7 +90,7 @@ describe("<MessageState>", () => {
 		});
 	});
 
-	// How much room this surface gets is the consumer's half of the split: a root
+	// how much room this surface gets is the consumer's half of the split: a root
 	// that claimed `flex: 1` for itself could not be placed beside anything else.
 	it("claims no fill of its own", () => {
 		const { getByTestId } = render(
@@ -107,7 +107,7 @@ describe("<MessageState>", () => {
 		).not.toHaveProperty("flex");
 	});
 
-	// This surface carries the horizontal safe-area inset on behalf of every call
+	// this surface carries the horizontal safe-area inset on behalf of every call
 	// site. Unistyles' jest mock resolves every stylesheet with zero insets, so
 	// this assertion stands in for a device that reports none: the design gutter
 	// has to survive, rather than the edge collapsing to the raw inset.

@@ -3,7 +3,7 @@ import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { reportError } from "~/core/helpers/error-reporting";
 
 /**
- * Whether a failed query is worth reporting to the error tracker. Permission
+ * whether a failed query is worth reporting to the error tracker. permission
  * (`auth`) and connectivity (`network`) failures are expected operational
  * states the UI already surfaces to the user, so they are not reported;
  * everything else — an unexpected server response, a payload the app can't
@@ -17,7 +17,7 @@ export function isReportableQueryError(error: unknown): boolean {
 }
 
 export const queryClient = new QueryClient({
-	// Report unexpected query failures to the error tracker once they settle
+	// report unexpected query failures to the error tracker once they settle
 	// (after retries); the per-feature UI still renders its own error state.
 	queryCache: new QueryCache({
 		onError: (error, query) => {

@@ -29,7 +29,7 @@ const session: Session = {
 	user: { id: "1", email: "you@example.com" },
 };
 
-// The Account group consumes the sign-out mutation via `useMutation`, so render
+// the Account group consumes the sign-out mutation via `useMutation`, so render
 // under a fresh, isolated QueryClient — the mutation stays idle here (never
 // invoked), and the real store still drives the auth-gated rows.
 function renderSettingsScreen() {
@@ -131,7 +131,7 @@ describe("<SettingsScreen>", () => {
 		expect(getByText("Sign out")).toBeTruthy();
 	});
 
-	// The last row used to sit flush against the tab bar; the content container
+	// the last row used to sit flush against the tab bar; the content container
 	// now ends with the screen's own gutter. Unistyles' jest mock reports zero
 	// insets, so this is the zero-inset device — the gutter is unconditional
 	// here, unlike the horizontal pair, which is deliberately the bare inset
@@ -146,9 +146,9 @@ describe("<SettingsScreen>", () => {
 		expect(content.paddingBottom).toBe(themes.light.gap.lg);
 	});
 
-	// The horizontal pair is the bare inset by design — the child rows carry the
+	// the horizontal pair is the bare inset by design — the child rows carry the
 	// gutter — so this screen is the one that asserts zero rather than a gutter.
-	// Flooring it against `theme.gap.md` would read as a fix and would stack a
+	// flooring it against `theme.gap.md` would read as a fix and would stack a
 	// second gutter on every row; pinning it here is what makes that regression
 	// fail a test instead of shipping.
 	it("leaves the horizontal pair as the bare inset, since the rows carry the gutter", () => {
