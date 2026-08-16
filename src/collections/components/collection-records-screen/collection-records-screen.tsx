@@ -136,7 +136,7 @@ export function CollectionRecordsScreen({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	count: {
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
@@ -146,9 +146,17 @@ const styles = StyleSheet.create((theme) => ({
 	footer: {
 		paddingVertical: theme.gap.md,
 	},
+	// A stack header clears the top edge and the tab bar the bottom, so this
+	// screen owns only the horizontal pair — carried on the feed's content
+	// container, not on the list itself, so cards scroll under the chrome.
+	// `CollectionRecordsSkeleton` mirrors these values, or the feed would shift
+	// when the records arrive.
 	list: {
 		gap: theme.gap.sm,
-		padding: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingTop: theme.gap.md,
 	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,

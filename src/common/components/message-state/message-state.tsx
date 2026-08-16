@@ -43,7 +43,7 @@ export function MessageState({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	mark: {
 		alignItems: "center",
 		aspectRatio: 1,
@@ -53,12 +53,21 @@ const styles = StyleSheet.create((theme) => ({
 		marginBottom: theme.gap.xs,
 		width: 66,
 	},
+	// This surface is `flex: 1` and full-bleed at every call site, so it carries
+	// the horizontal safe-area inset once on their behalf. The vertical pair is
+	// left as the plain gutter: a caller that owns its top or bottom edge (the
+	// welcome screen) overrides it through `style`, which comes last in the
+	// array — so both sides are written as longhands, never the `padding`
+	// shorthand, and which value wins is not a question of resolution order.
 	root: {
 		alignItems: "center",
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 		justifyContent: "center",
-		padding: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.xs,
 	},
 	subtitle: {

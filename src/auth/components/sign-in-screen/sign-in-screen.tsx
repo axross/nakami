@@ -220,9 +220,16 @@ export function SignInScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// The stack header clears the top edge, so this screen owns the bottom and
+	// the horizontal pair. The insets sit on the scrolled content rather than on
+	// the `ScrollView` itself, so the form scrolls under the header instead of
+	// stopping short of it.
 	content: {
-		padding: theme.gap.md,
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingTop: theme.gap.md,
 		rowGap: theme.gap.md,
 	},
 	error: {

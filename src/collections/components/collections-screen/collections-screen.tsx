@@ -79,6 +79,7 @@ export function CollectionsScreen(): JSX.Element {
 				keyExtractor={(collection) => collection.slug}
 				renderItem={({ item }) => <CollectionListItem collection={item} />}
 				style={styles.list}
+				testID="collections-list"
 			/>
 		);
 	} else {
@@ -99,13 +100,21 @@ export function CollectionsScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
+	// A stack header clears the top edge and the tab bar the bottom, so this
+	// screen owns only the horizontal pair — carried on the list's content
+	// container, not on the list itself, so rows scroll under the chrome.
+	// `CollectionListSkeleton` mirrors these values, or the card would shift
+	// when the collections arrive.
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.gap.sm,
 		borderWidth: 1,
-		margin: theme.gap.md,
+		marginBottom: theme.gap.md,
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginTop: theme.gap.md,
 		overflow: "hidden",
 	},
 	divider: {

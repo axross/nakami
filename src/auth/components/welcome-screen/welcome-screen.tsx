@@ -41,6 +41,7 @@ export function WelcomeScreen(): JSX.Element {
 				</Pressable>
 			}
 			icon={Database}
+			style={styles.screen}
 			subtitle="Sign in to your Payload CMS to browse your collections."
 			testID="welcome-screen"
 			title="Connect to Payload"
@@ -48,7 +49,7 @@ export function WelcomeScreen(): JSX.Element {
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
 	button: {
 		alignItems: "center",
 		alignSelf: "stretch",
@@ -64,5 +65,12 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	buttonPressed: {
 		opacity: 0.6,
+	},
+	// This screen has no header and no tab bar, so it owns all four edges.
+	// `MessageState` already carries the horizontal pair for every call site;
+	// only the vertical pair is added here, through its `style` prop.
+	screen: {
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.lg),
+		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
 	},
 }));
