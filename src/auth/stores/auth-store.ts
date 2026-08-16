@@ -129,11 +129,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 		// the session but deliberately leaves this value in place.
 		await writeLastServerUrl(session.serverUrl);
 		set({ status: "authenticated", session });
+		// One line per terminal store transition, at debug: each of these is an
+		// internal step of an operation (sign-in, sign-out, refresh, hydration)
+		// that already closes its own bracket at info. Logged after the keychain
+		// write so the line only appears once the transition actually happened;
+		// a throwing write is closed by the calling operation's failure line.
+		// Never log the token or the user's email.
+		logger.debug("Stored the session.", { serverUrl: session.serverUrl });
 	},
 
 	async deauthenticate() {
 		await clearSession();
 		set({ status: "unauthenticated", session: null });
+		logger.debug("Cleared the session.");
 	},
 
 	async applyRefresh(token, exp, user) {
@@ -151,6 +159,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 		};
 		await writeSession(next);
 		set({ session: next });
+		logger.debug("Replaced the session token.", { exp });
 	},
 }));
 
