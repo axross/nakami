@@ -10,9 +10,7 @@ import Animated, {
 	withSequence,
 	withTiming,
 } from "react-native-reanimated";
-import { StyleSheet } from "react-native-unistyles";
-
-const PULSE_DURATION_MS = 700;
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
  * The live read-out under a collections message state's subtitle: a pulsing dot
@@ -26,6 +24,7 @@ export function CollectionsMessageStateStatus({
 	label,
 	testID,
 }: Readonly<{ label: string; testID?: string }>): JSX.Element {
+	const { theme } = useUnistyles();
 	const reduceMotion = useReducedMotion();
 	const opacity = useSharedValue(0.5);
 
@@ -35,17 +34,24 @@ export function CollectionsMessageStateStatus({
 			return;
 		}
 
+		// One config for both halves, so the pulse cannot ease in and out on
+		// different curves. Read through the theme rather than from a local
+		// constant, and on the same two tokens the collections skeletons pulse on
+		// — this dot sits beside them in the same screens, so a second copy is how
+		// they would drift apart.
+		const timing = {
+			duration: theme.duration.slow,
+			easing: theme.easing.standard,
+		};
+
 		opacity.value = withRepeat(
-			withSequence(
-				withTiming(1, { duration: PULSE_DURATION_MS }),
-				withTiming(0.4, { duration: PULSE_DURATION_MS }),
-			),
+			withSequence(withTiming(1, timing), withTiming(0.4, timing)),
 			-1,
 			false,
 		);
 
 		return () => cancelAnimation(opacity);
-	}, [reduceMotion, opacity]);
+	}, [reduceMotion, opacity, theme.duration.slow, theme.easing.standard]);
 
 	const pulse = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
@@ -58,10 +64,12 @@ export function CollectionsMessageStateStatus({
 }
 
 const styles = StyleSheet.create((theme) => ({
+	// `pill` self-clamps to a circle on a square element, so the dot stays round
+	// without restating half its width here.
 	dot: {
 		aspectRatio: 1,
 		backgroundColor: theme.colors.text.neutral.base,
-		borderRadius: theme.gap.xs,
+		borderRadius: theme.radius.pill,
 		width: 8,
 	},
 	label: {
