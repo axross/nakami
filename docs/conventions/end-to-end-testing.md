@@ -51,20 +51,15 @@ normalize to `must`, and `area:` the same way — so one spelling of a value is 
 reported as disagreeing with another. A `scenario:` tag joins exactly instead: an `Id`
 is already required to be lower-case, and the id is the contract.
 
-A `scenario:` tag MUST go on the flow that asserts the journey's **outcome**, never
-on one that merely passes through it on the way somewhere else — executed is not
-asserted, and a tag on a pass-through flow overstates coverage.
-
-A facet tag MUST agree with every scenario the flow tags, and a flow spanning two
-areas or two priorities MUST therefore carry its `scenario:` tags alone rather than
-a facet that is true of only half of them. A facet with no `scenario:` tag beside it
-fails the gate rather than passing quietly: there is no row to check it against, so
-it asserts nothing and cannot be trusted.
-
-Renaming an id MUST move every tag that references it in the same change. The id is
-the whole contract between the catalog and the flows; a rename that lands alone
-turns every affected flow into an unknown-id failure or, worse, silently uncovers
-the row.
+Which tag belongs on which flow — tagging the flow that asserts a journey's
+**outcome** rather than one that merely passes through it, carrying a facet only
+where it holds for every scenario the flow tags, and moving every tag in the same
+change as a rename — is the installed capability's
+[scenario-coverage.md](../../.claude/skills/end-to-end-testing/references/scenario-coverage.md),
+and is not restated here. One thing about it is local: where that capability asks for
+facet consistency, this repository's gate **enforces** it, so a facet that disagrees
+with a row the flow tags fails the run rather than being left for a reviewer to
+notice.
 
 ## The gate, and what it does not prove
 
@@ -123,9 +118,18 @@ one.
 | `NAKAMI_E2E_PASSWORD`        | That user's password                                                                                         |
 
 They are supplied to the run (`maestro test -e NAKAMI_E2E_SERVER_URL=… e2e/flows`)
-and read inside a flow as `${NAKAMI_E2E_SERVER_URL}`. A credential, a server URL, or
-a fixture hostname MUST NOT be committed — not to a flow, not to `.env`, not as a
+and read inside a flow as `${NAKAMI_E2E_SERVER_URL}`. A fixture's credential, server
+URL, or hostname MUST NOT be committed — not to a flow, not to `.env`, not as a
 default in this document — and anything a run persists stays out of version control.
+
+A deterministic literal that exists to drive a **failure** path is not a fixture
+value, and that rule does not reach it.
+[`e2e/flows/auth/sign-in-form.yaml`](../../e2e/flows/auth/sign-in-form.yaml) commits
+`http://127.0.0.1:9`, `you@example.com`, and `wrong-password` on purpose — the
+journey it asserts is an unreachable server, and the installed capability's
+[test-environment.md](../../.claude/skills/end-to-end-testing/references/test-environment.md)
+asks for exactly such an offline-safe input in place of a real endpoint. That flow
+MUST NOT be raised as a violation of the paragraph above.
 
 `NAKAMI_E2E_SERVER_URL` cannot have one value for both platforms. An iOS simulator
 shares the host's loopback interface, so a server on the developer's machine is
