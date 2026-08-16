@@ -53,7 +53,7 @@ const styles = StyleSheet.create((theme) => ({
 		alignItems: "center",
 		alignSelf: "stretch",
 		backgroundColor: theme.colors.solid.accent.base,
-		borderRadius: theme.gap.sm,
+		borderRadius: theme.radius.md,
 		justifyContent: "center",
 		marginTop: theme.gap.md,
 		minHeight: 50,
