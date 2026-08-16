@@ -8,12 +8,14 @@ import {
 } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchRecords } from "~/collections/helpers/fetch-records";
 import type { RecordPageResponse } from "~/collections/models/record";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { themes } from "~/unistyles";
 import { CollectionRecordsScreen } from "./collection-records-screen";
 
 // The loading skeleton pulls in react-native-reanimated (v4 → react-native-
@@ -191,5 +193,31 @@ describe("<CollectionRecordsScreen>", () => {
 			"posts",
 			2,
 		);
+	});
+
+	// A stack header and the tab bar clear this screen's vertical edges, so it
+	// owns only the horizontal pair — carried on the feed's content container so
+	// cards scroll under the chrome. Unistyles' jest mock reports zero insets, so
+	// this is the zero-inset device: the feed's padding has to fall back to the
+	// design gutter rather than collapsing to the raw inset.
+	it("keeps the feed's horizontal gutter when the runtime reports no insets", async () => {
+		jest
+			.mocked(fetchRecords)
+			.mockResolvedValue(
+				page({ docs: [{ id: "r1", title: "A field guide" }], totalDocs: 1 }),
+			);
+
+		const { getByTestId } = renderScreen();
+
+		await waitFor(() => {
+			expect(getByTestId("collection-record-list-item-r1")).toBeTruthy();
+		});
+
+		const list = StyleSheet.flatten(
+			getByTestId("collection-records-list").props.contentContainerStyle,
+		);
+
+		expect(list.paddingStart).toBe(themes.light.gap.md);
+		expect(list.paddingEnd).toBe(themes.light.gap.md);
 	});
 });

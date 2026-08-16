@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { fireEvent, screen } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
-import { Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import { themes } from "~/unistyles";
 import { WelcomeScreen } from "./welcome-screen";
 
 describe("<WelcomeScreen>", () => {
@@ -28,5 +29,31 @@ describe("<WelcomeScreen>", () => {
 		fireEvent.press(screen.getByTestId("welcome-sign-in-button"));
 
 		expect(screen.getByTestId("sign-in-destination")).toBeTruthy();
+	});
+
+	// This screen has no header and no tab bar, so it owns all four edges — the
+	// vertical pair from its own stylesheet, the horizontal pair from
+	// `MessageState`. Unistyles' jest mock reports zero insets, so this is the
+	// zero-inset device: every edge has to fall back to its design gutter
+	// instead of collapsing to the raw inset.
+	//
+	// What this cannot see: at zero insets the vertical override resolves to the
+	// same 24 as the base `MessageState` gutter it overrides, so a screen that
+	// stopped passing `style` would still pass here. That the override reaches
+	// the notch is the manual on-device check, not this one.
+	it("keeps a gutter on all four edges when the runtime reports no insets", () => {
+		renderRouter(
+			{ index: WelcomeScreen, "sign-in": () => null },
+			{ initialUrl: "/" },
+		);
+
+		const root = StyleSheet.flatten(
+			screen.getByTestId("welcome-screen").props.style,
+		);
+
+		expect(root.paddingTop).toBe(themes.light.gap.lg);
+		expect(root.paddingBottom).toBe(themes.light.gap.lg);
+		expect(root.paddingStart).toBe(themes.light.gap.lg);
+		expect(root.paddingEnd).toBe(themes.light.gap.lg);
 	});
 });

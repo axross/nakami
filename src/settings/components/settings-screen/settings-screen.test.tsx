@@ -2,9 +2,11 @@ import { afterEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
+import { StyleSheet } from "react-native";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { themes } from "~/unistyles";
 import { SettingsScreen } from "./settings-screen";
 
 jest.mock("@sentry/react-native", () => ({
@@ -127,5 +129,20 @@ describe("<SettingsScreen>", () => {
 		expect(getByText("https://cms.example.com")).toBeTruthy();
 		expect(getByTestId("settings-sign-out-row")).toBeTruthy();
 		expect(getByText("Sign out")).toBeTruthy();
+	});
+
+	// The last row used to sit flush against the tab bar; the content container
+	// now ends with the screen's own gutter. Unistyles' jest mock reports zero
+	// insets, so this is the zero-inset device — the gutter is unconditional
+	// here, unlike the horizontal pair, which is deliberately the bare inset
+	// because the child rows carry that gutter themselves.
+	it("separates the last row from the tab bar with the screen's gutter", () => {
+		const { getByTestId } = renderSettingsScreen();
+
+		const content = StyleSheet.flatten(
+			getByTestId("settings-screen").props.contentContainerStyle,
+		);
+
+		expect(content.paddingBottom).toBe(themes.light.gap.lg);
 	});
 });
