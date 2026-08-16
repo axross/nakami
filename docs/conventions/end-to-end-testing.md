@@ -77,7 +77,8 @@ join:
 
 The gate exits non-zero on a flow tagging an id the catalog does not list, on a
 facet tag that disagrees with a row the flow tags, on a facet tag carried without a
-`scenario:` tag, on an empty or malformed catalog, and on any uncovered
+`scenario:` tag — which leaves no row to check it against, so it asserts nothing and
+cannot be trusted — on an empty or malformed catalog, and on any uncovered
 `must`-priority row. It reports without failing on an uncovered `should` / `may`
 row and on the covered/total count.
 
