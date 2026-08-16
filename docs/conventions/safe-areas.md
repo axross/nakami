@@ -3,8 +3,10 @@
 The one mechanism this app reads safe-area insets through, which edges each screen is
 responsible for, and how an inset composes with the design's own spacing.
 
-Safe areas as a subject belong to two installed capabilities, and neither is restated
-here. `react-component-styling`'s
+Safe areas as a subject belong to two installed capabilities. Their rules are deferred
+to rather than copied here — where one is named below it is because it binds to a
+specific surface in this app, never as a second statement of the rule itself.
+`react-component-styling`'s
 [unistyles.md](../../.claude/skills/react-component-styling/references/unistyles.md)
 owns the stylesheet mechanics — reading insets from the mini runtime, composing them as
 a maximum, using the direction-agnostic properties. `expo-app-development`'s
@@ -58,23 +60,36 @@ header silently transfers an edge to the screen it uncovered.
 
 Two surfaces carry an inset on another's behalf, and both are deliberate.
 `src/common/components/message-state/message-state.tsx` is `flex: 1` and full-bleed at
-all three of its call sites, so it carries the horizontal pair once for all of them;
-`welcome-screen` adds only the vertical pair it owns, through that component's `style`
-prop. Each loading skeleton mirrors the inset of the list it stands in for —
+each of its call sites — `welcome-screen` renders it directly, and
+`collections-message-state` wraps it for both Collections screens — so it carries the
+horizontal pair once for all of them; `welcome-screen` adds only the vertical pair it
+owns, through that component's `style` prop. A future call site that does not render it
+full-bleed MUST NOT rely on it for the horizontal pair, because the inset would then
+land somewhere other than the screen edge. Each loading skeleton mirrors the inset of
+the list it stands in for —
 `collection-list-skeleton` matching `collections-screen`, `collection-records-skeleton`
 matching `collection-records-screen` — so the placeholder does not shift sideways when
 the data arrives.
 
 ## An inset is floored against the surface's own gutter
 
-An owned edge MUST be written as `Math.max(rt.insets.<edge>, theme.gap.<size>)`, where
-the second argument is the gutter that surface already had. A raw inset MUST NOT be a
-surface's only spacing: a device without a notch reports zero, and the surface would
-then have no gutter at all on exactly the devices where nothing looks wrong.
+`unistyles.md` owns the composition rule itself. What is this app's own is the second
+argument — each surface floors its inset against the gutter it already had, so a device
+reporting zero insets renders exactly as it did before this convention existed:
 
-A horizontal inset MUST use `paddingStart` / `paddingEnd` or `marginStart` /
-`marginEnd`. The `Left` / `Right` forms MUST NOT appear, so a right-to-left layout
-mirrors.
+| Surface                                                     | Floors against       |
+| ----------------------------------------------------------- | -------------------- |
+| `message-state` (horizontal, for every call site)           | `theme.gap.lg`       |
+| `welcome-screen` (vertical, via `MessageState`'s `style`)   | `theme.gap.lg`       |
+| `sign-in-screen` content container                          | `theme.gap.md`       |
+| `home-screen` root                                          | `theme.gap.lg`       |
+| `collections-screen` + `collection-list-skeleton`           | `theme.gap.md`       |
+| `collection-records-screen` + `collection-records-skeleton` | `theme.gap.md`       |
+| `licenses-screen` root                                      | `theme.gap.lg`       |
+| `settings-screen` content container                         | nothing — see below  |
+
+A new surface takes the gutter it already had rather than inventing one, so adding
+clearance never doubles as a redesign.
 
 Where an inset applies to an edge, that edge's spacing MUST be written as a longhand
 rather than folded into a `padding` or `margin` shorthand, even where the other edges
@@ -92,18 +107,22 @@ Flooring the inset there would stack a second gutter on top of theirs. Any futur
 surface taking this exception MUST carry the same comment, naming the children that
 hold the gutter.
 
-Every inset-bearing surface has a colocated unit test asserting that its owned edges
-still resolve to the design gutter. Unistyles' jest mock reports zero insets, which
-makes the whole suite a zero-inset device: a surface that replaced its `Math.max` with
-a raw inset fails its own test.
+Every inset-bearing surface has a colocated unit test pinning what its owned edges
+resolve to. Unistyles' jest mock reports zero insets, which makes the whole suite a
+zero-inset device, so each floored surface asserts its design gutter and a surface that
+replaced its `Math.max` with a raw inset fails its own test. `settings-screen` is
+asserted the other way round — its horizontal pair is pinned at `0`, because the bare
+inset above is a decision rather than an oversight, and flooring it would go unnoticed
+otherwise.
 
 ## A scrolling screen insets its content, not its container
 
-On `sign-in-screen`, `settings-screen`, `collections-screen`, and
-`collection-records-screen`, the inset MUST go on the `contentContainerStyle` and MUST
-NOT go on the scroll container. The container extends under the chrome so content
-scrolls beneath it; padding the container instead leaves the scroll view stopping short
-of the edge with a dead band beyond it.
+Four screens scroll, and each carries its inset on the `contentContainerStyle` rather
+than on the scroll container: `sign-in-screen` and `settings-screen` on their
+`ScrollView`, `collections-screen` and `collection-records-screen` on their `FlatList`.
+Their scroll containers hold background and `flex` only. `expo-app-development`'s
+[safe-areas.md](../../.claude/skills/expo-app-development/references/safe-areas.md) owns
+why.
 
 ## Horizontal insets are correctness, not observable behaviour
 
@@ -112,9 +131,17 @@ of the edge with a dead band beyond it.
 values above are therefore unverifiable by any manual check while that pin stands — no
 landscape pass can exercise them.
 
-They are written anyway, for the two cases where they stop being zero: an orientation
-unlock, and a right-to-left layout, where the start and end properties are what decide
-which physical edge each value lands on. A reviewer MUST NOT read an untestable
-horizontal inset as dead code, and a change that unlocks orientation SHOULD verify
-every surface in this document in landscape, which is the first point at which a
-wrong-axis inset becomes visible.
+They are written anyway, because an orientation unlock is the point at which they start
+mattering and the point at which nothing would remind anyone to add them. A reviewer
+MUST NOT read an untestable horizontal inset as dead code, and a change that unlocks
+orientation SHOULD verify every surface in this document in landscape, which is the
+first point at which a wrong-axis inset becomes visible.
+
+One thing that unlock has to re-derive rather than inherit: `paddingStart` / `paddingEnd`
+mirror under a right-to-left layout, but `rt.insets.left` and `rt.insets.right` do not —
+they are physical-edge measurements on both platforms. Pairing `paddingStart` with
+`insets.left`, which is what `unistyles.md`'s own worked example prescribes and what
+every surface here does, therefore applies the physically-left measurement to the
+physically-right edge under RTL. In portrait both are zero, so the pairing is
+unobservable today; in landscape RTL it would be wrong, and the fix belongs to whoever
+unlocks orientation.
