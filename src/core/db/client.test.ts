@@ -15,7 +15,7 @@ jest.mock("expo-sqlite", () => ({
 // tracker. Use the manual mock, as logging.test.ts does.
 jest.mock("~/core/helpers/error-reporting");
 
-// Nothing in src/ imports ./client (see that file), so this file is the only
+// Nothing imports ./client but this file (see that file), so this is the only
 // thing that runs it. What it covers is the module's construction: that
 // drizzle() still accepts the handle and yields a query builder, which is the
 // drift a drizzle-orm bump would cause — README.md lists Drizzle among the
