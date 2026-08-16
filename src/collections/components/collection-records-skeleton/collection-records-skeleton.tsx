@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { useEffect } from "react";
 import { type DimensionValue, View } from "react-native";
 import Animated, {
@@ -31,7 +31,13 @@ const CARD_WIDTHS: readonly DimensionValue[] = [
  * does not reflow when records arrive. Honors the OS "reduce motion" setting
  * (via reanimated's `useReducedMotion`) by holding a steady opacity.
  */
-export function CollectionRecordsSkeleton(): JSX.Element {
+export function CollectionRecordsSkeleton({
+	style,
+	testID = "collection-records-loading",
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithRef<typeof View>, "children">
+>): JSX.Element {
 	const { theme } = useUnistyles();
 	const reduceMotion = useReducedMotion();
 	const opacity = useSharedValue(0.5);
@@ -65,8 +71,9 @@ export function CollectionRecordsSkeleton(): JSX.Element {
 		<View
 			accessible
 			accessibilityLabel="Loading records"
-			style={styles.feed}
-			testID="collection-records-loading"
+			testID={testID}
+			{...props}
+			style={[styles.feed, style]}
 		>
 			<View style={styles.count}>
 				<Animated.View style={[styles.countBar, pulse]} />

@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import type { CollectionRecord } from "~/collections/models/record";
@@ -27,15 +27,22 @@ export const RECORD_CARD_LINE = 22;
  */
 export function CollectionRecordCard({
 	record,
-}: Readonly<{ record: CollectionRecord }>): JSX.Element {
+	style,
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithRef<typeof View>, "children"> & {
+		record: CollectionRecord;
+	}
+>): JSX.Element {
 	const hasMeta = record.hasTitle || record.updatedLabel !== null;
 
 	return (
 		<View
 			accessible
 			accessibilityLabel={record.title}
-			style={styles.card}
 			testID={`collection-record-list-item-${record.id}`}
+			{...props}
+			style={[styles.card, style]}
 		>
 			<Text
 				numberOfLines={1}
