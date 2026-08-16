@@ -13,7 +13,7 @@ import Animated, {
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { RECORD_CARD_LINE } from "~/collections/components/collection-record-card/collection-record-card";
 
-// Placeholder title-bar widths per card, so the skeleton reads as varied
+// placeholder title-bar widths per card, so the skeleton reads as varied
 // content rather than a repeated block (matching the loaded card feed).
 const CARD_WIDTHS: readonly DimensionValue[] = [
 	"82%",
@@ -24,11 +24,11 @@ const CARD_WIDTHS: readonly DimensionValue[] = [
 ];
 
 /**
- * The records loading state: placeholder cards in the same card feed as the
- * loaded list, gently pulsing. Each placeholder card mirrors a real record
+ * the records loading state: placeholder cards in the same card feed as the
+ * loaded list, gently pulsing. each placeholder card mirrors a real record
  * card's exact geometry — the count header, the inset card padding, and two
  * {@link RECORD_CARD_LINE}-tall line boxes (title + metadata row) — so the list
- * does not reflow when records arrive. Honors the OS "reduce motion" setting
+ * does not reflow when records arrive. honors the OS "reduce motion" setting
  * (via reanimated's `useReducedMotion`) by holding a steady opacity.
  */
 export function CollectionRecordsSkeleton({
@@ -48,7 +48,7 @@ export function CollectionRecordsSkeleton({
 			return;
 		}
 
-		// The same two tokens the collections skeleton pulses on, so the two
+		// the same two tokens the collections skeleton pulses on, so the two
 		// loading states cannot drift apart — which is what a duration constant
 		// redeclared per file had already set up.
 		const timing = {
@@ -94,7 +94,7 @@ export function CollectionRecordsSkeleton({
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// Mirrors the record card's container (see collection-record-card).
+	// mirrors the record card's container (see collection-record-card).
 	card: {
 		gap: theme.gap.xs,
 		paddingVertical: theme.gap.sm,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		borderWidth: theme.borderWidth.hairline,
 		borderRadius: theme.radius.md,
 	},
-	// Mirrors the screen's record-count header.
+	// mirrors the screen's record-count header.
 	count: {
 		paddingHorizontal: theme.gap.xs,
 		paddingBottom: theme.gap.xs,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
 	},
-	// Mirrors the loaded feed's content container, safe-area inset included (see
+	// mirrors the loaded feed's content container, safe-area inset included (see
 	// collection-records-screen), so the placeholder does not shift when data
 	// arrives.
 	feed: {
@@ -125,7 +125,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
-	// A card's title and metadata rows are each one fixed line box; the thin bar
+	// a card's title and metadata rows are each one fixed line box; the thin bar
 	// sits centered inside it, so the placeholder card is exactly as tall as a
 	// real one.
 	line: {

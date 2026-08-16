@@ -84,7 +84,7 @@ describe("getCollectionRecordsInfiniteQueryOptions", () => {
 			pageParam: 3,
 		} as unknown as Parameters<typeof queryFn>[0]);
 
-		// The server URL comes from the session, not from the scope — it
+		// the server URL comes from the session, not from the scope — it
 		// authenticates the request without identifying the data.
 		expect(fetchRecords).toHaveBeenCalledWith(
 			"https://cms.example.com",

@@ -10,7 +10,7 @@ interface MessageAction {
 }
 
 /**
- * The Collections screen's empty and error surfaces: the shared
+ * the Collections screen's empty and error surfaces: the shared
  * {@link MessageState} with a primary retry button when an action is given.
  */
 export function CollectionsMessageState({

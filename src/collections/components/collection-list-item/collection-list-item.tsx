@@ -12,10 +12,10 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Collection } from "~/collections/models/collection";
 
 /**
- * The pressable row body: a monogram of the collection's initial, its name, and
- * a chevron. Kept a separate component so `Link asChild` clones *this* wrapper
+ * the pressable row body: a monogram of the collection's initial, its name, and
+ * a chevron. kept a separate component so `Link asChild` clones *this* wrapper
  * and threads its injected press/href props onto the root `Pressable` via
- * `...props`. Wrapping the Unistyles-styled `Pressable` in `Link asChild`
+ * `...props`. wrapping the Unistyles-styled `Pressable` in `Link asChild`
  * directly drops the row's computed style — the clone takes over the ref
  * Unistyles applies styles through — collapsing the horizontal layout.
  */
@@ -53,7 +53,7 @@ function CollectionRow({
 }
 
 /**
- * A single collection row that opens the collection's record list. Navigation
+ * a single collection row that opens the collection's record list. navigation
  * is declarative via `Link`; the row body lives in
  * {@link CollectionRow} so `Link asChild` targets a wrapper component rather
  * than the Unistyles-styled `Pressable` directly (see that component's note).
@@ -63,9 +63,9 @@ function CollectionRow({
  * `Link asChild` slots its child through `@radix-ui/react-slot`, which composes
  * a `style` by spreading it into an object literal — which throws in
  * development for the array form, and silently detaches a Unistyles style from
- * the updates it applies through its own reference. A `style` accepted here
+ * the updates it applies through its own reference. a `style` accepted here
  * would type-check and not work, which is the exact failure this component's
- * props contract exists to remove. Size and place the row from the list's
+ * props contract exists to remove. size and place the row from the list's
  * `contentContainerStyle` instead.
  */
 export function CollectionListItem({

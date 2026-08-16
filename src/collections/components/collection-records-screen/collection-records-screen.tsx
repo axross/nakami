@@ -11,7 +11,7 @@ import { describeLoadError } from "~/collections/helpers/describe-collections-er
 import type { CollectionRecord } from "~/collections/models/record";
 import { getCollectionRecordsInfiniteQueryOptions } from "~/collections/queries/collection-records-query";
 
-// Subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
+// subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
 // retryability — is shared with the collection list).
 const RECORDS_LOAD_ERROR = {
 	accessTitle: "Can't access records",
@@ -29,10 +29,10 @@ function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
 }
 
 /**
- * A collection's records: the screen a Collections row opens. Renders a loading
+ * a collection's records: the screen a Collections row opens. renders a loading
  * skeleton, a failure-aware error state (permission failures get calm, retry-less
  * copy; connectivity/unexpected failures offer a retry), an empty state, or the
- * paginated card feed — appending the next page on scroll. Rows are read-only;
+ * paginated card feed — appending the next page on scroll. rows are read-only;
  * browsing into a single record is a follow-up.
  */
 export function CollectionRecordsScreen({
@@ -147,7 +147,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 	footer: {
 		paddingVertical: theme.gap.md,
 	},
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the feed's content
 	// container, not on the list itself, which would inset its scroll indicators
 	// and leave the cards stopping short of the screen edge.
@@ -160,7 +160,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
-	// The message state claims no space of its own, so this screen — which gives
+	// the message state claims no space of its own, so this screen — which gives
 	// it the whole surface — supplies the fill.
 	messageState: {
 		flex: 1,

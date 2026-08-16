@@ -10,7 +10,7 @@ import { CollectionsMessageState } from "~/collections/components/collections-me
 import { describeLoadError } from "~/collections/helpers/describe-collections-error";
 import { getCollectionListQueryOptions } from "~/collections/queries/collection-list-query";
 
-// Subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
+// subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
 // retryability — is shared with the records list).
 const COLLECTIONS_LOAD_ERROR = {
 	accessTitle: "Can't access collections",
@@ -25,8 +25,8 @@ function CollectionListDivider(): JSX.Element {
 }
 
 /**
- * The Collections tab: lists the signed-in server's readable, non-system
- * collections, each row opening that collection's record list. Renders a
+ * the Collections tab: lists the signed-in server's readable, non-system
+ * collections, each row opening that collection's record list. renders a
  * loading skeleton, an error state (with a message tailored to the failure),
  * an empty state, or the list.
  */
@@ -100,7 +100,7 @@ export function CollectionsScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the list's content
 	// container, not on the list itself, which would inset its scroll indicators
 	// and leave the rows stopping short of the screen edge.
@@ -117,7 +117,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		borderRadius: theme.radius.md,
 		overflow: "hidden",
 	},
-	// Drawn as a filled `View` rather than a border, so the hairline is its
+	// drawn as a filled `View` rather than a border, so the hairline is its
 	// height.
 	divider: {
 		height: theme.borderWidth.hairline,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		flex: 1,
 		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
-	// The message state claims no space of its own, so this screen — which gives
+	// the message state claims no space of its own, so this screen — which gives
 	// it the whole tab — supplies the fill.
 	messageState: {
 		flex: 1,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		flex: 1,
 		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
-	// The skeleton claims no space of its own either, and it stands in for the
+	// the skeleton claims no space of its own either, and it stands in for the
 	// whole list.
 	skeleton: {
 		flex: 1,
