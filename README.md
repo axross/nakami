@@ -164,6 +164,8 @@ This table is the authoritative list of the repository's commands, for human con
 
 Files under `src/core/db/migrations/` are generated — never hand-edit or amend a committed migration; change the schema and generate a new one. The generated migrations are meant to be applied on-device at startup via Drizzle's expo-sqlite migrator (`useMigrations`), which is **not wired yet**: the change that lands the first migration must also wire it into `src/app/_layout.tsx`.
 
+The data layer is scaffolding until then: `src/core/db/schema.ts` declares no table and nothing in `src/` imports `src/core/db/client.ts`, so the only thing exercising that client is its own colocated smoke test — which **mocks `expo-sqlite`, and therefore leaves the native database open unverified**. What it does cover is that `drizzle()` still yields a query builder, which is the drift a Drizzle bump would cause. Everything the app persists today goes to the keychain, and everything it reads comes from the Payload REST API through TanStack Query; [`docs/conventions/data-layer.md`](./docs/conventions/data-layer.md) holds the rules a read has to satisfy once that changes.
+
 The documentation under [`docs/`](./docs/index.md) has five checks of its own. They ship inside the installed `living-project-documentation` skill rather than as npm scripts, and the `Docs` job in [`merge-checks.yml`](./.github/workflows/merge-checks.yml) runs all five — plus the skills' link checker, pointed at `docs` — on every pull request. Run the same sequence locally after changing any document there:
 
 ```sh
