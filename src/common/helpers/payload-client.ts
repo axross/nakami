@@ -25,9 +25,10 @@ export class PayloadRequestError extends Error {
 	readonly status: number | undefined;
 
 	/**
-	 * `options.cause` carries the originating failure (a `ZodError` from
-	 * {@link parseResponse}, for instance) for diagnosis only: nothing branches
-	 * on it, so no caller's signature learns about it.
+	 * `options.cause` carries the originating failure — the rejection `fetch`
+	 * produced, the `SyntaxError` from a body that would not parse, or a
+	 * `ZodError` from {@link parseResponse} — for diagnosis only: nothing
+	 * branches on it, so no caller's signature learns about it.
 	 */
 	constructor(
 		kind: PayloadErrorKind,
@@ -58,6 +59,14 @@ export function serverBaseUrl(serverUrl: string): string {
  * to a {@link PayloadRequestError} on failure and returning the parsed JSON body
  * on success. Credentials only ever travel to the caller-supplied host. The
  * `operation` label identifies the call in the request-lifecycle breadcrumbs.
+ *
+ * @throws {PayloadRequestError} on every failure path, in one of three kinds:
+ * `"network"` when the transport never returned a response, whether the host
+ * was unreachable or the timeout above aborted the call; `"auth"` on a 401 or
+ * 403; and `"server"` both on any other non-ok status and on an ok response
+ * whose body will not parse. the two paths with no HTTP status to report — the
+ * dead transport and the unparseable body — carry the originating error as
+ * `cause`.
  */
 export async function request(
 	operation: string,
@@ -75,10 +84,15 @@ export async function request(
 	let response: Response;
 	try {
 		response = await fetch(url, { ...init, signal: controller.signal });
-	} catch {
-		// Network down, DNS failure, timeout/abort — the server was unreachable.
-		// Close the bracket at debug (callers report the failure at their own
+	} catch (error) {
+		// network down, DNS failure, timeout/abort — the server was unreachable.
+		// close the bracket at debug (callers report the failure at their own
 		// level) so the breadcrumb trail doesn't go quiet on the failure path.
+		// the rejection rides on the thrown error's `cause` rather than this line:
+		// `isReportableQueryError()` keeps `"network"` out of the tracker, so the
+		// cause serves local diagnosis and whatever path does capture the error,
+		// while a breadcrumb leaves the device either way — putting the underlying
+		// message on one would add a telemetry surface for no triage gain.
 		logger.debug("Failed request.", {
 			operation,
 			duration: performance.now() - startedAt,
@@ -86,6 +100,8 @@ export async function request(
 		throw new PayloadRequestError(
 			"network",
 			"The server could not be reached.",
+			undefined,
+			{ cause: error },
 		);
 	} finally {
 		clearTimeout(timeout);
@@ -115,10 +131,12 @@ export async function request(
 
 	try {
 		return await response.json();
-	} catch {
+	} catch (error) {
 		throw new PayloadRequestError(
 			"server",
 			"The server returned an invalid response.",
+			undefined,
+			{ cause: error },
 		);
 	}
 }
