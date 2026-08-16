@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import type { CollectionRecord } from "~/collections/models/record";
+import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import {
 	CollectionRecordCard,
 	RECORD_CARD_LINE,
@@ -19,21 +20,6 @@ const UNTITLED: CollectionRecord = {
 	hasTitle: false,
 	updatedLabel: "Updated 18 Jul 2026",
 };
-
-/**
- * Flattens whatever React Native accepts as a `style` prop (an object, or an
- * arbitrarily nested array of them) into the single resolved object the
- * renderer would apply.
- */
-function resolveStyle(style: unknown): Record<string, unknown> {
-	if (Array.isArray(style)) {
-		return Object.assign({}, ...style.map(resolveStyle));
-	}
-
-	return typeof style === "object" && style !== null
-		? (style as Record<string, unknown>)
-		: {};
-}
 
 /**
  * The pixel height of the nearest ancestor that fixes one, walking up from a

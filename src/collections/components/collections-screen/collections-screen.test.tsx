@@ -22,7 +22,7 @@ import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchAccess } from "~/collections/helpers/fetch-access";
 import { fetchRecords } from "~/collections/helpers/fetch-records";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { CollectionsScreen } from "./collections-screen";
 

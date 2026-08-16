@@ -23,7 +23,7 @@ import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchRecords } from "~/collections/helpers/fetch-records";
 import type { RecordPageResponse } from "~/collections/models/record";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { CollectionRecordsScreen } from "./collection-records-screen";
 

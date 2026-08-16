@@ -39,5 +39,5 @@ client would opt whatever used it out of both, and would do so invisibly — the
 still works, and only the errors stop arriving.
 
 A unit test is the exception and MUST build its own throwaway client through
-`createTestQueryClient` in `src/common/helpers/test-query-client.ts`, which disables
+`createTestQueryClient` in `src/common/test-helpers/query-client.ts`, which disables
 retries and gives each test a fresh cache, so cache state never leaks between tests.
