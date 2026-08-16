@@ -18,8 +18,8 @@ const USER_ID = "68b0c1d2e3f4a5b6c7d8e9f0";
 /**
  * Drives a real query through the app's own client until it settles as a
  * failure, so the cache's `onError` runs exactly as it does in the app. Retries
- * are switched off here rather than on the client, which keeps the shared
- * instance's own retry baseline under test everywhere else.
+ * are switched off per call rather than on the client, which leaves the shared
+ * instance's own retry baseline untouched.
  */
 async function failQuery(queryKey: readonly unknown[], error: unknown) {
 	await expect(
@@ -98,6 +98,8 @@ describe("the query cache's failure reporting", () => {
 			[...getSessionQueryKeyRoot(USER_ID), "collections", "posts", "records"],
 			new PayloadRequestError("server", "boom", 500),
 		);
+
+		expect(reportError).toHaveBeenCalledTimes(1);
 
 		const [, context] = jest.mocked(reportError).mock.calls[0];
 		expect(JSON.stringify(context)).not.toContain(USER_ID);

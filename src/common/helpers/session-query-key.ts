@@ -31,9 +31,10 @@ export function getSessionQueryKeyRoot(userId: string) {
  * instead of silently flattening it again. A key rooted anywhere else keeps
  * every segment it had.
  *
- * The signed-in user's id never reaches the result, and a segment that is not a
- * string is described as `?` rather than serialized, so a key that one day
- * carries a filter object cannot put its values into a report either.
+ * The signed-in user's id never reaches the description of a session-scoped
+ * key, and a segment that is not a string is described as `?` rather than
+ * serialized, so a key that one day carries a filter object cannot put its
+ * values into a report either.
  */
 export function describeQueryKey(queryKey: readonly unknown[]): string {
 	const redactedRoot = getSessionQueryKeyRoot(REDACTED_USER_ID);
