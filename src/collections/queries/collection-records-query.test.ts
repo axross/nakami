@@ -16,7 +16,6 @@ jest.mock("~/collections/helpers/fetch-records", () => ({
 }));
 
 const SCOPE = {
-	serverUrl: "https://cms.example.com",
 	userId: "user-1",
 	slug: "posts",
 };
@@ -39,12 +38,13 @@ afterEach(() => {
 });
 
 describe("getCollectionRecordsInfiniteQueryOptions", () => {
-	it("keys on the collection and scope, mirroring the REST path", () => {
+	it("keys on the collection beneath the session root, mirroring the REST path", () => {
 		expect(getCollectionRecordsInfiniteQueryOptions(SCOPE).queryKey).toEqual([
+			"users",
+			"user-1",
 			"collections",
 			"posts",
 			"records",
-			{ serverUrl: "https://cms.example.com", userId: "user-1" },
 		]);
 	});
 
@@ -84,6 +84,8 @@ describe("getCollectionRecordsInfiniteQueryOptions", () => {
 			pageParam: 3,
 		} as unknown as Parameters<typeof queryFn>[0]);
 
+		// The server URL comes from the session, not from the scope — it
+		// authenticates the request without identifying the data.
 		expect(fetchRecords).toHaveBeenCalledWith(
 			"https://cms.example.com",
 			"jwt-token",
@@ -93,5 +95,19 @@ describe("getCollectionRecordsInfiniteQueryOptions", () => {
 		expect(result.records).toEqual([
 			{ id: "5", title: "Mapped", hasTitle: true, updatedLabel: null },
 		]);
+	});
+
+	it("throws without fetching when there is no session", async () => {
+		useAuthStore.setState({ status: "unauthenticated", session: null });
+
+		const { queryFn } = getCollectionRecordsInfiniteQueryOptions(SCOPE);
+		if (typeof queryFn !== "function") {
+			throw new Error("expected an infinite queryFn");
+		}
+
+		await expect(
+			queryFn({ pageParam: 1 } as unknown as Parameters<typeof queryFn>[0]),
+		).rejects.toThrow("Cannot load records without a session.");
+		expect(fetchRecords).not.toHaveBeenCalled();
 	});
 });

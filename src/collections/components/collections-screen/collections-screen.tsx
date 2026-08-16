@@ -34,10 +34,7 @@ export function CollectionsScreen(): JSX.Element {
 	const { theme } = useUnistyles();
 	const session = useAuthSession();
 	const { data, isPending, isError, error, refetch } = useQuery({
-		...getCollectionListQueryOptions({
-			serverUrl: session?.serverUrl ?? "",
-			userId: session?.user.id ?? "",
-		}),
+		...getCollectionListQueryOptions({ userId: session?.user.id ?? "" }),
 		enabled: session !== null,
 	});
 
