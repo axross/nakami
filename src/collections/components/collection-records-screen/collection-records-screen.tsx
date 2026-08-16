@@ -82,6 +82,7 @@ export function CollectionRecordsScreen({
 						? theme.colors.text.destructive.base
 						: theme.colors.text.neutral.base
 				}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collection-records-error"
 				title={copy.title}
@@ -94,6 +95,7 @@ export function CollectionRecordsScreen({
 			content = (
 				<CollectionsMessageState
 					icon={FileText}
+					style={styles.messageState}
 					subtitle="There are no records in this collection yet."
 					testID="collection-records-empty"
 					title="No records"
@@ -149,6 +151,11 @@ const styles = StyleSheet.create((theme) => ({
 	list: {
 		gap: theme.gap.sm,
 		padding: theme.gap.md,
+	},
+	// The message state claims no space of its own, so this screen — which gives
+	// it the whole surface — supplies the fill.
+	messageState: {
+		flex: 1,
 	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,

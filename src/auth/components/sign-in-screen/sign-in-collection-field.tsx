@@ -1,14 +1,7 @@
 import { Pencil } from "lucide-react-native";
-import type { JSX } from "react";
+import type { ComponentPropsWithoutRef, JSX } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-
-interface SignInCollectionFieldProps {
-	readonly value: string;
-	readonly editing: boolean;
-	readonly onEdit: () => void;
-	readonly onChangeText: (value: string) => void;
-}
 
 /**
  * The Collection slug field. Because most Payload instances use `users`, it
@@ -21,11 +14,20 @@ export function SignInCollectionField({
 	editing,
 	onEdit,
 	onChangeText,
-}: SignInCollectionFieldProps): JSX.Element {
+	style,
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithoutRef<typeof View>, "children"> & {
+		value: string;
+		editing: boolean;
+		onEdit: () => void;
+		onChangeText: (value: string) => void;
+	}
+>): JSX.Element {
 	const { theme } = useUnistyles();
 
 	return (
-		<View style={styles.field}>
+		<View {...props} style={[styles.field, style]}>
 			<Text style={styles.label}>Collection</Text>
 
 			{editing ? (

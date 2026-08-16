@@ -43,7 +43,7 @@ export function CollectionsScreen(): JSX.Element {
 
 	let content: JSX.Element;
 	if (isPending) {
-		content = <CollectionListSkeleton />;
+		content = <CollectionListSkeleton style={styles.skeleton} />;
 	} else if (isError) {
 		const copy = describeLoadError(error, COLLECTIONS_LOAD_ERROR);
 		content = (
@@ -65,6 +65,7 @@ export function CollectionsScreen(): JSX.Element {
 						? theme.colors.text.destructive.base
 						: theme.colors.text.neutral.base
 				}
+				style={styles.messageState}
 				subtitle={copy.subtitle}
 				testID="collections-error"
 				title={copy.title}
@@ -85,6 +86,7 @@ export function CollectionsScreen(): JSX.Element {
 		content = (
 			<CollectionsMessageState
 				icon={FolderOpen}
+				style={styles.messageState}
 				subtitle="There are no collections to show for this account."
 				testID="collections-empty"
 				title="No collections"
@@ -116,8 +118,18 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
 	},
+	// The message state claims no space of its own, so this screen — which gives
+	// it the whole tab — supplies the fill.
+	messageState: {
+		flex: 1,
+	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
+		flex: 1,
+	},
+	// The skeleton claims no space of its own either, and it stands in for the
+	// whole list.
+	skeleton: {
 		flex: 1,
 	},
 }));

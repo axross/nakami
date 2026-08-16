@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentProps, ComponentPropsWithoutRef, JSX } from "react";
 import {
 	Pressable,
 	type StyleProp,
@@ -60,7 +60,8 @@ function CollectionRow({
  */
 export function CollectionListItem({
 	collection,
-}: Readonly<{ collection: Collection }>): JSX.Element {
+	...props
+}: Readonly<ComponentProps<typeof CollectionRow>>): JSX.Element {
 	return (
 		<Link
 			asChild
@@ -69,7 +70,7 @@ export function CollectionListItem({
 				params: { slug: collection.slug },
 			}}
 		>
-			<CollectionRow collection={collection} />
+			<CollectionRow collection={collection} {...props} />
 		</Link>
 	);
 }
