@@ -150,6 +150,31 @@ the route file.
 This entry exists because the directory name looks like a violation at a glance, and a
 finding raised anyway costs a review round to answer.
 
+## `CollectionListItem` publishes no `style` prop
+
+The installed `react-component-styling` capability requires `style` on every
+mobile-native component that renders a styled root, and
+`src/collections/components/collection-list-item/collection-list-item.tsx` renders one —
+the `Pressable` inside `CollectionRow`. It accepts every other prop that root takes, and
+omits `style` from its published type on purpose.
+
+The cause is in the platform rather than in the component. `Link asChild` slots its
+child through `@radix-ui/react-slot`, whose `mergeProps` composes a `style` by spreading
+it into an object literal (`{ ...slotStyle, ...childStyle }`). Two things follow, and
+both are silent in review: expo-router's own shim throws for the array form in
+development and produces an index-keyed object from it in production, and a single
+Unistyles style spread into a fresh object stops reacting to theme and runtime changes,
+because Unistyles applies those through the reference it handed out. A `style` accepted
+here would type-check and not work — the exact defect the props-and-spread contract in
+issue #69 exists to remove, so publishing one to satisfy the rule would defeat the rule's
+own purpose.
+
+A row is therefore sized and placed from the list's `contentContainerStyle`. Any other
+component this repository slots through `Link asChild` inherits the same constraint;
+one that must take a `style` needs a different navigation shape — `onPress` with
+`router.push`, as `WelcomeScreen`'s button already uses for an unrelated `Link asChild`
+failure — rather than an exception here.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this
