@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, waitFor } from "@testing-library/react-native";
+import { fireEvent, waitFor, within } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import { StyleSheet } from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
@@ -47,6 +47,13 @@ function renderSignInScreen() {
 	);
 }
 
+/** Leaves the sign-in request pending, so the in-flight state stays on screen. */
+function leaveLoginPending() {
+	jest
+		.mocked(login)
+		.mockReturnValue(new Promise<Awaited<ReturnType<typeof login>>>(() => {}));
+}
+
 beforeEach(() => {
 	jest.clearAllMocks();
 	jest.mocked(readLastServerUrl).mockResolvedValue(null);
@@ -66,7 +73,7 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-collection-input")).toBeTruthy();
 	});
 
-	it("blocks submission and shows an error for an invalid server URL", () => {
+	it("blocks submission and flags the Server URL field for an invalid URL", () => {
 		const { getByTestId } = renderSignInScreen();
 
 		fireEvent.changeText(getByTestId("sign-in-server-url"), "not-a-url");
@@ -74,18 +81,148 @@ describe("<SignInScreen>", () => {
 		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
 		fireEvent.press(getByTestId("sign-in-submit"));
 
-		expect(getByTestId("sign-in-error")).toBeTruthy();
+		expect(
+			within(getByTestId("sign-in-error-server-url")).getByText(
+				"Enter a valid server URL, e.g. https://cms.example.com.",
+			),
+		).toBeTruthy();
 		expect(login).not.toHaveBeenCalled();
+	});
+
+	// The defect this screen was built to fix: the button used to grey itself out
+	// until every field was filled, so the message naming the blank field could
+	// never be reached.
+	it("stays pressable with a blank field and names that field on press", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+
+		expect(getByTestId("sign-in-submit").props.accessibilityState).toEqual({
+			disabled: false,
+		});
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(
+			within(getByTestId("sign-in-error-email")).getByText(
+				"Enter your email address.",
+			),
+		).toBeTruthy();
+		expect(login).not.toHaveBeenCalled();
+	});
+
+	it("reports every blank field at once, preceded by the problem count", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(
+			within(getByTestId("sign-in-error-summary")).getByText(
+				"3 problems to fix",
+			),
+		).toBeTruthy();
+		expect(getByTestId("sign-in-error-server-url")).toBeTruthy();
+		expect(getByTestId("sign-in-error-email")).toBeTruthy();
+		expect(getByTestId("sign-in-error-password")).toBeTruthy();
+		expect(login).not.toHaveBeenCalled();
+	});
+
+	it("leaves the count out when a single field is at fault", () => {
+		const { getByTestId, queryByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(getByTestId("sign-in-error-password")).toBeTruthy();
+		expect(queryByTestId("sign-in-error-summary")).toBeNull();
+	});
+
+	// The count is a control rather than a line of text, which is what lets it
+	// send the user to the first field that is at fault.
+	it("presents the problem count as a button onto the first offending field", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+		fireEvent.changeText(getByTestId("sign-in-collection-input"), "");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		const summary = getByTestId("sign-in-error-summary");
+
+		expect(summary.props.accessibilityRole).toBe("button");
+
+		fireEvent.press(summary);
+
+		// Collection is the field nearest the top that is at fault, so the press
+		// leaves its input on screen for the focus to land in.
+		expect(getByTestId("sign-in-collection-input")).toBeTruthy();
+		expect(getByTestId("sign-in-error-collection")).toBeTruthy();
+	});
+
+	it("flags a field when focus leaves it, without a press of Sign in", () => {
+		const { getByTestId, queryByTestId } = renderSignInScreen();
+
+		expect(queryByTestId("sign-in-error-email")).toBeNull();
+
+		fireEvent(getByTestId("sign-in-email"), "blur");
+
+		expect(
+			within(getByTestId("sign-in-error-email")).getByText(
+				"Enter your email address.",
+			),
+		).toBeTruthy();
+		// Blurring one field says nothing about the others.
+		expect(queryByTestId("sign-in-error-password")).toBeNull();
+	});
+
+	it("clears a field's message as it is corrected, leaving the others standing", () => {
+		const { getByTestId, queryByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+		expect(getByTestId("sign-in-error-email")).toBeTruthy();
+
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+
+		expect(queryByTestId("sign-in-error-email")).toBeNull();
+		expect(getByTestId("sign-in-error-password")).toBeTruthy();
+		expect(
+			within(getByTestId("sign-in-error-summary")).getByText(
+				"2 problems to fix",
+			),
+		).toBeTruthy();
+	});
+
+	it("keeps the values already entered after a failed submit", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(getByTestId("sign-in-server-url").props.value).toBe(
+			"https://cms.example.com",
+		);
+		expect(getByTestId("sign-in-email").props.value).toBe("you@example.com");
 	});
 
 	it("submits normalized credentials when the form is valid", async () => {
 		// Leave the login pending so the assertion targets the credentials handed
 		// to the data layer, without driving the success/navigation path.
-		jest
-			.mocked(login)
-			.mockReturnValue(
-				new Promise<Awaited<ReturnType<typeof login>>>(() => {}),
-			);
+		leaveLoginPending();
 
 		const { getByTestId } = renderSignInScreen();
 
@@ -105,7 +242,28 @@ describe("<SignInScreen>", () => {
 		});
 	});
 
-	it("maps an auth rejection to a friendly message", async () => {
+	it("disables Sign in only while a submission is in flight", async () => {
+		leaveLoginPending();
+
+		const { getByTestId, getByText } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		await waitFor(() => {
+			expect(getByText("Signing in…")).toBeTruthy();
+		});
+		expect(getByTestId("sign-in-submit").props.accessibilityState).toEqual({
+			disabled: true,
+		});
+	});
+
+	it("maps an auth rejection to a friendly message in the form-level slot", async () => {
 		jest
 			.mocked(login)
 			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
@@ -121,9 +279,37 @@ describe("<SignInScreen>", () => {
 		fireEvent.press(getByTestId("sign-in-submit"));
 
 		await waitFor(() => {
-			expect(getByTestId("sign-in-error").props.children).toBe(
-				"Incorrect email or password.",
-			);
+			expect(
+				within(getByTestId("sign-in-error")).getByText(
+					"Incorrect email or password.",
+				),
+			).toBeTruthy();
+		});
+	});
+
+	it("drops the server's rejection as soon as a field is edited", async () => {
+		jest
+			.mocked(login)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		const { getByTestId, queryByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		await waitFor(() => {
+			expect(getByTestId("sign-in-error")).toBeTruthy();
+		});
+
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret2");
+
+		await waitFor(() => {
+			expect(queryByTestId("sign-in-error")).toBeNull();
 		});
 	});
 
