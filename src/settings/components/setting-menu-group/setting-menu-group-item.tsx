@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { Pressable, type StyleProp, type ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
@@ -8,7 +8,7 @@ export function SettingMenuGroupItem({
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithoutRef<typeof Pressable>, "style"> & {
+	Omit<ComponentPropsWithRef<typeof Pressable>, "style"> & {
 		first?: boolean;
 		last?: boolean;
 		style?: StyleProp<ViewStyle>;

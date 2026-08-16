@@ -41,7 +41,7 @@ export function WelcomeScreen(): JSX.Element {
 				</Pressable>
 			}
 			icon={Database}
-			style={styles.screen}
+			style={styles.messageState}
 			subtitle="Sign in to your Payload CMS to browse your collections."
 			testID="welcome-screen"
 			title="Connect to Payload"
@@ -66,10 +66,15 @@ const styles = StyleSheet.create((theme, rt) => ({
 	buttonPressed: {
 		opacity: 0.6,
 	},
-	// This screen has no header and no tab bar, so it owns all four edges.
-	// `MessageState` already carries the horizontal pair for every call site;
-	// only the vertical pair is added here, through its `style` prop.
-	screen: {
+	// `MessageState` claims no space of its own, so the consumer decides how much
+	// room it gets; this screen is the whole signed-out surface.
+	//
+	// It is also the one screen with neither a header nor a tab bar, so it owns
+	// all four edges. `MessageState` already carries the horizontal pair for every
+	// call site; the vertical pair is added here, through the same `style` prop
+	// that supplies the fill.
+	messageState: {
+		flex: 1,
 		paddingBottom: Math.max(rt.insets.bottom, theme.gap.lg),
 		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
 	},

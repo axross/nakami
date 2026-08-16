@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -21,8 +21,17 @@ const ROW_WIDTHS = [70, 96, 58, 84, 66, 78];
  * loaded list, gently pulsing. Honors the OS "reduce motion" setting (via
  * reanimated's `useReducedMotion`) by holding a steady opacity instead of
  * animating.
+ *
+ * The root claims no space of its own: the screen that gives it a whole tab
+ * passes `flex: 1` through `style`.
  */
-export function CollectionListSkeleton(): JSX.Element {
+export function CollectionListSkeleton({
+	style,
+	testID = "collections-loading",
+	...props
+}: Readonly<
+	Omit<ComponentPropsWithRef<typeof View>, "children">
+>): JSX.Element {
 	const { theme } = useUnistyles();
 	const reduceMotion = useReducedMotion();
 	const opacity = useSharedValue(0.5);
@@ -54,13 +63,18 @@ export function CollectionListSkeleton(): JSX.Element {
 	const pulse = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
 	return (
-		<View style={styles.root}>
-			<View
-				accessible
-				accessibilityLabel="Loading collections"
-				style={styles.card}
-				testID="collections-loading"
-			>
+		<View
+			accessible
+			accessibilityLabel="Loading collections"
+			testID={testID}
+			{...props}
+			style={[styles.root, style]}
+		>
+			{/* Hooked separately from the root: the root carries the accessible
+			    label and the caller-overridable hook, while the safe-area inset
+			    this card mirrors from the loaded list is what a guard has to be
+			    able to read. */}
+			<View style={styles.card} testID="collections-loading-card">
 				{ROW_WIDTHS.map((width, index) => (
 					<View key={width} style={styles.row(index > 0)}>
 						<Animated.View style={[styles.monogram, pulse]} />
@@ -98,9 +112,10 @@ const styles = StyleSheet.create((theme, rt) => ({
 		height: 11,
 		width,
 	}),
+	// Deliberately no fill here: how much room the skeleton gets is the
+	// consumer's half of the split, so do not "fix" this by adding one.
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
-		flex: 1,
 	},
 	row: (divided: boolean) => ({
 		alignItems: "center",

@@ -62,14 +62,17 @@ to a screen's chrome MUST be accompanied by a re-reading of this table — hidin
 header silently transfers an edge to the screen it uncovered.
 
 One surface carries an inset on its callers' behalf, and it is deliberate.
-`src/common/components/message-state/message-state.tsx` is `flex: 1` and full-bleed at
-each of its call sites — `welcome-screen` renders it directly, and
+`src/common/components/message-state/message-state.tsx` is rendered flush against the
+screen's own edges at each of its call sites — `welcome-screen` renders it directly, and
 `collections-message-state` wraps it for both Collections screens — so it carries the
-horizontal pair once for all of them; `welcome-screen` adds only the vertical pair it
-owns, through that component's `style` prop, which comes last in the merged array and
-therefore wins. A future call site that does not render it full-bleed MUST NOT rely on
-it for the horizontal pair, because the inset would then land somewhere other than the
-screen edge.
+horizontal pair once for all of them. It claims no fill of its own: each call site
+supplies `flex: 1` through the `style` prop, and `welcome-screen` adds the vertical pair
+it owns through that same prop, which comes last in the merged array and therefore wins.
+
+That makes the array order load-bearing twice over, and a component test beside the file
+holds it. A future call site MUST NOT rely on this component for the horizontal pair
+unless it renders it flush against the screen edges, because the inset would otherwise
+land somewhere other than the edge it is measured from.
 
 Separately, each loading skeleton mirrors the inset of the list it stands in for —
 `collection-list-skeleton` matching `collections-screen`, `collection-records-skeleton`
@@ -123,10 +126,11 @@ Two limits of those guards are worth stating rather than discovering. **No unit 
 here observes a non-zero inset at all**: the mock's insets are fixed at zero and
 `StyleSheet.create` resolves once at module load, so what the suite holds is the gutter
 fallback, never the clearance the change exists to produce — that is the manual
-on-device pass. And the guards import `StyleSheet` from React Native rather than from
-Unistyles, against that package's usual rule, because they read an already-rendered
-style array and Unistyles' own `flatten` mock returns its argument untouched. The rule
-governs the stylesheet-declaration path, which these tests do not touch.
+on-device pass. And each guard has to flatten an already-rendered style array itself,
+because Unistyles' own `flatten` mock returns its argument untouched: most import
+React Native's `StyleSheet` for that, against Unistyles' usual rule, while the three
+component suites use the local `resolveStyle` helper their neighbours already defined.
+That rule governs the stylesheet-declaration path, which none of these tests touch.
 
 ## A scrolling screen insets its content, not its container
 

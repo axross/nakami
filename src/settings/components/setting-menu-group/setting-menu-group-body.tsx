@@ -1,11 +1,11 @@
-import type { ComponentPropsWithoutRef, JSX } from "react";
+import type { ComponentPropsWithRef, JSX } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 export function SettingMenuGroupBody({
 	style,
 	...props
-}: Readonly<ComponentPropsWithoutRef<typeof View>>): JSX.Element {
+}: Readonly<ComponentPropsWithRef<typeof View>>): JSX.Element {
 	return <View style={[styles.body, style]} {...props} />;
 }
 
