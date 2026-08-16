@@ -14,7 +14,7 @@ const styles = StyleSheet.create((theme) => ({
 	// a border, so this `rowGap` is a hairline rather than a spacing step — the
 	// group's ground shows through it as the separator.
 	body: {
-		paddingHorizontal: theme.gap.md,
 		rowGap: theme.borderWidth.hairline,
+		paddingHorizontal: theme.gap.md,
 	},
 }));

@@ -72,29 +72,29 @@ export function SettingsAccountGroup(
 
 const styles = StyleSheet.create((theme) => ({
 	accountRow: {
+		flexDirection: "row",
 		alignItems: "center",
+		columnGap: theme.gap.md,
+		minHeight: 48,
+		paddingVertical: theme.gap.xs,
+		paddingHorizontal: theme.gap.md,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderTopLeftRadius: theme.radius.md,
 		borderTopRightRadius: theme.radius.md,
-		columnGap: theme.gap.md,
-		flexDirection: "row",
-		minHeight: 48,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.xs,
 	},
 	accountText: {
-		flexShrink: 1,
 		rowGap: theme.gap.xs,
+		flexShrink: 1,
 	},
 	// Square by `aspectRatio`, so the pill radius clamps to half the side and
 	// draws a true circle — matching how the design kit already renders it.
 	avatar: {
 		alignItems: "center",
+		justifyContent: "center",
+		width: 36,
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.neutral.base,
 		borderRadius: theme.radius.pill,
-		justifyContent: "center",
-		width: 36,
 	},
 	email: {
 		...theme.typography.body,

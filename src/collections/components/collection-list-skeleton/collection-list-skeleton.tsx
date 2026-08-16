@@ -90,27 +90,27 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// Mirrors the loaded list's card, safe-area inset included (see
 	// collections-screen), so the placeholder does not shift when data arrives.
 	card: {
+		marginTop: theme.gap.md,
+		marginBottom: theme.gap.md,
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
 		borderWidth: theme.borderWidth.hairline,
-		marginBottom: theme.gap.md,
-		marginEnd: Math.max(rt.insets.right, theme.gap.md),
-		marginStart: Math.max(rt.insets.left, theme.gap.md),
-		marginTop: theme.gap.md,
+		borderRadius: theme.radius.md,
 		overflow: "hidden",
 	},
 	monogram: {
+		width: 34,
 		aspectRatio: 1,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
-		width: 34,
 	},
 	name: (width: number) => ({
+		width,
+		height: 11,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
-		height: 11,
-		width,
 	}),
 	// Deliberately no fill here: how much room the skeleton gets is the
 	// consumer's half of the split, so do not "fix" this by adding one.
@@ -118,13 +118,13 @@ const styles = StyleSheet.create((theme, rt) => ({
 		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	row: (divided: boolean) => ({
+		flexDirection: "row",
 		alignItems: "center",
+		columnGap: theme.gap.sm,
+		minHeight: 56,
+		paddingVertical: theme.gap.xs,
+		paddingHorizontal: theme.gap.md,
 		borderTopColor: theme.colors.border.neutral.subtle,
 		borderTopWidth: divided ? theme.borderWidth.hairline : 0,
-		columnGap: theme.gap.sm,
-		flexDirection: "row",
-		minHeight: 56,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.xs,
 	}),
 }));

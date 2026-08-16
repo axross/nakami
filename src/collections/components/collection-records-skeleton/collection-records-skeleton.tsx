@@ -96,52 +96,52 @@ export function CollectionRecordsSkeleton({
 const styles = StyleSheet.create((theme, rt) => ({
 	// Mirrors the record card's container (see collection-record-card).
 	card: {
+		gap: theme.gap.xs,
+		paddingVertical: theme.gap.sm,
+		paddingHorizontal: theme.gap.md,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
 		borderWidth: theme.borderWidth.hairline,
-		gap: theme.gap.xs,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.sm,
+		borderRadius: theme.radius.md,
 	},
 	// Mirrors the screen's record-count header.
 	count: {
-		paddingBottom: theme.gap.xs,
 		paddingHorizontal: theme.gap.xs,
+		paddingBottom: theme.gap.xs,
 	},
 	countBar: {
+		width: 72,
+		height: 13,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
-		height: 13,
-		width: 72,
 	},
 	// Mirrors the loaded feed's content container, safe-area inset included (see
 	// collection-records-screen), so the placeholder does not shift when data
 	// arrives.
 	feed: {
 		gap: theme.gap.sm,
-		paddingBottom: theme.gap.md,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingTop: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	// A card's title and metadata rows are each one fixed line box; the thin bar
 	// sits centered inside it, so the placeholder card is exactly as tall as a
 	// real one.
 	line: {
-		height: RECORD_CARD_LINE,
 		justifyContent: "center",
+		height: RECORD_CARD_LINE,
 	},
 	metaBar: {
+		width: "40%",
+		height: 11,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
-		height: 11,
-		width: "40%",
 	},
 	titleBar: (width: DimensionValue) => ({
+		width,
+		height: 13,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
-		height: 13,
-		width,
 	}),
 }));

@@ -43,13 +43,13 @@ export function CollectionsMessageState({
 const styles = StyleSheet.create((theme) => ({
 	button: (pressed: boolean) => ({
 		alignItems: "center",
+		justifyContent: "center",
+		minHeight: 48,
+		marginTop: theme.gap.md,
+		paddingHorizontal: theme.gap.lg,
 		backgroundColor: theme.colors.solid.accent.base,
 		borderRadius: theme.radius.md,
-		justifyContent: "center",
-		marginTop: theme.gap.md,
-		minHeight: 48,
 		opacity: pressed ? 0.7 : 1,
-		paddingHorizontal: theme.gap.lg,
 	}),
 	buttonLabel: {
 		...theme.typography.heading,

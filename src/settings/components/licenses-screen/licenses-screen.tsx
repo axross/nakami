@@ -22,12 +22,12 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// screen owns only the horizontal pair.
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.bare,
-		flex: 1,
 		justifyContent: "center",
-		paddingBottom: theme.gap.lg,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
-		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		flex: 1,
 		paddingTop: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 }));

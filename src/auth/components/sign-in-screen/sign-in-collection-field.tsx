@@ -72,9 +72,9 @@ export function SignInCollectionField({
 const styles = StyleSheet.create((theme) => ({
 	editButton: {
 		alignItems: "center",
-		height: 40,
 		justifyContent: "center",
 		width: 40,
+		height: 40,
 	},
 	field: {
 		rowGap: theme.gap.xs,
@@ -85,13 +85,13 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	input: {
 		...theme.typography.body,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
-		borderWidth: theme.borderWidth.hairline,
-		color: theme.colors.text.neutral.intense,
 		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		color: theme.colors.text.neutral.intense,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderWidth: theme.borderWidth.hairline,
+		borderRadius: theme.radius.md,
 	},
 	label: {
 		...theme.typography.caption,
@@ -99,13 +99,13 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	value: {
 		...theme.typography.body,
-		color: theme.colors.text.neutral.intense,
 		flexGrow: 1,
+		color: theme.colors.text.neutral.intense,
 	},
 	valueRow: {
+		flexDirection: "row",
 		alignItems: "center",
 		columnGap: theme.gap.xs,
-		flexDirection: "row",
 		minHeight: 40,
 	},
 }));

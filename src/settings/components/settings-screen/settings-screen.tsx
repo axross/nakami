@@ -118,24 +118,24 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// `paddingBottom` is new: without it the last row sat flush against the tab
 	// bar.
 	content: {
-		paddingBottom: theme.gap.lg,
-		paddingEnd: rt.insets.right,
-		paddingStart: rt.insets.left,
-		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.lg,
+		paddingTop: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingStart: rt.insets.left,
+		paddingEnd: rt.insets.right,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	technicalDetails: {
 		...theme.typography.code,
-		color: theme.colors.text.neutral.base,
 		paddingHorizontal: theme.gap.md,
+		color: theme.colors.text.neutral.base,
 	},
 	disclaimer: {
 		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
 		paddingHorizontal: theme.gap.md,
+		color: theme.colors.text.neutral.base,
 	},
 }));

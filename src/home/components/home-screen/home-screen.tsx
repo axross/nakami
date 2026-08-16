@@ -23,14 +23,14 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// as the horizontal pair; the tab bar pads itself by the bottom inset.
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.bare,
-		flex: 1,
 		justifyContent: "center",
-		paddingBottom: theme.gap.lg,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
-		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
-		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
 		rowGap: theme.gap.xs,
+		flex: 1,
+		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
+		paddingBottom: theme.gap.lg,
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	subtitle: {
 		...theme.typography.body,

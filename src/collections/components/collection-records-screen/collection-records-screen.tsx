@@ -140,9 +140,9 @@ export function CollectionRecordsScreen({
 const styles = StyleSheet.create((theme, rt) => ({
 	count: {
 		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
-		paddingBottom: theme.gap.xs,
 		paddingHorizontal: theme.gap.xs,
+		paddingBottom: theme.gap.xs,
+		color: theme.colors.text.neutral.base,
 	},
 	footer: {
 		paddingVertical: theme.gap.md,
@@ -155,10 +155,10 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// when the records arrive.
 	list: {
 		gap: theme.gap.sm,
-		paddingBottom: theme.gap.md,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingTop: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	// The message state claims no space of its own, so this screen — which gives
 	// it the whole surface — supplies the fill.
@@ -166,7 +166,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		flex: 1,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 }));

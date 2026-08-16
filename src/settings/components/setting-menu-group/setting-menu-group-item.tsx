@@ -24,17 +24,17 @@ export function SettingMenuGroupItem({
 
 const styles = StyleSheet.create((theme) => ({
 	item: (first: boolean, last: boolean, pressed: boolean) => ({
+		flexDirection: "row",
 		alignItems: "center",
+		columnGap: theme.gap.md,
+		minHeight: 48,
+		paddingVertical: theme.gap.xs,
+		paddingHorizontal: theme.gap.md,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderBottomLeftRadius: last ? theme.radius.md : 0,
-		borderBottomRightRadius: last ? theme.radius.md : 0,
 		borderTopLeftRadius: first ? theme.radius.md : 0,
 		borderTopRightRadius: first ? theme.radius.md : 0,
-		columnGap: theme.gap.md,
-		flexDirection: "row",
-		minHeight: 48,
+		borderBottomLeftRadius: last ? theme.radius.md : 0,
+		borderBottomRightRadius: last ? theme.radius.md : 0,
 		opacity: pressed ? 0.7 : 1,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.xs,
 	}),
 }));

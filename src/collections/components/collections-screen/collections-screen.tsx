@@ -107,25 +107,25 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// `CollectionListSkeleton` mirrors these values, or the card would shift
 	// when the collections arrive.
 	card: {
+		marginTop: theme.gap.md,
+		marginBottom: theme.gap.md,
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
 		borderWidth: theme.borderWidth.hairline,
-		marginBottom: theme.gap.md,
-		marginEnd: Math.max(rt.insets.right, theme.gap.md),
-		marginStart: Math.max(rt.insets.left, theme.gap.md),
-		marginTop: theme.gap.md,
+		borderRadius: theme.radius.md,
 		overflow: "hidden",
 	},
 	// Drawn as a filled `View` rather than a border, so the hairline is its
 	// height.
 	divider: {
-		backgroundColor: theme.colors.border.neutral.subtle,
 		height: theme.borderWidth.hairline,
+		backgroundColor: theme.colors.border.neutral.subtle,
 	},
 	list: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	// The message state claims no space of its own, so this screen — which gives
 	// it the whole tab — supplies the fill.
@@ -133,8 +133,8 @@ const styles = StyleSheet.create((theme, rt) => ({
 		flex: 1,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	// The skeleton claims no space of its own either, and it stands in for the
 	// whole list.

@@ -227,11 +227,11 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// indicators with it and leave the form stopping short of the screen edge
 	// with a dead band beyond it.
 	content: {
-		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
-		paddingTop: theme.gap.md,
 		rowGap: theme.gap.md,
+		paddingTop: theme.gap.md,
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	error: {
 		...theme.typography.caption,
@@ -242,28 +242,28 @@ const styles = StyleSheet.create((theme, rt) => ({
 	},
 	input: {
 		...theme.typography.body,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
-		borderWidth: theme.borderWidth.hairline,
-		color: theme.colors.text.neutral.intense,
 		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		color: theme.colors.text.neutral.intense,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderWidth: theme.borderWidth.hairline,
+		borderRadius: theme.radius.md,
 	},
 	label: {
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	submit: {
 		alignItems: "center",
-		backgroundColor: theme.colors.solid.accent.base,
-		borderRadius: theme.radius.md,
 		justifyContent: "center",
 		minHeight: 50,
+		backgroundColor: theme.colors.solid.accent.base,
+		borderRadius: theme.radius.md,
 	},
 	submitDisabled: {
 		opacity: 0.5,

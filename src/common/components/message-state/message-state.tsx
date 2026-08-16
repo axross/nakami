@@ -54,12 +54,12 @@ export function MessageState({
 const styles = StyleSheet.create((theme, rt) => ({
 	mark: {
 		alignItems: "center",
+		justifyContent: "center",
+		width: 66,
 		aspectRatio: 1,
+		marginBottom: theme.gap.xs,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderRadius: theme.radius.lg,
-		justifyContent: "center",
-		marginBottom: theme.gap.xs,
-		width: 66,
 	},
 	// Deliberately no fill here: how much room the surface gets is the consumer's
 	// half of the split, so do not "fix" this by adding one.
@@ -75,18 +75,18 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// precedence is involved in reading which value applies.
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		justifyContent: "center",
-		paddingBottom: theme.gap.lg,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
-		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
-		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.xs,
+		paddingTop: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	subtitle: {
 		...theme.typography.body,
-		color: theme.colors.text.neutral.base,
 		maxWidth: 280,
+		color: theme.colors.text.neutral.base,
 		textAlign: "center",
 	},
 	title: {

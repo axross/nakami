@@ -52,12 +52,12 @@ export function WelcomeScreen(): JSX.Element {
 const styles = StyleSheet.create((theme, rt) => ({
 	button: {
 		alignItems: "center",
+		justifyContent: "center",
 		alignSelf: "stretch",
+		minHeight: 50,
+		marginTop: theme.gap.md,
 		backgroundColor: theme.colors.solid.accent.base,
 		borderRadius: theme.radius.md,
-		justifyContent: "center",
-		marginTop: theme.gap.md,
-		minHeight: 50,
 	},
 	buttonLabel: {
 		...theme.typography.heading,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// that supplies the fill.
 	messageState: {
 		flex: 1,
-		paddingBottom: Math.max(rt.insets.bottom, theme.gap.lg),
 		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.lg),
 	},
 }));
