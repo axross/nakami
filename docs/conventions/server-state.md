@@ -19,6 +19,15 @@ Every session-scoped query key MUST be rooted at `getSessionQueryKeyRoot(userId)
 factory's root stops matching without failing anything, so the ended session's
 collections and records stay readable in memory until `gcTime` expires them.
 
+A session-scoped key that leaves the cache — into an error report, a log context, a
+breadcrumb — MUST be described through `describeQueryKey` from that same module, and
+MUST NOT be described by indexing into the key. It rebuilds the root through the factory
+above with the user id replaced by `*` and joins what follows into a path, so a report
+names the resource that failed and carries no user id. Indexing is the same drift a
+retyped prefix is, in a different form: once every session-scoped key shared the
+`["users", …]` root, `queryKey[0]` was the constant `"users"` for all of them, and
+nothing failed — the report simply stopped telling one resource from another.
+
 A query key MUST NOT carry the server URL. Server and user are one authentication
 session here, so the user id identifies the tenant on its own, and a `queryFn` reads the
 URL from the session alongside the token rather than taking it as a factory argument —

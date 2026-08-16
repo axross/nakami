@@ -62,12 +62,15 @@ Three exceptions are ratified, and none of them generalises — a new upward or
 cross-feature import is a violation, not a precedent.
 
 `src/core/helpers/query-client.ts` MAY import `PayloadRequestError` from
-`src/common/helpers/payload-client.ts`, so that a failed query can be classified before
-it is reported. That client stays in `src/common/`: it encodes none of this
-application's configuration, and it is not one of the singletons the app is wired from.
-The crossing is therefore permitted rather than a debt to be paid off — see
-[agent-skills.md](./agent-skills.md) for what that placement rests on and where a
-reviewer could reasonably differ.
+`src/common/helpers/payload-client.ts` and `describeQueryKey` from
+`src/common/helpers/session-query-key.ts`, so that a failed query can be classified and
+described before it is reported. Both modules stay in `src/common/`: neither encodes
+this application's configuration, and neither is one of the singletons the app is wired
+from. The describer in particular belongs beside the session-root factory it redacts
+against, since it is only correct while the two agree. The crossing is therefore
+permitted rather than a debt to be paid off — see [agent-skills.md](./agent-skills.md)
+for what the Payload client's placement rests on and where a reviewer could reasonably
+differ.
 
 `src/collections/` and `src/settings/` MAY import `src/auth/`'s session surface —
 `stores/auth-store`, `models/session`, and `mutations/sign-out-mutation` — because that
