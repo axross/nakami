@@ -64,13 +64,16 @@ cross-feature import is a violation, not a precedent.
 `src/core/helpers/query-client.ts` MAY import `PayloadRequestError` from
 `src/common/helpers/payload-client.ts` and `describeQueryKey` from
 `src/common/helpers/session-query-key.ts`, so that a failed query can be classified and
-described before it is reported. Both modules stay in `src/common/`: neither encodes
-this application's configuration, and neither is one of the singletons the app is wired
-from. The describer in particular belongs beside the session-root factory it redacts
-against, since it is only correct while the two agree. The crossing is therefore
-permitted rather than a debt to be paid off — see [agent-skills.md](./agent-skills.md)
-for what the Payload client's placement rests on and where a reviewer could reasonably
-differ.
+described before it is reported. Both modules stay in `src/common/`. The content test
+above has two halves, and this exception argues one: neither encodes this application's
+configuration, and neither is one of the singletons the app is wired from. The other —
+whether either carries domain vocabulary — is left open here rather than asserted.
+[agent-skills.md](./agent-skills.md) records what the Payload client's placement rests
+on and names that half as the one where a reviewer could reasonably differ, and
+`session-query-key.ts` returns the literal `"users"`, so the same question is open for
+the describer too. The describer belongs beside the session-root factory it redacts
+against either way, since it is only correct while the two agree. The crossing is
+therefore permitted rather than a debt to be paid off.
 
 `src/collections/` and `src/settings/` MAY import `src/auth/`'s session surface —
 `stores/auth-store`, `models/session`, and `mutations/sign-out-mutation` — because that
