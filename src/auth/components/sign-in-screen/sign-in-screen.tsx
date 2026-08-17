@@ -131,23 +131,6 @@ export function SignInScreen(): JSX.Element {
 	const emailRef = useRef<TextInput>(null);
 	const passwordRef = useRef<TextInput>(null);
 
-	// Pre-fill the server URL with the last successful sign-in's endpoint, but
-	// never overwrite input the user has already started typing before this
-	// keychain read resolves.
-	useEffect(() => {
-		let active = true;
-
-		void readLastServerUrl().then((stored) => {
-			if (active && stored !== null && !serverUrlEdited.current) {
-				setServerUrl(stored);
-			}
-		});
-
-		return () => {
-			active = false;
-		};
-	}, []);
-
 	const serverErrorMessage = error === null ? null : messageForError(error);
 
 	// The server's rejection is announced the same way a validation failure is;
@@ -212,6 +195,38 @@ export function SignInScreen(): JSX.Element {
 		},
 		[serverUrl, collection, email, password, fieldErrors],
 	);
+
+	// Held in a ref so the mount effect below can take the same path a keystroke
+	// does without listing a callback that changes on every render — which would
+	// re-read the keychain each time the user types.
+	const onFieldChangeRef = useRef(onFieldChange);
+	useEffect(() => {
+		onFieldChangeRef.current = onFieldChange;
+	});
+
+	// Pre-fill the server URL with the last successful sign-in's endpoint, but
+	// never overwrite input the user has already started typing before this
+	// keychain read resolves.
+	//
+	// The arriving value goes through the same clearing path an edit does. Press
+	// Sign in, or blur the field, before this read settles and the field would
+	// otherwise end up holding a valid URL while still carrying "Enter your
+	// server URL." — with the flagged border, the composed accessible name, and a
+	// place in the problem count — a message contradicting the value beside it.
+	useEffect(() => {
+		let active = true;
+
+		void readLastServerUrl().then((stored) => {
+			if (active && stored !== null && !serverUrlEdited.current) {
+				setServerUrl(stored);
+				onFieldChangeRef.current("serverUrl", stored);
+			}
+		});
+
+		return () => {
+			active = false;
+		};
+	}, []);
 
 	const onSubmit = useCallback(() => {
 		const { errors, values } = validateSignInForm({

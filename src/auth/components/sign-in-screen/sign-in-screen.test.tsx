@@ -486,6 +486,38 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-email").props.value).toBe("you@example.com");
 	});
 
+	// The keychain read settles after the screen is already interactive, so a
+	// press can flag the Server URL field before the stored value lands in it.
+	// The pre-fill takes the same clearing path an edit does, or the field would
+	// keep a message contradicting the value it now shows.
+	it("clears a stale Server URL message when the stored endpoint arrives", async () => {
+		let deliverStored: (stored: string | null) => void = () => {};
+		jest.mocked(readLastServerUrl).mockReturnValue(
+			new Promise<string | null>((resolve) => {
+				deliverStored = resolve;
+			}),
+		);
+
+		const { getByTestId, queryByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+		expect(getByTestId("sign-in-error-server-url", HIDDEN)).toBeTruthy();
+
+		deliverStored("https://cms.example.com");
+
+		await waitFor(() => {
+			expect(getByTestId("sign-in-server-url").props.value).toBe(
+				"https://cms.example.com",
+			);
+		});
+		expect(queryByTestId("sign-in-error-server-url", HIDDEN)).toBeNull();
+		expect(getByTestId("sign-in-server-url").props.accessibilityLabel).toBe(
+			"Server URL",
+		);
+		// The fields the pre-fill says nothing about keep theirs.
+		expect(getByTestId("sign-in-error-email", HIDDEN)).toBeTruthy();
+	});
+
 	it("submits normalized credentials when the form is valid", async () => {
 		// Leave the login pending so the assertion targets the credentials handed
 		// to the data layer, without driving the success/navigation path.
