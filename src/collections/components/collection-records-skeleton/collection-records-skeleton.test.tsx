@@ -13,7 +13,7 @@ describe("<CollectionRecordsSkeleton>", () => {
 		).toBe("Loading records");
 	});
 
-	// A component that hard-codes its own hook cannot be used twice on one screen
+	// a component that hard-codes its own hook cannot be used twice on one screen
 	// and told apart, so the default has to be a default rather than a fixture.
 	it("lets the caller override the test hook", () => {
 		const { getByTestId, queryByTestId } = render(
@@ -24,7 +24,7 @@ describe("<CollectionRecordsSkeleton>", () => {
 		expect(queryByTestId("collection-records-loading")).toBeNull();
 	});
 
-	// The placeholder feed has to sit exactly where the loaded feed sits,
+	// the placeholder feed has to sit exactly where the loaded feed sits,
 	// safe-area inset included, or the cards jump sideways when the records
 	// arrive. Unistyles' jest mock reports zero insets, so this is the zero-inset
 	// device: the padding has to fall back to the design gutter rather than

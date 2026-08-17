@@ -3,8 +3,8 @@ import { render } from "@testing-library/react-native";
 import { SettingMenuGroupItem } from "./setting-menu-group-item";
 
 describe("<SettingMenuGroupItem>", () => {
-	// A row copied into another tree used to render with silently square corners.
-	// It now fails at the point of the mistake, naming the part and the parent it
+	// a row copied into another tree used to render with silently square corners.
+	// it now fails at the point of the mistake, naming the part and the parent it
 	// needs. React also reports the throw through `console.error`, which is noise
 	// here rather than a second failure.
 	it("throws an error naming itself and its required parent when rendered outside a body", () => {

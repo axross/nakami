@@ -16,7 +16,7 @@ describe("<HomeScreen>", () => {
 		expect(getByText("A companion mobile app for Payload CMS.")).toBeTruthy();
 	});
 
-	// The tab group hides its header, so this screen owns the top edge and the
+	// the tab group hides its header, so this screen owns the top edge and the
 	// horizontal pair. Unistyles' jest mock reports zero insets, so this is the
 	// zero-inset device: each owned edge has to fall back to its design gutter
 	// rather than collapsing to the raw inset.

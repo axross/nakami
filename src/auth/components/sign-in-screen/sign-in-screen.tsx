@@ -32,12 +32,12 @@ function messageForError(error: unknown): string {
 }
 
 /**
- * The Payload sign-in form: server URL, auth collection (defaulted), email, and
- * password. The Server URL field pre-fills on mount with the last successful
+ * the Payload sign-in form: server URL, auth collection (defaulted), email, and
+ * password. the Server URL field pre-fills on mount with the last successful
  * sign-in's endpoint (kept in the keychain) so a returning user need not retype
- * it. On success it persists the session (via the sign-in mutation), which
+ * it. on success it persists the session (via the sign-in mutation), which
  * flips the app to authenticated — the root navigator then swaps this
- * signed-out stack for the tab UI. Failures surface inline without leaving the
+ * signed-out stack for the tab UI. failures surface inline without leaving the
  * screen.
  */
 export function SignInScreen(): JSX.Element {
@@ -54,7 +54,7 @@ export function SignInScreen(): JSX.Element {
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const serverUrlEdited = useRef(false);
 
-	// Pre-fill the server URL with the last successful sign-in's endpoint, but
+	// pre-fill the server URL with the last successful sign-in's endpoint, but
 	// never overwrite input the user has already started typing before this
 	// keychain read resolves.
 	useEffect(() => {
@@ -71,7 +71,7 @@ export function SignInScreen(): JSX.Element {
 		};
 	}, []);
 
-	// Clears any prior error as soon as the user changes an input.
+	// clears any prior error as soon as the user changes an input.
 	const clearErrors = useCallback(() => {
 		setValidationError(null);
 		if (error) {
@@ -221,17 +221,17 @@ export function SignInScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// The stack header clears the top edge, so this screen owns the bottom and
-	// the horizontal pair. The insets sit on the scrolled content rather than on
+	// the stack header clears the top edge, so this screen owns the bottom and
+	// the horizontal pair. the insets sit on the scrolled content rather than on
 	// the `ScrollView` itself: padding the scroll view would inset its scroll
 	// indicators with it and leave the form stopping short of the screen edge
 	// with a dead band beyond it.
 	content: {
-		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
-		paddingTop: theme.gap.md,
 		rowGap: theme.gap.md,
+		paddingTop: theme.gap.md,
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	error: {
 		...theme.typography.caption,
@@ -242,28 +242,28 @@ const styles = StyleSheet.create((theme, rt) => ({
 	},
 	input: {
 		...theme.typography.body,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
-		borderWidth: theme.borderWidth.hairline,
-		color: theme.colors.text.neutral.intense,
 		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		color: theme.colors.text.neutral.intense,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderWidth: theme.borderWidth.hairline,
+		borderRadius: theme.radius.md,
 	},
 	label: {
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	submit: {
 		alignItems: "center",
-		backgroundColor: theme.colors.solid.accent.base,
-		borderRadius: theme.radius.md,
 		justifyContent: "center",
 		minHeight: 50,
+		backgroundColor: theme.colors.solid.accent.base,
+		borderRadius: theme.radius.md,
 	},
 	submitDisabled: {
 		opacity: 0.5,

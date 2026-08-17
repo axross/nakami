@@ -12,7 +12,7 @@ describe("<LicensesScreen>", () => {
 		expect(getByText("License information is not available yet.")).toBeTruthy();
 	});
 
-	// A stack header and the tab bar clear this screen's vertical edges, so it
+	// a stack header and the tab bar clear this screen's vertical edges, so it
 	// owns only the horizontal pair. Unistyles' jest mock reports zero insets, so
 	// this is the zero-inset device: the gutter has to survive rather than the
 	// edge collapsing to the raw inset.

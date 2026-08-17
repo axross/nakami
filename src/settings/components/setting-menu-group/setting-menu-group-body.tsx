@@ -12,9 +12,9 @@ import {
 } from "./setting-menu-group-context";
 
 /**
- * The body of a setting menu group: it stacks the rows it is given and publishes
+ * the body of a setting menu group: it stacks the rows it is given and publishes
  * each row's position, so a row rounds the right corners without its caller
- * restating where that row sits. A provider renders no host node of its own, so
+ * restating where that row sits. a provider renders no host node of its own, so
  * the rows stay direct children of this `View` and the gap between them is
  * unchanged.
  */
@@ -62,11 +62,11 @@ function getRowPosition(
 }
 
 const styles = StyleSheet.create((theme) => ({
-	// The rows sit flush and are separated by the gap between them rather than by
+	// the rows sit flush and are separated by the gap between them rather than by
 	// a border, so this `rowGap` is a hairline rather than a spacing step — the
 	// group's ground shows through it as the separator.
 	body: {
-		paddingHorizontal: theme.gap.md,
 		rowGap: theme.borderWidth.hairline,
+		paddingHorizontal: theme.gap.md,
 	},
 }));

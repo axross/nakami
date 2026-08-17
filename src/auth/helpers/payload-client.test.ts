@@ -21,7 +21,7 @@ function mockFetch(
 	return fetchMock;
 }
 
-/** Signs in against the mocked fetch, resolving with its outcome either way. */
+/** signs in against the mocked fetch, resolving with its outcome either way. */
 function attemptSignIn(): Promise<unknown> {
 	return login(server, { email: "you@example.com", password: "secret" }).catch(
 		(caught: unknown) => caught,

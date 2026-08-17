@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 /**
- * The Home tab surface. Home renders only while authenticated — the root
+ * the Home tab surface. Home renders only while authenticated — the root
  * navigator gates the whole tab UI behind sign-in — so there is no signed-out
  * branch here; the signed-out landing lives in the welcome screen.
  */
@@ -19,18 +19,18 @@ export function HomeScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// The tab group hides its header, so this screen owns the top edge as well
+	// the tab group hides its header, so this screen owns the top edge as well
 	// as the horizontal pair; the tab bar pads itself by the bottom inset.
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.bare,
-		flex: 1,
 		justifyContent: "center",
-		paddingBottom: theme.gap.lg,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
-		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
-		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
 		rowGap: theme.gap.xs,
+		flex: 1,
+		paddingTop: Math.max(rt.insets.top, theme.gap.lg),
+		paddingBottom: theme.gap.lg,
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	subtitle: {
 		...theme.typography.body,

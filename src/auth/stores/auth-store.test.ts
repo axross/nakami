@@ -30,7 +30,7 @@ jest.mock("~/auth/helpers/payload-client", () => {
 
 // `deauthenticate()` hard-imports the app's one query client, so substitute a
 // test client for it rather than letting this suite mutate the instance the
-// rest of the app shares. The store's real eviction logic still runs.
+// rest of the app shares. the store's real eviction logic still runs.
 jest.mock("~/core/helpers/query-client", () => {
 	const { createTestQueryClient } = jest.requireActual(
 		"~/common/test-helpers/query-client",
@@ -48,7 +48,7 @@ const session: Session = {
 
 beforeEach(() => {
 	jest.clearAllMocks();
-	// The substituted client lives for the file, so empty it between tests.
+	// the substituted client lives for the file, so empty it between tests.
 	queryClient.clear();
 	useAuthStore.setState({ status: "loading", session: null });
 });
@@ -131,7 +131,7 @@ describe("authenticate / deauthenticate / applyRefresh", () => {
 		expect(useAuthStore.getState().status).toBe("unauthenticated");
 		expect(useAuthStore.getState().session).toBeNull();
 		expect(clearSession).toHaveBeenCalled();
-		// The last-used URL survives sign-out, so nothing clears it here.
+		// the last-used URL survives sign-out, so nothing clears it here.
 		expect(writeLastServerUrl).not.toHaveBeenCalled();
 	});
 

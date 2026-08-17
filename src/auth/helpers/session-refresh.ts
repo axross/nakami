@@ -7,14 +7,14 @@ import { createModuleLogger } from "~/core/helpers/logging";
 
 const logger = createModuleLogger("auth/session-refresh");
 
-// How close to expiry (in seconds) a token must be before it is refreshed.
+// how close to expiry (in seconds) a token must be before it is refreshed.
 // Payload's default token lifetime is 2h; refreshing within the final 30
 // minutes keeps an active session alive with roughly one refresh per window,
 // since a successful refresh pushes `exp` far past the window again.
 export const REFRESH_LEAD_SECONDS = 30 * 60;
 
 /**
- * Whether a token with the given Unix `exp` (seconds) is due for refresh —
+ * whether a token with the given Unix `exp` (seconds) is due for refresh —
  * true once it is within {@link REFRESH_LEAD_SECONDS} of expiry, including
  * already-expired, so a foreground attempt either renews it or the resulting
  * auth rejection signs the user out.
@@ -27,13 +27,13 @@ export function isWithinRefreshWindow(
 	return exp - nowSeconds <= REFRESH_LEAD_SECONDS;
 }
 
-// Guards against overlapping refreshes from the interval + foreground triggers.
+// guards against overlapping refreshes from the interval + foreground triggers.
 let refreshing = false;
 
 /**
- * Refreshes the token when the current session is authenticated and inside the
- * refresh window. Signs the user out on an auth rejection; keeps the session on
- * a transport error to retry on the next trigger. No-op otherwise.
+ * refreshes the token when the current session is authenticated and inside the
+ * refresh window. signs the user out on an auth rejection; keeps the session on
+ * a transport error to retry on the next trigger. no-op otherwise.
  */
 export async function refreshSessionIfDue(): Promise<void> {
 	const { session, applyRefresh, deauthenticate } = useAuthStore.getState();
@@ -44,8 +44,8 @@ export async function refreshSessionIfDue(): Promise<void> {
 
 	refreshing = true;
 	const startedAt = performance.now();
-	// Routine bracket-open at debug; each of the three closes below carries the
-	// terminal `outcome`, mirroring `auth-store.hydrate`. Log the endpoint only —
+	// routine bracket-open at debug; each of the three closes below carries the
+	// terminal `outcome`, mirroring `auth-store.hydrate`. log the endpoint only —
 	// never the token.
 	logger.debug("Started refreshing the session token.", {
 		serverUrl: session.serverUrl,
@@ -63,8 +63,8 @@ export async function refreshSessionIfDue(): Promise<void> {
 		});
 	} catch (error) {
 		if (error instanceof PayloadRequestError && error.kind === "auth") {
-			// This is where a session ends for a user who was away long enough for
-			// the token to expire. It is the only line that attributes the
+			// this is where a session ends for a user who was away long enough for
+			// the token to expire. it is the only line that attributes the
 			// involuntary sign-out, so it names the reason and stays at info — a
 			// rejected token is an expected operational state, not a defect, so it
 			// is deliberately not reported to the error tracker.

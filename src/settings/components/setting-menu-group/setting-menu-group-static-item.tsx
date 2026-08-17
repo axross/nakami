@@ -8,7 +8,7 @@ import {
 } from "./setting-menu-group-item-style";
 
 /**
- * A row that presents information rather than a control — the same surface,
+ * a row that presents information rather than a control — the same surface,
  * layout, and position-derived corners as `<SettingMenuGroupItem>`, with no press
  * target, no press feedback, and no interactive role for assistive technology to
  * announce.

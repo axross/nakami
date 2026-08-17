@@ -22,7 +22,7 @@ const session: Session = {
 	user: { id: "1", email: "you@example.com" },
 };
 
-/** Feeds the keychain read whatever the last keychain write stored. */
+/** feeds the keychain read whatever the last keychain write stored. */
 function replayStoredEntry(): void {
 	const [, stored] = jest.mocked(SecureStore.setItemAsync).mock.calls[0] ?? [];
 	jest.mocked(SecureStore.getItemAsync).mockResolvedValue(stored ?? null);
@@ -64,7 +64,7 @@ describe("writeSession()", () => {
 	it("stores the session under its keychain entry", async () => {
 		await writeSession(session);
 
-		// The exact stored bytes, not merely "a string": this is the assertion
+		// the exact stored bytes, not merely "a string": this is the assertion
 		// that would catch the write half starting to store a different shape
 		// from the one the read half expects.
 		expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
@@ -79,7 +79,7 @@ describe("the keychain round trip", () => {
 		await writeSession(session);
 		replayStoredEntry();
 
-		// Deep equality across both halves of the boundary: were a normalizing
+		// deep equality across both halves of the boundary: were a normalizing
 		// transform reintroduced into the session's user schema, the encode half
 		// would throw here rather than quietly storing a value the read half
 		// would rewrite.
