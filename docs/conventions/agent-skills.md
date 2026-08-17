@@ -342,6 +342,43 @@ with no change to the join. Until that exists, `status: "declared"` MUST NOT be
 raised as a fresh finding — and a green gate MUST NOT be reported as e2e
 verification, which is that same capability's rule rather than a departure from it.
 
+## The e2e coverage gate's own modules carry no unit test
+
+The installed `unit-testing` capability's
+[testing-scope.md](../../.claude/skills/unit-testing/references/testing-scope.md)
+states a MUST:
+
+> MUST add or update unit tests when a non-trivial pure helper, schema, parser,
+> serializer, validator, or handler changes.
+
+`e2e/scenario-coverage.mjs` holds a markdown table parser and the catalog-to-tag join,
+and `e2e/check-scenario-coverage.mjs` hand-reads YAML block sequences, inline arrays,
+quoting, and comments. All of it is exactly that shape, and none of it has a unit
+test. The evidence carried instead is a manual mutation check, recorded in the pull
+request that introduced the gate — real evidence, but run once by hand rather than on
+every change.
+
+**This one is a deferral, not a resolved collision.** The other entries above record a
+rule this repository answers differently on purpose; this records a rule it means to
+satisfy and has not yet. The distinction matters to whoever reads it next: there is
+nothing here to argue with, only work that has not landed.
+
+The reasoning that deferred it is Jest-specific, and only half of it survives.
+`jest.config.cjs` matches `src/**/*.test.{ts,tsx}` only, so reaching these modules
+through Jest means widening `testMatch` and taking on ESM-in-Jest configuration in a
+file the [README](../../README.md) lists among those that fail globally — still true,
+and still a reason not to use Jest here. It says nothing about `node --test`, which
+reads these `.mjs` modules directly with no configuration at all; two specs written
+against the shipped core pass in about 110ms. So the gap is narrower than it first
+looked: the core is testable as it stands, while the adapter has to be refactored to
+be importable without executing the gate, since its helpers are module-private and
+loading the file runs the whole check and can call `process.exit(1)`.
+
+[#139](https://github.com/axross/nakami/issues/139) carries that work, with the
+mutation check's own cases as its test list. Until it lands, the absence of these
+tests MUST NOT be raised as a fresh finding — and this entry MUST be removed by the
+change that adds them, rather than left behind describing a gap that has closed.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this
