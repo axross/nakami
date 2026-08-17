@@ -23,6 +23,15 @@ else produces no migration and reaches no device.
 structured data on the device yet: the session lives in the keychain and everything
 else is server state held in memory.
 
+## The client and its consumers
+
+`src/core/db/client.ts`, which opens that database and exports the shared `db` handle,
+correspondingly has no consumer: its colocated smoke test is the only thing that imports
+and executes it, and that test mocks `expo-sqlite`, so the native database open stays
+unverified. The module states that at its top, along with what the first consumer owes:
+a table in the schema, the generated migration committed with it, and `useMigrations`
+wired into `src/app/_layout.tsx`.
+
 ## Bounding a read
 
 A data-layer read MUST state its projection and its filter, and MUST state a result
