@@ -45,10 +45,10 @@ export const queryClient = new QueryClient({
 });
 
 // TanStack Query learns about connectivity and foreground state from two
-// process-wide managers. In a browser they wire themselves to `online`/
+// process-wide managers. in a browser they wire themselves to `online`/
 // `offline` and `visibilitychange`; React Native fires none of those, so the
 // `refetchOnReconnect` and `refetchOnWindowFocus` defaults above — both `true`
-// — stay silently inert until the managers are given a native source. Both are
+// — stay silently inert until the managers are given a native source. both are
 // registered here at module scope rather than from a component, because they
 // are global: tying one to a component would unregister it on unmount.
 
@@ -60,9 +60,9 @@ onlineManager.setEventListener((setOnline) => {
 		setOnline(Boolean(state.isConnected));
 	});
 
-	// The listener only reports *changes*, so nothing yet describes the
+	// the listener only reports *changes*, so nothing yet describes the
 	// connection the app launched with — a launch while offline would otherwise
-	// keep the manager's optimistic `true`. Seed it once, unless a real change
+	// keep the manager's optimistic `true`. seed it once, unless a real change
 	// has already arrived and superseded it.
 	const startedAt = performance.now();
 
@@ -83,10 +83,10 @@ onlineManager.setEventListener((setOnline) => {
 			});
 		})
 		.catch((error: unknown) => {
-			// Recovered rather than reported, for the same reason a `network`
+			// recovered rather than reported, for the same reason a `network`
 			// request failure is not reported above: connectivity is an expected
 			// operational state, and the manager's own optimistic `true` is the
-			// fallback, which the next change event corrects. The bracket still
+			// fallback, which the next change event corrects. the bracket still
 			// closes on this path, so the breadcrumb trail does not go quiet on
 			// the failure the trail is most likely to be read for.
 			logger.warn("Failed reading the launch-time network state.", {
@@ -98,7 +98,7 @@ onlineManager.setEventListener((setOnline) => {
 	return () => subscription.remove();
 });
 
-// Native only. `setEventListener` *replaces* whatever source the manager
+// native only. `setEventListener` *replaces* whatever source the manager
 // installs for itself, so registering this on web would trade the browser's
 // working `visibilitychange` wiring for an `AppState` bridge — and the guard
 // that keeps AppState from double-driving focus there would leave the manager

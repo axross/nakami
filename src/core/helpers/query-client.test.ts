@@ -53,7 +53,7 @@ type NetworkListener = (event: NetworkStateEvent) => void;
 type AppStateListener = (status: "active" | "background") => void;
 
 /**
- * Settles every promise reaction queued so far. A `setTimeout` rather than a
+ * settles every promise reaction queued so far. a `setTimeout` rather than a
  * bare `await`: the launch-time probe's rejection travels through two chained
  * reactions, so awaiting a single microtask can resume this test between them
  * and read the `.catch` handler's effects before it has run.
@@ -65,13 +65,13 @@ async function flushPromises() {
 }
 
 /**
- * Loads `query-client` in a fresh module registry with both managers'
+ * loads `query-client` in a fresh module registry with both managers'
  * `setEventListener` stubbed, and hands back the setup function each manager
  * was registered with — or `undefined` where the module registered none.
  *
- * Registration is a module-scope side effect, so re-running it per test needs a
+ * registration is a module-scope side effect, so re-running it per test needs a
  * registry that has not already cached the module — this file's own import at
- * the top has. Stubbing `setEventListener` captures each setup while keeping
+ * the top has. stubbing `setEventListener` captures each setup while keeping
  * registration from subscribing for real, leaving the setups to be invoked
  * deliberately in the tests below.
  */
@@ -108,9 +108,9 @@ function loadQueryClientModule(platformOS: "ios" | "web" = "ios") {
 			require("~/core/helpers/logging") as typeof import("~/core/helpers/logging");
 	});
 
-	// Both modules are mocked by a factory, and Jest keeps one instance of such
+	// both modules are mocked by a factory, and Jest keeps one instance of such
 	// a mock once the outer registry has instantiated it — the import at the top
-	// of this file, whose own registration already called it. Drop that history
+	// of this file, whose own registration already called it. drop that history
 	// so each test reads back only the calls its own setup makes.
 	const logger = jest.mocked(logging.createModuleLogger("core/query-client"));
 
@@ -256,7 +256,7 @@ describe("online manager launch-time probe logging", () => {
 		onlineSetup?.(jest.fn());
 		await flushPromises();
 
-		// The breadcrumb transport reads exactly the first two arguments, so a
+		// the breadcrumb transport reads exactly the first two arguments, so a
 		// third would be written and then dropped without a trace.
 		for (const call of [
 			...jest.mocked(logger.debug).mock.calls,
@@ -273,7 +273,7 @@ describe("focus manager listener", () => {
 	it("maps app state to focus and unsubscribes on teardown", () => {
 		const { focusSetup } = loadQueryClientModule();
 		const remove = jest.fn();
-		// The spy goes on this file's own `AppState`, not one pulled from the
+		// the spy goes on this file's own `AppState`, not one pulled from the
 		// isolated registry: React Native's entry point exposes `AppState`
 		// through a lazy getter that re-`require`s on every access, so the setup
 		// — invoked here, outside `isolateModules` — resolves the outer module.

@@ -1,5 +1,5 @@
 /**
- * Flattens whatever React Native accepts as a `style` prop (an object, or an
+ * flattens whatever React Native accepts as a `style` prop (an object, or an
  * arbitrarily nested array of them) into the single resolved object the
  * renderer would apply.
  */

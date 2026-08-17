@@ -13,8 +13,8 @@ import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-gr
 import { SettingMenuGroupStaticItem } from "~/settings/components/setting-menu-group/setting-menu-group-static-item";
 
 /**
- * The signed-in Account section: the current user's email and server, plus a
- * Sign out action. Rendered only while authenticated (the parent gates it), so
+ * the signed-in Account section: the current user's email and server, plus a
+ * Sign out action. rendered only while authenticated (the parent gates it), so
  * the session is always present here.
  */
 export function SettingsAccountGroup(
@@ -72,18 +72,18 @@ export function SettingsAccountGroup(
 
 const styles = StyleSheet.create((theme) => ({
 	accountText: {
-		flexShrink: 1,
 		rowGap: theme.gap.xs,
+		flexShrink: 1,
 	},
-	// Square by `aspectRatio`, so the pill radius clamps to half the side and
+	// square by `aspectRatio`, so the pill radius clamps to half the side and
 	// draws a true circle — matching how the design kit already renders it.
 	avatar: {
 		alignItems: "center",
+		justifyContent: "center",
+		width: 36,
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.neutral.base,
 		borderRadius: theme.radius.pill,
-		justifyContent: "center",
-		width: 36,
 	},
 	email: {
 		...theme.typography.body,

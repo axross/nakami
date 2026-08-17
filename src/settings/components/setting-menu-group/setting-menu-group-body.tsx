@@ -12,9 +12,9 @@ import {
 } from "./setting-menu-group-context";
 
 /**
- * The body of a setting menu group: it stacks the rows it is given and publishes
+ * the body of a setting menu group: it stacks the rows it is given and publishes
  * each row's position, so a row rounds the right corners without its caller
- * restating where that row sits. A provider renders no host node of its own, so
+ * restating where that row sits. a provider renders no host node of its own, so
  * the rows stay direct children of this `View` and the gap between them is
  * unchanged.
  */

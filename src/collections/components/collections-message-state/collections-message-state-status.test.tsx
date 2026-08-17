@@ -10,17 +10,17 @@ import { render } from "@testing-library/react-native";
 import * as Reanimated from "react-native-reanimated";
 import { CollectionsMessageStateStatus } from "./collections-message-state-status";
 
-// The animation is not reachable through the tree — the project's reanimated
+// the animation is not reachable through the tree — the project's reanimated
 // mock (see jest.config.cjs) renders `Animated.View` as an empty fragment — so
 // these spies are the seam. `useAnimatedStyle` keeps the style factory, which
 // reads the shared value at the moment it is called, so a test can ask what the
-// dot would draw with after the effect has run. A module-level `jest.mock` of
+// dot would draw with after the effect has run. a module-level `jest.mock` of
 // reanimated would not work here: `jest/enforce-imported-globals.js` loads
 // expo-router's testing library, which mocks and requires reanimated first, so
 // the module is already resolved by the time a test file registers its own.
 const animatedStyles: (() => { opacity: number })[] = [];
 
-/** The animated style the dot would draw with, read after the effect has run. */
+/** the animated style the dot would draw with, read after the effect has run. */
 function readPulse(): { opacity: number } {
 	const factory = animatedStyles.at(-1);
 
@@ -37,7 +37,7 @@ beforeEach(() => {
 		const keep = factory as () => { opacity: number };
 		animatedStyles.push(keep);
 
-		// The project's mock resolves the hook to the plain style object the
+		// the project's mock resolves the hook to the plain style object the
 		// component hands to its view; the real hook's handle type has no
 		// counterpart under test.
 		return keep() as unknown as ReturnType<typeof Reanimated.useAnimatedStyle>;

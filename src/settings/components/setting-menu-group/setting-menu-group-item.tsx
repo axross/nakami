@@ -8,7 +8,7 @@ import {
 } from "./setting-menu-group-item-style";
 
 /**
- * An interactive row of a setting menu group. Which corners it rounds comes from
+ * an interactive row of a setting menu group. which corners it rounds comes from
  * the position its `<SettingMenuGroupBody>` publishes, never from the caller —
  * moving a row is a change to the JSX order and nothing else.
  */
@@ -45,7 +45,7 @@ const styles = StyleSheet.create((theme) => ({
 			position: getSettingMenuGroupItemPositionVariants(theme),
 		},
 	},
-	// The press feedback stays its own style rather than a `pressed` variant: the
+	// the press feedback stays its own style rather than a `pressed` variant: the
 	// render prop already hands the flag to the array, and a variant would have to
 	// be selected from the component body, which cannot see it.
 	itemPressed: {
