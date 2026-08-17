@@ -325,8 +325,12 @@ export function SignInScreen(): JSX.Element {
 				</View>
 
 				<SignInCollectionField
-					editing={editingCollection}
-					error={fieldErrors.collection}
+					// Spread as one discriminated object: the field accepts `error`
+					// only alongside `editing: true`, so the two cannot be handed over
+					// as independent props.
+					{...(editingCollection
+						? { editing: true as const, error: fieldErrors.collection }
+						: { editing: false as const })}
 					inputRef={collectionRef}
 					onBlur={() => onFieldBlur("collection")}
 					onChangeText={(next) => {

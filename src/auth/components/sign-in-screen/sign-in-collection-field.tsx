@@ -16,10 +16,13 @@ import { signInFieldLabel } from "~/auth/helpers/sign-in-form";
  * screen's error summary can focus it; the root's own `ref` stays available
  * through the spread props.
  *
- * `error` belongs to the editable input and renders beneath it. That is the
- * only state the value can be wrong in — it starts non-empty and is only ever
- * changed through this input — so a message while the field is still showing
- * plain text is not a case that arises, and no slot is kept for it.
+ * `error` belongs to the editable input and renders beneath it, and the props
+ * are discriminated on `editing` so it can only be passed alongside `editing:
+ * true`. That is the only state the value can be wrong in — it starts non-empty
+ * and is only ever changed through this input — and pinning it in the type is
+ * what stops a later change from producing a message that renders nowhere while
+ * still being counted by the summary, whose press would then focus a null ref
+ * and do nothing.
  */
 export function SignInCollectionField({
 	value,
@@ -34,13 +37,11 @@ export function SignInCollectionField({
 }: Readonly<
 	Omit<ComponentPropsWithRef<typeof View>, "children" | "onBlur"> & {
 		value: string;
-		editing: boolean;
-		error?: string;
 		inputRef?: Ref<TextInput>;
 		onEdit: () => void;
 		onChangeText: (value: string) => void;
 		onBlur?: () => void;
-	}
+	} & ({ editing: true; error?: string } | { editing: false; error?: never })
 >): JSX.Element {
 	const { theme } = useUnistyles();
 
