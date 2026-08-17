@@ -37,6 +37,17 @@ describe("describeQueryKey()", () => {
 		expect(describeQueryKey(["users"])).toBe("users");
 	});
 
+	// The boundary of that same length guard, from the other side. A guard that
+	// admitted only keys longer than the root would describe this one as
+	// `users/<the signed-in user's id>`, so the redaction is asserted here rather
+	// than left to the deeper keys above.
+	it("redacts the user id from a key that is exactly the session root", () => {
+		const described = describeQueryKey(getSessionQueryKeyRoot(USER_ID));
+
+		expect(described).toBe("users/*");
+		expect(described).not.toContain(USER_ID);
+	});
+
 	it("describes a segment that is not a string without serializing it", () => {
 		const described = describeQueryKey([
 			...getSessionQueryKeyRoot(USER_ID),
