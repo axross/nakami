@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, waitFor, within } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
-import { StyleSheet } from "react-native";
+import { AccessibilityInfo, StyleSheet, TextInput } from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
 import { createTestQueryClient } from "~/common/helpers/test-query-client";
@@ -52,6 +52,35 @@ function leaveLoginPending() {
 	jest
 		.mocked(login)
 		.mockReturnValue(new Promise<Awaited<ReturnType<typeof login>>>(() => {}));
+}
+
+// The screen announces through `AccessibilityInfo` on iOS, because the live
+// region its message components carry is Android-only. `jest-expo` runs this
+// suite as iOS, so that branch is the live one and needs no platform stub.
+// Spied once at module scope; `jest.clearAllMocks()` below resets its calls
+// between tests.
+const announceSpy = jest.spyOn(
+	AccessibilityInfo,
+	"announceForAccessibilityWithOptions",
+);
+
+/**
+ * The `testID` of the input the screen last called `focus()` on, or `undefined`
+ * when it called none.
+ *
+ * `jest-expo` mocks `TextInput` as a class whose `focus` is one shared jest
+ * mock, so each call records the instance it was made on and that instance's
+ * props carry the testID. It is the only seam that observes a programmatic
+ * focus here: the runtime's own `TextInput.State.currentlyFocusedInput()` never
+ * updates under the mock.
+ */
+function lastFocusedTestId(): string | undefined {
+	const { focus } = TextInput.prototype as unknown as {
+		focus: { mock: { instances: readonly { props?: { testID?: string } }[] } };
+	};
+	const { instances } = focus.mock;
+
+	return instances.at(-1)?.props?.testID;
 }
 
 beforeEach(() => {
@@ -147,7 +176,27 @@ describe("<SignInScreen>", () => {
 
 	// The count is a control rather than a line of text, which is what lets it
 	// send the user to the first field that is at fault.
-	it("presents the problem count as a button onto the first offending field", () => {
+	it("sends the problem count's press to the first offending input", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		const summary = getByTestId("sign-in-error-summary");
+
+		expect(summary.props.accessibilityRole).toBe("button");
+		expect(lastFocusedTestId()).toBeUndefined();
+
+		fireEvent.press(summary);
+
+		// Email and password are both blank; email is the one nearer the top.
+		expect(lastFocusedTestId()).toBe("sign-in-email");
+	});
+
+	it("switches Collection into edit mode when it is the first offending field", () => {
 		const { getByTestId } = renderSignInScreen();
 
 		fireEvent.changeText(
@@ -158,16 +207,81 @@ describe("<SignInScreen>", () => {
 		fireEvent.changeText(getByTestId("sign-in-collection-input"), "");
 		fireEvent.press(getByTestId("sign-in-submit"));
 
-		const summary = getByTestId("sign-in-error-summary");
+		fireEvent.press(getByTestId("sign-in-error-summary"));
 
-		expect(summary.props.accessibilityRole).toBe("button");
-
-		fireEvent.press(summary);
-
-		// Collection is the field nearest the top that is at fault, so the press
-		// leaves its input on screen for the focus to land in.
 		expect(getByTestId("sign-in-collection-input")).toBeTruthy();
 		expect(getByTestId("sign-in-error-collection")).toBeTruthy();
+		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
+	});
+
+	// The message components' live region is Android-only, so iOS is announced
+	// imperatively; the suite runs as iOS, which is the branch asserted here.
+	it("announces the problem count to a screen reader on press", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(announceSpy).toHaveBeenCalledWith("3 problems to fix", {
+			queue: true,
+		});
+	});
+
+	it("announces the one message when a single field is at fault", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(announceSpy).toHaveBeenCalledWith("Enter your password.", {
+			queue: true,
+		});
+	});
+
+	// Blur validation raises a message with no press behind it, so nothing else
+	// would announce it.
+	it("announces a message raised by leaving a field", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-email"), "blur");
+
+		expect(announceSpy).toHaveBeenCalledWith("Enter your email address.", {
+			queue: true,
+		});
+	});
+
+	it("does not repeat an announcement a field is already showing", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-email"), "blur");
+		fireEvent(getByTestId("sign-in-email"), "blur");
+
+		expect(announceSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it("announces the server's rejection", async () => {
+		jest
+			.mocked(login)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		await waitFor(() => {
+			expect(announceSpy).toHaveBeenCalledWith("Incorrect email or password.", {
+				queue: true,
+			});
+		});
 	});
 
 	it("flags a field when focus leaves it, without a press of Sign in", () => {

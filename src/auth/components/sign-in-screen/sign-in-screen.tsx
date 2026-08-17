@@ -80,10 +80,18 @@ function announcementFor(errors: SignInFormErrors): string | null {
  * `accessibilityLiveRegion`, which React Native implements on Android only —
  * this is the other half, and the platform guard is what stops Android from
  * announcing the same message twice.
+ *
+ * Queued rather than spoken over what is already being said. Every message here
+ * is raised by an interaction VoiceOver is itself narrating — a field losing
+ * focus, or the submit button taking it — and an unqueued announcement is
+ * clipped by that narration. `queue` is an iOS-only option, which this guard
+ * already restricts the call to.
  */
 function announce(message: string): void {
 	if (Platform.OS === "ios") {
-		AccessibilityInfo.announceForAccessibility(message);
+		AccessibilityInfo.announceForAccessibilityWithOptions(message, {
+			queue: true,
+		});
 	}
 }
 
@@ -188,10 +196,19 @@ export function SignInScreen(): JSX.Element {
 				email,
 				password,
 			});
+			const message = errors[field];
 
-			setFieldErrors((current) => ({ ...current, [field]: errors[field] }));
+			setFieldErrors((current) => ({ ...current, [field]: message }));
+
+			// Announced beside the state write rather than inside the updater,
+			// which stays pure. A message identical to the one the field is already
+			// showing is not re-announced: a second blur of an untouched field has
+			// told the user nothing they have not heard.
+			if (message !== undefined && message !== fieldErrors[field]) {
+				announce(message);
+			}
 		},
-		[serverUrl, collection, email, password],
+		[serverUrl, collection, email, password, fieldErrors],
 	);
 
 	const onSubmit = useCallback(() => {
