@@ -196,7 +196,7 @@ describe("<SignInScreen>", () => {
 		expect(lastFocusedTestId()).toBe("sign-in-email");
 	});
 
-	it("switches Collection into edit mode when it is the first offending field", () => {
+	it("focuses the Collection input when it is the first offending field", () => {
 		const { getByTestId } = renderSignInScreen();
 
 		fireEvent.changeText(

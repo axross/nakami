@@ -234,18 +234,16 @@ export function SignInScreen(): JSX.Element {
 	}, [serverUrl, collection, email, password, mutate]);
 
 	// The summary links to the first offending field rather than focusing it on
-	// press, which would open the keyboard on every failed submit. The Collection
-	// field has to be switched into edit mode before it has an input at all; its
-	// `autoFocus` covers the case where this press is what mounted it, since the
-	// ref is still empty at that point.
+	// press, which would open the keyboard on every failed submit.
+	//
+	// Every field has an input to focus by the time it can be at fault, the
+	// Collection field included: its value starts non-empty and is only ever
+	// emptied through the input the pencil reveals, so it cannot be flagged
+	// while it is still showing plain text.
 	const onSummaryPress = useCallback(() => {
 		const field = firstSignInFieldError(fieldErrors);
 		if (field === null) {
 			return;
-		}
-
-		if (field === "collection") {
-			setEditingCollection(true);
 		}
 
 		const inputRefs: Record<SignInField, RefObject<TextInput | null>> = {

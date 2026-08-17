@@ -13,8 +13,12 @@ import { signInFieldLabel } from "~/auth/helpers/sign-in-form";
  *
  * `inputRef` reaches the editable input rather than this field's root, so the
  * screen's error summary can focus it; the root's own `ref` stays available
- * through the spread props. A caller that focuses the input while the field is
- * still showing its value has to switch `editing` on in the same press.
+ * through the spread props.
+ *
+ * `error` belongs to the editable input and renders beneath it. That is the
+ * only state the value can be wrong in — it starts non-empty and is only ever
+ * changed through this input — so a message while the field is still showing
+ * plain text is not a case that arises, and no slot is kept for it.
  */
 export function SignInCollectionField({
 	value,
@@ -39,14 +43,6 @@ export function SignInCollectionField({
 >): JSX.Element {
 	const { theme } = useUnistyles();
 
-	// Rendered from one place but placed in both branches, so the message stays
-	// directly under whatever the field is currently showing rather than below
-	// the hint that follows the input.
-	const message =
-		error === undefined ? null : (
-			<SignInFieldError message={error} testID="sign-in-error-collection" />
-		);
-
 	return (
 		<View {...props} style={[styles.field, style]}>
 			<Text style={styles.label}>Collection</Text>
@@ -67,30 +63,32 @@ export function SignInCollectionField({
 						testID="sign-in-collection-input"
 						value={value}
 					/>
-					{message}
+					{error === undefined ? null : (
+						<SignInFieldError
+							message={error}
+							testID="sign-in-error-collection"
+						/>
+					)}
 					<Text style={styles.hint}>
 						The slug of your Payload auth collection.
 					</Text>
 				</>
 			) : (
-				<>
-					<View style={styles.valueRow}>
-						<Text style={styles.value} testID="sign-in-collection-value">
-							{value}
-						</Text>
-						<Pressable
-							accessibilityLabel="Edit collection"
-							accessibilityRole="button"
-							hitSlop={8}
-							onPress={onEdit}
-							style={styles.editButton}
-							testID="sign-in-collection-edit"
-						>
-							<Pencil color={theme.colors.text.accent.base} size={20} />
-						</Pressable>
-					</View>
-					{message}
-				</>
+				<View style={styles.valueRow}>
+					<Text style={styles.value} testID="sign-in-collection-value">
+						{value}
+					</Text>
+					<Pressable
+						accessibilityLabel="Edit collection"
+						accessibilityRole="button"
+						hitSlop={8}
+						onPress={onEdit}
+						style={styles.editButton}
+						testID="sign-in-collection-edit"
+					>
+						<Pencil color={theme.colors.text.accent.base} size={20} />
+					</Pressable>
+				</View>
 			)}
 		</View>
 	);
