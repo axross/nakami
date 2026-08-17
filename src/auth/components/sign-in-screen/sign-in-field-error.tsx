@@ -1,6 +1,6 @@
 import { CircleAlert } from "lucide-react-native";
 import type { ComponentPropsWithRef, JSX } from "react";
-import { Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
@@ -13,6 +13,14 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
  * in React Native, so the screen pairs it with an `AccessibilityInfo`
  * announcement on iOS — neither platform is left silent, and neither
  * double-announces.
+ *
+ * On iOS this surface is hidden from the accessibility tree, because the
+ * message reaches VoiceOver twice otherwise: `signInFieldLabel` has already
+ * folded it into the input's own name, and this row sits immediately after that
+ * input. `aria-describedby`'s node on the web is referenced rather than also
+ * traversed; the substitute this repository uses in its place has no such
+ * exemption, so it is applied here. Android keeps the element, because the live
+ * region above is its only channel.
  */
 export function SignInFieldError({
 	message,
@@ -25,6 +33,7 @@ export function SignInFieldError({
 
 	return (
 		<View
+			accessibilityElementsHidden={Platform.OS === "ios"}
 			accessibilityLiveRegion="polite"
 			{...props}
 			style={[styles.row, style]}

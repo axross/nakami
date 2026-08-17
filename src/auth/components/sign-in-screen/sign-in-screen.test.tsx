@@ -100,6 +100,13 @@ function lastFocusedTestId(): string | undefined {
 		.at(-1);
 }
 
+// A field-message row is out of the iOS accessibility tree on purpose — its
+// message is already in the input's own name, and this suite runs as iOS. Every
+// query for one therefore has to opt into hidden elements: without this a
+// `queryBy*` would match nothing and pass whether the message was cleared or
+// merely hidden.
+const HIDDEN = { includeHiddenElements: true } as const;
+
 beforeEach(() => {
 	jest.clearAllMocks();
 	jest.mocked(readLastServerUrl).mockResolvedValue(null);
@@ -128,8 +135,9 @@ describe("<SignInScreen>", () => {
 		fireEvent.press(getByTestId("sign-in-submit"));
 
 		expect(
-			within(getByTestId("sign-in-error-server-url")).getByText(
+			within(getByTestId("sign-in-error-server-url", HIDDEN)).getByText(
 				"Enter a valid server URL, e.g. https://cms.example.com.",
+				HIDDEN,
 			),
 		).toBeTruthy();
 		expect(login).not.toHaveBeenCalled();
@@ -154,8 +162,9 @@ describe("<SignInScreen>", () => {
 		fireEvent.press(getByTestId("sign-in-submit"));
 
 		expect(
-			within(getByTestId("sign-in-error-email")).getByText(
+			within(getByTestId("sign-in-error-email", HIDDEN)).getByText(
 				"Enter your email address.",
+				HIDDEN,
 			),
 		).toBeTruthy();
 		expect(login).not.toHaveBeenCalled();
@@ -171,9 +180,9 @@ describe("<SignInScreen>", () => {
 				"3 problems to fix",
 			),
 		).toBeTruthy();
-		expect(getByTestId("sign-in-error-server-url")).toBeTruthy();
-		expect(getByTestId("sign-in-error-email")).toBeTruthy();
-		expect(getByTestId("sign-in-error-password")).toBeTruthy();
+		expect(getByTestId("sign-in-error-server-url", HIDDEN)).toBeTruthy();
+		expect(getByTestId("sign-in-error-email", HIDDEN)).toBeTruthy();
+		expect(getByTestId("sign-in-error-password", HIDDEN)).toBeTruthy();
 		expect(login).not.toHaveBeenCalled();
 	});
 
@@ -187,7 +196,7 @@ describe("<SignInScreen>", () => {
 		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
 		fireEvent.press(getByTestId("sign-in-submit"));
 
-		expect(getByTestId("sign-in-error-password")).toBeTruthy();
+		expect(getByTestId("sign-in-error-password", HIDDEN)).toBeTruthy();
 		expect(queryByTestId("sign-in-error-summary")).toBeNull();
 	});
 
@@ -227,7 +236,7 @@ describe("<SignInScreen>", () => {
 		fireEvent.press(getByTestId("sign-in-error-summary"));
 
 		expect(getByTestId("sign-in-collection-input")).toBeTruthy();
-		expect(getByTestId("sign-in-error-collection")).toBeTruthy();
+		expect(getByTestId("sign-in-error-collection", HIDDEN)).toBeTruthy();
 		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
 	});
 
@@ -312,8 +321,27 @@ describe("<SignInScreen>", () => {
 			getByTestId("sign-in-error-summary").props.accessibilityLiveRegion,
 		).toBe("polite");
 		expect(
-			getByTestId("sign-in-error-email").props.accessibilityLiveRegion,
+			getByTestId("sign-in-error-email", HIDDEN).props.accessibilityLiveRegion,
 		).toBe("polite");
+	});
+
+	// The message is already in the input's own accessible name, and this row is
+	// the next element after that input — so on iOS it would otherwise be read
+	// twice in one pass. The banners are not hidden: the count is a control a
+	// reader has to be able to reach, and neither its text nor the server's
+	// message is duplicated anywhere else.
+	it("hides a field message from VoiceOver, which already has it in the input's name", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(
+			getByTestId("sign-in-error-email", HIDDEN).props
+				.accessibilityElementsHidden,
+		).toBe(true);
+		expect(
+			getByTestId("sign-in-error-summary").props.accessibilityElementsHidden,
+		).toBeFalsy();
 	});
 
 	it("wraps the server's rejection in a polite live region", async () => {
@@ -411,29 +439,30 @@ describe("<SignInScreen>", () => {
 	it("flags a field when focus leaves it, without a press of Sign in", () => {
 		const { getByTestId, queryByTestId } = renderSignInScreen();
 
-		expect(queryByTestId("sign-in-error-email")).toBeNull();
+		expect(queryByTestId("sign-in-error-email", HIDDEN)).toBeNull();
 
 		fireEvent(getByTestId("sign-in-email"), "blur");
 
 		expect(
-			within(getByTestId("sign-in-error-email")).getByText(
+			within(getByTestId("sign-in-error-email", HIDDEN)).getByText(
 				"Enter your email address.",
+				HIDDEN,
 			),
 		).toBeTruthy();
 		// Blurring one field says nothing about the others.
-		expect(queryByTestId("sign-in-error-password")).toBeNull();
+		expect(queryByTestId("sign-in-error-password", HIDDEN)).toBeNull();
 	});
 
 	it("clears a field's message as it is corrected, leaving the others standing", () => {
 		const { getByTestId, queryByTestId } = renderSignInScreen();
 
 		fireEvent.press(getByTestId("sign-in-submit"));
-		expect(getByTestId("sign-in-error-email")).toBeTruthy();
+		expect(getByTestId("sign-in-error-email", HIDDEN)).toBeTruthy();
 
 		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
 
-		expect(queryByTestId("sign-in-error-email")).toBeNull();
-		expect(getByTestId("sign-in-error-password")).toBeTruthy();
+		expect(queryByTestId("sign-in-error-email", HIDDEN)).toBeNull();
+		expect(getByTestId("sign-in-error-password", HIDDEN)).toBeTruthy();
 		expect(
 			within(getByTestId("sign-in-error-summary")).getByText(
 				"2 problems to fix",
