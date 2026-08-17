@@ -23,6 +23,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
 import { SignInErrorSummary } from "~/auth/components/sign-in-screen/sign-in-error-summary";
 import { SignInFieldError } from "~/auth/components/sign-in-screen/sign-in-field-error";
+import { signInInputStyle } from "~/auth/components/sign-in-screen/sign-in-input-style";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
 import {
@@ -296,10 +297,7 @@ export function SignInScreen(): JSX.Element {
 						placeholder="https://cms.example.com"
 						placeholderTextColor={theme.colors.text.neutral.base}
 						ref={serverUrlRef}
-						style={[
-							styles.input,
-							fieldErrors.serverUrl !== undefined && styles.inputFlagged,
-						]}
+						style={styles.input(fieldErrors.serverUrl !== undefined)}
 						testID="sign-in-server-url"
 						value={serverUrl}
 					/>
@@ -339,10 +337,7 @@ export function SignInScreen(): JSX.Element {
 						placeholder="you@example.com"
 						placeholderTextColor={theme.colors.text.neutral.base}
 						ref={emailRef}
-						style={[
-							styles.input,
-							fieldErrors.email !== undefined && styles.inputFlagged,
-						]}
+						style={styles.input(fieldErrors.email !== undefined)}
 						testID="sign-in-email"
 						value={email}
 					/>
@@ -371,10 +366,7 @@ export function SignInScreen(): JSX.Element {
 						placeholderTextColor={theme.colors.text.neutral.base}
 						ref={passwordRef}
 						secureTextEntry
-						style={[
-							styles.input,
-							fieldErrors.password !== undefined && styles.inputFlagged,
-						]}
+						style={styles.input(fieldErrors.password !== undefined)}
 						testID="sign-in-password"
 						value={password}
 					/>
@@ -437,23 +429,10 @@ const styles = StyleSheet.create((theme, rt) => ({
 	field: {
 		rowGap: theme.gap.xs,
 	},
-	input: {
-		...theme.typography.body,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
-		borderWidth: theme.borderWidth.hairline,
-		color: theme.colors.text.neutral.intense,
-		minHeight: 48,
-		paddingHorizontal: theme.gap.sm,
-	},
-	// The flagged input's border and fill are the error's second and third cues,
-	// beside the message's own icon — the treatment has to survive a reader who
-	// cannot tell the destructive tone from the neutral one.
-	inputFlagged: {
-		backgroundColor: theme.colors.foundation.destructive.subtle,
-		borderColor: theme.colors.border.destructive.base,
-	},
+	// The flagged surface is the error's second and third cues, beside the
+	// message's own icon, and is shared with the Collection field's input so one
+	// retune reaches all four.
+	input: (flagged: boolean) => signInInputStyle(theme, flagged),
 	label: {
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,

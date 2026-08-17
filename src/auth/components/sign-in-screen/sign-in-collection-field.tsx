@@ -3,6 +3,7 @@ import type { ComponentPropsWithRef, JSX, Ref } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInFieldError } from "~/auth/components/sign-in-screen/sign-in-field-error";
+import { signInInputStyle } from "~/auth/components/sign-in-screen/sign-in-input-style";
 import { signInFieldLabel } from "~/auth/helpers/sign-in-form";
 
 /**
@@ -59,7 +60,7 @@ export function SignInCollectionField({
 						placeholder="users"
 						placeholderTextColor={theme.colors.text.neutral.base}
 						ref={inputRef}
-						style={[styles.input, error !== undefined && styles.inputFlagged]}
+						style={styles.input(error !== undefined)}
 						testID="sign-in-collection-input"
 						value={value}
 					/>
@@ -108,20 +109,9 @@ const styles = StyleSheet.create((theme) => ({
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
 	},
-	input: {
-		...theme.typography.body,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
-		borderWidth: theme.borderWidth.hairline,
-		color: theme.colors.text.neutral.intense,
-		minHeight: 48,
-		paddingHorizontal: theme.gap.sm,
-	},
-	inputFlagged: {
-		backgroundColor: theme.colors.foundation.destructive.subtle,
-		borderColor: theme.colors.border.destructive.base,
-	},
+	// Shared with the screen's own inputs, so the flagged treatment has one
+	// definition rather than one per stylesheet.
+	input: (flagged: boolean) => signInInputStyle(theme, flagged),
 	label: {
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
