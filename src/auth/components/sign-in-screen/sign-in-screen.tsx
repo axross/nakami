@@ -421,6 +421,7 @@ export function SignInScreen(): JSX.Element {
 						<ActivityIndicator
 							color={theme.colors.text.onAccent}
 							size="small"
+							testID="sign-in-submit-spinner"
 						/>
 					) : null}
 					<Text style={styles.submitLabel}>

@@ -44,9 +44,10 @@ afterEach(() => {
 
 describe("<SettingsAccountGroup>", () => {
 	it("offers Sign out while no sign-out is in flight", () => {
-		const { getByTestId, getByText } = renderAccountGroup();
+		const { getByTestId, getByText, queryByTestId } = renderAccountGroup();
 
 		expect(getByText("Sign out")).toBeTruthy();
+		expect(queryByTestId("settings-sign-out-spinner")).toBeNull();
 		expect(
 			getByTestId("settings-sign-out-row").props.accessibilityState,
 		).toEqual({ disabled: false });
@@ -67,6 +68,8 @@ describe("<SettingsAccountGroup>", () => {
 		const row = getByTestId("settings-sign-out-row");
 
 		expect(row.props.accessibilityState).toEqual({ disabled: true });
+		// The spinner stands in for the `LogOut` icon while the row is disabled.
+		expect(getByTestId("settings-sign-out-spinner")).toBeTruthy();
 		expect(StyleSheet.flatten(row.props.style).backgroundColor).toBe(
 			themes.light.colors.surface.neutral.base,
 		);

@@ -65,6 +65,7 @@ export function SettingsAccountGroup(
 							<ActivityIndicator
 								color={theme.colors.text.destructive.base}
 								size="small"
+								testID="settings-sign-out-spinner"
 							/>
 						</View>
 					) : (

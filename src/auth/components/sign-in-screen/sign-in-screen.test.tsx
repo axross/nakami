@@ -544,7 +544,12 @@ describe("<SignInScreen>", () => {
 	it("disables Sign in only while a submission is in flight", async () => {
 		leaveLoginPending();
 
-		const { getByTestId, getByText } = renderSignInScreen();
+		const { getByTestId, getByText, queryByTestId } = renderSignInScreen();
+
+		// A spinner beside the working-state label is what makes the disabled
+		// button read as working rather than as blocked, so it is only there once
+		// something is in flight.
+		expect(queryByTestId("sign-in-submit-spinner")).toBeNull();
 
 		fireEvent.changeText(
 			getByTestId("sign-in-server-url"),
@@ -560,6 +565,7 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-submit").props.accessibilityState).toEqual({
 			disabled: true,
 		});
+		expect(getByTestId("sign-in-submit-spinner")).toBeTruthy();
 	});
 
 	it("maps an auth rejection to a friendly message in the form-level slot", async () => {
