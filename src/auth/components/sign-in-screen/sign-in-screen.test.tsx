@@ -258,6 +258,45 @@ describe("<SignInScreen>", () => {
 		);
 	});
 
+	// The live region is the whole of the Android half of the announcement
+	// design — `announce()` is guarded to iOS, and this suite runs as iOS, so
+	// without these assertions the prop could be dropped from every surface and
+	// nothing here or in CI would notice.
+	it("wraps its validation messages in a polite live region", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(
+			getByTestId("sign-in-error-summary").props.accessibilityLiveRegion,
+		).toBe("polite");
+		expect(
+			getByTestId("sign-in-error-email").props.accessibilityLiveRegion,
+		).toBe("polite");
+	});
+
+	it("wraps the server's rejection in a polite live region", async () => {
+		jest
+			.mocked(login)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		await waitFor(() => {
+			expect(getByTestId("sign-in-error").props.accessibilityLiveRegion).toBe(
+				"polite",
+			);
+		});
+	});
+
 	// The message components' live region is Android-only, so iOS is announced
 	// imperatively; the suite runs as iOS, which is the branch asserted here.
 	it("announces the problem count to a screen reader on press", () => {
