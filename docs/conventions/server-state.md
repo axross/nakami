@@ -47,6 +47,16 @@ and where a failed query is classified and reported to the error tracker. A seco
 client would opt whatever used it out of both, and would do so invisibly — the screen
 still works, and only the errors stop arriving.
 
-A unit test is the exception and MUST build its own throwaway client through
-`createTestQueryClient` in `src/common/helpers/test-query-client.ts`, which disables
-retries and gives each test a fresh cache, so cache state never leaks between tests.
+A test that needs a working client is the exception and MUST build its own throwaway
+one through `createTestQueryClient` in `src/common/helpers/test-query-client.ts`, which
+disables retries and gives each test a fresh cache, so cache state never leaks between
+tests. A test MAY read the application client's own cache configuration — as
+`src/core/helpers/query-client.test.ts` reads `getQueryCache().config.onError` to
+assert which function a failed query is reported through — and MUST NOT drive a query
+through that instance or mutate anything it holds. The rule exists to keep one test's
+cache state out of another's, and reading one configuration property creates no such
+state and shares none; anything past a read needs a working client, which puts the test
+back under the sentence above. This knowingly diverges from the installed capability's
+unqualified "never reuse the application's singleton" MUST and rests on that read-only
+limit; [agent-skills.md](./agent-skills.md) records the decision and the boundary
+holding it up.

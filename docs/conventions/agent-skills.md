@@ -39,6 +39,41 @@ whereas this convention arrived with the change that adopted it. The deviation i
 standing, accepted violation of that MUST — revisit it if the app ever holds more than
 one session at a time.
 
+## A test may read the app query client's cache configuration
+
+The installed `tanstack-query-development` capability's
+[testing.md](../../.claude/skills/tanstack-query-development/references/testing.md)
+states a MUST:
+
+> MUST construct a fresh client per test and never reuse the application's singleton,
+> so cache state cannot leak between tests.
+
+[server-state.md](./server-state.md) carried that rule unqualified and now scopes it to
+a test that needs a working client. Such a test still MUST build a throwaway one
+through `createTestQueryClient`, and no test may drive a query through the application's
+instance or mutate what it holds. What the narrower rule permits is a read:
+`src/core/helpers/query-client.test.ts` asserts that the app's cache is wired to
+`reportQueryFailure` by reading `queryClient.getQueryCache().config.onError`, and
+nothing else in that file reaches for the instance.
+
+The difference rests on the reason both texts give for the rule — cache state must not
+leak between tests. Reading one property of a cache's configuration creates no cache
+state and shares none, so the leak the MUST prevents cannot happen through it. The
+capability's wording is unqualified because it is written for the test it has in mind,
+one that runs a query and asserts what comes back, and that test is bound here exactly
+as it is upstream. The permitted assertion needs no client at all: the reporting
+decision it checks was extracted into a plain function the other tests call directly,
+which leaves the wiring itself as the one thing only the application's client can
+answer for.
+
+The installed copy is deliberately left alone. It is generated from
+[`axross/skills`](https://github.com/axross/skills), so the next reinstall discards a
+hand-edit while, until then, that edit reads as a rule the library agrees with. Whether
+the gap generalizes enough to raise upstream is a separate decision needing the human's
+go-ahead; this entry stands either way. Anything a test does to the application's
+client beyond reading its cache configuration is a fresh finding rather than an
+extension of this entry.
+
 ## The Payload HTTP client sits in `src/common/`
 
 `src/common/helpers/payload-client.ts` is this app's Payload HTTP client, and its
