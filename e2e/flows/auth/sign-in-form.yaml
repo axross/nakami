@@ -1,5 +1,5 @@
 appId: app.axross.nakami
-name: auth-sign-in-form — the sign-in form toggles Collection and reports an unreachable server
+name: auth-sign-in-form — the sign-in form names its blank fields, toggles Collection, and reports an unreachable server
 tags:
   - scenario:auth.sign-in-form
   - area:auth
@@ -11,6 +11,21 @@ tags:
     id: "welcome-sign-in-button"
 - assertVisible:
     id: "sign-in-screen"
+# Sign in stays pressable with the form blank: the press is what explains what
+# is missing, field by field, rather than the button greying itself out.
+#
+# The per-field messages are asserted through the flagged inputs' accessible
+# names rather than through the message rows' own ids. Those rows are out of the
+# iOS accessibility tree on purpose — the message is already in the input's name,
+# and reading both would say it twice — so an id assertion on one would pass on
+# Android and fail on iOS. The name is the same string on both platforms, and it
+# is the mechanism worth asserting.
+- tapOn:
+    id: "sign-in-submit"
+- assertVisible:
+    id: "sign-in-error-summary"
+- assertVisible: "Email, Enter your email address."
+- assertVisible: "Password, Enter your password."
 # Collection starts as plain text with an edit affordance, then becomes an input.
 - assertVisible:
     id: "sign-in-collection-value"

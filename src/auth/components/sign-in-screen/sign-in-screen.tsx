@@ -1,19 +1,36 @@
 import { useMutation } from "@tanstack/react-query";
-import { type JSX, useCallback, useEffect, useRef, useState } from "react";
+import { CircleAlert, TriangleAlert } from "lucide-react-native";
 import {
+	type JSX,
+	type RefObject,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
+import {
+	AccessibilityInfo,
+	ActivityIndicator,
 	KeyboardAvoidingView,
 	Platform,
 	Pressable,
 	ScrollView,
 	Text,
-	TextInput,
-	View,
+	type TextInput,
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
+import { SignInErrorSummary } from "~/auth/components/sign-in-screen/sign-in-error-summary";
+import { SignInTextField } from "~/auth/components/sign-in-screen/sign-in-text-field";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
-import { normalizeServerUrl } from "~/auth/helpers/server-url";
+import {
+	countSignInFieldErrors,
+	firstSignInFieldError,
+	type SignInField,
+	type SignInFormErrors,
+	validateSignInForm,
+} from "~/auth/helpers/sign-in-form";
 import { getSignInMutationOptions } from "~/auth/mutations/sign-in-mutation";
 
 const DEFAULT_COLLECTION = "users";
@@ -32,6 +49,52 @@ function messageForError(error: unknown): string {
 }
 
 /**
+ * the error summary's copy. written once because the banner and the screen
+ * reader announcement both say it, and a reader who hears one and then reaches
+ * the other should not find two different sentences.
+ */
+function problemCountMessage(count: number): string {
+	return `${count} problems to fix`;
+}
+
+/**
+ * what a screen reader is told after a press that produced messages: the
+ * problem count when the summary is on screen, and otherwise the one message
+ * that is, since announcing "1 problems to fix" would say less than the message
+ * itself does.
+ */
+function announcementFor(errors: SignInFormErrors): string | null {
+	const count = countSignInFieldErrors(errors);
+	if (count > 1) {
+		return problemCountMessage(count);
+	}
+
+	const field = firstSignInFieldError(errors);
+
+	return field === null ? null : (errors[field] ?? null);
+}
+
+/**
+ * announces a message to a screen reader on iOS. the error components carry
+ * `accessibilityLiveRegion`, which React Native implements on Android only —
+ * this is the other half, and the platform guard is what stops Android from
+ * announcing the same message twice.
+ *
+ * queued rather than spoken over what is already being said. every message here
+ * is raised by an interaction VoiceOver is itself narrating — a field losing
+ * focus, or the submit button taking it — and an unqueued announcement is
+ * clipped by that narration. `queue` is an iOS-only option, which this guard
+ * already restricts the call to.
+ */
+function announce(message: string): void {
+	if (Platform.OS === "ios") {
+		AccessibilityInfo.announceForAccessibilityWithOptions(message, {
+			queue: true,
+		});
+	}
+}
+
+/**
  * the Payload sign-in form: server URL, auth collection (defaulted), email, and
  * password. the Server URL field pre-fills on mount with the last successful
  * sign-in's endpoint (kept in the keychain) so a returning user need not retype
@@ -39,6 +102,12 @@ function messageForError(error: unknown): string {
  * flips the app to authenticated — the root navigator then swaps this
  * signed-out stack for the tab UI. failures surface inline without leaving the
  * screen.
+ *
+ * Sign in stays pressable whenever no submission is in flight: the press is
+ * what validates the form, so a blank field is answered with a message naming
+ * it rather than with a control the user cannot press. field-level messages
+ * render beside their input; the server's own rejection belongs to the form and
+ * keeps the shared slot above the button.
  */
 export function SignInScreen(): JSX.Element {
 	const { theme } = useUnistyles();
@@ -51,18 +120,103 @@ export function SignInScreen(): JSX.Element {
 	const [editingCollection, setEditingCollection] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const [fieldErrors, setFieldErrors] = useState<SignInFormErrors>({});
 	const serverUrlEdited = useRef(false);
+
+	const serverUrlRef = useRef<TextInput>(null);
+	const collectionRef = useRef<TextInput>(null);
+	const emailRef = useRef<TextInput>(null);
+	const passwordRef = useRef<TextInput>(null);
+
+	const serverErrorMessage = error === null ? null : messageForError(error);
+
+	// the server's rejection is announced the same way a validation failure is;
+	// the banner's own live region covers Android.
+	useEffect(() => {
+		if (serverErrorMessage !== null) {
+			announce(serverErrorMessage);
+		}
+	}, [serverErrorMessage]);
+
+	// editing a field drops the server's rejection — it was about the values the
+	// user has just changed. a field already showing a message is re-checked
+	// against the new value, so the message clears the moment it stops being
+	// true; a quiet field stays quiet until it is blurred or the form submitted.
+	const onFieldChange = useCallback(
+		(field: SignInField, next: string) => {
+			setFieldErrors((current) => {
+				if (current[field] === undefined) {
+					return current;
+				}
+
+				const { errors } = validateSignInForm({
+					serverUrl,
+					collection,
+					email,
+					password,
+					[field]: next,
+				});
+
+				return { ...current, [field]: errors[field] };
+			});
+
+			if (error !== null) {
+				reset();
+			}
+		},
+		[serverUrl, collection, email, password, error, reset],
+	);
+
+	// leaving a field checks that one field, so an invalid value is reported
+	// where the user left it rather than waiting for a press of Sign in. every
+	// other field's message is left exactly as it stands.
+	const onFieldBlur = useCallback(
+		(field: SignInField) => {
+			const { errors } = validateSignInForm({
+				serverUrl,
+				collection,
+				email,
+				password,
+			});
+			const message = errors[field];
+
+			setFieldErrors((current) => ({ ...current, [field]: message }));
+
+			// announced beside the state write rather than inside the updater,
+			// which stays pure. a message identical to the one the field is already
+			// showing is not re-announced: a second blur of an untouched field has
+			// told the user nothing they have not heard.
+			if (message !== undefined && message !== fieldErrors[field]) {
+				announce(message);
+			}
+		},
+		[serverUrl, collection, email, password, fieldErrors],
+	);
+
+	// held in a ref so the mount effect below can take the same path a keystroke
+	// does without listing a callback that changes on every render — which would
+	// re-read the keychain each time the user types.
+	const onFieldChangeRef = useRef(onFieldChange);
+	useEffect(() => {
+		onFieldChangeRef.current = onFieldChange;
+	});
 
 	// pre-fill the server URL with the last successful sign-in's endpoint, but
 	// never overwrite input the user has already started typing before this
 	// keychain read resolves.
+	//
+	// the arriving value goes through the same clearing path an edit does. press
+	// Sign in, or blur the field, before this read settles and the field would
+	// otherwise end up holding a valid URL while still carrying "Enter your
+	// server URL." — with the flagged border, the composed accessible name, and a
+	// place in the problem count — a message contradicting the value beside it.
 	useEffect(() => {
 		let active = true;
 
 		void readLastServerUrl().then((stored) => {
 			if (active && stored !== null && !serverUrlEdited.current) {
 				setServerUrl(stored);
+				onFieldChangeRef.current("serverUrl", stored);
 			}
 		});
 
@@ -71,50 +225,51 @@ export function SignInScreen(): JSX.Element {
 		};
 	}, []);
 
-	// clears any prior error as soon as the user changes an input.
-	const clearErrors = useCallback(() => {
-		setValidationError(null);
-		if (error) {
-			reset();
-		}
-	}, [error, reset]);
-
 	const onSubmit = useCallback(() => {
-		const normalizedUrl = normalizeServerUrl(serverUrl);
-		if (normalizedUrl === null) {
-			setValidationError(
-				"Enter a valid server URL, e.g. https://cms.example.com.",
-			);
-			return;
-		}
-
-		const collectionSlug = collection.trim();
-		if (collectionSlug === "") {
-			setValidationError("Enter the auth collection slug.");
-			return;
-		}
-
-		const trimmedEmail = email.trim();
-		if (trimmedEmail === "" || password === "") {
-			setValidationError("Enter your email and password.");
-			return;
-		}
-
-		setValidationError(null);
-		mutate({
-			serverUrl: normalizedUrl,
-			collectionSlug,
-			email: trimmedEmail,
+		const { errors, values } = validateSignInForm({
+			serverUrl,
+			collection,
+			email,
 			password,
 		});
+
+		setFieldErrors(errors);
+
+		if (values === null) {
+			const announcement = announcementFor(errors);
+			if (announcement !== null) {
+				announce(announcement);
+			}
+			return;
+		}
+
+		mutate(values);
 	}, [serverUrl, collection, email, password, mutate]);
 
-	const message = validationError ?? (error ? messageForError(error) : null);
-	const canSubmit =
-		!isPending &&
-		serverUrl.trim() !== "" &&
-		email.trim() !== "" &&
-		password !== "";
+	// the summary links to the first offending field rather than focusing it on
+	// press, which would open the keyboard on every failed submit.
+	//
+	// every field has an input to focus by the time it can be at fault, the
+	// Collection field included: its value starts non-empty and is only ever
+	// emptied through the input the pencil reveals, so it cannot be flagged
+	// while it is still showing plain text.
+	const onSummaryPress = useCallback(() => {
+		const field = firstSignInFieldError(fieldErrors);
+		if (field === null) {
+			return;
+		}
+
+		const inputRefs: Record<SignInField, RefObject<TextInput | null>> = {
+			serverUrl: serverUrlRef,
+			collection: collectionRef,
+			email: emailRef,
+			password: passwordRef,
+		};
+
+		inputRefs[field].current?.focus();
+	}, [fieldErrors]);
+
+	const errorCount = countSignInFieldErrors(fieldErrors);
 
 	return (
 		<KeyboardAvoidingView
@@ -126,91 +281,113 @@ export function SignInScreen(): JSX.Element {
 				keyboardShouldPersistTaps="handled"
 				testID="sign-in-screen"
 			>
-				<View style={styles.field}>
-					<Text style={styles.label}>Server URL</Text>
-					<TextInput
-						accessibilityLabel="Server URL"
-						autoCapitalize="none"
-						autoCorrect={false}
-						inputMode="url"
-						onChangeText={(next) => {
-							serverUrlEdited.current = true;
-							setServerUrl(next);
-							clearErrors();
-						}}
-						placeholder="https://cms.example.com"
-						placeholderTextColor={theme.colors.text.neutral.base}
-						style={styles.input}
-						testID="sign-in-server-url"
-						value={serverUrl}
+				{errorCount > 1 ? (
+					<SignInErrorSummary
+						icon={TriangleAlert}
+						message={problemCountMessage(errorCount)}
+						onPress={onSummaryPress}
+						testID="sign-in-error-summary"
 					/>
-				</View>
+				) : null}
+
+				<SignInTextField
+					autoCapitalize="none"
+					autoCorrect={false}
+					error={fieldErrors.serverUrl}
+					errorTestID="sign-in-error-server-url"
+					inputMode="url"
+					inputRef={serverUrlRef}
+					label="Server URL"
+					onBlur={() => onFieldBlur("serverUrl")}
+					onChangeText={(next) => {
+						serverUrlEdited.current = true;
+						setServerUrl(next);
+						onFieldChange("serverUrl", next);
+					}}
+					placeholder="https://cms.example.com"
+					testID="sign-in-server-url"
+					value={serverUrl}
+				/>
 
 				<SignInCollectionField
-					editing={editingCollection}
+					// spread as one discriminated object: the field accepts `error`
+					// only alongside `editing: true`, so the two cannot be handed over
+					// as independent props.
+					{...(editingCollection
+						? { editing: true as const, error: fieldErrors.collection }
+						: { editing: false as const })}
+					inputRef={collectionRef}
+					onBlur={() => onFieldBlur("collection")}
 					onChangeText={(next) => {
 						setCollection(next);
-						clearErrors();
+						onFieldChange("collection", next);
 					}}
 					onEdit={() => setEditingCollection(true)}
 					value={collection}
 				/>
 
-				<View style={styles.field}>
-					<Text style={styles.label}>Email</Text>
-					<TextInput
-						accessibilityLabel="Email"
-						autoCapitalize="none"
-						autoCorrect={false}
-						inputMode="email"
-						onChangeText={(next) => {
-							setEmail(next);
-							clearErrors();
-						}}
-						placeholder="you@example.com"
-						placeholderTextColor={theme.colors.text.neutral.base}
-						style={styles.input}
-						testID="sign-in-email"
-						value={email}
-					/>
-				</View>
+				<SignInTextField
+					autoCapitalize="none"
+					autoCorrect={false}
+					error={fieldErrors.email}
+					errorTestID="sign-in-error-email"
+					inputMode="email"
+					inputRef={emailRef}
+					label="Email"
+					onBlur={() => onFieldBlur("email")}
+					onChangeText={(next) => {
+						setEmail(next);
+						onFieldChange("email", next);
+					}}
+					placeholder="you@example.com"
+					testID="sign-in-email"
+					value={email}
+				/>
 
-				<View style={styles.field}>
-					<Text style={styles.label}>Password</Text>
-					<TextInput
-						accessibilityLabel="Password"
-						autoCapitalize="none"
-						autoCorrect={false}
-						onChangeText={(next) => {
-							setPassword(next);
-							clearErrors();
-						}}
-						placeholderTextColor={theme.colors.text.neutral.base}
-						secureTextEntry
-						style={styles.input}
-						testID="sign-in-password"
-						value={password}
-					/>
-				</View>
+				<SignInTextField
+					autoCapitalize="none"
+					autoCorrect={false}
+					error={fieldErrors.password}
+					errorTestID="sign-in-error-password"
+					inputRef={passwordRef}
+					label="Password"
+					onBlur={() => onFieldBlur("password")}
+					onChangeText={(next) => {
+						setPassword(next);
+						onFieldChange("password", next);
+					}}
+					secureTextEntry
+					testID="sign-in-password"
+					value={password}
+				/>
 
-				{message !== null ? (
-					<Text style={styles.error} testID="sign-in-error">
-						{message}
-					</Text>
-				) : null}
+				{serverErrorMessage === null ? null : (
+					<SignInErrorSummary
+						icon={CircleAlert}
+						message={serverErrorMessage}
+						testID="sign-in-error"
+					/>
+				)}
 
 				<Pressable
 					accessibilityRole="button"
-					accessibilityState={{ disabled: !canSubmit }}
-					disabled={!canSubmit}
+					accessibilityState={{ disabled: isPending }}
+					disabled={isPending}
 					onPress={onSubmit}
 					style={({ pressed }) => [
 						styles.submit,
-						!canSubmit && styles.submitDisabled,
+						isPending && styles.submitDisabled,
 						pressed && styles.submitPressed,
 					]}
 					testID="sign-in-submit"
 				>
+					{isPending ? (
+						<ActivityIndicator
+							color={theme.colors.text.onAccent}
+							size="small"
+							testID="sign-in-submit-spinner"
+						/>
+					) : null}
 					<Text style={styles.submitLabel}>
 						{isPending ? "Signing in…" : "Sign in"}
 					</Text>
@@ -233,38 +410,22 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
-	error: {
-		...theme.typography.caption,
-		color: theme.colors.text.destructive.base,
-	},
-	field: {
-		rowGap: theme.gap.xs,
-	},
-	input: {
-		...theme.typography.body,
-		minHeight: 48,
-		paddingHorizontal: theme.gap.sm,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		color: theme.colors.text.neutral.intense,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderWidth: theme.borderWidth.hairline,
-		borderRadius: theme.radius.md,
-	},
-	label: {
-		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
-	},
 	root: {
 		flex: 1,
 		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	submit: {
+		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
+		columnGap: theme.gap.xs,
 		minHeight: 50,
 		backgroundColor: theme.colors.solid.accent.base,
 		borderRadius: theme.radius.md,
 	},
+	// reserved for a submission already in flight, which is the only state this
+	// button is disabled in; the spinner and the working-state label beside it
+	// are what keep that reading as working rather than as blocked.
 	submitDisabled: {
 		opacity: 0.5,
 	},

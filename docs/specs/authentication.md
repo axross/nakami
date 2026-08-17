@@ -35,21 +35,43 @@ naming what the value is.
 Email and password are ordinary fields, the password masked. None of the four
 fields auto-capitalises or auto-corrects.
 
-The submit action stays disabled until the server URL, the email, and the
-password are all non-empty, and reads as pending while a sign-in is in flight.
+The submit action stays pressable whenever no sign-in is in flight — pressing it
+is what validates the form, so a blank field is answered by a message naming it
+rather than by a control that cannot be pressed. It is disabled only while a
+sign-in is in flight, and then reads as working: a spinner beside a pending
+label.
 
 ## What the form checks before asking the server
 
 Submitting validates locally first, and a failure here is stated inline with no
 request made:
 
-- The server URL must be a well-formed `http` or `https` URL. Surrounding
-  whitespace and trailing slashes are stripped first, and it is the stripped
-  value that is sent and remembered. Plain `http` is accepted, because a
-  self-hosted Payload instance is often plain HTTP on a local network while it
-  is being set up.
+- The server URL must be present and must be a well-formed `http` or `https`
+  URL — a blank field and a malformed one are told apart. Surrounding whitespace
+  and trailing slashes are stripped first, and it is the stripped value that is
+  sent and remembered. Plain `http` is accepted, because a self-hosted Payload
+  instance is often plain HTTP on a local network while it is being set up.
 - The auth collection slug must not be empty once trimmed.
-- The email and the password must not be empty; the email is trimmed.
+- The email must not be empty once trimmed; the password must not be empty, and
+  is never trimmed.
+
+Every field is checked on every press rather than only up to the first failure,
+so one press says everything that is wrong. Each message renders beside the
+field it concerns and carries an icon as well as its colour, so colour is never
+the only cue. When more than one field is at fault the messages are preceded by
+a count of them, which is itself a control and leads to the first field at
+fault.
+
+What a screen reader is told follows that same split: the count when more than
+one field is at fault, and the message itself when only one is — announcing "1
+problems to fix" would say less than the message does. A reader sent to a field
+by the count is not left guessing either, because every flagged field carries
+its own message in its name.
+
+A field is also checked when focus leaves it, without waiting for a press. A
+field already showing a message is re-checked as its value is edited, so the
+message clears as soon as it stops being true; the other fields' messages are
+untouched, and nothing already typed is lost by a failed submit.
 
 ## Signing in
 
@@ -106,16 +128,22 @@ email and the server the session belongs to. It ends the session on the server
 where it can, and clears the local session either way — an unreachable server
 does not keep someone signed in. The app returns to the welcome screen.
 
+While a sign-out is in flight the row says so rather than only going quiet: it
+takes a heavier fill, its icon becomes a spinner, and its label reads as
+working.
+
 Signing out deliberately leaves the remembered server URL behind, so the next
 sign-in still pre-fills it.
 
 ## When a server rejects or cannot be reached
 
-A failed sign-in keeps the person on the form with an inline message under the
-fields, and the message distinguishes three outcomes: the server rejected the
-credentials, the server could not be reached at all, or the server answered with
-something unexpected. A request left unanswered for fifteen seconds counts as
-unreachable. Changing any field clears the message.
+A failed sign-in keeps the person on the form with an inline message above the
+submit action — the server's answer belongs to the form rather than to any one
+field, which is why it sits apart from the field-level messages above it. The
+message distinguishes three outcomes: the server rejected the credentials, the
+server could not be reached at all, or the server answered with something
+unexpected. A request left unanswered for fifteen seconds counts as unreachable.
+Changing any field clears the message.
 
 That same distinction runs through the whole domain, and it decides what happens
 to a session rather than only what is displayed. A rejection is the server

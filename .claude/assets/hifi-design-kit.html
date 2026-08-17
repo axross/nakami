@@ -110,10 +110,17 @@
   .device, .el-surface {
     /* light — mirror src/unistyles.ts: neutral=Slate, destructive=Ruby, accent=Teal.
        --accent-d is the accent TEXT/tint role (text.accent.base); solid fills
-       use --accent-solid; muted accent grounds use --accent-surface. */
+       use --accent-solid; muted accent grounds use --accent-surface.
+       The destructive tone carries the same five roles the neutral one does:
+       --danger-d is text.destructive.base, and the four below are the grounds
+       and lines an error treatment is drawn from. */
     --bg: #fcfcfd; --elev: #f9f9fb; --surface: #f0f0f3; --txt: #1c2024; --txt2: #60646c;
     --line-d: #d9d9e0; --accent-d: #008573; --accent-solid: #12a594; --accent-surface: #e0f8f3;
     --accentC: #ffffff; --danger-d: #ca244d;
+    --danger-found: #fff7f8;  /* foundation.destructive.subtle — flagged field fill */
+    --danger-surf: #feeaed;   /* surface.destructive.base — banner fill */
+    --danger-line-s: #f8bfc8; /* border.destructive.subtle — banner border */
+    --danger-line: #efacb8;   /* border.destructive.base — flagged field border */
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-pill: 999px; --tabInactive: #8b8d98;
 
     /* theme.borderWidth.* — `hairline` is StyleSheet.hairlineWidth on device
@@ -151,6 +158,8 @@
     --bg: #111113; --elev: #18191b; --surface: #212225; --txt: #edeef0; --txt2: #b0b4ba;
     --line-d: #363a3f; --accent-d: #0bd8b6; --accent-solid: #12a594; --accent-surface: #0d2d2a;
     --accentC: #ffffff; --danger-d: #ff949d;
+    --danger-found: #1e1517; --danger-surf: #3a141e;
+    --danger-line-s: #6f2539; --danger-line: #883447;
     --tabInactive: #696e77;
   }
   .device {
@@ -192,10 +201,26 @@
   .input { height: 46px; border: var(--bw-hairline) solid var(--line-d); border-radius: var(--r-md); background: var(--elev); display: flex; align-items: center; padding: 0 13px; font: var(--t-body); color: var(--txt); }  /* typography.body */
   .input.ph { color: var(--txt2); }
   .input .dotpw { letter-spacing: 3px; }
-  .form .err, .el-surface .err { display: flex; align-items: center; gap: 8px; color: var(--danger-d); font: var(--t-caption); margin-top: -4px; border: 0; }  /* typography.caption */
+  .form .err, .el-surface .err { display: flex; align-items: flex-start; gap: 8px; color: var(--danger-d); font: var(--t-caption); margin-top: -4px; border: 0; }  /* typography.caption */
   .form .err svg, .el-surface .err svg { width: 16px; height: 16px; flex: none; }
+  /* A message nested inside its own field clears the label's own gap instead of
+     the form's, which the negative margin above is tuned for. */
+  .form .field .err { margin-top: 6px; }
+  /* The filled destructive banner — a form-level error, and the pressable
+     problem-count summary when it carries a chevron. Fill, border, and text are
+     surface.destructive.base / border.destructive.subtle / text.destructive.base.
+     The 48px floor is the touch target a control needs, not a look: iOS asks
+     44pt and Material 48dp, and one stylesheet serves both platforms, so the
+     larger of the two is what the app sets. */
+  .banner { display: flex; align-items: center; gap: 8px; min-height: 48px; background: var(--danger-surf); border: var(--bw-hairline) solid var(--danger-line-s); border-radius: var(--r-md); padding: 8px 12px; color: var(--danger-d); font: var(--t-caption); }  /* typography.caption */
+  .banner svg { width: 16px; height: 16px; flex: none; }
+  .banner .grow { flex: 1; }
+  .banner .chev::after { content: "\203A"; font-size: 17px; line-height: 1; }
   .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-solid); color: var(--accentC); font: var(--t-heading); display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }  /* typography.heading */
-  .submit.busy { opacity: 0.75; }
+  /* The app dips the in-flight submit button to 0.5 (`styles.submitDisabled` in
+     sign-in-screen.tsx); the spinner and working-state label beside it are what
+     keep that reading as working rather than as blocked. */
+  .submit.busy { opacity: 0.5; }
   .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45); border-top-color: #fff; }
 
   .settings { padding: 20px 0; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
@@ -233,9 +258,12 @@
   .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font: var(--t-heading); }  /* typography.heading */
   .el-btn.primary { background: var(--accent-solid); color: var(--accentC); }
   .el-btn.secondary { background: transparent; color: var(--accent-d); border: var(--bw-hairline) solid var(--line-d); }
-  .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.75; }
+  .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.5; }  /* same dip as .submit.busy — one control, one number */
   .input.focus { border-color: var(--accent-solid); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-solid) 30%, transparent); }
-  .input.error { border-color: var(--danger-d); }
+  /* A flagged field takes the destructive border AND the tinted destructive
+     ground, so the error survives a reader who cannot tell the two text tones
+     apart — colour is never the only cue. */
+  .input.error { border-color: var(--danger-line); background: var(--danger-found); }
   .caret { width: 1.5px; height: 20px; background: var(--accent-d); margin-left: 1px; display: inline-block; }
 
   /* The loading skeletons' pulse, on the two motion tokens both of the app's
@@ -285,6 +313,9 @@
     <symbol id="i-logout" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2M9 12h11m0 0-3-3m3 3-3 3"/></symbol>
     <symbol id="i-mark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3 4 6.8v6.4c0 4 3.4 6.6 8 7.8 4.6-1.2 8-3.8 8-7.8V6.8L12 3Z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M9.5 12.2h5M12 9.7v5"/></symbol>
     <symbol id="i-warn" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 4 2.8 20h18.4L12 4Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 10v4m0 3h.01"/></symbol>
+    <!-- Lucide CircleAlert / TriangleAlert stand-ins: the app marks a field or
+         server message with the circle and a problem count with the triangle. -->
+    <symbol id="i-circle-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 8v4m0 4h.01"/></symbol>
   </svg>
 
   <section class="theme-band">
@@ -327,10 +358,15 @@
     ${statusbar}
     <div class="nav"><span class="back"></span><span class="navtitle">Form</span><span class="navspace"></span></div>
     <div class="content"><div class="form">
+      ${variant==='error'
+        ? `<div class="banner"><svg><use href="#i-warn"/></svg><span class="grow">2 problems to fix</span><span class="chev"></span></div>`
+        : ``}
       <div class="field"><label>Label one</label><div class="input">value</div></div>
       <div class="field"><label>Label two</label><div class="input ph">placeholder</div></div>
-      <div class="field"><label>Password</label><div class="input"><span class="dotpw">••••••••</span></div></div>
-      ${variant==='error' ? `<div class="err"><svg><use href="#i-warn"/></svg>An inline error message.</div>` : ``}
+      <div class="field"><label>Password</label>
+        <div class="input${variant==='error' ? ' error' : ''}"><span class="dotpw">••••••••</span></div>
+        ${variant==='error' ? `<div class="err"><svg><use href="#i-circle-alert"/></svg>An inline error message.</div>` : ``}
+      </div>
       ${variant==='busy'
         ? `<div class="submit busy"><span class="spinner"></span>Submitting…</div>`
         : `<div class="submit">Submit</div>`}
@@ -386,9 +422,13 @@
       <div class="input ph">you@example.com</div>
       <div class="input focus">users<span class="caret"></span></div>
     </div>
-    <div class="el-spec"><span class="el-lbl">Text input — error</span>
+    <div class="el-spec"><span class="el-lbl">Text input — flagged, with its message</span>
       <div class="input error"><span class="dotpw">••••••••</span></div>
-      <div class="err"><svg><use href="#i-warn"/></svg>Incorrect email or password.</div>
+      <div class="err"><svg><use href="#i-circle-alert"/></svg>Enter your password.</div>
+    </div>
+    <div class="el-spec"><span class="el-lbl">Destructive banner — form-level error · pressable problem count</span>
+      <div class="banner"><svg><use href="#i-circle-alert"/></svg><span class="grow">Incorrect email or password.</span></div>
+      <div class="banner"><svg><use href="#i-warn"/></svg><span class="grow">2 problems to fix</span><span class="chev"></span></div>
     </div>
     <div class="el-spec"><span class="el-lbl">List item</span>
       <div class="grp"><div class="rows">

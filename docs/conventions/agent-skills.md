@@ -379,6 +379,116 @@ mutation check's own cases as its test list. Until it lands, the absence of thes
 tests MUST NOT be raised as a fresh finding — and this entry MUST be removed by the
 change that adds them, rather than left behind describing a gap that has closed.
 
+## A form error reaches assistive technology by two substituted mechanisms
+
+The installed `high-fidelity-ui-design` capability's
+[interaction-states-and-feedback.md](../../.claude/skills/high-fidelity-ui-design/references/interaction-states-and-feedback.md)
+names the web mechanism directly:
+
+> MUST render each validation message inline beside its offending field, wire it via
+> aria-describedby, and precede multi-error forms with a top summary that states the
+> error count and links to the first field.
+
+Two halves of that are unreachable in React Native, and the sign-in form substitutes a
+mechanism for each. Both substitutions are deliberate, and the line numbers below are
+from React Native 0.86's `node_modules/react-native/Libraries/Components/View/ViewAccessibility.d.ts`.
+
+**There is no `aria-describedby`, and its nearest relative is Android-only.** The prop
+does not exist in that file at all — no `describedby` under any casing. The association
+props that do exist are `accessibilityLabelledBy` (line 227) and `aria-labelledby`
+(line 235), and both carry `@platform android` in the comment immediately above them
+(lines 225 and 233). Pairing a flagged input with its separate message node would
+therefore leave VoiceOver reading nothing but "Email, text field" — which is exactly the
+outcome the rule exists to prevent, reached by following it as literally as the platform
+allows. `signInFieldLabel` in `src/auth/helpers/sign-in-form.ts` folds the message into
+the input's own `accessibilityLabel` instead, so a flagged Email field is named "Email,
+Enter your email address." on both platforms. The visible label and the visible message
+stay separate nodes, so nothing about the sighted rendering changes.
+
+**`accessibilityLiveRegion` is Android-only too**, at line 245, with `@platform android`
+at line 240. It is what announces a message the user did not navigate to — the count
+after a failed submit, a message raised by leaving a field, the server's rejection — and
+on its own it would leave iOS silent for every one of them. The screen pairs it with
+`AccessibilityInfo.announceForAccessibilityWithOptions(message, { queue: true })`,
+guarded to `Platform.OS === "ios"`. The guard is what stops Android announcing twice, and
+the queueing is what stops the utterance being clipped by the focus change that raised
+it.
+
+Folding the message into the name has one cost, and it is paid rather than left
+implicit: on iOS the message would otherwise be read twice, once as part of the input's
+name and again as the sibling message node. `SignInFieldError` therefore sets
+`accessibilityElementsHidden` (line 291, `@platform ios`) on iOS only, which keeps
+Android's live region — its sole channel — intact.
+
+Both substitutions end, rather than being re-argued, if React Native gains a
+cross-platform description association. Until then a flagged input MUST carry its
+message in its accessible name, and a message surface MUST carry both the live region
+and the iOS announcement rather than either alone.
+
+## Three styles keep a boolean as a dynamic-function argument
+
+The installed `react-component-styling` capability's
+[unistyles.md](../../.claude/skills/react-component-styling/references/unistyles.md)
+states a MUST:
+
+> MUST express a closed set of options — a variant, an intent, a size, a boolean
+> state — as variants and compound variants, not as a conditional style array or a
+> chain of dynamic-function arguments.
+
+Most of this repository follows it — `sign-in-text-field.tsx` is a component per
+input precisely so each can select its own `flagged` variant, and a setting menu
+row selects both its `position` and its `disabled` state. Three styles cannot, and
+each is blocked by the same two facts about Unistyles 3.3.0 rather than by
+preference.
+
+**`useVariants` selects once per component body.** It is typed
+`useVariants: (variants: ExtractVariantNames<T>) => void` on the stylesheet
+(`node_modules/react-native-unistyles/src/types/stylesheet.ts:84`) and the rule's
+own fourth clause requires it be called under the rules of hooks. A component
+rendering several elements of one style with different values therefore cannot
+express them, because it gets one selection for all of them.
+
+**`pressed` is only readable inside the render prop.** React Native supplies it to
+`Pressable`'s `style={({ pressed }) => …}` callback, which is not a component body,
+so no hook may be called there. Unistyles ships its own `Pressable` with a
+`variants` prop, but the native implementation destructures it and never uses it
+(`node_modules/react-native-unistyles/src/components/native/Pressable.native.tsx:27`)
+— it is a web-only affordance, and it takes a caller-supplied static record rather
+than the live press state in any case. Expressing `pressed` as a variant would mean
+lifting it into component state through `onPressIn`/`onPressOut`, which changes how
+these components handle presses; that is a behaviour change, and it is not one this
+rule asks for.
+
+| Style | Argument | Why it stays |
+| --- | --- | --- |
+| `collection-list-item.tsx:106` `row` | `pressed` | `pressed` |
+| `collections-message-state.tsx:63` `button` | `pressed` | `pressed` |
+| `collection-list-skeleton.tsx:120` `row` | `divided` | rendered through `ROW_WIDTHS.map(…)`, so the value differs per row within one body |
+
+`setting-menu-group-item.tsx` shows the third shape a `pressed` style can take and
+is **not** a deviation: its `item` is a static style carrying `position` and
+`disabled` variant groups, and the press feedback is a separate `itemPressed` style
+the render prop selects from the array. Nothing there is a dynamic function, so the
+rule's first clause is satisfied and only its own comment records why `pressed`
+stays outside the variant groups.
+
+Two neighbouring styles look similar and are **not** deviations:
+`collection-records-skeleton.tsx:141` and `collection-list-skeleton.tsx:109` both
+take a width, which the same rule's next clause requires stay a dynamic function.
+
+The two `pressed` styles convert the moment Unistyles offers a press state a
+component body can read, or its native `Pressable` honours the `variants` prop it
+already accepts. The skeleton row converts when its rows become a component of
+their own, which is worth doing for its own reasons rather than for this rule.
+
+**One cost of following the rule is worth knowing before extending it.** The jest
+mock strips `variants` and `compoundVariants` from every stylesheet and stubs
+`useVariants` to a no-op (`node_modules/react-native-unistyles/src/mocks.ts:218-219`),
+so a variant's values never reach the rendered tree under test. A converted style's
+colours cannot be asserted at all; only the selection can, by spying on
+`useVariants`. Converting a style therefore trades a test that checks what is drawn
+for one that checks what was asked for.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this

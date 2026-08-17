@@ -23,7 +23,7 @@ without losing what a flow has to assert.
 | ---------------------- | ----------------------------------------------------------------------- | ----------- | -------- |
 | `app.launch`           | Cold start reaches the welcome screen                                   | app         | must     |
 | `auth.signed-out`      | Signed out, the welcome screen offers sign-in and shows no tab bar      | auth        | must     |
-| `auth.sign-in-form`    | The sign-in form toggles Collection and reports an unreachable server   | auth        | must     |
+| `auth.sign-in-form`    | Blank fields are named on press, Collection toggles, an unreachable server errors | auth  | must     |
 | `auth.session`         | Signing in mounts the tab UI, and Sign out returns to the welcome screen | auth       | should   |
 | `auth.last-server-url` | Reopening sign-in pre-fills the last-used server URL                    | auth        | should   |
 | `tabs.navigation`      | The bottom tabs reach Home, Collections, and Settings                   | tabs        | should   |
@@ -56,9 +56,10 @@ tab bar.
 
 ### `auth.sign-in-form`
 
-From the welcome screen, the sign-in screen opens with its fields, the Collection
-value toggles to an editable input, and an unreachable server surfaces an inline
-error.
+From the welcome screen, the sign-in screen opens with its fields, pressing Sign in
+with the form blank names each missing field under a count of the problems, the
+Collection value toggles to an editable input, and an unreachable server surfaces
+an inline error.
 
 ### `auth.session`
 
