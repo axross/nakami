@@ -58,9 +58,15 @@ request made:
 Every field is checked on every press rather than only up to the first failure,
 so one press says everything that is wrong. Each message renders beside the
 field it concerns and carries an icon as well as its colour, so colour is never
-the only cue, and it is announced to a screen reader. When more than one field
-is at fault the messages are preceded by a count of them, which is itself a
-control and leads to the first field at fault.
+the only cue. When more than one field is at fault the messages are preceded by
+a count of them, which is itself a control and leads to the first field at
+fault.
+
+What a screen reader is told follows that same split: the count when more than
+one field is at fault, and the message itself when only one is — announcing "1
+problems to fix" would say less than the message does. A reader sent to a field
+by the count is not left guessing either, because every flagged field carries
+its own message in its name.
 
 A field is also checked when focus leaves it, without waiting for a press. A
 field already showing a message is re-checked as its value is edited, so the

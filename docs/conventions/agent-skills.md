@@ -308,6 +308,52 @@ yet. A change that unlocks orientation MUST re-derive the pairing rather than in
 it, and that is the point at which raising it upstream on
 [`axross/skills`](https://github.com/axross/skills) becomes worth the human's go-ahead.
 
+## A form error reaches assistive technology by two substituted mechanisms
+
+The installed `high-fidelity-ui-design` capability's
+[interaction-states-and-feedback.md](../../.claude/skills/high-fidelity-ui-design/references/interaction-states-and-feedback.md)
+names the web mechanism directly:
+
+> MUST render each validation message inline beside its offending field, wire it via
+> aria-describedby, and precede multi-error forms with a top summary that states the
+> error count and links to the first field.
+
+Two halves of that are unreachable in React Native, and the sign-in form substitutes a
+mechanism for each. Both substitutions are deliberate, and the line numbers below are
+from React Native 0.86's `node_modules/react-native/Libraries/Components/View/ViewAccessibility.d.ts`.
+
+**There is no `aria-describedby`, and its nearest relative is Android-only.** The prop
+does not exist in that file at all — no `describedby` under any casing. The association
+props that do exist are `accessibilityLabelledBy` (line 227) and `aria-labelledby`
+(line 235), and both carry `@platform android` in the comment immediately above them
+(lines 225 and 233). Pairing a flagged input with its separate message node would
+therefore leave VoiceOver reading nothing but "Email, text field" — which is exactly the
+outcome the rule exists to prevent, reached by following it as literally as the platform
+allows. `signInFieldLabel` in `src/auth/helpers/sign-in-form.ts` folds the message into
+the input's own `accessibilityLabel` instead, so a flagged Email field is named "Email,
+Enter your email address." on both platforms. The visible label and the visible message
+stay separate nodes, so nothing about the sighted rendering changes.
+
+**`accessibilityLiveRegion` is Android-only too**, at line 245, with `@platform android`
+at line 240. It is what announces a message the user did not navigate to — the count
+after a failed submit, a message raised by leaving a field, the server's rejection — and
+on its own it would leave iOS silent for every one of them. The screen pairs it with
+`AccessibilityInfo.announceForAccessibilityWithOptions(message, { queue: true })`,
+guarded to `Platform.OS === "ios"`. The guard is what stops Android announcing twice, and
+the queueing is what stops the utterance being clipped by the focus change that raised
+it.
+
+Folding the message into the name has one cost, and it is paid rather than left
+implicit: on iOS the message would otherwise be read twice, once as part of the input's
+name and again as the sibling message node. `SignInFieldError` therefore sets
+`accessibilityElementsHidden` (line 291, `@platform ios`) on iOS only, which keeps
+Android's live region — its sole channel — intact.
+
+Both substitutions end, rather than being re-argued, if React Native gains a
+cross-platform description association. Until then a flagged input MUST carry its
+message in its accessible name, and a message surface MUST carry both the live region
+and the iOS announcement rather than either alone.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this
