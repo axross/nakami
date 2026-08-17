@@ -62,13 +62,18 @@ it in.
 Three exceptions are ratified, and none of them generalises — a new upward or
 cross-feature import is a violation, not a precedent.
 
-`src/core/helpers/query-client.ts` MAY import `PayloadRequestError` from
-`src/common/helpers/payload-client.ts`, so that a failed query can be classified before
-it is reported. That client stays in `src/common/`: it encodes none of this
-application's configuration, and it is not one of the singletons the app is wired from.
-The crossing is therefore permitted rather than a debt to be paid off — see
-[agent-skills.md](./agent-skills.md) for what that placement rests on and where a
-reviewer could reasonably differ.
+`src/core/helpers/query-client.ts` and its colocated test MAY import
+`PayloadRequestError` from `src/common/helpers/payload-client.ts`, and the query-key
+root and describer from `src/common/helpers/session-query-key.ts`, so that a failed
+query can be classified and described before it is reported. Both modules stay in
+`src/common/`. The content test above puts `session-query-key.ts` there on both halves:
+it encodes no configuration of this application and is not one of the singletons the app
+is wired from, and it carries no domain vocabulary either — neither signature names a
+domain type, and the `"users"` literal is a fixed query-key namespace rather than a
+Collection slug, since the auth collection's own slug varies per session and arrives at
+sign-in. [agent-skills.md](./agent-skills.md) records what the Payload client's own
+placement rests on. The crossing is therefore permitted rather than a debt to be paid
+off.
 
 `src/collections/` and `src/settings/` MAY import `src/auth/`'s session surface —
 `stores/auth-store`, `models/session`, and `mutations/sign-out-mutation` — because that
