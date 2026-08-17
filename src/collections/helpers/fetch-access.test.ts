@@ -27,7 +27,7 @@ describe("fetchAccess()", () => {
 			}),
 		});
 
-		// Trailing slash on the server URL is normalized away.
+		// trailing slash on the server URL is normalized away.
 		const access = await fetchAccess("https://cms.example.com/", "jwt-token");
 
 		expect(access.collections.posts?.read).toEqual({ permission: true });

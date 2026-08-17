@@ -31,15 +31,15 @@ describe("<WelcomeScreen>", () => {
 		expect(screen.getByTestId("sign-in-destination")).toBeTruthy();
 	});
 
-	// This screen has no header and no tab bar, so it owns all four edges — the
+	// this screen has no header and no tab bar, so it owns all four edges — the
 	// vertical pair from its own stylesheet, the horizontal pair from
 	// `MessageState`. Unistyles' jest mock reports zero insets, so this is the
 	// zero-inset device: every edge has to fall back to its design gutter
 	// instead of collapsing to the raw inset.
 	//
-	// What this cannot see: at zero insets the vertical override resolves to the
+	// what this cannot see: at zero insets the vertical override resolves to the
 	// same 24 as the base `MessageState` gutter it overrides, so a screen that
-	// stopped passing `style` would still pass here. That the override reaches
+	// stopped passing `style` would still pass here. that the override reaches
 	// the notch is the manual on-device check, not this one.
 	it("keeps a gutter on all four edges when the runtime reports no insets", () => {
 		renderRouter(
@@ -57,9 +57,9 @@ describe("<WelcomeScreen>", () => {
 		expect(root.paddingEnd).toBe(themes.light.gap.lg);
 	});
 
-	// The assertion above cannot see the override, so this one pins the wiring
+	// the assertion above cannot see the override, so this one pins the wiring
 	// instead of the value: that this screen passes a vertical pair down at all.
-	// Without it, deleting `style={styles.screen}` removes the only thing giving
+	// without it, deleting `style={styles.screen}` removes the only thing giving
 	// the welcome screen its owned top and bottom edges, and every other test
 	// stays green — `MessageState`'s own gutter answers with the same 24.
 	it("passes its own vertical pair down to MessageState", () => {

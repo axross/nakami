@@ -4,12 +4,12 @@ import { z } from "zod";
 import { CollectionRecordsScreen } from "~/collections/components/collection-records-screen/collection-records-screen";
 import { humanizeSlug } from "~/collections/helpers/humanize-slug";
 
-// Deep-link params are untrusted; validate before use.
+// deep-link params are untrusted; validate before use.
 const paramsSchema = z.object({ slug: z.string().min(1) });
 
 /**
- * Validates the deep-linked `slug` param and renders the collection's record
- * list, titling the stack header with its humanized name. An invalid slug
+ * validates the deep-linked `slug` param and renders the collection's record
+ * list, titling the stack header with its humanized name. an invalid slug
  * renders the screen with an empty slug, which surfaces the query's error state.
  */
 export default function CollectionRecordsRoute(): JSX.Element {

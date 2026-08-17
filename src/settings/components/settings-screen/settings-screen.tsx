@@ -45,7 +45,6 @@ export function SettingsScreen(): JSX.Element {
 				<SettingMenuGroupBody>
 					<SettingMenuGroupItem
 						accessibilityRole="button"
-						first
 						onPress={onFeedbackPress}
 						testID="settings-feedback-row"
 					>
@@ -57,7 +56,6 @@ export function SettingsScreen(): JSX.Element {
 					<Link asChild href="/(tabs)/settings/licenses">
 						<SettingMenuGroupItem
 							accessibilityRole="link"
-							last
 							testID="settings-license-row"
 						>
 							<SettingMenuGroupItemIcon icon={FileText} />
@@ -75,8 +73,6 @@ export function SettingsScreen(): JSX.Element {
 					<SettingMenuGroupBody>
 						<SettingMenuGroupItem
 							accessibilityRole="button"
-							first
-							last
 							onPress={onOpenDevMenuPress}
 							testID="settings-open-dev-menu-row"
 						>
@@ -103,14 +99,14 @@ export function SettingsScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the scrolled content,
 	// not on the `ScrollView`, which would inset its scroll indicators and leave
 	// the rows stopping short of the screen edge.
 	//
-	// The horizontal value is the bare inset rather than `Math.max(inset,
+	// the horizontal value is the bare inset rather than `Math.max(inset,
 	// gutter)`, which every other surface here uses: this container has no
-	// horizontal gutter of its own. Its children carry it — `SettingMenuGroupBody`,
+	// horizontal gutter of its own. its children carry it — `SettingMenuGroupBody`,
 	// `SettingMenuGroupHeading`, and the two paragraphs below each set
 	// `paddingHorizontal: theme.gap.md` — so flooring the inset here would add a
 	// second gutter on top of theirs.
@@ -118,24 +114,24 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// `paddingBottom` is new: without it the last row sat flush against the tab
 	// bar.
 	content: {
-		paddingBottom: theme.gap.lg,
-		paddingEnd: rt.insets.right,
-		paddingStart: rt.insets.left,
-		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.lg,
+		paddingTop: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingStart: rt.insets.left,
+		paddingEnd: rt.insets.right,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	technicalDetails: {
 		...theme.typography.code,
-		color: theme.colors.text.neutral.base,
 		paddingHorizontal: theme.gap.md,
+		color: theme.colors.text.neutral.base,
 	},
 	disclaimer: {
 		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
 		paddingHorizontal: theme.gap.md,
+		color: theme.colors.text.neutral.base,
 	},
 }));

@@ -129,7 +129,7 @@ fallback, never the clearance the change exists to produce — that is the manua
 on-device pass. And each guard has to flatten an already-rendered style array itself,
 because Unistyles' own `flatten` mock returns its argument untouched: most import
 React Native's `StyleSheet` for that, against Unistyles' usual rule, while the three
-component suites use the local `resolveStyle` helper their neighbours already defined.
+component suites use the shared `resolveStyle` helper in `src/common/test-helpers/`.
 That rule governs the stylesheet-declaration path, which none of these tests touch.
 
 ## A scrolling screen insets its content, not its container

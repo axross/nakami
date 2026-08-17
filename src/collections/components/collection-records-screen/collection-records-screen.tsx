@@ -8,10 +8,11 @@ import { CollectionRecordCard } from "~/collections/components/collection-record
 import { CollectionRecordsSkeleton } from "~/collections/components/collection-records-skeleton/collection-records-skeleton";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
 import { describeLoadError } from "~/collections/helpers/describe-collections-error";
+import { describeOfflineLoad } from "~/collections/helpers/describe-collections-offline";
 import type { CollectionRecord } from "~/collections/models/record";
 import { getCollectionRecordsInfiniteQueryOptions } from "~/collections/queries/collection-records-query";
 
-// Subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
+// subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
 // retryability — is shared with the collection list).
 const RECORDS_LOAD_ERROR = {
 	accessTitle: "Can't access records",
@@ -19,6 +20,11 @@ const RECORDS_LOAD_ERROR = {
 		"Your account doesn't have permission to view this collection's records.",
 	genericSubtitle: "Something went wrong loading records. Please try again.",
 } as const;
+
+// the subject-specific half of the offline surface; its title, status line, and
+// icon are shared with the collection list.
+const RECORDS_OFFLINE_SUBTITLE =
+	"Records will load as soon as you're back online.";
 
 function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
 	return (
@@ -29,11 +35,11 @@ function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
 }
 
 /**
- * A collection's records: the screen a Collections row opens. Renders a loading
- * skeleton, a failure-aware error state (permission failures get calm, retry-less
- * copy; connectivity/unexpected failures offer a retry), an empty state, or the
- * paginated card feed — appending the next page on scroll. Rows are read-only;
- * browsing into a single record is a follow-up.
+ * a collection's records: the screen a Collections row opens. renders an offline
+ * state, a loading skeleton, a failure-aware error state (permission failures
+ * get calm, retry-less copy; connectivity/unexpected failures offer a retry), an
+ * empty state, or the paginated card feed — appending the next page on scroll.
+ * rows are read-only; browsing into a single record is a follow-up.
  */
 export function CollectionRecordsScreen({
 	slug,
@@ -43,6 +49,7 @@ export function CollectionRecordsScreen({
 	const {
 		data,
 		isPending,
+		fetchStatus,
 		isError,
 		error,
 		refetch,
@@ -58,7 +65,24 @@ export function CollectionRecordsScreen({
 	});
 
 	let content: JSX.Element;
-	if (isPending) {
+	// ahead of the skeleton on purpose. with no connection the first page pauses
+	// rather than failing, so the query stays `pending` with nothing cached and
+	// the skeleton below would pulse indefinitely with nothing on its way. a feed
+	// that already holds records is past `pending` and keeps showing them.
+	if (isPending && fetchStatus === "paused") {
+		const copy = describeOfflineLoad(RECORDS_OFFLINE_SUBTITLE);
+		content = (
+			<CollectionsMessageState
+				icon={copy.icon}
+				iconColor={theme.colors.text.neutral.base}
+				status={copy.status}
+				style={styles.messageState}
+				subtitle={copy.subtitle}
+				testID="collection-records-offline"
+				title={copy.title}
+			/>
+		);
+	} else if (isPending) {
 		content = <CollectionRecordsSkeleton />;
 	} else if (isError) {
 		const copy = describeLoadError(error, RECORDS_LOAD_ERROR);
@@ -140,14 +164,14 @@ export function CollectionRecordsScreen({
 const styles = StyleSheet.create((theme, rt) => ({
 	count: {
 		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
-		paddingBottom: theme.gap.xs,
 		paddingHorizontal: theme.gap.xs,
+		paddingBottom: theme.gap.xs,
+		color: theme.colors.text.neutral.base,
 	},
 	footer: {
 		paddingVertical: theme.gap.md,
 	},
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the feed's content
 	// container, not on the list itself, which would inset its scroll indicators
 	// and leave the cards stopping short of the screen edge.
@@ -155,18 +179,18 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// when the records arrive.
 	list: {
 		gap: theme.gap.sm,
-		paddingBottom: theme.gap.md,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingTop: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
-	// The message state claims no space of its own, so this screen — which gives
+	// the message state claims no space of its own, so this screen — which gives
 	// it the whole surface — supplies the fill.
 	messageState: {
 		flex: 1,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 }));

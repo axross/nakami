@@ -5,10 +5,10 @@ import { View } from "react-native";
 import { SettingMenuGroupItemIcon } from "./setting-menu-group-item-icon";
 
 /**
- * Stands in for the caller's Lucide icon. The suite maps `lucide-react-native`
+ * stands in for the caller's Lucide icon. the suite maps `lucide-react-native`
  * to a stub that renders an empty fragment and drops every prop it is given
  * (see `jest/lucide-react-native-mock.js`), so a real icon can never show what
- * reached it — a dropped rest object would leave the whole suite green. This
+ * reached it — a dropped rest object would leave the whole suite green. this
  * records the props it receives on a host node instead.
  */
 const ProbeIcon = ((props: Readonly<Record<string, unknown>>) => (
@@ -16,7 +16,7 @@ const ProbeIcon = ((props: Readonly<Record<string, unknown>>) => (
 )) as unknown as LucideIcon;
 
 describe("<SettingMenuGroupItemIcon>", () => {
-	// The part's only visible job is placing an icon, which is exactly the case
+	// the part's only visible job is placing an icon, which is exactly the case
 	// the composition rules name as still owing its caller a props spread.
 	it("forwards an undeclared prop to the icon it renders", () => {
 		const { getByTestId } = render(
@@ -32,7 +32,7 @@ describe("<SettingMenuGroupItemIcon>", () => {
 		);
 	});
 
-	// Colour and size are set before the spread, so the menu's own look is the
+	// colour and size are set before the spread, so the menu's own look is the
 	// default rather than a value a caller cannot get past.
 	it("defaults the icon's colour and size, and lets a caller override them", () => {
 		const { getByTestId } = render(

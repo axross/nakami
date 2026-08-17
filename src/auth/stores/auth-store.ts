@@ -15,7 +15,7 @@ import { queryClient } from "~/core/helpers/query-client";
 const logger = createModuleLogger("auth/auth-store");
 
 /**
- * App-wide auth state. `"loading"` is the pre-hydration state held behind the
+ * app-wide auth state. `"loading"` is the pre-hydration state held behind the
  * splash screen; the app renders authenticated/unauthenticated surfaces only
  * after {@link AuthStore.hydrate} settles.
  */
@@ -25,21 +25,21 @@ interface AuthStore {
 	status: AuthStatus;
 	session: Session | null;
 	/**
-	 * Reads the stored session and verifies it against `/me`. Signs out on an
+	 * reads the stored session and verifies it against `/me`. signs out on an
 	 * explicit auth rejection; keeps the session on a transport error so the app
-	 * stays usable offline. Always settles into a terminal status.
+	 * stays usable offline. always settles into a terminal status.
 	 */
 	hydrate: () => Promise<void>;
-	/** Persists a freshly obtained session and marks the app authenticated. */
+	/** persists a freshly obtained session and marks the app authenticated. */
 	authenticate: (session: Session) => Promise<void>;
 	/**
-	 * Clears the stored session, marks the app unauthenticated, and evicts the
-	 * ending session's cached server state. Every sign-out path runs through
+	 * clears the stored session, marks the app unauthenticated, and evicts the
+	 * ending session's cached server state. every sign-out path runs through
 	 * here, including the one {@link AuthStore.hydrate} takes when the server
 	 * rejects a stored session.
 	 */
 	deauthenticate: () => Promise<void>;
-	/** Replaces the token/expiry (and user) after a successful refresh. */
+	/** replaces the token/expiry (and user) after a successful refresh. */
 	applyRefresh: (
 		token: string,
 		exp: number,
@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				return;
 			}
 
-			// Trust the stored session while verifying, then reconcile.
+			// trust the stored session while verifying, then reconcile.
 			set({ status: "authenticated", session: stored });
 
 			try {
@@ -111,11 +111,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 					return;
 				}
 
-				// Unreachable/unexpected: keep the stored session (offline-tolerant).
+				// unreachable/unexpected: keep the stored session (offline-tolerant).
 				logger.warn("Session verification deferred.", {
 					reason: error instanceof Error ? error.message : "unknown",
 				});
-				// Offline-tolerant terminal path: the optimistic session stays,
+				// offline-tolerant terminal path: the optimistic session stays,
 				// so bracket it like the others for production breadcrumbs.
 				logger.debug("Completed session hydration.", {
 					status: "authenticated",
@@ -123,7 +123,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 				});
 			}
 		} catch (error) {
-			// Keychain read/write failure — fall back to a clean signed-out state.
+			// keychain read/write failure — fall back to a clean signed-out state.
 			reportError(error, { extra: { scope: "auth/auth-store.hydrate" } });
 			set({ status: "unauthenticated", session: null });
 		}
@@ -131,33 +131,33 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
 	async authenticate(session) {
 		await writeSession(session);
-		// Remember the endpoint so the next sign-in can pre-fill it; best-effort
-		// inside the helper, so it never blocks authentication. Sign-out clears
+		// remember the endpoint so the next sign-in can pre-fill it; best-effort
+		// inside the helper, so it never blocks authentication. sign-out clears
 		// the session but deliberately leaves this value in place.
 		await writeLastServerUrl(session.serverUrl);
 		set({ status: "authenticated", session });
-		// One line per terminal store transition, at debug: each of these is an
+		// one line per terminal store transition, at debug: each of these is an
 		// internal step of an operation (sign-in, sign-out, refresh, hydration)
-		// that already closes its own bracket at info. Logged after the keychain
+		// that already closes its own bracket at info. logged after the keychain
 		// write so the line only appears once the transition actually happened;
 		// a throwing write is closed by the calling operation's failure line.
-		// Never log the token or the user's email.
+		// never log the token or the user's email.
 		logger.debug("Stored the session.", { serverUrl: session.serverUrl });
 	},
 
 	async deauthenticate() {
-		// Read the id before the session is gone — the eviction is keyed on it.
+		// read the id before the session is gone — the eviction is keyed on it.
 		const userId = get().session?.user.id ?? null;
 
 		await clearSession();
-		// Unauthenticate before evicting, not after: the collections queries gate
+		// unauthenticate before evicting, not after: the collections queries gate
 		// on an active session and the root navigator unmounts the tab group with
 		// them, so closing that gate first is what stops a still-mounted observer
 		// from refetching the entries the eviction below is about to remove.
 		set({ status: "unauthenticated", session: null });
 
 		if (userId !== null) {
-			// Clearing the session does not clear the cache. Without this, the
+			// clearing the session does not clear the cache. without this, the
 			// ended session's collections and records stay readable in memory
 			// until gcTime expires them. `removeQueries` rather than
 			// `invalidateQueries`: invalidation leaves the data resident and can
@@ -165,7 +165,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 			queryClient.removeQueries({ queryKey: getSessionQueryKeyRoot(userId) });
 		}
 
-		// Last, so the line stands for the whole terminal transition — the
+		// last, so the line stands for the whole terminal transition — the
 		// keychain clear, the status flip, and the cache eviction above.
 		logger.debug("Cleared the session.");
 	},
@@ -189,12 +189,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 	},
 }));
 
-/** Selector hook for app-wide auth status (Home, Settings, the tabs layout). */
+/** selector hook for app-wide auth status (Home, Settings, the tabs layout). */
 export function useAuthStatus(): AuthStatus {
 	return useAuthStore((state) => state.status);
 }
 
-/** Selector hook for the current session (Settings account section). */
+/** selector hook for the current session (Settings account section). */
 export function useAuthSession(): Session | null {
 	return useAuthStore((state) => state.session);
 }

@@ -12,7 +12,7 @@ export function SettingMenuGroupHeading({
 const styles = StyleSheet.create((theme) => ({
 	heading: {
 		...theme.typography.heading,
-		color: theme.colors.text.neutral.intense,
 		paddingHorizontal: theme.gap.md,
+		color: theme.colors.text.neutral.intense,
 	},
 }));

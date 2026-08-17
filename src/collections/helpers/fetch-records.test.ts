@@ -12,7 +12,7 @@ function mockFetch(
 	return fetchMock;
 }
 
-/** Fetches page 1 against the mocked fetch, resolving with its outcome either way. */
+/** fetches page 1 against the mocked fetch, resolving with its outcome either way. */
 function attemptFirstPage(): Promise<unknown> {
 	return fetchRecords("https://cms.example.com", "jwt-token", "posts", 1).catch(
 		(caught: unknown) => caught,
@@ -36,7 +36,7 @@ describe("fetchRecords()", () => {
 			}),
 		});
 
-		// Trailing slash on the server URL is normalized away.
+		// trailing slash on the server URL is normalized away.
 		const page = await fetchRecords(
 			"https://cms.example.com/",
 			"jwt-token",

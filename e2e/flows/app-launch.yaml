@@ -1,7 +1,9 @@
 appId: app.axross.nakami
 name: app-launch — cold start reaches the welcome screen
 tags:
-  - scenario:app-launch
+  - scenario:app.launch
+  - area:app
+  - priority:must
 ---
 - launchApp:
     clearState: true

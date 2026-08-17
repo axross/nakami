@@ -5,11 +5,11 @@ import { renderRouter } from "expo-router/testing-library";
 import { StyleSheet } from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { SignInScreen } from "./sign-in-screen";
 
-// Mock only the data layer the real mutation calls — `login` — keeping
+// mock only the data layer the real mutation calls — `login` — keeping
 // `PayloadRequestError` real so the error-mapping path is exercised end to end.
 jest.mock("~/auth/helpers/payload-client", () => ({
 	...jest.requireActual<typeof import("~/auth/helpers/payload-client")>(
@@ -17,7 +17,7 @@ jest.mock("~/auth/helpers/payload-client", () => ({
 	),
 	login: jest.fn(),
 }));
-// The sign-in mutation persists the session via the auth store's `authenticate`
+// the sign-in mutation persists the session via the auth store's `authenticate`
 // action (read non-reactively with `getState()`); stub it to a resolved no-op so
 // the success path does not touch the keychain.
 jest.mock("~/auth/stores/auth-store", () => ({
@@ -30,7 +30,7 @@ jest.mock("~/auth/helpers/last-server-url", () => ({
 	readLastServerUrl: jest.fn(),
 }));
 
-// Render the screen under a fresh, isolated QueryClient (retries off) so the
+// render the screen under a fresh, isolated QueryClient (retries off) so the
 // real `useMutation` runs; tests drive the actual mutation and assert its
 // observable outcome rather than stubbing the hook.
 function renderSignInScreen() {
@@ -79,7 +79,7 @@ describe("<SignInScreen>", () => {
 	});
 
 	it("submits normalized credentials when the form is valid", async () => {
-		// Leave the login pending so the assertion targets the credentials handed
+		// leave the login pending so the assertion targets the credentials handed
 		// to the data layer, without driving the success/navigation path.
 		jest
 			.mocked(login)
@@ -148,7 +148,7 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-server-url").props.value).toBe("");
 	});
 
-	// The stack header clears the top edge, so this screen owns the bottom and
+	// the stack header clears the top edge, so this screen owns the bottom and
 	// the horizontal pair, carried on the scrolled content. Unistyles' jest mock
 	// reports zero insets, so this is the zero-inset device: each owned edge has
 	// to fall back to its design gutter — the submit button in particular, which

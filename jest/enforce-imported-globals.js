@@ -1,8 +1,8 @@
-// Registered as jest.config.cjs's setupFilesAfterEnv module. Jest injects its
+// registered as jest.config.cjs's setupFilesAfterEnv module. Jest injects its
 // API (`describe`, `it`, `expect`, `jest`, …) onto the global object, so a test
 // file that imports only part of that API from `@jest/globals` still runs green
 // — the symbols it forgot resolve off the global instead, and nothing reports
-// the inconsistency. Deleting the injected globals here turns that into a
+// the inconsistency. deleting the injected globals here turns that into a
 // `ReferenceError` naming the symbol and the line, so the convention is
 // enforced when the suite runs and not only by `npm run typecheck`.
 //
@@ -15,28 +15,28 @@
 // is required, which is the one window where the globals can be taken away
 // without breaking anything that legitimately needed them.
 
-// These two requires have to stay ahead of the deletion below. Both libraries
+// these two requires have to stay ahead of the deletion below. both libraries
 // touch the injected globals at module scope, and a test file would otherwise
 // load them after the globals are gone:
 //
 //   - @testing-library/react-native calls `expect.extend(...)` to register its
 //     matchers, and registers its auto-cleanup and the React `act` environment
 //     behind `typeof afterEach === "function"` / `typeof beforeAll ===
-//     "function"` guards. Those guards fail *silently*, so a green suite alone
+//     "function"` guards. those guards fail *silently*, so a green suite alone
 //     would not reveal them having been skipped — the render- and router-using
 //     suites are what actually exercise this ordering.
 //   - expo-router/testing-library calls `jest.mock(...)` at module scope for
 //     expo-linking and react-native-reanimated, and registers its own matchers
 //     with `expect.extend(...)`.
 //
-// Any future library that reads an injected global at module scope, or any
+// any future library that reads an injected global at module scope, or any
 // setup module added to setupFilesAfterEnv after this one, has to be loaded
 // here too — above the deletion — for the same reason.
 require("@testing-library/react-native");
 require("expo-router/testing-library");
 
-// The list is read from @jest/globals at run time rather than hard-coded, so it
-// cannot drift from what Jest actually injects. Deleting matches
+// the list is read from @jest/globals at run time rather than hard-coded, so it
+// cannot drift from what Jest actually injects. deleting matches
 // `injectGlobals: false` semantics, where the global is simply absent; a
 // throwing getter would give a friendlier message but would also break the
 // legitimate `typeof` feature detection that libraries like the one above rely

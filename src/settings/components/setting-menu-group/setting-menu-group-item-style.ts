@@ -1,0 +1,55 @@
+import type { UnistylesThemes } from "react-native-unistyles";
+
+// react-native-unistyles exports the map of registered themes but not the single
+// theme a stylesheet's callback receives, so derive it from that map.
+type Theme = UnistylesThemes[keyof UnistylesThemes];
+
+/**
+ * the chrome every row of a setting menu group shares: the surface fill and the
+ * row layout. both row parts spread it into their own `StyleSheet.create` object
+ * literal, so the interactive and the static row cannot drift apart.
+ */
+export function getSettingMenuGroupItemChrome(theme: Theme) {
+	return {
+		flexDirection: "row",
+		alignItems: "center",
+		columnGap: theme.gap.md,
+		minHeight: 48,
+		paddingVertical: theme.gap.xs,
+		paddingHorizontal: theme.gap.md,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+	} as const;
+}
+
+/**
+ * the corners each position rounds — the ends of the group, and nothing in
+ * between. the rows sit flush, so a group reads as one surface with rounded ends
+ * rather than as a stack of rounded cards.
+ *
+ * this is the value of a `variants.position` key that both row parts write out
+ * **literally** inside `StyleSheet.create`. spreading a helper whose result
+ * already carries `variants` does not work: Unistyles' Babel plugin detects the
+ * group by reading the key in the object literal, so a spread-in group records no
+ * variants dependency and the corners never follow a position change.
+ */
+export function getSettingMenuGroupItemPositionVariants(theme: Theme) {
+	return {
+		first: {
+			borderTopLeftRadius: theme.radius.md,
+			borderTopRightRadius: theme.radius.md,
+		},
+		middle: {},
+		last: {
+			borderBottomLeftRadius: theme.radius.md,
+			borderBottomRightRadius: theme.radius.md,
+		},
+		only: {
+			borderRadius: theme.radius.md,
+		},
+		// unreachable through the context, whose hook throws rather than yielding
+		// an absent position — but a variant group without a `default` renders
+		// nothing at all when a selection is missing, so the square-cornered
+		// middle treatment is the fallback.
+		default: {},
+	};
+}

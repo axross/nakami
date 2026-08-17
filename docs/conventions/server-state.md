@@ -48,7 +48,7 @@ client would opt whatever used it out of both, and would do so invisibly — the
 still works, and only the errors stop arriving.
 
 A test that needs a working client is the exception and MUST build its own throwaway
-one through `createTestQueryClient` in `src/common/helpers/test-query-client.ts`, which
+one through `createTestQueryClient` in `src/common/test-helpers/query-client.ts`, which
 disables retries and gives each test a fresh cache, so cache state never leaks between
 tests. A test MAY read the application client's own cache configuration — as
 `src/core/helpers/query-client.test.ts` reads `getQueryCache().config.onError` to

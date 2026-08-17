@@ -51,6 +51,10 @@ Documents under `specs/` describe rather than instruct, and use none of them.
 - [conventions/logging.md](./conventions/logging.md) — the root logger and its two
   transports, the message-plus-context shape a log call takes, and bracketing an
   operation that can fail.
+- [conventions/end-to-end-testing.md](./conventions/end-to-end-testing.md) — the
+  journey catalog's four columns and the tags a flow joins itself to a row with, what
+  the coverage gate proves and what it does not, and the Payload fixture contract an
+  authenticated flow is built against.
 - [conventions/agent-skills.md](./conventions/agent-skills.md) — where this repository
   departs from an installed skill, or hits a case one is silent on, and how a new
   deviation or gap is recorded.

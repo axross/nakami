@@ -12,8 +12,8 @@ export function SettingMenuGroupItemLabel({
 const styles = StyleSheet.create((theme) => ({
 	label: {
 		...theme.typography.body,
-		color: theme.colors.text.neutral.intense,
 		flexGrow: 1,
 		flexShrink: 1,
+		color: theme.colors.text.neutral.intense,
 	},
 }));

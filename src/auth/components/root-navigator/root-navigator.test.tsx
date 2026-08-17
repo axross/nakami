@@ -5,7 +5,7 @@ import { Text } from "react-native";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { RootNavigator } from "./root-navigator";
 
-// Stub the child screens so the gate is tested without the native tab bar
+// stub the child screens so the gate is tested without the native tab bar
 // (which does not render under jest) or the real screens' dependencies.
 const routes = {
 	_layout: RootNavigator,
