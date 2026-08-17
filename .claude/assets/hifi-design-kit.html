@@ -217,7 +217,10 @@
   .banner .grow { flex: 1; }
   .banner .chev::after { content: "\203A"; font-size: 17px; line-height: 1; }
   .submit { height: 50px; border-radius: var(--r-md); background: var(--accent-solid); color: var(--accentC); font: var(--t-heading); display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; }  /* typography.heading */
-  .submit.busy { opacity: 0.75; }
+  /* The app dips the in-flight submit button to 0.5 (`styles.submitDisabled` in
+     sign-in-screen.tsx); the spinner and working-state label beside it are what
+     keep that reading as working rather than as blocked. */
+  .submit.busy { opacity: 0.5; }
   .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45); border-top-color: #fff; }
 
   .settings { padding: 20px 0; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
@@ -255,7 +258,7 @@
   .el-btn { height: 44px; border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 20px; font: var(--t-heading); }  /* typography.heading */
   .el-btn.primary { background: var(--accent-solid); color: var(--accentC); }
   .el-btn.secondary { background: transparent; color: var(--accent-d); border: var(--bw-hairline) solid var(--line-d); }
-  .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.75; }
+  .el-btn.busy { background: var(--accent-solid); color: var(--accentC); opacity: 0.5; }  /* same dip as .submit.busy — one control, one number */
   .input.focus { border-color: var(--accent-solid); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-solid) 30%, transparent); }
   /* A flagged field takes the destructive border AND the tinted destructive
      ground, so the error survives a reader who cannot tell the two text tones
