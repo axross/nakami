@@ -64,23 +64,40 @@ const announceSpy = jest.spyOn(
 	"announceForAccessibilityWithOptions",
 );
 
+/** This screen's four text inputs, by `testID`. */
+const SIGN_IN_INPUT_TEST_IDS: ReadonlySet<string> = new Set([
+	"sign-in-server-url",
+	"sign-in-collection-input",
+	"sign-in-email",
+	"sign-in-password",
+]);
+
 /**
- * The `testID` of the input the screen last called `focus()` on, or `undefined`
- * when it called none.
+ * The `testID` of the sign-in input the screen last called `focus()` on, or
+ * `undefined` when it called none.
  *
- * `jest-expo` mocks `TextInput` as a class whose `focus` is one shared jest
- * mock, so each call records the instance it was made on and that instance's
- * props carry the testID. It is the only seam that observes a programmatic
- * focus here: the runtime's own `TextInput.State.currentlyFocusedInput()` never
- * updates under the mock.
+ * React Native's jest preset mocks each native component as a class and copies
+ * one shared `MockNativeMethods` object onto every such prototype, so this
+ * `focus` is a single `jest.fn` behind `TextInput`, `View`, and every other
+ * mocked native component alike. `mock.instances` is therefore a suite-wide log
+ * of focus calls on any of them, which is why it is filtered to this screen's
+ * own inputs before the last entry is taken rather than trusted as-is.
+ *
+ * It is the only seam that observes a programmatic focus here: the runtime's
+ * own `TextInput.State.currentlyFocusedInput()` never updates under the mock,
+ * and the element RNTL hands back carries no `focus` of its own.
  */
 function lastFocusedTestId(): string | undefined {
 	const { focus } = TextInput.prototype as unknown as {
 		focus: { mock: { instances: readonly { props?: { testID?: string } }[] } };
 	};
-	const { instances } = focus.mock;
 
-	return instances.at(-1)?.props?.testID;
+	return focus.mock.instances
+		.map((instance) => instance?.props?.testID)
+		.filter(
+			(testID) => testID !== undefined && SIGN_IN_INPUT_TEST_IDS.has(testID),
+		)
+		.at(-1);
 }
 
 beforeEach(() => {
