@@ -28,8 +28,10 @@ export function getSessionQueryKeyRoot(userId: string) {
  * The redacted root is rebuilt through {@link getSessionQueryKeyRoot} rather
  * than written out here, so both its length and its literal prefix follow that
  * factory — the next change to the root's shape carries into the description
- * instead of silently flattening it again. A key rooted anywhere else keeps
- * every segment it had.
+ * instead of silently flattening it again. A key counts as session-scoped only
+ * when it is at least as long as that root and begins with the same first
+ * segment; every other key keeps exactly the segments it had, so a key shorter
+ * than the root can never gain a redacted segment it never carried.
  *
  * The signed-in user's id never reaches the description of a session-scoped
  * key, and a segment that is not a string is described as `?` rather than
@@ -38,10 +40,11 @@ export function getSessionQueryKeyRoot(userId: string) {
  */
 export function describeQueryKey(queryKey: readonly unknown[]): string {
 	const redactedRoot = getSessionQueryKeyRoot(REDACTED_USER_ID);
-	const segments: readonly unknown[] =
-		queryKey[0] === redactedRoot[0]
-			? [...redactedRoot, ...queryKey.slice(redactedRoot.length)]
-			: queryKey;
+	const isSessionScoped =
+		queryKey.length >= redactedRoot.length && queryKey[0] === redactedRoot[0];
+	const segments: readonly unknown[] = isSessionScoped
+		? [...redactedRoot, ...queryKey.slice(redactedRoot.length)]
+		: queryKey;
 
 	return segments
 		.map((segment) => (typeof segment === "string" ? segment : OPAQUE_SEGMENT))

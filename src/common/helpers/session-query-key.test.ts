@@ -33,6 +33,10 @@ describe("describeQueryKey()", () => {
 		);
 	});
 
+	it("adds no redacted segment to a key shorter than the session root", () => {
+		expect(describeQueryKey(["users"])).toBe("users");
+	});
+
 	it("describes a segment that is not a string without serializing it", () => {
 		const described = describeQueryKey([
 			...getSessionQueryKeyRoot(USER_ID),
