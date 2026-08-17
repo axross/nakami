@@ -6,15 +6,24 @@ import {
 	it,
 	jest,
 } from "@jest/globals";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+
+import type { QueryClient } from "@tanstack/react-query";
+import { onlineManager, QueryClientProvider } from "@tanstack/react-query";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	waitFor,
+} from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
+
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchRecords } from "~/collections/helpers/fetch-records";
 import type { RecordPageResponse } from "~/collections/models/record";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { CollectionRecordsScreen } from "./collection-records-screen";
 
@@ -50,12 +59,24 @@ function page(overrides: Partial<RecordPageResponse>): RecordPageResponse {
 	};
 }
 
+let activeClient: QueryClient | null = null;
+
+/**
+ * Renders the screen under a fresh, isolated QueryClient, exposing that client
+ * so a test can drive the cache — invalidating a loaded feed is what reaches the
+ * "paused with records already on screen" state.
+ */
 function renderScreen() {
 	const client = createTestQueryClient();
-	return render(
-		<QueryClientProvider client={client}>
-			<CollectionRecordsScreen slug="posts" />
-		</QueryClientProvider>,
+	activeClient = client;
+
+	return Object.assign(
+		render(
+			<QueryClientProvider client={client}>
+				<CollectionRecordsScreen slug="posts" />
+			</QueryClientProvider>,
+		),
+		{ client },
 	);
 }
 
@@ -65,6 +86,17 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	// Order matters for the offline tests. Unmount first: coming back online
+	// resumes a paused query, and a resumed query under a still-mounted tree
+	// lands its state update outside `act`. Then empty the cache, so a paused
+	// fetch is cancelled rather than resumed — `Query.onOnline` continues its
+	// retryer, which would call the mocked data layer again after the test that
+	// asserted on its call count. `onlineManager` is process-wide, so it is
+	// restored last, or every suite after this one would run offline.
+	cleanup();
+	activeClient?.clear();
+	activeClient = null;
+	onlineManager.setOnline(true);
 	useAuthStore.setState({ status: "unauthenticated", session: null });
 });
 
@@ -74,12 +106,89 @@ describe("<CollectionRecordsScreen>", () => {
 			.mocked(fetchRecords)
 			.mockReturnValue(new Promise<RecordPageResponse>(() => {}));
 
-		const { getByTestId } = renderScreen();
+		const { getByTestId, queryByTestId } = renderScreen();
 
 		await waitFor(() => {
 			expect(getByTestId("collection-records-loading")).toBeTruthy();
 		});
 		expect(getByTestId("collection-records-screen")).toBeTruthy();
+		// The other half of the offline surface's ordering guard: a genuine first
+		// load is still a skeleton, so the paused branch cannot be widened to
+		// swallow it.
+		expect(queryByTestId("collection-records-offline")).toBeNull();
+	});
+
+	it("shows the offline surface when the first page is paused with nothing cached", async () => {
+		onlineManager.setOnline(false);
+
+		const { getByTestId, getByText, queryByTestId } = renderScreen();
+
+		await waitFor(() => {
+			expect(getByTestId("collection-records-offline")).toBeTruthy();
+		});
+		expect(getByText("You're offline")).toBeTruthy();
+		expect(
+			getByText("Records will load as soon as you're back online."),
+		).toBeTruthy();
+		expect(getByTestId("collection-records-offline-status")).toBeTruthy();
+		expect(getByText("Waiting for a connection")).toBeTruthy();
+		// Nothing to press, and no skeleton pulsing over a fetch that never left.
+		expect(queryByTestId("collection-records-retry-button")).toBeNull();
+		expect(queryByTestId("collection-records-loading")).toBeNull();
+		expect(fetchRecords).not.toHaveBeenCalled();
+	});
+
+	it("keeps the loaded records on screen when the connection drops", async () => {
+		jest
+			.mocked(fetchRecords)
+			.mockResolvedValue(
+				page({ docs: [{ id: "r1", title: "A field guide" }], totalDocs: 1 }),
+			);
+
+		const screen = renderScreen();
+
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+
+		// Going offline and invalidating pauses the refetch, so the query reports
+		// `paused` with the first page still cached — the state the offline surface
+		// must not claim.
+		onlineManager.setOnline(false);
+		await act(async () => {
+			void screen.client.invalidateQueries();
+		});
+		// The library batches its listener notifications, so first wait for the
+		// pause to reach the cache — without this the assertions below read the
+		// render from before the pause and prove nothing.
+		await waitFor(() => {
+			expect(
+				screen.client
+					.getQueryCache()
+					.getAll()
+					.some((query) => query.state.fetchStatus === "paused"),
+			).toBe(true);
+		});
+		// Then re-render, so the assertions read the paused state now rather than a
+		// beat later, when React happens to apply the batched notification.
+		screen.rerender(
+			<QueryClientProvider client={screen.client}>
+				<CollectionRecordsScreen slug="posts" />
+			</QueryClientProvider>,
+		);
+
+		expect(screen.getByText("A field guide")).toBeTruthy();
+		expect(screen.queryByTestId("collection-records-offline")).toBeNull();
+
+		// Coming back online resumes that paused refetch by itself — the point of
+		// wiring `onlineManager` at all — so settle it inside the test rather than
+		// leaving a paused fetch to resume during teardown.
+		await act(async () => {
+			onlineManager.setOnline(true);
+		});
+		await waitFor(() => {
+			expect(fetchRecords).toHaveBeenCalledTimes(2);
+		});
 	});
 
 	it("shows an error state with a retry that refetches", async () => {

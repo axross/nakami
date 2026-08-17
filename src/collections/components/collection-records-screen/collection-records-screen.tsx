@@ -8,6 +8,7 @@ import { CollectionRecordCard } from "~/collections/components/collection-record
 import { CollectionRecordsSkeleton } from "~/collections/components/collection-records-skeleton/collection-records-skeleton";
 import { CollectionsMessageState } from "~/collections/components/collections-message-state/collections-message-state";
 import { describeLoadError } from "~/collections/helpers/describe-collections-error";
+import { describeOfflineLoad } from "~/collections/helpers/describe-collections-offline";
 import type { CollectionRecord } from "~/collections/models/record";
 import { getCollectionRecordsInfiniteQueryOptions } from "~/collections/queries/collection-records-query";
 
@@ -20,6 +21,11 @@ const RECORDS_LOAD_ERROR = {
 	genericSubtitle: "Something went wrong loading records. Please try again.",
 } as const;
 
+// The subject-specific half of the offline surface; its title, status line, and
+// icon are shared with the collection list.
+const RECORDS_OFFLINE_SUBTITLE =
+	"Records will load as soon as you're back online.";
+
 function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
 	return (
 		<Text style={styles.count}>
@@ -29,11 +35,11 @@ function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
 }
 
 /**
- * A collection's records: the screen a Collections row opens. Renders a loading
- * skeleton, a failure-aware error state (permission failures get calm, retry-less
- * copy; connectivity/unexpected failures offer a retry), an empty state, or the
- * paginated card feed — appending the next page on scroll. Rows are read-only;
- * browsing into a single record is a follow-up.
+ * A collection's records: the screen a Collections row opens. Renders an offline
+ * state, a loading skeleton, a failure-aware error state (permission failures
+ * get calm, retry-less copy; connectivity/unexpected failures offer a retry), an
+ * empty state, or the paginated card feed — appending the next page on scroll.
+ * Rows are read-only; browsing into a single record is a follow-up.
  */
 export function CollectionRecordsScreen({
 	slug,
@@ -43,6 +49,7 @@ export function CollectionRecordsScreen({
 	const {
 		data,
 		isPending,
+		fetchStatus,
 		isError,
 		error,
 		refetch,
@@ -58,7 +65,24 @@ export function CollectionRecordsScreen({
 	});
 
 	let content: JSX.Element;
-	if (isPending) {
+	// Ahead of the skeleton on purpose. With no connection the first page pauses
+	// rather than failing, so the query stays `pending` with nothing cached and
+	// the skeleton below would pulse indefinitely with nothing on its way. A feed
+	// that already holds records is past `pending` and keeps showing them.
+	if (isPending && fetchStatus === "paused") {
+		const copy = describeOfflineLoad(RECORDS_OFFLINE_SUBTITLE);
+		content = (
+			<CollectionsMessageState
+				icon={copy.icon}
+				iconColor={theme.colors.text.neutral.base}
+				status={copy.status}
+				style={styles.messageState}
+				subtitle={copy.subtitle}
+				testID="collection-records-offline"
+				title={copy.title}
+			/>
+		);
+	} else if (isPending) {
 		content = <CollectionRecordsSkeleton />;
 	} else if (isError) {
 		const copy = describeLoadError(error, RECORDS_LOAD_ERROR);

@@ -29,6 +29,12 @@ const config = {
 		// renders every icon as a no-op component (see that file) rather than
 		// widening the transformIgnorePatterns the note below keeps untouched.
 		"^lucide-react-native$": "<rootDir>/jest/lucide-react-native-mock.js",
+		// expo-network has no native side under jest-expo, so
+		// `addNetworkStateListener` returns undefined. `query-client.ts` registers
+		// `onlineManager` at module scope, which means every suite reaching the
+		// shared query client hits that cleanup on unmount — see the mock for why
+		// this is global rather than per-suite.
+		"^expo-network$": "<rootDir>/jest/expo-network-mock.js",
 	},
 	// jest-expo's default transformIgnorePatterns already allows every
 	// react-native-* / expo-* / @expo/* package through Babel — do not override

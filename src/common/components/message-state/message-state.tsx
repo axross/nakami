@@ -4,10 +4,11 @@ import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
- * A centered "mark + title + subtitle" surface with an optional action slot —
- * the shared shape behind feature empty/error/placeholder screens. Callers pass
- * their own action element so each keeps its distinct control (a navigation
- * link, a retry button).
+ * A centered "mark + title + subtitle" surface with optional status and action
+ * slots — the shared shape behind feature empty/error/placeholder screens.
+ * Callers pass their own elements so each keeps its distinct control (a
+ * navigation link, a retry button) and its own read-out of what the screen is
+ * waiting on.
  *
  * The root claims no space of its own: a consumer that gives it a whole screen
  * passes `flex: 1` through `style`.
@@ -23,6 +24,7 @@ export function MessageState({
 	iconColor,
 	title,
 	subtitle,
+	status,
 	action,
 	style,
 	...props
@@ -32,6 +34,7 @@ export function MessageState({
 		iconColor?: string;
 		title: string;
 		subtitle: string;
+		status?: ReactNode;
 		action?: ReactNode;
 	}
 >): JSX.Element {
@@ -46,6 +49,7 @@ export function MessageState({
 			<Text style={styles.title}>{title}</Text>
 			<Text style={styles.subtitle}>{subtitle}</Text>
 
+			{status}
 			{action}
 		</View>
 	);

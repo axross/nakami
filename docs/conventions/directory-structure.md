@@ -16,6 +16,7 @@ infer.
 | `src/app/`                   | Expo Router routes — thin entry points only                                                                                                       |
 | `src/<feature>/`             | One feature: `components/`, `queries/`, `mutations/`, `models/`, `helpers/`, `hooks/`, `stores/` as needed                                         |
 | `src/common/`                | Primitives shared across features: `components/` and `helpers/`                                                                                   |
+| `src/common/test-helpers/`   | Modules that exist for the unit suite alone — a spec file may import one, application code never does                                              |
 | `src/core/`                  | App bootstrap and infrastructure: `db/` (the schema, the shared client, and generated migrations) and `helpers/` (env, logging, error reporting, the query client) |
 | `src/unistyles.ts`           | Unistyles theme and breakpoints — declared and registered here, imported first by the root layout                                                 |
 | `e2e/`                       | Maestro flows (`flows/`), the scenario catalog (`scenarios.md`), and the coverage gate in two parts — the runner-agnostic core (`scenario-coverage.mjs`) and the Maestro adapter that runs it (`check-scenario-coverage.mjs`); [end-to-end-testing.md](./end-to-end-testing.md) states what each holds |
@@ -96,3 +97,36 @@ relative path does.
 
 A unit test MUST sit beside its subject as `<name>.test.ts(x)`; `jest.config.cjs`
 matches tests under `src/` only, so a test written anywhere else never runs.
+
+## Test-only modules
+
+A module the unit suite alone uses — a helper that reads what a render produced, a
+factory that builds a throwaway client — MUST live in `src/common/test-helpers/`, and
+nothing that is not test-only belongs there. It holds `resolve-style.ts`, which flattens
+a rendered `style` prop into the single object the renderer would apply, and
+`query-client.ts`, which builds the per-test `QueryClient`
+[server-state.md](./server-state.md) requires.
+
+The directory sits beside `src/common/helpers/` rather than inside it so that
+`src/common/helpers/` stays uniformly application code, and "is this module test-only?"
+is answered by the import path rather than by opening the file. It stays under `src/`
+because the `~/*` alias resolves there, so a spec reaches it the way the rule above
+requires every cross-directory import to travel.
+
+Names follow the kebab-case rule above and say what the module provides, with no `test-`
+prefix — the directory already carries that signal, and repeating it in the filename
+says nothing the import path does not. A filename MUST NOT match `*.test.ts(x)`:
+`jest.config.cjs` matches every such file under `src/` as a suite, so a helper named
+that way would be collected as a suite of its own and fail the run for holding no tests.
+
+Only a test file MAY import from this directory, and it MAY do so from any tier; an
+application module MUST NOT, whichever tier it sits in. In the other direction the
+directory travels the same way as the rest of `src/common/`: it MAY import `src/common/`
+and `src/core/`, and MUST NOT import a feature.
+
+That import rule is also the whole of what keeps these modules off a device. Metro
+bundles what is reachable from the app entry point, and nothing reachable imports
+`src/common/test-helpers/`, so no module in it reaches the bundles `npm run build`
+emits. No lint rule fences the directory — one was considered and deliberately declined
+— so the boundary rests on this convention and on review. An application import would
+fail no check; it would quietly put a test-only module into a shipped bundle.

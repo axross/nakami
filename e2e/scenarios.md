@@ -29,18 +29,21 @@ without losing what a flow has to assert.
 | `tabs.navigation`      | The bottom tabs reach Home, Collections, and Settings                   | tabs        | should   |
 | `collections.list`     | The Collections tab lists the server's readable collections             | collections | should   |
 | `collections.records`  | A collection's records load as a paging card feed                       | collections | should   |
+| `collections.offline`  | Losing the connection states it, and reconnecting loads on its own      | collections | should   |
 | `settings.menu`        | The Settings menu shows About and pushes the Licenses screen            | settings    | should   |
 
 ## Journeys
 
-Six of the nine carry a gap note. Each names what it is waiting on in its own
-terms, and all six wait on the same thing: a session signed in against a Payload
-fixture, which this suite does not have.
+Seven of the ten carry a gap note. Each names what it is waiting on in its own
+terms, and six of the seven wait on the same thing: a session signed in against a
+Payload fixture, which this suite does not have.
 [docs/conventions/end-to-end-testing.md](../docs/conventions/end-to-end-testing.md)
-states the contract such a fixture satisfies, and the flows themselves are tracked by
-[#135](https://github.com/axross/nakami/issues/135). Nothing else covers these
-journeys end-to-end in the meantime: the unit suite exercises their components in
-isolation, which is not the same claim.
+states the contract such a fixture satisfies, and those six flows are tracked by
+[#135](https://github.com/axross/nakami/issues/135). The seventh,
+[`collections.offline`](#collectionsoffline), needs a device whose connectivity can
+be cut on top of that fixture, so it is not in that issue's scope. Nothing else
+covers any of these journeys end-to-end in the meantime: the unit suite exercises
+their components in isolation, which is not the same claim.
 
 ### `app.launch`
 
@@ -101,6 +104,18 @@ failure-aware error states, and scrolling to the end loads more.
 **Gap:** no automated flow asserts this. Beyond a session, the paging half needs a
 fixture collection holding more than one page of records, and the empty state needs
 a second collection holding none.
+
+### `collections.offline`
+
+Signed in with no connection, opening the Collections tab or a collection states
+that the device is offline, offers nothing to press, and loads on its own once the
+connection returns.
+
+**Gap:** no automated flow asserts this, and it is the one gap a Payload fixture
+alone does not close. The journey is about the connection rather than the server, so
+it needs the run to cut and restore the device's connectivity mid-flow — a control
+the suite does not have today — on top of the signed-in session every other gap
+here waits on.
 
 ### `settings.menu`
 
