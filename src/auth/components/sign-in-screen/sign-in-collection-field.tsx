@@ -3,8 +3,8 @@ import type { ComponentPropsWithRef, JSX, Ref } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInFieldError } from "~/auth/components/sign-in-screen/sign-in-field-error";
-import { signInInputStyle } from "~/auth/components/sign-in-screen/sign-in-input-style";
 import { signInFieldLabel } from "~/auth/helpers/sign-in-form";
+import { signInInputStyle } from "~/auth/helpers/sign-in-input-style";
 
 /**
  * The Collection slug field. Because most Payload instances use `users`, it

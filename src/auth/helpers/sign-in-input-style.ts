@@ -4,7 +4,8 @@ import type { UnistylesThemes } from "react-native-unistyles";
  * The sign-in form's text-input surface, in both of its states: the neutral one
  * and the flagged one a validation message puts it in.
  *
- * It lives here rather than in each screen part's own stylesheet because the
+ * It lives in the feature's helpers rather than in either screen part's own
+ * stylesheet because the
  * flagged treatment — a destructive border over a tinted destructive ground —
  * is one design decision spread across four inputs: the three the screen draws
  * directly, and the one inside the Collection field. Declared per stylesheet, a

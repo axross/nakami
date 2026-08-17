@@ -23,7 +23,6 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
 import { SignInErrorSummary } from "~/auth/components/sign-in-screen/sign-in-error-summary";
 import { SignInFieldError } from "~/auth/components/sign-in-screen/sign-in-field-error";
-import { signInInputStyle } from "~/auth/components/sign-in-screen/sign-in-input-style";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
 import {
@@ -34,6 +33,7 @@ import {
 	signInFieldLabel,
 	validateSignInForm,
 } from "~/auth/helpers/sign-in-form";
+import { signInInputStyle } from "~/auth/helpers/sign-in-input-style";
 import { getSignInMutationOptions } from "~/auth/mutations/sign-in-mutation";
 
 const DEFAULT_COLLECTION = "users";
