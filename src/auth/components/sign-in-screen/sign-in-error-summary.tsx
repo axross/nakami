@@ -73,8 +73,10 @@ export function SignInErrorSummary({
 
 const styles = StyleSheet.create((theme) => ({
 	// `minHeight` is the touch target rather than a look: the caption line box
-	// plus this padding falls short of the 44pt minimum a control needs, and the
-	// banner is a control whenever it carries an `onPress`.
+	// plus this padding comes to 34, short of the floor a control needs, and the
+	// banner is a control whenever it carries an `onPress`. 48 is that floor —
+	// iOS asks 44pt and Material 48dp, and one stylesheet serves both platforms
+	// here, so the larger of the two is the number that satisfies both.
 	banner: {
 		alignItems: "center",
 		backgroundColor: theme.colors.surface.destructive.base,
@@ -83,7 +85,7 @@ const styles = StyleSheet.create((theme) => ({
 		borderWidth: theme.borderWidth.hairline,
 		columnGap: theme.gap.xs,
 		flexDirection: "row",
-		minHeight: 44,
+		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
 		paddingVertical: theme.gap.xs,
 	},

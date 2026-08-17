@@ -208,9 +208,11 @@
   .form .field .err { margin-top: 6px; }
   /* The filled destructive banner — a form-level error, and the pressable
      problem-count summary when it carries a chevron. Fill, border, and text are
-     surface.destructive.base / border.destructive.subtle / text.destructive.base;
-     the 44px floor is the touch target a control needs, not a look. */
-  .banner { display: flex; align-items: center; gap: 8px; min-height: 44px; background: var(--danger-surf); border: var(--bw-hairline) solid var(--danger-line-s); border-radius: var(--r-md); padding: 8px 12px; color: var(--danger-d); font: var(--t-caption); }  /* typography.caption */
+     surface.destructive.base / border.destructive.subtle / text.destructive.base.
+     The 48px floor is the touch target a control needs, not a look: iOS asks
+     44pt and Material 48dp, and one stylesheet serves both platforms, so the
+     larger of the two is what the app sets. */
+  .banner { display: flex; align-items: center; gap: 8px; min-height: 48px; background: var(--danger-surf); border: var(--bw-hairline) solid var(--danger-line-s); border-radius: var(--r-md); padding: 8px 12px; color: var(--danger-d); font: var(--t-caption); }  /* typography.caption */
   .banner svg { width: 16px; height: 16px; flex: none; }
   .banner .grow { flex: 1; }
   .banner .chev::after { content: "\203A"; font-size: 17px; line-height: 1; }
