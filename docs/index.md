@@ -45,8 +45,9 @@ Documents under `specs/` describe rather than instruct, and use none of them.
 - [conventions/data-layer.md](./conventions/data-layer.md) — where this app's on-device
   tables are defined, and the projection, filter, and result limit a read has to state.
 - [conventions/server-state.md](./conventions/server-state.md) — the single TanStack
-  Query client every consumer imports, and the throwaway client a unit test builds
-  instead.
+  Query client every consumer imports, the throwaway client a unit test builds instead,
+  and `describeQueryKey` as the way a session-scoped key is described on its way out of
+  the cache.
 - [conventions/logging.md](./conventions/logging.md) — the root logger and its two
   transports, the message-plus-context shape a log call takes, and bracketing an
   operation that can fail.
