@@ -26,12 +26,12 @@ import {
 	parseScenarioCatalog,
 } from "./scenario-coverage.mjs";
 
-/** Whether a YAML scalar is written in quotes, so its content is literal. */
+/** whether a YAML scalar is written in quotes, so its content is literal. */
 function isQuoted(value) {
 	return /^(".*"|'.*')$/s.test(value);
 }
 
-/** Strips the quotes a YAML scalar may be written with. */
+/** strips the quotes a YAML scalar may be written with. */
 function stripQuotes(value) {
 	const trimmed = value.trim();
 
@@ -51,12 +51,12 @@ function stripComment(value) {
 		: trimmed.replace(/(^|\s)#.*$/s, "").trim();
 }
 
-/** Whether a line inside a block sequence holds no entry — blank, or a comment. */
+/** whether a line inside a block sequence holds no entry — blank, or a comment. */
 function isBlankOrComment(line) {
 	return /^[ \t]*(#.*)?$/.test(line);
 }
 
-/** Reads a flow config's `name:` — Maestro's own label for the flow. */
+/** reads a flow config's `name:` — Maestro's own label for the flow. */
 function readFlowName(config) {
 	const match = config.match(/^name:[ \t]*(.*)$/m);
 

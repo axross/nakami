@@ -26,7 +26,7 @@ const FACETS = ["area", "priority"];
 // written (`auth.last-server-url`).
 const ID_PATTERN = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
 
-/** Splits one markdown table row into trimmed cells, or `null` if it is not a row. */
+/** splits one markdown table row into trimmed cells, or `null` if it is not a row. */
 function tableCells(line) {
 	const trimmed = line.trim();
 	if (!trimmed.startsWith("|")) {
@@ -38,12 +38,12 @@ function tableCells(line) {
 	return inner.split("|").map((cell) => cell.trim());
 }
 
-/** Whether these cells are a table's `| --- | --- |` delimiter row. */
+/** whether these cells are a table's `| --- | --- |` delimiter row. */
 function isDelimiterRow(cells) {
 	return cells?.every((cell) => /^:?-+:?$/.test(cell)) ?? false;
 }
 
-/** Strips the backticks a catalog cell may wrap a value in. */
+/** strips the backticks a catalog cell may wrap a value in. */
 function stripBackticks(value) {
 	const trimmed = value.trim();
 
@@ -58,7 +58,7 @@ function normalizeFacet(value) {
 	return value.trim().toLowerCase();
 }
 
-/** Capitalizes the caller's noun for the thing a finding is about. */
+/** capitalizes the caller's noun for the thing a finding is about. */
 function describe(subject, title) {
 	return `${subject.charAt(0).toUpperCase()}${subject.slice(1)} "${title}"`;
 }
