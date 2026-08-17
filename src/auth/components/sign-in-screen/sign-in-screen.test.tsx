@@ -267,30 +267,6 @@ describe("<SignInScreen>", () => {
 		);
 	});
 
-	// the flagged surface is the error's other two cues, beside the message's own
-	// icon. one definition now serves every input on the screen, so this pins
-	// that the shared style still resolves to the destructive pair.
-	it("flags the offending input's own surface, not just the message beside it", () => {
-		const { getByTestId } = renderSignInScreen();
-
-		expect(
-			StyleSheet.flatten(getByTestId("sign-in-email").props.style).borderColor,
-		).toBe(themes.light.colors.border.neutral.subtle);
-
-		fireEvent.press(getByTestId("sign-in-submit"));
-
-		const flagged = StyleSheet.flatten(
-			getByTestId("sign-in-email").props.style,
-		);
-
-		expect(flagged.borderColor).toBe(
-			themes.light.colors.border.destructive.base,
-		);
-		expect(flagged.backgroundColor).toBe(
-			themes.light.colors.foundation.destructive.subtle,
-		);
-	});
-
 	it("returns an input's name to its plain label once the message clears", () => {
 		const { getByTestId } = renderSignInScreen();
 

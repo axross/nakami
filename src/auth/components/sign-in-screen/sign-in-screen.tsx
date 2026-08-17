@@ -16,13 +16,12 @@ import {
 	Pressable,
 	ScrollView,
 	Text,
-	TextInput,
-	View,
+	type TextInput,
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
 import { SignInErrorSummary } from "~/auth/components/sign-in-screen/sign-in-error-summary";
-import { SignInFieldError } from "~/auth/components/sign-in-screen/sign-in-field-error";
+import { SignInTextField } from "~/auth/components/sign-in-screen/sign-in-text-field";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { PayloadRequestError } from "~/auth/helpers/payload-client";
 import {
@@ -30,10 +29,8 @@ import {
 	firstSignInFieldError,
 	type SignInField,
 	type SignInFormErrors,
-	signInFieldLabel,
 	validateSignInForm,
 } from "~/auth/helpers/sign-in-form";
-import { signInInputStyle } from "~/auth/helpers/sign-in-input-style";
 import { getSignInMutationOptions } from "~/auth/mutations/sign-in-mutation";
 
 const DEFAULT_COLLECTION = "users";
@@ -293,36 +290,24 @@ export function SignInScreen(): JSX.Element {
 					/>
 				) : null}
 
-				<View style={styles.field}>
-					<Text style={styles.label}>Server URL</Text>
-					<TextInput
-						accessibilityLabel={signInFieldLabel(
-							"Server URL",
-							fieldErrors.serverUrl,
-						)}
-						autoCapitalize="none"
-						autoCorrect={false}
-						inputMode="url"
-						onBlur={() => onFieldBlur("serverUrl")}
-						onChangeText={(next) => {
-							serverUrlEdited.current = true;
-							setServerUrl(next);
-							onFieldChange("serverUrl", next);
-						}}
-						placeholder="https://cms.example.com"
-						placeholderTextColor={theme.colors.text.neutral.base}
-						ref={serverUrlRef}
-						style={styles.input(fieldErrors.serverUrl !== undefined)}
-						testID="sign-in-server-url"
-						value={serverUrl}
-					/>
-					{fieldErrors.serverUrl === undefined ? null : (
-						<SignInFieldError
-							message={fieldErrors.serverUrl}
-							testID="sign-in-error-server-url"
-						/>
-					)}
-				</View>
+				<SignInTextField
+					autoCapitalize="none"
+					autoCorrect={false}
+					error={fieldErrors.serverUrl}
+					errorTestID="sign-in-error-server-url"
+					inputMode="url"
+					inputRef={serverUrlRef}
+					label="Server URL"
+					onBlur={() => onFieldBlur("serverUrl")}
+					onChangeText={(next) => {
+						serverUrlEdited.current = true;
+						setServerUrl(next);
+						onFieldChange("serverUrl", next);
+					}}
+					placeholder="https://cms.example.com"
+					testID="sign-in-server-url"
+					value={serverUrl}
+				/>
 
 				<SignInCollectionField
 					// Spread as one discriminated object: the field accepts `error`
@@ -341,61 +326,40 @@ export function SignInScreen(): JSX.Element {
 					value={collection}
 				/>
 
-				<View style={styles.field}>
-					<Text style={styles.label}>Email</Text>
-					<TextInput
-						accessibilityLabel={signInFieldLabel("Email", fieldErrors.email)}
-						autoCapitalize="none"
-						autoCorrect={false}
-						inputMode="email"
-						onBlur={() => onFieldBlur("email")}
-						onChangeText={(next) => {
-							setEmail(next);
-							onFieldChange("email", next);
-						}}
-						placeholder="you@example.com"
-						placeholderTextColor={theme.colors.text.neutral.base}
-						ref={emailRef}
-						style={styles.input(fieldErrors.email !== undefined)}
-						testID="sign-in-email"
-						value={email}
-					/>
-					{fieldErrors.email === undefined ? null : (
-						<SignInFieldError
-							message={fieldErrors.email}
-							testID="sign-in-error-email"
-						/>
-					)}
-				</View>
+				<SignInTextField
+					autoCapitalize="none"
+					autoCorrect={false}
+					error={fieldErrors.email}
+					errorTestID="sign-in-error-email"
+					inputMode="email"
+					inputRef={emailRef}
+					label="Email"
+					onBlur={() => onFieldBlur("email")}
+					onChangeText={(next) => {
+						setEmail(next);
+						onFieldChange("email", next);
+					}}
+					placeholder="you@example.com"
+					testID="sign-in-email"
+					value={email}
+				/>
 
-				<View style={styles.field}>
-					<Text style={styles.label}>Password</Text>
-					<TextInput
-						accessibilityLabel={signInFieldLabel(
-							"Password",
-							fieldErrors.password,
-						)}
-						autoCapitalize="none"
-						autoCorrect={false}
-						onBlur={() => onFieldBlur("password")}
-						onChangeText={(next) => {
-							setPassword(next);
-							onFieldChange("password", next);
-						}}
-						placeholderTextColor={theme.colors.text.neutral.base}
-						ref={passwordRef}
-						secureTextEntry
-						style={styles.input(fieldErrors.password !== undefined)}
-						testID="sign-in-password"
-						value={password}
-					/>
-					{fieldErrors.password === undefined ? null : (
-						<SignInFieldError
-							message={fieldErrors.password}
-							testID="sign-in-error-password"
-						/>
-					)}
-				</View>
+				<SignInTextField
+					autoCapitalize="none"
+					autoCorrect={false}
+					error={fieldErrors.password}
+					errorTestID="sign-in-error-password"
+					inputRef={passwordRef}
+					label="Password"
+					onBlur={() => onFieldBlur("password")}
+					onChangeText={(next) => {
+						setPassword(next);
+						onFieldChange("password", next);
+					}}
+					secureTextEntry
+					testID="sign-in-password"
+					value={password}
+				/>
 
 				{serverErrorMessage === null ? null : (
 					<SignInErrorSummary
@@ -445,17 +409,6 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingTop: theme.gap.md,
 		rowGap: theme.gap.md,
-	},
-	field: {
-		rowGap: theme.gap.xs,
-	},
-	// The flagged surface is the error's second and third cues, beside the
-	// message's own icon, and is shared with the Collection field's input so one
-	// retune reaches all four.
-	input: (flagged: boolean) => signInInputStyle(theme, flagged),
-	label: {
-		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
 	},
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,
