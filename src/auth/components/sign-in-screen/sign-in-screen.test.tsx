@@ -5,7 +5,7 @@ import { renderRouter } from "expo-router/testing-library";
 import { StyleSheet } from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { SignInScreen } from "./sign-in-screen";
 

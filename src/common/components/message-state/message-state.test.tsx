@@ -3,26 +3,12 @@ import { render } from "@testing-library/react-native";
 import { Database } from "lucide-react-native";
 import { createRef } from "react";
 import type { View } from "react-native";
+import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import { themes } from "~/unistyles";
 import { MessageState } from "./message-state";
 
-/**
- * flattens whatever React Native accepts as a `style` prop (an object, or an
- * arbitrarily nested array of them) into the single resolved object the
- * renderer would apply.
- */
-function resolveStyle(style: unknown): Record<string, unknown> {
-	if (Array.isArray(style)) {
-		return Object.assign({}, ...style.map(resolveStyle));
-	}
-
-	return typeof style === "object" && style !== null
-		? (style as Record<string, unknown>)
-		: {};
-}
-
 describe("<MessageState>", () => {
-	// a dropped rest object type-checks and fails silently — the caller's prop
+	// A dropped rest object type-checks and fails silently — the caller's prop
 	// simply never reaches a node — so this is the only place the forwarding is
 	// actually proven.
 	it("forwards an undeclared prop and the caller's test hook to the root", () => {
@@ -40,7 +26,7 @@ describe("<MessageState>", () => {
 	});
 
 	// `ref` is an ordinary prop on React 19, so a props type that strips it leaves
-	// a caller unable to measure or focus the surface at all. asserting the
+	// a caller unable to measure or focus the surface at all. Asserting the
 	// populated instance rather than only that the call type-checks is what
 	// proves the spread carried it the whole way to the root.
 	it("populates a caller's ref with the root node it renders", () => {
@@ -60,13 +46,13 @@ describe("<MessageState>", () => {
 		expect(ref.current?.props.testID).toBe("welcome-screen");
 	});
 
-	// the consumer owns where the surface sits; the component owns what it looks
-	// like. merging last is what makes the first half true without discarding the
+	// The consumer owns where the surface sits; the component owns what it looks
+	// like. Merging last is what makes the first half true without discarding the
 	// second — and two consumers now depend on it: every call site supplies the
 	// `flex` this root deliberately omits, and the welcome screen clears its own
 	// top and bottom edges through the same prop.
 	//
-	// the asserted value is deliberately one no gutter here produces. at zero
+	// The asserted value is deliberately one no gutter here produces. At zero
 	// insets the welcome screen's override resolves to the same 24 as this root's
 	// own padding, so reversing the array would make every override lose while
 	// that screen's test stayed green and the notch stopped being cleared.
@@ -90,7 +76,7 @@ describe("<MessageState>", () => {
 		});
 	});
 
-	// how much room this surface gets is the consumer's half of the split: a root
+	// How much room this surface gets is the consumer's half of the split: a root
 	// that claimed `flex: 1` for itself could not be placed beside anything else.
 	it("claims no fill of its own", () => {
 		const { getByTestId } = render(
@@ -107,7 +93,7 @@ describe("<MessageState>", () => {
 		).not.toHaveProperty("flex");
 	});
 
-	// this surface carries the horizontal safe-area inset on behalf of every call
+	// This surface carries the horizontal safe-area inset on behalf of every call
 	// site. Unistyles' jest mock resolves every stylesheet with zero insets, so
 	// this assertion stands in for a device that reports none: the design gutter
 	// has to survive, rather than the edge collapsing to the raw inset.

@@ -75,6 +75,17 @@ the same geometry as the real thing, so nothing shifts when the content arrives.
 The placeholders pulse, and hold a steady opacity instead when the device asks
 for reduced motion.
 
+Opening either screen with no connection, and with nothing loaded yet, states
+that the device is offline instead of showing a placeholder: nothing is on its
+way for a placeholder to stand in for. Each screen names what it is waiting
+to load — collections on one, records on the other — under a live line
+saying it is waiting for a connection, which pulses and holds a steady
+opacity under reduced motion the same way the placeholders do. There is
+nothing to press: retrying gets no further while the device is offline, and
+the screen loads by itself once the connection returns. A screen that already
+has content keeps showing it rather than replacing it, so only a first load
+reaches this state.
+
 An account with no readable collections gets an empty state rather than an empty
 list, and so does a collection holding no records.
 
@@ -85,6 +96,18 @@ Both screens map a load failure the same way, differing only in the noun:
   cannot grant access.
 - A server that could not be reached, and any other unexpected response, are
   stated as failures and offer a Try again action that reloads.
+
+A failure that came from the device having no connection clears itself. Once
+the device is back online, what failed is loaded again without Try again being
+pressed, and the screen goes from the failure straight to the content. Try
+again stays the route out of the other unexpected responses, which regaining a
+connection does nothing about.
+
+What is already on screen goes stale a short while after it arrives, and a
+stale screen loads again when the app returns to the foreground. A feed left
+open across a long absence is therefore current by the time it is looked at
+again, rather than showing what the server held when the app was last put
+down.
 
 ## Switching server or account
 

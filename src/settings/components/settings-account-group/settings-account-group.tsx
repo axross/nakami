@@ -10,10 +10,11 @@ import { SettingMenuGroupBody } from "~/settings/components/setting-menu-group/s
 import { SettingMenuGroupHeading } from "~/settings/components/setting-menu-group/setting-menu-group-heading";
 import { SettingMenuGroupItem } from "~/settings/components/setting-menu-group/setting-menu-group-item";
 import { SettingMenuGroupItemLabel } from "~/settings/components/setting-menu-group/setting-menu-group-item-label";
+import { SettingMenuGroupStaticItem } from "~/settings/components/setting-menu-group/setting-menu-group-static-item";
 
 /**
- * the signed-in Account section: the current user's email and server, plus a
- * Sign out action. rendered only while authenticated (the parent gates it), so
+ * The signed-in Account section: the current user's email and server, plus a
+ * Sign out action. Rendered only while authenticated (the parent gates it), so
  * the session is always present here.
  */
 export function SettingsAccountGroup(
@@ -38,7 +39,7 @@ export function SettingsAccountGroup(
 			<SettingMenuGroupHeading>Account</SettingMenuGroupHeading>
 
 			<SettingMenuGroupBody>
-				<View style={styles.accountRow} testID="settings-account-row">
+				<SettingMenuGroupStaticItem testID="settings-account-row">
 					<View style={styles.avatar}>
 						<UserRound color={theme.colors.text.accent.base} size={22} />
 					</View>
@@ -50,13 +51,12 @@ export function SettingsAccountGroup(
 							{session.serverUrl}
 						</Text>
 					</View>
-				</View>
+				</SettingMenuGroupStaticItem>
 
 				<SettingMenuGroupItem
 					accessibilityRole="button"
 					accessibilityState={{ disabled: isPending }}
 					disabled={isPending}
-					last
 					onPress={onSignOutPress}
 					testID="settings-sign-out-row"
 				>
@@ -71,30 +71,19 @@ export function SettingsAccountGroup(
 }
 
 const styles = StyleSheet.create((theme) => ({
-	accountRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		columnGap: theme.gap.md,
-		minHeight: 48,
-		paddingVertical: theme.gap.xs,
-		paddingHorizontal: theme.gap.md,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderTopLeftRadius: theme.radius.md,
-		borderTopRightRadius: theme.radius.md,
-	},
 	accountText: {
-		rowGap: theme.gap.xs,
 		flexShrink: 1,
+		rowGap: theme.gap.xs,
 	},
-	// square by `aspectRatio`, so the pill radius clamps to half the side and
+	// Square by `aspectRatio`, so the pill radius clamps to half the side and
 	// draws a true circle — matching how the design kit already renders it.
 	avatar: {
 		alignItems: "center",
-		justifyContent: "center",
-		width: 36,
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.neutral.base,
 		borderRadius: theme.radius.pill,
+		justifyContent: "center",
+		width: 36,
 	},
 	email: {
 		...theme.typography.body,
