@@ -124,26 +124,26 @@ export async function request(
 }
 
 /**
- * Parses a body returned by {@link request} against the schema the caller
+ * parses a body returned by {@link request} against the schema the caller
  * expects, bringing a shape mismatch inside the same error taxonomy every other
- * failure mode already uses. The app points at whatever Payload server the user typed
+ * failure mode already uses. the app points at whatever Payload server the user typed
  * in, across unknown versions and configurations, so a 200 whose body does not
  * match is an ordinary runtime outcome rather than a defect — and a raw
  * `ZodError` escaping here would fall through every consumer's `kind` branch
- * instead of rendering the bad-response state. The validation error rides along
+ * instead of rendering the bad-response state. the validation error rides along
  * as the thrown error's `cause`, so the detail survives without `ZodError`
  * entering any caller's signature.
  *
- * Only the operation label and the failing issue paths are logged, because
+ * only the operation label and the failing issue paths are logged, because
  * every log line here becomes an error-tracker breadcrumb and the body is
- * untrusted server content that may carry user data. A path is built from the
+ * untrusted server content that may carry user data. a path is built from the
  * schema's own field names and array indices, so no field *value* is recorded
  * — with one exception worth naming rather than leaving to be discovered:
  * where the schema models a map (`z.record`), the failing key is itself part
- * of the path, and that key comes from the response. The only such schema in
+ * of the path, and that key comes from the response. the only such schema in
  * this app keys by collection slug, which is a schema-level identifier rather
  * than user content, and identifiers are what a parse-failure line is supposed
- * to carry. A schema keying a map by something sensitive would need this
+ * to carry. a schema keying a map by something sensitive would need this
  * revisited.
  */
 export function parseResponse<Schema extends z.ZodType>(

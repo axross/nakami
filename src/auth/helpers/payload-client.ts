@@ -28,7 +28,7 @@ function endpoint(
 	return `${serverBaseUrl(serverUrl)}/api/${encodeURIComponent(collectionSlug)}${path}`;
 }
 
-/** Exchanges email + password for a session token. */
+/** exchanges email + password for a session token. */
 export async function login(
 	server: PayloadServer,
 	credentials: { email: string; password: string },
@@ -42,7 +42,7 @@ export async function login(
 	return parseResponse("login", loginResponseSchema, body);
 }
 
-/** Re-validates a token; `user` is null when the token is no longer valid. */
+/** re-validates a token; `user` is null when the token is no longer valid. */
 export async function fetchMe(server: PayloadServer, token: string) {
 	const body = await request("fetchMe", endpoint(server, "/me"), {
 		method: "GET",
@@ -52,7 +52,7 @@ export async function fetchMe(server: PayloadServer, token: string) {
 	return parseResponse("fetchMe", meResponseSchema, body);
 }
 
-/** Exchanges a still-valid token for a fresh one with a later expiry. */
+/** exchanges a still-valid token for a fresh one with a later expiry. */
 export async function refreshToken(server: PayloadServer, token: string) {
 	const body = await request(
 		"refreshToken",
@@ -69,7 +69,7 @@ export async function refreshToken(server: PayloadServer, token: string) {
 	return parseResponse("refreshToken", refreshResponseSchema, body);
 }
 
-/** Best-effort remote logout; the caller clears local state regardless. */
+/** best-effort remote logout; the caller clears local state regardless. */
 export async function logout(
 	server: PayloadServer,
 	token: string,

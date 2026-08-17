@@ -177,7 +177,7 @@ describe("storedSessionCodec", () => {
 		);
 
 		expect(result.success).toBe(false);
-		// The stored entry carries a bearer token, and this error is reported to
+		// the stored entry carries a bearer token, and this error is reported to
 		// the error tracker, so neither the issues nor the message may echo it.
 		const serialized = JSON.stringify(result.error?.issues ?? []);
 		expect(serialized).not.toContain(validSession.token);

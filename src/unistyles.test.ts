@@ -17,7 +17,7 @@ function leafPaths(value: unknown, prefix = ""): string[] {
 }
 
 describe("themes", () => {
-	// A surface can only reference a token that exists in both schemes; a name
+	// a surface can only reference a token that exists in both schemes; a name
 	// present in one theme alone renders as `undefined` in the other.
 	it("declares identical token shapes in light and dark", () => {
 		expect(leafPaths(themes.dark).sort()).toEqual(
@@ -25,7 +25,7 @@ describe("themes", () => {
 		);
 	});
 
-	// Every text style in the app spreads a role rather than setting its own
+	// every text style in the app spreads a role rather than setting its own
 	// metrics, so nothing below is checked by the type-checker at the use site:
 	// a role that lost a property would silently fall back to the platform
 	// default on every screen that applies it.
@@ -47,14 +47,14 @@ describe("themes", () => {
 				},
 			);
 
-			// Weight lives in the font file (InnovatorGrotesk-SemiBold vs -Regular).
-			// Setting `fontWeight` alongside one makes React Native synthesize a
+			// weight lives in the font file (InnovatorGrotesk-SemiBold vs -Regular).
+			// setting `fontWeight` alongside one makes React Native synthesize a
 			// second weight on top of the real one.
 			it.each(roles)("leaves weight to the font file in %s", (_, role) => {
 				expect(role).not.toHaveProperty("fontWeight");
 			});
 
-			// Only these three faces are bundled and registered in `app.json`; a
+			// only these three faces are bundled and registered in `app.json`; a
 			// role naming anything else renders in the platform default instead.
 			it.each(roles)("names a bundled font family in %s", (_, role) => {
 				expect([
@@ -66,11 +66,11 @@ describe("themes", () => {
 		},
 	);
 
-	// Both loading skeletons hand `easing.standard` to reanimated, which runs it
+	// both loading skeletons hand `easing.standard` to reanimated, which runs it
 	// on the UI thread and rejects a function the worklets Babel plugin never
-	// transformed. Nothing at a use site catches that: the curve is read through
+	// transformed. nothing at a use site catches that: the curve is read through
 	// the theme like any other token, and a missing directive surfaces only as a
-	// failed animation on a device. These assertions are also what confirm the
+	// failed animation on a device. these assertions are also what confirm the
 	// metadata survives being registered as part of the theme object.
 	describe.each(["light", "dark"] as const)("%s theme easing", (name) => {
 		const { standard } = themes[name].easing;
@@ -79,13 +79,13 @@ describe("themes", () => {
 			expect(standard).toHaveProperty("__workletHash");
 		});
 
-		// An empty closure is what makes the curve shareable on its own; a worklet
+		// an empty closure is what makes the curve shareable on its own; a worklet
 		// that captured a module-scope binding would drag that binding across too.
 		it("captures nothing from module scope in standard", () => {
 			expect(standard).toHaveProperty("__closure", {});
 		});
 
-		// The ease-in-out quad `withTiming` already defaults to, so naming the
+		// the ease-in-out quad `withTiming` already defaults to, so naming the
 		// curve explicitly leaves every existing animation rendering as it did.
 		it("eases in and out around the midpoint in standard", () => {
 			expect(standard(0)).toBe(0);
@@ -96,7 +96,7 @@ describe("themes", () => {
 		});
 	});
 
-	// A record card's height is fixed by RECORD_CARD_LINE (22), which the title
+	// a record card's height is fixed by RECORD_CARD_LINE (22), which the title
 	// row reaches from its own role rather than from an override at the use site.
 	it("gives heading, body, and code the record card's 22pt line box", () => {
 		expect(themes.light.typography.heading.lineHeight).toBe(22);

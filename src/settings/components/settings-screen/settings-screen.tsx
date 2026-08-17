@@ -103,12 +103,12 @@ export function SettingsScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the scrolled content,
 	// not on the `ScrollView`, which would inset its scroll indicators and leave
 	// the rows stopping short of the screen edge.
 	//
-	// The horizontal value is the bare inset rather than `Math.max(inset,
+	// the horizontal value is the bare inset rather than `Math.max(inset,
 	// gutter)`, which every other surface here uses: this container has no
 	// horizontal gutter of its own. its children carry it — `SettingMenuGroupBody`,
 	// `SettingMenuGroupHeading`, and the two paragraphs below each set

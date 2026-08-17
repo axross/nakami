@@ -87,7 +87,7 @@ const styles = StyleSheet.create((theme) => ({
 		borderColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.pill,
 		borderWidth: theme.borderWidth.hairline,
-		// Fixed pill height (a fixed element dimension, not scale spacing) keeps
+		// fixed pill height (a fixed element dimension, not scale spacing) keeps
 		// the chip compact around its id text and equal to the row line box; the
 		// theme's smallest gap step (xs: 8) as vertical padding would make the
 		// pill far too tall.
@@ -100,12 +100,12 @@ const styles = StyleSheet.create((theme) => ({
 		...theme.typography.code,
 		color: theme.colors.text.neutral.base,
 	},
-	// The title row and the metadata row are each one fixed line box, so a card's
+	// the title row and the metadata row are each one fixed line box, so a card's
 	// height is deterministic — every card is paddingV + LINE + gap + LINE +
-	// paddingV tall regardless of title length or whether a chip shows. The title
+	// paddingV tall regardless of title length or whether a chip shows. the title
 	// row gets there from its own text role's 22pt line box; this row is held
 	// open explicitly, because its caption text is shorter than that and the chip
-	// that would otherwise set the height is absent on a title-less record. The
+	// that would otherwise set the height is absent on a title-less record. the
 	// loading skeleton mirrors these exact metrics so the list doesn't reflow
 	// when records arrive.
 	meta: {

@@ -53,7 +53,7 @@ function CollectionRow({
 }
 
 /**
- * A single collection row that opens the collection's record list. Navigation
+ * a single collection row that opens the collection's record list. navigation
  * is declarative via `Link`; the row body lives in
  * {@link CollectionRow} so `Link asChild` targets a wrapper component rather
  * than the Unistyles-styled `Pressable` directly (see that component's note).
@@ -63,9 +63,9 @@ function CollectionRow({
  * `Link asChild` slots its child through `@radix-ui/react-slot`, which composes
  * a `style` by spreading it into an object literal — which throws in
  * development for the array form, and silently detaches a Unistyles style from
- * the updates it applies through its own reference. A `style` accepted here
+ * the updates it applies through its own reference. a `style` accepted here
  * would type-check and not work, which is the exact failure this component's
- * props contract exists to remove. Size and place the row from the list's
+ * props contract exists to remove. size and place the row from the list's
  * `contentContainerStyle` instead.
  */
 export function CollectionListItem({

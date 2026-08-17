@@ -58,7 +58,7 @@ function problemCountMessage(count: number): string {
 }
 
 /**
- * What a screen reader is told after a press that produced messages: the
+ * what a screen reader is told after a press that produced messages: the
  * problem count when the summary is on screen, and otherwise the one message
  * that is, since announcing "1 problems to fix" would say less than the message
  * itself does.
@@ -75,12 +75,12 @@ function announcementFor(errors: SignInFormErrors): string | null {
 }
 
 /**
- * Announces a message to a screen reader on iOS. The error components carry
+ * announces a message to a screen reader on iOS. the error components carry
  * `accessibilityLiveRegion`, which React Native implements on Android only —
  * this is the other half, and the platform guard is what stops Android from
  * announcing the same message twice.
  *
- * Queued rather than spoken over what is already being said. Every message here
+ * queued rather than spoken over what is already being said. every message here
  * is raised by an interaction VoiceOver is itself narrating — a field losing
  * focus, or the submit button taking it — and an unqueued announcement is
  * clipped by that narration. `queue` is an iOS-only option, which this guard
@@ -95,17 +95,17 @@ function announce(message: string): void {
 }
 
 /**
- * The Payload sign-in form: server URL, auth collection (defaulted), email, and
- * password. The Server URL field pre-fills on mount with the last successful
+ * the Payload sign-in form: server URL, auth collection (defaulted), email, and
+ * password. the Server URL field pre-fills on mount with the last successful
  * sign-in's endpoint (kept in the keychain) so a returning user need not retype
- * it. On success it persists the session (via the sign-in mutation), which
+ * it. on success it persists the session (via the sign-in mutation), which
  * flips the app to authenticated — the root navigator then swaps this
- * signed-out stack for the tab UI. Failures surface inline without leaving the
+ * signed-out stack for the tab UI. failures surface inline without leaving the
  * screen.
  *
  * Sign in stays pressable whenever no submission is in flight: the press is
  * what validates the form, so a blank field is answered with a message naming
- * it rather than with a control the user cannot press. Field-level messages
+ * it rather than with a control the user cannot press. field-level messages
  * render beside their input; the server's own rejection belongs to the form and
  * keeps the shared slot above the button.
  */
@@ -130,7 +130,7 @@ export function SignInScreen(): JSX.Element {
 
 	const serverErrorMessage = error === null ? null : messageForError(error);
 
-	// The server's rejection is announced the same way a validation failure is;
+	// the server's rejection is announced the same way a validation failure is;
 	// the banner's own live region covers Android.
 	useEffect(() => {
 		if (serverErrorMessage !== null) {
@@ -138,8 +138,8 @@ export function SignInScreen(): JSX.Element {
 		}
 	}, [serverErrorMessage]);
 
-	// Editing a field drops the server's rejection — it was about the values the
-	// user has just changed. A field already showing a message is re-checked
+	// editing a field drops the server's rejection — it was about the values the
+	// user has just changed. a field already showing a message is re-checked
 	// against the new value, so the message clears the moment it stops being
 	// true; a quiet field stays quiet until it is blurred or the form submitted.
 	const onFieldChange = useCallback(
@@ -167,8 +167,8 @@ export function SignInScreen(): JSX.Element {
 		[serverUrl, collection, email, password, error, reset],
 	);
 
-	// Leaving a field checks that one field, so an invalid value is reported
-	// where the user left it rather than waiting for a press of Sign in. Every
+	// leaving a field checks that one field, so an invalid value is reported
+	// where the user left it rather than waiting for a press of Sign in. every
 	// other field's message is left exactly as it stands.
 	const onFieldBlur = useCallback(
 		(field: SignInField) => {
@@ -182,8 +182,8 @@ export function SignInScreen(): JSX.Element {
 
 			setFieldErrors((current) => ({ ...current, [field]: message }));
 
-			// Announced beside the state write rather than inside the updater,
-			// which stays pure. A message identical to the one the field is already
+			// announced beside the state write rather than inside the updater,
+			// which stays pure. a message identical to the one the field is already
 			// showing is not re-announced: a second blur of an untouched field has
 			// told the user nothing they have not heard.
 			if (message !== undefined && message !== fieldErrors[field]) {
@@ -193,7 +193,7 @@ export function SignInScreen(): JSX.Element {
 		[serverUrl, collection, email, password, fieldErrors],
 	);
 
-	// Held in a ref so the mount effect below can take the same path a keystroke
+	// held in a ref so the mount effect below can take the same path a keystroke
 	// does without listing a callback that changes on every render — which would
 	// re-read the keychain each time the user types.
 	const onFieldChangeRef = useRef(onFieldChange);
@@ -201,11 +201,11 @@ export function SignInScreen(): JSX.Element {
 		onFieldChangeRef.current = onFieldChange;
 	});
 
-	// Pre-fill the server URL with the last successful sign-in's endpoint, but
+	// pre-fill the server URL with the last successful sign-in's endpoint, but
 	// never overwrite input the user has already started typing before this
 	// keychain read resolves.
 	//
-	// The arriving value goes through the same clearing path an edit does. Press
+	// the arriving value goes through the same clearing path an edit does. press
 	// Sign in, or blur the field, before this read settles and the field would
 	// otherwise end up holding a valid URL while still carrying "Enter your
 	// server URL." — with the flagged border, the composed accessible name, and a
@@ -246,10 +246,10 @@ export function SignInScreen(): JSX.Element {
 		mutate(values);
 	}, [serverUrl, collection, email, password, mutate]);
 
-	// The summary links to the first offending field rather than focusing it on
+	// the summary links to the first offending field rather than focusing it on
 	// press, which would open the keyboard on every failed submit.
 	//
-	// Every field has an input to focus by the time it can be at fault, the
+	// every field has an input to focus by the time it can be at fault, the
 	// Collection field included: its value starts non-empty and is only ever
 	// emptied through the input the pencil reveals, so it cannot be flagged
 	// while it is still showing plain text.
@@ -310,7 +310,7 @@ export function SignInScreen(): JSX.Element {
 				/>
 
 				<SignInCollectionField
-					// Spread as one discriminated object: the field accepts `error`
+					// spread as one discriminated object: the field accepts `error`
 					// only alongside `editing: true`, so the two cannot be handed over
 					// as independent props.
 					{...(editingCollection
@@ -398,8 +398,8 @@ export function SignInScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// The stack header clears the top edge, so this screen owns the bottom and
-	// the horizontal pair. The insets sit on the scrolled content rather than on
+	// the stack header clears the top edge, so this screen owns the bottom and
+	// the horizontal pair. the insets sit on the scrolled content rather than on
 	// the `ScrollView` itself: padding the scroll view would inset its scroll
 	// indicators with it and leave the form stopping short of the screen edge
 	// with a dead band beyond it.
@@ -423,7 +423,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		justifyContent: "center",
 		minHeight: 50,
 	},
-	// Reserved for a submission already in flight, which is the only state this
+	// reserved for a submission already in flight, which is the only state this
 	// button is disabled in; the spinner and the working-state label beside it
 	// are what keep that reading as working rather than as blocked.
 	submitDisabled: {
