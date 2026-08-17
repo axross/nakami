@@ -21,7 +21,7 @@ component adds its row here.
 
 | Component       | Purpose                                                                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `message-state` | Centred mark, title, and subtitle with an optional action slot — the shared shape behind the feature empty, error, and placeholder screens |
+| `message-state` | Centred mark, title, and subtitle with optional status and action slots — the shared shape behind the feature empty, error, offline, and placeholder screens |
 
 ## One file per part
 
@@ -68,3 +68,10 @@ launch shows what was decided.
 A bundled asset MUST be sized for its largest rendered use rather than exported at the
 design tool's original size. Unlike a remote image, it ships inside every install
 whether or not any screen draws it, so the cost is paid by every user at download time.
+
+`expo-image` MUST NOT be removed from the dependency manifest while the rules above
+stand, even though nothing imports it yet. No surface in `src/` renders an image, so a
+sweep that looks for import sites finds the package unreferenced and reads as removable
+— and removing it would delete the mechanism those rules mandate, leaving the first
+image surface to re-choose one. The keep is deliberate, and this is where a sweep that
+reaches `expo-image` finds that answer instead of filing a finding.

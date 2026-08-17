@@ -308,6 +308,77 @@ yet. A change that unlocks orientation MUST re-derive the pairing rather than in
 it, and that is the point at which raising it upstream on
 [`axross/skills`](https://github.com/axross/skills) becomes worth the human's go-ahead.
 
+## The e2e coverage gate counts a scenario covered on `declared`
+
+The installed `end-to-end-testing` capability's
+[scenario-coverage.md](../../.claude/skills/end-to-end-testing/references/scenario-coverage.md)
+states a MUST:
+
+> MUST count a scenario as covered only when a **passing** test carries its tag; a
+> failing or skipped test leaves it uncovered.
+
+`e2e/check-scenario-coverage.mjs` hands the core one result per flow with
+`status: "declared"`, and `declared` is not passing. Every row this gate reports as
+covered is therefore counted on something that rule does not accept.
+
+The same reference is why it cannot do otherwise, in its closing section:
+
+> SHOULD keep the gate fast and free of the system under test (pure file/report
+> bookkeeping) so it can run anywhere, including where the app cannot be launched.
+
+A gate that never launches the app has observed no execution, so it has no pass to
+count — one static gate cannot satisfy both rules. This repository keeps the static
+one, because that is what lets the `E2E Scenario Coverage` job run on a plain Ubuntu
+runner with no simulator and catch a tag error on every pull request, and `declared`
+is the honest word for what such a run saw. Reporting `passed` for a flow nobody ran
+would satisfy the MUST by lying about the thing it exists to protect.
+[end-to-end-testing.md](./end-to-end-testing.md) states the repository's answer in
+full, including what a green gate does and does not prove.
+
+The deviation ends, rather than being re-argued, the moment an adapter reads a real
+Maestro report: the core already counts a scenario covered only when a result
+carrying its tag neither failed nor was skipped, so true statuses satisfy that MUST
+with no change to the join. Until that exists, `status: "declared"` MUST NOT be
+raised as a fresh finding — and a green gate MUST NOT be reported as e2e
+verification, which is that same capability's rule rather than a departure from it.
+
+## The e2e coverage gate's own modules carry no unit test
+
+The installed `unit-testing` capability's
+[testing-scope.md](../../.claude/skills/unit-testing/references/testing-scope.md)
+states a MUST:
+
+> MUST add or update unit tests when a non-trivial pure helper, schema, parser,
+> serializer, validator, or handler changes.
+
+`e2e/scenario-coverage.mjs` holds a markdown table parser and the catalog-to-tag join,
+and `e2e/check-scenario-coverage.mjs` hand-reads YAML block sequences, inline arrays,
+quoting, and comments. All of it is exactly that shape, and none of it has a unit
+test. The evidence carried instead is a manual mutation check, recorded in the pull
+request that introduced the gate — real evidence, but run once by hand rather than on
+every change.
+
+**This one is a deferral, not a resolved collision.** The other entries above record a
+rule this repository answers differently on purpose; this records a rule it means to
+satisfy and has not yet. The distinction matters to whoever reads it next: there is
+nothing here to argue with, only work that has not landed.
+
+The reasoning that deferred it is Jest-specific, and only half of it survives.
+`jest.config.cjs` matches `src/**/*.test.{ts,tsx}` only, so reaching these modules
+through Jest means widening `testMatch` and taking on ESM-in-Jest configuration in a
+file the [README](../../README.md) lists among those that fail globally — still true,
+and still a reason not to use Jest here. It says nothing about `node --test`, which
+reads these `.mjs` modules directly with no configuration at all; two specs written
+against the shipped core pass in about 110ms. So the gap is narrower than it first
+looked: the core is testable as it stands, while the adapter has to be refactored to
+be importable without executing the gate, since its helpers are module-private and
+loading the file runs the whole check and can call `process.exit(1)`.
+
+[#139](https://github.com/axross/nakami/issues/139) carries that work, with the
+mutation check's own cases as its test list. Until it lands, the absence of these
+tests MUST NOT be raised as a fresh finding — and this entry MUST be removed by the
+change that adds them, rather than left behind describing a gap that has closed.
+
 ## A form error reaches assistive technology by two substituted mechanisms
 
 The installed `high-fidelity-ui-design` capability's
@@ -354,7 +425,7 @@ cross-platform description association. Until then a flagged input MUST carry it
 message in its accessible name, and a message surface MUST carry both the live region
 and the iOS announcement rather than either alone.
 
-## Four styles keep a boolean as a dynamic-function argument
+## Three styles keep a boolean as a dynamic-function argument
 
 The installed `react-component-styling` capability's
 [unistyles.md](../../.claude/skills/react-component-styling/references/unistyles.md)
@@ -365,8 +436,9 @@ states a MUST:
 > chain of dynamic-function arguments.
 
 Most of this repository follows it — `sign-in-text-field.tsx` is a component per
-input precisely so each can select its own `flagged` variant. Four styles cannot,
-and each is blocked by the same two facts about Unistyles 3.3.0 rather than by
+input precisely so each can select its own `flagged` variant, and a setting menu
+row selects both its `position` and its `disabled` state. Three styles cannot, and
+each is blocked by the same two facts about Unistyles 3.3.0 rather than by
 preference.
 
 **`useVariants` selects once per component body.** It is typed
@@ -389,16 +461,22 @@ rule asks for.
 
 | Style | Argument | Why it stays |
 | --- | --- | --- |
-| `setting-menu-group-item.tsx:43` `item` | `first`, `last`, `pressed`, `disabled` | `pressed`. the same rule's third clause forbids a style being half variant and half dynamic function, so the whole style stays one |
 | `collection-list-item.tsx:106` `row` | `pressed` | `pressed` |
-| `collections-message-state.tsx:44` `button` | `pressed` | `pressed` |
+| `collections-message-state.tsx:63` `button` | `pressed` | `pressed` |
 | `collection-list-skeleton.tsx:120` `row` | `divided` | rendered through `ROW_WIDTHS.map(…)`, so the value differs per row within one body |
+
+`setting-menu-group-item.tsx` shows the third shape a `pressed` style can take and
+is **not** a deviation: its `item` is a static style carrying `position` and
+`disabled` variant groups, and the press feedback is a separate `itemPressed` style
+the render prop selects from the array. Nothing there is a dynamic function, so the
+rule's first clause is satisfied and only its own comment records why `pressed`
+stays outside the variant groups.
 
 Two neighbouring styles look similar and are **not** deviations:
 `collection-records-skeleton.tsx:141` and `collection-list-skeleton.tsx:109` both
 take a width, which the same rule's next clause requires stay a dynamic function.
 
-The three `pressed` styles convert the moment Unistyles offers a press state a
+The two `pressed` styles convert the moment Unistyles offers a press state a
 component body can read, or its native `Pressable` honours the `variants` prop it
 already accepts. The skeleton row converts when its rows become a component of
 their own, which is worth doing for its own reasons rather than for this rule.

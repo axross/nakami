@@ -404,24 +404,24 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// indicators with it and leave the form stopping short of the screen edge
 	// with a dead band beyond it.
 	content: {
-		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
-		paddingTop: theme.gap.md,
 		rowGap: theme.gap.md,
+		paddingTop: theme.gap.md,
+		paddingBottom: Math.max(rt.insets.bottom, theme.gap.md),
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	submit: {
+		flexDirection: "row",
 		alignItems: "center",
+		justifyContent: "center",
+		columnGap: theme.gap.xs,
+		minHeight: 50,
 		backgroundColor: theme.colors.solid.accent.base,
 		borderRadius: theme.radius.md,
-		columnGap: theme.gap.xs,
-		flexDirection: "row",
-		justifyContent: "center",
-		minHeight: 50,
 	},
 	// reserved for a submission already in flight, which is the only state this
 	// button is disabled in; the spinner and the working-state label beside it

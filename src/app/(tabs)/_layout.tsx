@@ -7,8 +7,8 @@ export default function TabsLayout(): JSX.Element {
 	const { theme } = useUnistyles();
 
 	// standard JS tabs (React Navigation bottom tabs via expo-router's `Tabs`),
-	// NOT expo-router's `unstable-native-tabs`: the experimental native
-	// fragment-backed tab host crashes on Android's New Architecture
+	// never expo-router's `unstable-native-tabs`: the experimental native
+	// Fragment-backed tab host crashes on Android's New Architecture
 	// (react-native-screens). the tab group is only mounted while authenticated
 	// (the root navigator gates it), so the three-tab set is fixed.
 	return (

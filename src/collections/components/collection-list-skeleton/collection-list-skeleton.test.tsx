@@ -1,22 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
+import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import { themes } from "~/unistyles";
 import { CollectionListSkeleton } from "./collection-list-skeleton";
-
-/**
- * flattens whatever React Native accepts as a `style` prop (an object, or an
- * arbitrarily nested array of them) into the single resolved object the
- * renderer would apply.
- */
-function resolveStyle(style: unknown): Record<string, unknown> {
-	if (Array.isArray(style)) {
-		return Object.assign({}, ...style.map(resolveStyle));
-	}
-
-	return typeof style === "object" && style !== null
-		? (style as Record<string, unknown>)
-		: {};
-}
 
 describe("<CollectionListSkeleton>", () => {
 	// the hook and the accessible label now sit on the root rather than on the
@@ -42,7 +28,7 @@ describe("<CollectionListSkeleton>", () => {
 	});
 
 	// how much room the skeleton gets is the consumer's half of the split; the
-	// collections screen passes the fill in through `style`.
+	// Collections screen passes the fill in through `style`.
 	it("claims no fill of its own", () => {
 		const { getByTestId } = render(<CollectionListSkeleton />);
 		const resolved = resolveStyle(

@@ -1,11 +1,9 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
-import { StyleSheet } from "react-native";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
-import { themes } from "~/unistyles";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { SettingsAccountGroup } from "./settings-account-group";
 
 // leave the sign-out request pending, so the row's in-flight state stays on
@@ -54,7 +52,10 @@ describe("<SettingsAccountGroup>", () => {
 	});
 
 	// a row that only stops responding reads as broken rather than as busy, so
-	// the in-flight sign-out has to say so in the label and in the fill.
+	// the in-flight sign-out has to say so. the fill it also changes to is a
+	// variant of `SettingMenuGroupItem`, which the Unistyles jest mock strips —
+	// setting-menu-group-item.test.tsx asserts that selection, and what is left
+	// observable here is the label, the spinner, and the disabled state.
 	it("shows the sign-out as working once it is in flight", async () => {
 		const { getByTestId, getByText, queryByText } = renderAccountGroup();
 
@@ -70,8 +71,5 @@ describe("<SettingsAccountGroup>", () => {
 		expect(row.props.accessibilityState).toEqual({ disabled: true });
 		// the spinner stands in for the `LogOut` icon while the row is disabled.
 		expect(getByTestId("settings-sign-out-spinner")).toBeTruthy();
-		expect(StyleSheet.flatten(row.props.style).backgroundColor).toBe(
-			themes.light.colors.surface.neutral.base,
-		);
 	});
 });

@@ -2,7 +2,7 @@ import * as SecureStore from "expo-secure-store";
 import { type Session, storedSessionCodec } from "~/auth/models/session";
 import { reportError } from "~/core/helpers/error-reporting";
 
-// the single keychain entry that holds the session. Session material is a
+// the single keychain entry that holds the session. session material is a
 // bearer credential, so it lives only in the platform keychain — never the
 // Drizzle database or plain key-value storage.
 const SESSION_KEY = "nakami.session";

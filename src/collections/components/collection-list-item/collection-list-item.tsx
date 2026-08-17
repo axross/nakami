@@ -88,30 +88,30 @@ export function CollectionListItem({
 const styles = StyleSheet.create((theme) => ({
 	label: {
 		...theme.typography.body,
-		color: theme.colors.text.neutral.intense,
 		flexShrink: 1,
+		color: theme.colors.text.neutral.intense,
 	},
 	monogram: {
 		alignItems: "center",
+		justifyContent: "center",
+		width: 34,
 		aspectRatio: 1,
 		backgroundColor: theme.colors.surface.accent.base,
 		borderRadius: theme.radius.sm,
-		justifyContent: "center",
-		width: 34,
 	},
 	monogramText: {
 		...theme.typography.heading,
 		color: theme.colors.text.accent.base,
 	},
 	row: (pressed: boolean) => ({
-		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		columnGap: theme.gap.sm,
 		flexDirection: "row",
+		alignItems: "center",
+		columnGap: theme.gap.sm,
 		minHeight: 56,
-		opacity: pressed ? 0.6 : 1,
-		paddingHorizontal: theme.gap.md,
 		paddingVertical: theme.gap.xs,
+		paddingHorizontal: theme.gap.md,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		opacity: pressed ? 0.6 : 1,
 	}),
 	spring: {
 		flex: 1,

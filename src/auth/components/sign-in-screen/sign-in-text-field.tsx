@@ -92,11 +92,11 @@ export const styles = StyleSheet.create((theme) => ({
 	// selected would still render a defined surface.
 	input: {
 		...theme.typography.body,
-		borderRadius: theme.radius.md,
-		borderWidth: theme.borderWidth.hairline,
-		color: theme.colors.text.neutral.intense,
 		minHeight: 48,
 		paddingHorizontal: theme.gap.sm,
+		color: theme.colors.text.neutral.intense,
+		borderWidth: theme.borderWidth.hairline,
+		borderRadius: theme.radius.md,
 		variants: {
 			flagged: {
 				default: {

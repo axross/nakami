@@ -5,11 +5,17 @@ import { renderRouter } from "expo-router/testing-library";
 import { StyleSheet } from "react-native";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
-import { createTestQueryClient } from "~/common/helpers/test-query-client";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { SettingsScreen } from "./settings-screen";
 
+// `addBreadcrumb` is not used by this screen: it is reached at import time,
+// because the shared query client logs the start of its launch-time
+// connectivity probe while registering `onlineManager` at module scope, and the
+// root logger's breadcrumb transport forwards every line here. a factory that
+// names only what the screen calls makes the whole suite fail to load.
 jest.mock("@sentry/react-native", () => ({
+	addBreadcrumb: jest.fn(),
 	showFeedbackWidget: jest.fn(),
 }));
 

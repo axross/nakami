@@ -73,28 +73,28 @@ export function CollectionRecordCard({
 
 const styles = StyleSheet.create((theme) => ({
 	card: {
+		gap: theme.gap.xs,
+		paddingVertical: theme.gap.sm,
+		paddingHorizontal: theme.gap.md,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
 		borderWidth: theme.borderWidth.hairline,
-		gap: theme.gap.xs,
-		paddingHorizontal: theme.gap.md,
-		paddingVertical: theme.gap.sm,
+		borderRadius: theme.radius.md,
 	},
 	chip: {
 		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.bare,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.pill,
-		borderWidth: theme.borderWidth.hairline,
+		justifyContent: "center",
 		// fixed pill height (a fixed element dimension, not scale spacing) keeps
 		// the chip compact around its id text and equal to the row line box; the
 		// theme's smallest gap step (xs: 8) as vertical padding would make the
 		// pill far too tall.
 		height: RECORD_CARD_LINE,
-		justifyContent: "center",
 		maxWidth: 140,
 		paddingHorizontal: theme.gap.xs,
+		backgroundColor: theme.colors.foundation.neutral.bare,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderWidth: theme.borderWidth.hairline,
+		borderRadius: theme.radius.pill,
 	},
 	chipText: {
 		...theme.typography.code,
@@ -109,15 +109,15 @@ const styles = StyleSheet.create((theme) => ({
 	// loading skeleton mirrors these exact metrics so the list doesn't reflow
 	// when records arrive.
 	meta: {
+		flexDirection: "row",
 		alignItems: "center",
 		columnGap: theme.gap.xs,
-		flexDirection: "row",
 		height: RECORD_CARD_LINE,
 	},
 	metaText: {
 		...theme.typography.caption,
-		color: theme.colors.text.neutral.base,
 		flexShrink: 1,
+		color: theme.colors.text.neutral.base,
 	},
 	title: {
 		...theme.typography.heading,

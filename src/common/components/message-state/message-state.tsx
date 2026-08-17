@@ -4,10 +4,11 @@ import { Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
- * a centered "mark + title + subtitle" surface with an optional action slot —
- * the shared shape behind feature empty/error/placeholder screens. callers pass
- * their own action element so each keeps its distinct control (a navigation
- * link, a retry button).
+ * a centered "mark + title + subtitle" surface with optional status and action
+ * slots — the shared shape behind feature empty/error/placeholder screens.
+ * callers pass their own elements so each keeps its distinct control (a
+ * navigation link, a retry button) and its own read-out of what the screen is
+ * waiting on.
  *
  * the root claims no space of its own: a consumer that gives it a whole screen
  * passes `flex: 1` through `style`.
@@ -23,6 +24,7 @@ export function MessageState({
 	iconColor,
 	title,
 	subtitle,
+	status,
 	action,
 	style,
 	...props
@@ -32,6 +34,7 @@ export function MessageState({
 		iconColor?: string;
 		title: string;
 		subtitle: string;
+		status?: ReactNode;
 		action?: ReactNode;
 	}
 >): JSX.Element {
@@ -46,6 +49,7 @@ export function MessageState({
 			<Text style={styles.title}>{title}</Text>
 			<Text style={styles.subtitle}>{subtitle}</Text>
 
+			{status}
 			{action}
 		</View>
 	);
@@ -54,12 +58,12 @@ export function MessageState({
 const styles = StyleSheet.create((theme, rt) => ({
 	mark: {
 		alignItems: "center",
+		justifyContent: "center",
+		width: 66,
 		aspectRatio: 1,
+		marginBottom: theme.gap.xs,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderRadius: theme.radius.lg,
-		justifyContent: "center",
-		marginBottom: theme.gap.xs,
-		width: 66,
 	},
 	// deliberately no fill here: how much room the surface gets is the consumer's
 	// half of the split, so do not "fix" this by adding one.
@@ -75,18 +79,18 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// precedence is involved in reading which value applies.
 	root: {
 		alignItems: "center",
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		justifyContent: "center",
-		paddingBottom: theme.gap.lg,
-		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
-		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
-		paddingTop: theme.gap.lg,
 		rowGap: theme.gap.xs,
+		paddingTop: theme.gap.lg,
+		paddingBottom: theme.gap.lg,
+		paddingStart: Math.max(rt.insets.left, theme.gap.lg),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.lg),
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	subtitle: {
 		...theme.typography.body,
-		color: theme.colors.text.neutral.base,
 		maxWidth: 280,
+		color: theme.colors.text.neutral.base,
 		textAlign: "center",
 	},
 	title: {
