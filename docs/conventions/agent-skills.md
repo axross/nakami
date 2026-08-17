@@ -354,6 +354,63 @@ cross-platform description association. Until then a flagged input MUST carry it
 message in its accessible name, and a message surface MUST carry both the live region
 and the iOS announcement rather than either alone.
 
+## Four styles keep a boolean as a dynamic-function argument
+
+The installed `react-component-styling` capability's
+[unistyles.md](../../.claude/skills/react-component-styling/references/unistyles.md)
+states a MUST:
+
+> MUST express a closed set of options — a variant, an intent, a size, a boolean
+> state — as variants and compound variants, not as a conditional style array or a
+> chain of dynamic-function arguments.
+
+Most of this repository follows it — `sign-in-text-field.tsx` is a component per
+input precisely so each can select its own `flagged` variant. Four styles cannot,
+and each is blocked by the same two facts about Unistyles 3.3.0 rather than by
+preference.
+
+**`useVariants` selects once per component body.** It is typed
+`useVariants: (variants: ExtractVariantNames<T>) => void` on the stylesheet
+(`node_modules/react-native-unistyles/src/types/stylesheet.ts:84`) and the rule's
+own fourth clause requires it be called under the rules of hooks. A component
+rendering several elements of one style with different values therefore cannot
+express them, because it gets one selection for all of them.
+
+**`pressed` is only readable inside the render prop.** React Native supplies it to
+`Pressable`'s `style={({ pressed }) => …}` callback, which is not a component body,
+so no hook may be called there. Unistyles ships its own `Pressable` with a
+`variants` prop, but the native implementation destructures it and never uses it
+(`node_modules/react-native-unistyles/src/components/native/Pressable.native.tsx:27`)
+— it is a web-only affordance, and it takes a caller-supplied static record rather
+than the live press state in any case. Expressing `pressed` as a variant would mean
+lifting it into component state through `onPressIn`/`onPressOut`, which changes how
+these components handle presses; that is a behaviour change, and it is not one this
+rule asks for.
+
+| Style | Argument | Why it stays |
+| --- | --- | --- |
+| `setting-menu-group-item.tsx:43` `item` | `first`, `last`, `pressed`, `disabled` | `pressed`. the same rule's third clause forbids a style being half variant and half dynamic function, so the whole style stays one |
+| `collection-list-item.tsx:106` `row` | `pressed` | `pressed` |
+| `collections-message-state.tsx:44` `button` | `pressed` | `pressed` |
+| `collection-list-skeleton.tsx:120` `row` | `divided` | rendered through `ROW_WIDTHS.map(…)`, so the value differs per row within one body |
+
+Two neighbouring styles look similar and are **not** deviations:
+`collection-records-skeleton.tsx:141` and `collection-list-skeleton.tsx:109` both
+take a width, which the same rule's next clause requires stay a dynamic function.
+
+The three `pressed` styles convert the moment Unistyles offers a press state a
+component body can read, or its native `Pressable` honours the `variants` prop it
+already accepts. The skeleton row converts when its rows become a component of
+their own, which is worth doing for its own reasons rather than for this rule.
+
+**One cost of following the rule is worth knowing before extending it.** The jest
+mock strips `variants` and `compoundVariants` from every stylesheet and stubs
+`useVariants` to a no-op (`node_modules/react-native-unistyles/src/mocks.ts:218-219`),
+so a variant's values never reach the rendered tree under test. A converted style's
+colours cannot be asserted at all; only the selection can, by spying on
+`useVariants`. Converting a style therefore trades a test that checks what is drawn
+for one that checks what was asked for.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this
