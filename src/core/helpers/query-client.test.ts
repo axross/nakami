@@ -1,46 +1,30 @@
-import {
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	jest,
-} from "@jest/globals";
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import type { Query } from "@tanstack/react-query";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { getSessionQueryKeyRoot } from "~/common/helpers/session-query-key";
 import { reportError } from "~/core/helpers/error-reporting";
-import { isReportableQueryError, queryClient } from "./query-client";
+import {
+	isReportableQueryError,
+	queryClient,
+	reportQueryFailure,
+} from "./query-client";
 
 jest.mock("~/core/helpers/error-reporting");
 
 const USER_ID = "68b0c1d2e3f4a5b6c7d8e9f0";
 
 /**
- * Drives a real query through the app's own client until it settles as a
- * failure, so the cache's `onError` runs exactly as it does in the app. Retries
- * are switched off per call rather than on the client, which leaves the shared
- * instance's own retry baseline untouched.
+ * The failing query as `reportQueryFailure` sees it. Only the key is read, and
+ * a real `Query` can be built by nothing but a `QueryClient` — which these
+ * tests deliberately do without, so no cache is shared between them and no
+ * settled query schedules a garbage-collection timer that outlives the run.
  */
-async function failQuery(queryKey: readonly unknown[], error: unknown) {
-	await expect(
-		queryClient.fetchQuery({
-			queryKey,
-			queryFn: () => Promise.reject(error),
-			retry: false,
-		}),
-	).rejects.toBe(error);
+function failedQuery(queryKey: readonly unknown[]) {
+	return { queryKey } as Query<unknown, unknown, unknown>;
 }
 
 beforeEach(() => {
 	jest.clearAllMocks();
-});
-
-afterEach(() => {
-	// The app's one client lives for the whole file, so empty it between tests.
-	// Clearing also destroys the garbage-collection timer a settled query
-	// schedules, which would otherwise hold the run open long past the last
-	// assertion.
-	queryClient.clear();
 });
 
 describe("isReportableQueryError", () => {
@@ -69,23 +53,31 @@ describe("isReportableQueryError", () => {
 	});
 });
 
-describe("the query cache's failure reporting", () => {
-	it("names the collection list that failed", async () => {
+describe("reportQueryFailure()", () => {
+	it("names the collection list that failed", () => {
 		const error = new PayloadRequestError("server", "boom", 500);
 
-		await failQuery([...getSessionQueryKeyRoot(USER_ID), "collections"], error);
+		reportQueryFailure(
+			error,
+			failedQuery([...getSessionQueryKeyRoot(USER_ID), "collections"]),
+		);
 
 		expect(reportError).toHaveBeenCalledWith(error, {
 			extra: { queryKey: "users/*/collections" },
 		});
 	});
 
-	it("names the collection whose records failed", async () => {
+	it("names the collection whose records failed", () => {
 		const error = new Error("could not parse response");
 
-		await failQuery(
-			[...getSessionQueryKeyRoot(USER_ID), "collections", "posts", "records"],
+		reportQueryFailure(
 			error,
+			failedQuery([
+				...getSessionQueryKeyRoot(USER_ID),
+				"collections",
+				"posts",
+				"records",
+			]),
 		);
 
 		expect(reportError).toHaveBeenCalledWith(error, {
@@ -93,10 +85,15 @@ describe("the query cache's failure reporting", () => {
 		});
 	});
 
-	it("carries the signed-in user's id into no field of the report", async () => {
-		await failQuery(
-			[...getSessionQueryKeyRoot(USER_ID), "collections", "posts", "records"],
+	it("carries the signed-in user's id into no field of the report", () => {
+		reportQueryFailure(
 			new PayloadRequestError("server", "boom", 500),
+			failedQuery([
+				...getSessionQueryKeyRoot(USER_ID),
+				"collections",
+				"posts",
+				"records",
+			]),
 		);
 
 		expect(reportError).toHaveBeenCalledTimes(1);
@@ -105,21 +102,27 @@ describe("the query cache's failure reporting", () => {
 		expect(JSON.stringify(context)).not.toContain(USER_ID);
 	});
 
-	it("reports nothing when the failure is a permission (auth) one", async () => {
-		await failQuery(
-			[...getSessionQueryKeyRoot(USER_ID), "collections"],
+	it("reports nothing when the failure is a permission (auth) one", () => {
+		reportQueryFailure(
 			new PayloadRequestError("auth", "rejected", 403),
+			failedQuery([...getSessionQueryKeyRoot(USER_ID), "collections"]),
 		);
 
 		expect(reportError).not.toHaveBeenCalled();
 	});
 
-	it("reports nothing when the failure is a connectivity (network) one", async () => {
-		await failQuery(
-			[...getSessionQueryKeyRoot(USER_ID), "collections"],
+	it("reports nothing when the failure is a connectivity (network) one", () => {
+		reportQueryFailure(
 			new PayloadRequestError("network", "unreachable"),
+			failedQuery([...getSessionQueryKeyRoot(USER_ID), "collections"]),
 		);
 
 		expect(reportError).not.toHaveBeenCalled();
+	});
+});
+
+describe("queryClient", () => {
+	it("reports its cache's query failures through reportQueryFailure", () => {
+		expect(queryClient.getQueryCache().config.onError).toBe(reportQueryFailure);
 	});
 });
