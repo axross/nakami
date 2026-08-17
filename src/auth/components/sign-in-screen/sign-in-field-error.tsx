@@ -4,17 +4,17 @@ import { Platform, Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
- * A single field's validation message, rendered directly beneath the input it
- * concerns. The icon is the non-colour cue: the message has to be legible as an
+ * a single field's validation message, rendered directly beneath the input it
+ * concerns. the icon is the non-colour cue: the message has to be legible as an
  * error to a reader who cannot tell the destructive text tone from the neutral
  * one around it.
  *
- * `accessibilityLiveRegion` announces the message on Android. It is Android-only
+ * `accessibilityLiveRegion` announces the message on Android. it is Android-only
  * in React Native, so the screen pairs it with an `AccessibilityInfo`
  * announcement on iOS — neither platform is left silent, and neither
  * double-announces.
  *
- * On iOS this surface is hidden from the accessibility tree, because the
+ * on iOS this surface is hidden from the accessibility tree, because the
  * message reaches VoiceOver twice otherwise: `signInFieldLabel` has already
  * folded it into the input's own name, and this row sits immediately after that
  * input. `aria-describedby`'s node on the web is referenced rather than also
@@ -50,7 +50,7 @@ const styles = StyleSheet.create((theme) => ({
 		color: theme.colors.text.destructive.base,
 		flexShrink: 1,
 	},
-	// Top-aligned rather than centred, so the icon stays beside the message's
+	// top-aligned rather than centred, so the icon stays beside the message's
 	// first line when the message wraps to a second.
 	row: {
 		alignItems: "flex-start",

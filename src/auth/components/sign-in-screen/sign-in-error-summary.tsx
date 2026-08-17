@@ -4,13 +4,13 @@ import { Pressable, Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
 /**
- * The form's filled destructive banner, used for both errors that belong to the
+ * the form's filled destructive banner, used for both errors that belong to the
  * form rather than to one field: the count of validation problems after a press
  * of Sign in, and the server's own rejection.
  *
- * Passing `onPress` is what makes it a control — it then carries a chevron and
+ * passing `onPress` is what makes it a control — it then carries a chevron and
  * the button role, which is how the count links to the first offending field.
- * The server-error slot passes none and stays a plain surface, because there is
+ * the server-error slot passes none and stays a plain surface, because there is
  * nowhere for it to send the user.
  *
  * `accessibilityLiveRegion` announces the banner on Android; being Android-only

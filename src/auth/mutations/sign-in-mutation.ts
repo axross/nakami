@@ -6,7 +6,7 @@ import { createModuleLogger } from "~/core/helpers/logging";
 
 const logger = createModuleLogger("auth/sign-in-mutation");
 
-/** Input for a sign-in attempt; `serverUrl` is expected already normalized. */
+/** input for a sign-in attempt; `serverUrl` is expected already normalized. */
 export interface SignInInput {
 	serverUrl: string;
 	collectionSlug: string;
@@ -15,11 +15,11 @@ export interface SignInInput {
 }
 
 /**
- * Mutation options for signing in against a Payload server: exchanges
+ * mutation options for signing in against a Payload server: exchanges
  * credentials for a token, then persists the session and marks the app
- * authenticated. Consume with `useMutation(getSignInMutationOptions())`; the
+ * authenticated. consume with `useMutation(getSignInMutationOptions())`; the
  * pending/error state drives the sign-in form and the password never leaves
- * this call. The raw error is surfaced unwrapped so the screen can map a
+ * this call. the raw error is surfaced unwrapped so the screen can map a
  * `PayloadRequestError` to a friendly message.
  */
 export function getSignInMutationOptions() {
@@ -33,8 +33,8 @@ export function getSignInMutationOptions() {
 		}: SignInInput): Promise<Session> => {
 			const server = { serverUrl, collectionSlug };
 			const startedAt = performance.now();
-			// Routine bracket-open at debug; the completion below is the
-			// user-significant milestone at info. Log the endpoint and collection
+			// routine bracket-open at debug; the completion below is the
+			// user-significant milestone at info. log the endpoint and collection
 			// only — never the email or password.
 			logger.debug("Started signing in.", { serverUrl, collectionSlug });
 
@@ -47,7 +47,7 @@ export function getSignInMutationOptions() {
 					exp: result.exp,
 					user: result.user,
 				};
-				// Read imperatively: a mutation factory holds no hooks, and the
+				// read imperatively: a mutation factory holds no hooks, and the
 				// store action is stable, so `getState()` is the correct
 				// non-reactive access.
 				await useAuthStore.getState().authenticate(session);
@@ -57,8 +57,8 @@ export function getSignInMutationOptions() {
 				});
 				return session;
 			} catch (error) {
-				// Close the bracket on the failure path so the breadcrumb trail
-				// reaches the sign-in failure. The message drives the form; no
+				// close the bracket on the failure path so the breadcrumb trail
+				// reaches the sign-in failure. the message drives the form; no
 				// credentials are logged.
 				logger.warn("Failed signing in.", {
 					serverUrl,

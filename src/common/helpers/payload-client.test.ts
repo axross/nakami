@@ -14,7 +14,7 @@ jest.mock("~/core/helpers/logging", () => {
 	return { createModuleLogger: () => moduleLogger };
 });
 
-// The mocked factory hands back one shared logger, so this is the same object
+// the mocked factory hands back one shared logger, so this is the same object
 // the module under test writes through.
 const logger = jest.mocked(createModuleLogger("common/payload-client"));
 
@@ -23,13 +23,13 @@ const pageSchema = z.object({
 	totalDocs: z.number(),
 });
 
-// Shaped like the access response: a map whose keys come from the server, which
+// shaped like the access response: a map whose keys come from the server, which
 // is the one case where an issue path carries a value the response chose.
 const accessLikeSchema = z.object({
 	collections: z.record(z.string(), z.object({ read: z.boolean() })),
 });
 
-// A body that fails in two places at once, carrying a value that must never
+// a body that fails in two places at once, carrying a value that must never
 // reach a log line, a breadcrumb, or an error report.
 const SENSITIVE_VALUE = "sensitive-value-from-the-response-body";
 const mismatchedBody = {
@@ -105,8 +105,8 @@ describe("parseResponse()", () => {
 			}),
 		);
 
-		// Documented behavior rather than an oversight: a `z.record` key is part
-		// of the path, so it is logged. Slugs are schema-level identifiers, not
+		// documented behavior rather than an oversight: a `z.record` key is part
+		// of the path, so it is logged. slugs are schema-level identifiers, not
 		// user content — see the helper's own note on what a path can carry.
 		const [, context] = logger.warn.mock.calls[0] ?? [];
 		expect(context).toEqual({

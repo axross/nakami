@@ -110,7 +110,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 	//
 	// The horizontal value is the bare inset rather than `Math.max(inset,
 	// gutter)`, which every other surface here uses: this container has no
-	// horizontal gutter of its own. Its children carry it — `SettingMenuGroupBody`,
+	// horizontal gutter of its own. its children carry it — `SettingMenuGroupBody`,
 	// `SettingMenuGroupHeading`, and the two paragraphs below each set
 	// `paddingHorizontal: theme.gap.md` — so flooring the inset here would add a
 	// second gutter on top of theirs.

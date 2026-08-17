@@ -7,7 +7,7 @@ import { signInFieldLabel } from "~/auth/helpers/sign-in-form";
 import { signInInputStyle } from "~/auth/helpers/sign-in-input-style";
 
 /**
- * The Collection slug field. Because most Payload instances use `users`, it
+ * the Collection slug field. because most Payload instances use `users`, it
  * shows the value as plain text with a pencil affordance by default and only
  * becomes an editable input once the pencil is pressed — keeping the common
  * case zero-interaction while staying configurable.
@@ -18,7 +18,7 @@ import { signInInputStyle } from "~/auth/helpers/sign-in-input-style";
  *
  * `error` belongs to the editable input and renders beneath it, and the props
  * are discriminated on `editing` so it can only be passed alongside `editing:
- * true`. That is the only state the value can be wrong in — it starts non-empty
+ * true`. that is the only state the value can be wrong in — it starts non-empty
  * and is only ever changed through this input — and pinning it in the type is
  * what stops a later change from producing a message that renders nowhere while
  * still being counted by the summary, whose press would then focus a null ref
@@ -110,7 +110,7 @@ const styles = StyleSheet.create((theme) => ({
 		...theme.typography.caption,
 		color: theme.colors.text.neutral.base,
 	},
-	// Shared with the screen's own inputs, so the flagged treatment has one
+	// shared with the screen's own inputs, so the flagged treatment has one
 	// definition rather than one per stylesheet.
 	input: (flagged: boolean) => signInInputStyle(theme, flagged),
 	label: {

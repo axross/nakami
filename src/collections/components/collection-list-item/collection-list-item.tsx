@@ -12,10 +12,10 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import type { Collection } from "~/collections/models/collection";
 
 /**
- * The pressable row body: a monogram of the collection's initial, its name, and
- * a chevron. Kept a separate component so `Link asChild` clones *this* wrapper
+ * the pressable row body: a monogram of the collection's initial, its name, and
+ * a chevron. kept a separate component so `Link asChild` clones *this* wrapper
  * and threads its injected press/href props onto the root `Pressable` via
- * `...props`. Wrapping the Unistyles-styled `Pressable` in `Link asChild`
+ * `...props`. wrapping the Unistyles-styled `Pressable` in `Link asChild`
  * directly drops the row's computed style — the clone takes over the ref
  * Unistyles applies styles through — collapsing the horizontal layout.
  */

@@ -9,7 +9,7 @@ import {
 	refreshSessionIfDue,
 } from "./session-refresh";
 
-// Assert the log lines through the breadcrumb transport rather than the logger:
+// assert the log lines through the breadcrumb transport rather than the logger:
 // reaching the error tracker's trail is the point of these lines, and it is the
 // same seam `core/helpers/logging.test.ts` asserts against.
 jest.mock("~/core/helpers/error-reporting");
@@ -38,7 +38,7 @@ function sessionExpiringIn(seconds: number): Session {
 }
 
 /**
- * The breadcrumbs this module emitted, in order. Filtering by category keeps
+ * the breadcrumbs this module emitted, in order. filtering by category keeps
  * the assertions to `refreshSessionIfDue`'s own bracket, so the store's
  * transition lines do not count toward it.
  */
@@ -80,7 +80,7 @@ describe("refreshSessionIfDue", () => {
 		await refreshSessionIfDue();
 
 		expect(refreshToken).not.toHaveBeenCalled();
-		// A no-op tick stays silent: the bracket opens after the due check, so a
+		// a no-op tick stays silent: the bracket opens after the due check, so a
 		// signed-out app does not fill the breadcrumb trail with interval noise.
 		expect(refreshBreadcrumbs()).toEqual([]);
 	});
@@ -141,7 +141,7 @@ describe("refreshSessionIfDue", () => {
 		expect(useAuthStore.getState().status).toBe("unauthenticated");
 	});
 
-	// The line that makes an involuntary sign-out attributable from the
+	// the line that makes an involuntary sign-out attributable from the
 	// breadcrumb trail alone — without it the app just drops to the welcome
 	// screen with nothing saying why.
 	it("brackets the refresh and attributes the sign-out when the token is rejected", async () => {
@@ -219,8 +219,8 @@ describe("refreshSessionIfDue", () => {
 
 		await refreshSessionIfDue();
 
-		// Every line here becomes a breadcrumb shipped off-device, so assert
-		// across all of them — the store's transition lines included. Assert the
+		// every line here becomes a breadcrumb shipped off-device, so assert
+		// across all of them — the store's transition lines included. assert the
 		// trail is non-empty first, so an implementation that stopped logging
 		// entirely cannot satisfy the two `not.toContain`s vacuously.
 		const calls = jest.mocked(addBreadcrumb).mock.calls;

@@ -9,7 +9,7 @@ import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { themes } from "~/unistyles";
 import { SignInScreen } from "./sign-in-screen";
 
-// Mock only the data layer the real mutation calls — `login` — keeping
+// mock only the data layer the real mutation calls — `login` — keeping
 // `PayloadRequestError` real so the error-mapping path is exercised end to end.
 jest.mock("~/auth/helpers/payload-client", () => ({
 	...jest.requireActual<typeof import("~/auth/helpers/payload-client")>(
@@ -17,7 +17,7 @@ jest.mock("~/auth/helpers/payload-client", () => ({
 	),
 	login: jest.fn(),
 }));
-// The sign-in mutation persists the session via the auth store's `authenticate`
+// the sign-in mutation persists the session via the auth store's `authenticate`
 // action (read non-reactively with `getState()`); stub it to a resolved no-op so
 // the success path does not touch the keychain.
 jest.mock("~/auth/stores/auth-store", () => ({
@@ -30,7 +30,7 @@ jest.mock("~/auth/helpers/last-server-url", () => ({
 	readLastServerUrl: jest.fn(),
 }));
 
-// Render the screen under a fresh, isolated QueryClient (retries off) so the
+// render the screen under a fresh, isolated QueryClient (retries off) so the
 // real `useMutation` runs; tests drive the actual mutation and assert its
 // observable outcome rather than stubbing the hook.
 function renderSignInScreen() {
@@ -47,24 +47,24 @@ function renderSignInScreen() {
 	);
 }
 
-/** Leaves the sign-in request pending, so the in-flight state stays on screen. */
+/** leaves the sign-in request pending, so the in-flight state stays on screen. */
 function leaveLoginPending() {
 	jest
 		.mocked(login)
 		.mockReturnValue(new Promise<Awaited<ReturnType<typeof login>>>(() => {}));
 }
 
-// The screen announces through `AccessibilityInfo` on iOS, because the live
+// the screen announces through `AccessibilityInfo` on iOS, because the live
 // region its message components carry is Android-only. `jest-expo` runs this
 // suite as iOS, so that branch is the live one and needs no platform stub.
-// Spied once at module scope; `jest.clearAllMocks()` below resets its calls
+// spied once at module scope; `jest.clearAllMocks()` below resets its calls
 // between tests.
 const announceSpy = jest.spyOn(
 	AccessibilityInfo,
 	"announceForAccessibilityWithOptions",
 );
 
-/** This screen's four text inputs, by `testID`. */
+/** this screen's four text inputs, by `testID`. */
 const SIGN_IN_INPUT_TEST_IDS: ReadonlySet<string> = new Set([
 	"sign-in-server-url",
 	"sign-in-collection-input",
@@ -73,7 +73,7 @@ const SIGN_IN_INPUT_TEST_IDS: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * The `testID` of the sign-in input the screen last called `focus()` on, or
+ * the `testID` of the sign-in input the screen last called `focus()` on, or
  * `undefined` when it called none.
  *
  * React Native's jest preset mocks each native component as a class and copies
@@ -83,7 +83,7 @@ const SIGN_IN_INPUT_TEST_IDS: ReadonlySet<string> = new Set([
  * of focus calls on any of them, which is why it is filtered to this screen's
  * own inputs before the last entry is taken rather than trusted as-is.
  *
- * It is the only seam that observes a programmatic focus here: the runtime's
+ * it is the only seam that observes a programmatic focus here: the runtime's
  * own `TextInput.State.currentlyFocusedInput()` never updates under the mock,
  * and the element RNTL hands back carries no `focus` of its own.
  */
@@ -100,8 +100,8 @@ function lastFocusedTestId(): string | undefined {
 		.at(-1);
 }
 
-// A field-message row is out of the iOS accessibility tree on purpose — its
-// message is already in the input's own name, and this suite runs as iOS. Every
+// a field-message row is out of the iOS accessibility tree on purpose — its
+// message is already in the input's own name, and this suite runs as iOS. every
 // query for one therefore has to opt into hidden elements: without this a
 // `queryBy*` would match nothing and pass whether the message was cleared or
 // merely hidden.
@@ -143,7 +143,7 @@ describe("<SignInScreen>", () => {
 		expect(login).not.toHaveBeenCalled();
 	});
 
-	// The defect this screen was built to fix: the button used to grey itself out
+	// the defect this screen was built to fix: the button used to grey itself out
 	// until every field was filled, so the message naming the blank field could
 	// never be reached.
 	it("stays pressable with a blank field and names that field on press", () => {
@@ -200,7 +200,7 @@ describe("<SignInScreen>", () => {
 		expect(queryByTestId("sign-in-error-summary")).toBeNull();
 	});
 
-	// The count is a control rather than a line of text, which is what lets it
+	// the count is a control rather than a line of text, which is what lets it
 	// send the user to the first field that is at fault.
 	it("sends the problem count's press to the first offending input", () => {
 		const { getByTestId } = renderSignInScreen();
@@ -240,7 +240,7 @@ describe("<SignInScreen>", () => {
 		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
 	});
 
-	// A flagged input's border and tint are cues only a sighted user gets. React
+	// a flagged input's border and tint are cues only a sighted user gets. React
 	// Native has no `aria-describedby` to bind the message node to the input, so
 	// the message is folded into the input's own accessible name — which is what
 	// a reader arriving from the summary's press actually hears.
@@ -267,8 +267,8 @@ describe("<SignInScreen>", () => {
 		);
 	});
 
-	// The flagged surface is the error's other two cues, beside the message's own
-	// icon. One definition now serves every input on the screen, so this pins
+	// the flagged surface is the error's other two cues, beside the message's own
+	// icon. one definition now serves every input on the screen, so this pins
 	// that the shared style still resolves to the destructive pair.
 	it("flags the offending input's own surface, not just the message beside it", () => {
 		const { getByTestId } = renderSignInScreen();
@@ -302,13 +302,13 @@ describe("<SignInScreen>", () => {
 		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
 
 		expect(getByTestId("sign-in-email").props.accessibilityLabel).toBe("Email");
-		// The field beside it keeps both its message and its named state.
+		// the field beside it keeps both its message and its named state.
 		expect(getByTestId("sign-in-password").props.accessibilityLabel).toBe(
 			"Password, Enter your password.",
 		);
 	});
 
-	// The live region is the whole of the Android half of the announcement
+	// the live region is the whole of the Android half of the announcement
 	// design — `announce()` is guarded to iOS, and this suite runs as iOS, so
 	// without these assertions the prop could be dropped from every surface and
 	// nothing here or in CI would notice.
@@ -325,9 +325,9 @@ describe("<SignInScreen>", () => {
 		).toBe("polite");
 	});
 
-	// The message is already in the input's own accessible name, and this row is
+	// the message is already in the input's own accessible name, and this row is
 	// the next element after that input — so on iOS it would otherwise be read
-	// twice in one pass. The banners are not hidden: the count is a control a
+	// twice in one pass. the banners are not hidden: the count is a control a
 	// reader has to be able to reach, and neither its text nor the server's
 	// message is duplicated anywhere else.
 	it("hides a field message from VoiceOver, which already has it in the input's name", () => {
@@ -366,7 +366,7 @@ describe("<SignInScreen>", () => {
 		});
 	});
 
-	// The message components' live region is Android-only, so iOS is announced
+	// the message components' live region is Android-only, so iOS is announced
 	// imperatively; the suite runs as iOS, which is the branch asserted here.
 	it("announces the problem count to a screen reader on press", () => {
 		const { getByTestId } = renderSignInScreen();
@@ -393,7 +393,7 @@ describe("<SignInScreen>", () => {
 		});
 	});
 
-	// Blur validation raises a message with no press behind it, so nothing else
+	// blur validation raises a message with no press behind it, so nothing else
 	// would announce it.
 	it("announces a message raised by leaving a field", () => {
 		const { getByTestId } = renderSignInScreen();
@@ -449,7 +449,7 @@ describe("<SignInScreen>", () => {
 				HIDDEN,
 			),
 		).toBeTruthy();
-		// Blurring one field says nothing about the others.
+		// blurring one field says nothing about the others.
 		expect(queryByTestId("sign-in-error-password", HIDDEN)).toBeNull();
 	});
 
@@ -486,9 +486,9 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-email").props.value).toBe("you@example.com");
 	});
 
-	// The keychain read settles after the screen is already interactive, so a
+	// the keychain read settles after the screen is already interactive, so a
 	// press can flag the Server URL field before the stored value lands in it.
-	// The pre-fill takes the same clearing path an edit does, or the field would
+	// the pre-fill takes the same clearing path an edit does, or the field would
 	// keep a message contradicting the value it now shows.
 	it("clears a stale Server URL message when the stored endpoint arrives", async () => {
 		let deliverStored: (stored: string | null) => void = () => {};
@@ -514,12 +514,12 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-server-url").props.accessibilityLabel).toBe(
 			"Server URL",
 		);
-		// The fields the pre-fill says nothing about keep theirs.
+		// the fields the pre-fill says nothing about keep theirs.
 		expect(getByTestId("sign-in-error-email", HIDDEN)).toBeTruthy();
 	});
 
 	it("submits normalized credentials when the form is valid", async () => {
-		// Leave the login pending so the assertion targets the credentials handed
+		// leave the login pending so the assertion targets the credentials handed
 		// to the data layer, without driving the success/navigation path.
 		leaveLoginPending();
 
@@ -546,7 +546,7 @@ describe("<SignInScreen>", () => {
 
 		const { getByTestId, getByText, queryByTestId } = renderSignInScreen();
 
-		// A spinner beside the working-state label is what makes the disabled
+		// a spinner beside the working-state label is what makes the disabled
 		// button read as working rather than as blocked, so it is only there once
 		// something is in flight.
 		expect(queryByTestId("sign-in-submit-spinner")).toBeNull();
@@ -639,7 +639,7 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-server-url").props.value).toBe("");
 	});
 
-	// The stack header clears the top edge, so this screen owns the bottom and
+	// the stack header clears the top edge, so this screen owns the bottom and
 	// the horizontal pair, carried on the scrolled content. Unistyles' jest mock
 	// reports zero insets, so this is the zero-inset device: each owned edge has
 	// to fall back to its design gutter — the submit button in particular, which

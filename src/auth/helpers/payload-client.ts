@@ -17,7 +17,7 @@ export type {
 	PayloadErrorKind,
 	PayloadServer,
 } from "~/common/helpers/payload-client";
-// Re-export the shared transport surface so existing auth consumers keep
+// re-export the shared transport surface so existing auth consumers keep
 // importing it from here; the canonical definitions live in ~/common.
 export { PayloadRequestError } from "~/common/helpers/payload-client";
 

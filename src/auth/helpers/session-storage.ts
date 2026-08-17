@@ -2,13 +2,13 @@ import * as SecureStore from "expo-secure-store";
 import { type Session, storedSessionCodec } from "~/auth/models/session";
 import { reportError } from "~/core/helpers/error-reporting";
 
-// The single keychain entry that holds the session. Session material is a
+// the single keychain entry that holds the session. Session material is a
 // bearer credential, so it lives only in the platform keychain — never the
 // Drizzle database or plain key-value storage.
 const SESSION_KEY = "nakami.session";
 
 /**
- * Reads the persisted session from the keychain, returning `null` when none is
+ * reads the persisted session from the keychain, returning `null` when none is
  * stored or the stored value is unreadable/corrupt (in which case the bad
  * entry is cleared so the app falls back to a clean signed-out state).
  */
@@ -19,9 +19,9 @@ export async function readSession(): Promise<Session | null> {
 		return null;
 	}
 
-	// An unreadable entry is an outcome, not a defect: the app is pointed at
+	// an unreadable entry is an outcome, not a defect: the app is pointed at
 	// whatever server the user typed in, and a build that tightens the schema
-	// can meet an entry an older build wrote. Hence the safe decode.
+	// can meet an entry an older build wrote. hence the safe decode.
 	const decoded = storedSessionCodec.safeDecode(raw);
 
 	if (!decoded.success) {
@@ -36,7 +36,7 @@ export async function readSession(): Promise<Session | null> {
 }
 
 /**
- * Persists the session to the keychain, replacing any previous entry. Encoding
+ * persists the session to the keychain, replacing any previous entry. encoding
  * through the same codec `readSession` decodes with is what keeps the stored
  * form and the domain form from drifting; it throws rather than storing a
  * session the read half would reject, which for a value the compiler already
@@ -49,7 +49,7 @@ export async function writeSession(session: Session): Promise<void> {
 	);
 }
 
-/** Removes the persisted session from the keychain. */
+/** removes the persisted session from the keychain. */
 export async function clearSession(): Promise<void> {
 	await SecureStore.deleteItemAsync(SESSION_KEY);
 }

@@ -4,13 +4,13 @@ import { StyleSheet } from "react-native-unistyles";
 import type { CollectionRecord } from "~/collections/models/record";
 
 /**
- * The fixed line-box height shared by a record card's title row, its metadata
+ * the fixed line-box height shared by a record card's title row, its metadata
  * row, and the id chip — the single value that makes a card's height
- * deterministic. Exported so the loading skeleton mirrors the exact same
+ * deterministic. exported so the loading skeleton mirrors the exact same
  * geometry.
  *
- * A deliberate geometry constant, not a typography value: it sizes elements,
- * and no text style sets it. It matches the 22pt line box that
+ * a deliberate geometry constant, not a typography value: it sizes elements,
+ * and no text style sets it. it matches the 22pt line box that
  * `typography.heading` and `typography.code` already carry, so a title row is
  * exactly this tall on its own; only the metadata row — whose
  * `typography.caption` line box is shorter, and whose chip may be absent — has
@@ -19,11 +19,11 @@ import type { CollectionRecord } from "~/collections/models/record";
 export const RECORD_CARD_LINE = 22;
 
 /**
- * One record in a collection, as a non-interactive elevated card (the chosen
+ * one record in a collection, as a non-interactive elevated card (the chosen
  * "card feed" design): the derived title over a metadata row — a monospace
- * record-id chip and the last-updated label. A title-less record renders its id
+ * record-id chip and the last-updated label. a title-less record renders its id
  * as the (monospace) title and omits the chip, so the id is never shown twice.
- * Browsing into a single record is a follow-up; the card is read-only.
+ * browsing into a single record is a follow-up; the card is read-only.
  */
 export function CollectionRecordCard({
 	record,

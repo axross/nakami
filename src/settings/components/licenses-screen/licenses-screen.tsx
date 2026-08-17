@@ -18,7 +18,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		color: theme.colors.text.neutral.base,
 		textAlign: "center",
 	},
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair.
 	root: {
 		alignItems: "center",

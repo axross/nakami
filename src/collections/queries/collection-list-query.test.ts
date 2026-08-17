@@ -60,7 +60,7 @@ describe("getCollectionListQueryOptions", () => {
 			{} as unknown as Parameters<typeof queryFn>[0],
 		);
 
-		// The server URL comes from the session, not from the scope — it
+		// the server URL comes from the session, not from the scope — it
 		// authenticates the request without identifying the data.
 		expect(fetchAccess).toHaveBeenCalledWith(
 			"https://cms.example.com",

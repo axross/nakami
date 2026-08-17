@@ -12,17 +12,17 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
-// Placeholder name-bar widths per row, so the skeleton reads as varied content
+// placeholder name-bar widths per row, so the skeleton reads as varied content
 // rather than a repeated block.
 const ROW_WIDTHS = [70, 96, 58, 84, 66, 78];
 
 /**
- * The Collections loading state: placeholder rows in the same inset card as the
- * loaded list, gently pulsing. Honors the OS "reduce motion" setting (via
+ * the Collections loading state: placeholder rows in the same inset card as the
+ * loaded list, gently pulsing. honors the OS "reduce motion" setting (via
  * reanimated's `useReducedMotion`) by holding a steady opacity instead of
  * animating.
  *
- * The root claims no space of its own: the screen that gives it a whole tab
+ * the root claims no space of its own: the screen that gives it a whole tab
  * passes `flex: 1` through `style`.
  */
 export function CollectionListSkeleton({
@@ -42,8 +42,8 @@ export function CollectionListSkeleton({
 			return;
 		}
 
-		// One config for both halves, so the pulse cannot ease in and out on
-		// different curves. Read through the theme rather than from a local
+		// one config for both halves, so the pulse cannot ease in and out on
+		// different curves. read through the theme rather than from a local
 		// constant: the records skeleton pulses on these same two tokens, and a
 		// second copy is how the two drifted apart in the first place.
 		const timing = {
@@ -70,7 +70,7 @@ export function CollectionListSkeleton({
 			{...props}
 			style={[styles.root, style]}
 		>
-			{/* Hooked separately from the root: the root carries the accessible
+			{/* hooked separately from the root: the root carries the accessible
 			    label and the caller-overridable hook, while the safe-area inset
 			    this card mirrors from the loaded list is what a guard has to be
 			    able to read. */}
@@ -87,7 +87,7 @@ export function CollectionListSkeleton({
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// Mirrors the loaded list's card, safe-area inset included (see
+	// mirrors the loaded list's card, safe-area inset included (see
 	// collections-screen), so the placeholder does not shift when data arrives.
 	card: {
 		backgroundColor: theme.colors.foundation.neutral.subtle,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		height: 11,
 		width,
 	}),
-	// Deliberately no fill here: how much room the skeleton gets is the
+	// deliberately no fill here: how much room the skeleton gets is the
 	// consumer's half of the split, so do not "fix" this by adding one.
 	root: {
 		backgroundColor: theme.colors.foundation.neutral.bare,

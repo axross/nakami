@@ -5,8 +5,8 @@ import {
 } from "~/collections/helpers/derive-record-title";
 
 /**
- * One record (document) in a Payload collection, as returned by the `find`
- * endpoint with `depth=0`. The shape is collection-specific and unknown to the
+ * one record (document) in a Payload collection, as returned by the `find`
+ * endpoint with `depth=0`. the shape is collection-specific and unknown to the
  * app, so only `id` is required (a string or number depending on the DB
  * adapter, normalized to a string, like {@link import("~/auth/models/session").PayloadUser}.id);
  * every other field is tolerated (kept, via the loose object) so the title
@@ -29,13 +29,13 @@ export const recordPageSchema = z.object({
 	nextPage: z.number().nullable().optional(),
 });
 
-/** The parsed, validated `find` response (see {@link recordPageSchema}). */
+/** the parsed, validated `find` response (see {@link recordPageSchema}). */
 export type RecordPageResponse = z.infer<typeof recordPageSchema>;
 
-/** A record as the list UI needs it: an id, a derived title, and a metadata line. */
+/** a record as the list UI needs it: an id, a derived title, and a metadata line. */
 export interface CollectionRecord {
 	readonly id: string;
-	/** Derived display title — a title-ish field's value, or the id (see `hasTitle`). */
+	/** derived display title — a title-ish field's value, or the id (see `hasTitle`). */
 	readonly title: string;
 	/** `false` when the title fell back to the id (no title-ish field existed). */
 	readonly hasTitle: boolean;
@@ -43,12 +43,12 @@ export interface CollectionRecord {
 	readonly updatedLabel: string | null;
 }
 
-/** One page of records as the list UI needs it, plus the pagination cursor. */
+/** one page of records as the list UI needs it, plus the pagination cursor. */
 export interface CollectionRecordPage {
 	readonly records: CollectionRecord[];
 	readonly totalDocs: number;
 	readonly hasNextPage: boolean;
-	/** Next 1-based page number, or `null` on the last page. */
+	/** next 1-based page number, or `null` on the last page. */
 	readonly nextPage: number | null;
 }
 
@@ -65,7 +65,7 @@ function toCollectionRecord(
 	};
 }
 
-/** Maps a parsed `find` page into the view model the record list consumes. */
+/** maps a parsed `find` page into the view model the record list consumes. */
 export function toRecordPage(
 	response: RecordPageResponse,
 ): CollectionRecordPage {

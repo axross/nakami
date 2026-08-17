@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 /**
- * A user id in its normalized, in-app form. Shared by both user schemas below
+ * a user id in its normalized, in-app form. shared by both user schemas below
  * so the network side cannot produce an id the domain side would reject.
  */
 const userIdSchema = z.string().min(1);
 
 /**
- * A Payload user as it arrives over the network. Payload auth collections carry
+ * a Payload user as it arrives over the network. Payload auth collections carry
  * many more fields; we keep only what the UI shows and tolerate (strip) the
  * rest so the app works against any collection shape. `id` is a string or a
  * number depending on the database adapter, and this is the one place it is
@@ -19,11 +19,11 @@ export const payloadUserSchema = z.object({
 });
 
 /**
- * The same user once it is inside the app, where `id` is already a string. The
+ * the same user once it is inside the app, where `id` is already a string. the
  * absence of a transform is the point rather than an omission: a `.transform()`
  * anywhere inside a schema makes `encode` throw, so keeping one here would make
  * {@link storedSessionCodec} unusable and leave the keychain's write half
- * bypassing the schema its read half re-runs. It infers the same
+ * bypassing the schema its read half re-runs. it infers the same
  * `{ id: string; email: string }` as {@link payloadUserSchema}, so the two are
  * interchangeable to every consumer.
  */
@@ -60,7 +60,7 @@ export const refreshResponseSchema = z.object({
 });
 
 /**
- * The persisted session. Stored as a single JSON value in the platform
+ * the persisted session. stored as a single JSON value in the platform
  * keychain (never the database or plain storage), through
  * {@link storedSessionCodec} in both directions. `exp` is the token's Unix
  * expiry in seconds, as returned by Payload.
@@ -76,18 +76,18 @@ export const sessionSchema = z.object({
 export type Session = z.infer<typeof sessionSchema>;
 
 /**
- * The keychain boundary in both directions at once: the stored entry is a JSON
- * **string**, the domain value is a {@link Session}. Pairing them in one codec
+ * the keychain boundary in both directions at once: the stored entry is a JSON
+ * **string**, the domain value is a {@link Session}. pairing them in one codec
  * is what stops the write half from serializing a shape the read half would
  * reject — the drift a separate `JSON.stringify` invites.
  *
- * Adapted from the `json(schema)` template in Zod's codec documentation, which
+ * adapted from the `json(schema)` template in Zod's codec documentation, which
  * is published to be copied rather than imported (the package exports no such
- * codec and has no `./codecs` subpath). One difference is deliberate: the
+ * codec and has no `./codecs` subpath). one difference is deliberate: the
  * template puts the offending input, and the JSON parser's own message, onto
- * the issue it raises. Here the input is the stored session, which carries a
+ * the issue it raises. here the input is the stored session, which carries a
  * bearer token, and the parser's message quotes a fragment of it — so the issue
- * names the failure and nothing else. The caller reports this error, and a
+ * names the failure and nothing else. the caller reports this error, and a
  * reported error leaves the device.
  */
 export const storedSessionCodec = z.codec(z.string(), sessionSchema, {

@@ -1,5 +1,5 @@
 /**
- * Low-level Payload REST transport shared across features. Feature clients
+ * low-level Payload REST transport shared across features. feature clients
  * (auth operations, collection access, …) build their typed calls on top of
  * {@link request} and {@link parseResponse}; the error taxonomy and server
  * identifier live here so the whole app maps Payload failures the same way.
@@ -13,9 +13,9 @@ const logger = createModuleLogger("common/payload-client");
 const REQUEST_TIMEOUT_MS = 15_000;
 
 /**
- * Distinguishes an authentication rejection (the server said the credentials
+ * distinguishes an authentication rejection (the server said the credentials
  * or token are invalid) from a transport failure (the server could not be
- * reached) and any other unexpected response. Callers sign the user out only on
+ * reached) and any other unexpected response. callers sign the user out only on
  * `"auth"`, and keep the session on `"network"`.
  */
 export type PayloadErrorKind = "auth" | "network" | "server";
@@ -42,21 +42,21 @@ export class PayloadRequestError extends Error {
 	}
 }
 
-/** Identifies which Payload server and auth collection a request targets. */
+/** identifies which Payload server and auth collection a request targets. */
 export interface PayloadServer {
 	readonly serverUrl: string;
 	readonly collectionSlug: string;
 }
 
-/** Normalizes a server URL to its origin without a trailing slash. */
+/** normalizes a server URL to its origin without a trailing slash. */
 export function serverBaseUrl(serverUrl: string): string {
 	return serverUrl.replace(/\/+$/, "");
 }
 
 /**
- * Performs a request against a Payload host with a timeout, mapping the outcome
+ * performs a request against a Payload host with a timeout, mapping the outcome
  * to a {@link PayloadRequestError} on failure and returning the parsed JSON body
- * on success. Credentials only ever travel to the caller-supplied host. The
+ * on success. credentials only ever travel to the caller-supplied host. the
  * `operation` label identifies the call in the request-lifecycle breadcrumbs.
  */
 export async function request(
@@ -68,7 +68,7 @@ export async function request(
 	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 	const startedAt = performance.now();
 
-	// Routine per-request lifecycle → debug (dev-only). The operation label
+	// routine per-request lifecycle → debug (dev-only). the operation label
 	// identifies the call; the URL and body are omitted to keep credentials out.
 	logger.debug("Started request.", { operation });
 
@@ -76,8 +76,8 @@ export async function request(
 	try {
 		response = await fetch(url, { ...init, signal: controller.signal });
 	} catch {
-		// Network down, DNS failure, timeout/abort — the server was unreachable.
-		// Close the bracket at debug (callers report the failure at their own
+		// network down, DNS failure, timeout/abort — the server was unreachable.
+		// close the bracket at debug (callers report the failure at their own
 		// level) so the breadcrumb trail doesn't go quiet on the failure path.
 		logger.debug("Failed request.", {
 			operation,

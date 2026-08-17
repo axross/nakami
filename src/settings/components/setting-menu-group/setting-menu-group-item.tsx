@@ -3,7 +3,7 @@ import { Pressable, type StyleProp, type ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 
 /**
- * A row of a settings menu group. `disabled` is destructured rather than left
+ * a row of a settings menu group. `disabled` is destructured rather than left
  * in the spread because the row both styles on it and still hands it to
  * `Pressable`: a disabled row has to *look* unavailable, not merely stop
  * responding.
@@ -36,7 +36,7 @@ export function SettingMenuGroupItem({
 }
 
 const styles = StyleSheet.create((theme) => ({
-	// The disabled row moves to a heavier neutral fill rather than dimming: a
+	// the disabled row moves to a heavier neutral fill rather than dimming: a
 	// row is disabled here only while its own action is in flight, and the
 	// caller pairs that with a working-state label, so the state has to stay
 	// readable instead of fading below it.

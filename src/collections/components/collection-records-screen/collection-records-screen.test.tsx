@@ -18,15 +18,15 @@ import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { themes } from "~/unistyles";
 import { CollectionRecordsScreen } from "./collection-records-screen";
 
-// The loading skeleton pulls in react-native-reanimated (v4 → react-native-
-// worklets), whose real module throws on import under jest. Redirect it to the
+// the loading skeleton pulls in react-native-reanimated (v4 → react-native-
+// worklets), whose real module throws on import under jest. redirect it to the
 // project's manual mock — the same substitution expo-router's testing-library
 // makes for suites that render through it.
 jest.mock("react-native-reanimated", () =>
 	require("react-native-reanimated/mock"),
 );
 
-// Mock the data layer; the query, its factory, and the record mapping run for
+// mock the data layer; the query, its factory, and the record mapping run for
 // real, so pagination and error mapping are exercised end to end.
 jest.mock("~/collections/helpers/fetch-records", () => ({
 	fetchRecords: jest.fn(),
@@ -167,7 +167,7 @@ describe("<CollectionRecordsScreen>", () => {
 			expect(getByText("Page one")).toBeTruthy();
 		});
 
-		// Seed the virtualized list's layout/content metrics (no real layout runs
+		// seed the virtualized list's layout/content metrics (no real layout runs
 		// in the test renderer) so scrolling to the bottom computes a distance and
 		// fires onEndReached.
 		const list = getByTestId("collection-records-list");
@@ -195,7 +195,7 @@ describe("<CollectionRecordsScreen>", () => {
 		);
 	});
 
-	// A stack header and the tab bar clear this screen's vertical edges, so it
+	// a stack header and the tab bar clear this screen's vertical edges, so it
 	// owns only the horizontal pair — carried on the feed's content container
 	// rather than the list itself. Unistyles' jest mock reports zero insets, so
 	// this is the zero-inset device: the feed's padding has to fall back to the

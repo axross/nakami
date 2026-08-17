@@ -8,8 +8,8 @@ import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { themes } from "~/unistyles";
 import { SettingsAccountGroup } from "./settings-account-group";
 
-// Leave the sign-out request pending, so the row's in-flight state stays on
-// screen for the assertions below. The real options are replaced wholesale
+// leave the sign-out request pending, so the row's in-flight state stays on
+// screen for the assertions below. the real options are replaced wholesale
 // rather than stubbed at the data layer: this suite is about the row's states,
 // not about what signing out does.
 jest.mock("~/auth/mutations/sign-out-mutation", () => ({
@@ -53,7 +53,7 @@ describe("<SettingsAccountGroup>", () => {
 		).toEqual({ disabled: false });
 	});
 
-	// A row that only stops responding reads as broken rather than as busy, so
+	// a row that only stops responding reads as broken rather than as busy, so
 	// the in-flight sign-out has to say so in the label and in the fill.
 	it("shows the sign-out as working once it is in flight", async () => {
 		const { getByTestId, getByText, queryByText } = renderAccountGroup();
@@ -68,7 +68,7 @@ describe("<SettingsAccountGroup>", () => {
 		const row = getByTestId("settings-sign-out-row");
 
 		expect(row.props.accessibilityState).toEqual({ disabled: true });
-		// The spinner stands in for the `LogOut` icon while the row is disabled.
+		// the spinner stands in for the `LogOut` icon while the row is disabled.
 		expect(getByTestId("settings-sign-out-spinner")).toBeTruthy();
 		expect(StyleSheet.flatten(row.props.style).backgroundColor).toBe(
 			themes.light.colors.surface.neutral.base,

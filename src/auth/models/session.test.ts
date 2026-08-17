@@ -43,7 +43,7 @@ describe("payloadUserSchema (via loginResponseSchema)", () => {
 		expect(result.user.id).toBe("42");
 	});
 
-	// Asserting the issue path, not just the rejection: without it these pass
+	// asserting the issue path, not just the rejection: without it these pass
 	// when some other field in the fixture is what failed, which would leave the
 	// field this change actually constrains untested.
 	it.each(["", "not an email"])("rejects %p as an email", (email) => {
@@ -164,7 +164,7 @@ describe("storedSessionCodec", () => {
 	});
 
 	it("decodes an entry the previous build's plain JSON.stringify wrote", () => {
-		// The stored shape is unchanged by the move onto the codec, so a session
+		// the stored shape is unchanged by the move onto the codec, so a session
 		// already sitting in a keychain must survive the upgrade.
 		expect(storedSessionCodec.decode(JSON.stringify(validSession))).toEqual(
 			validSession,

@@ -52,7 +52,7 @@ function messageForError(error: unknown): string {
 }
 
 /**
- * The error summary's copy. Written once because the banner and the screen
+ * the error summary's copy. written once because the banner and the screen
  * reader announcement both say it, and a reader who hears one and then reaches
  * the other should not find two different sentences.
  */

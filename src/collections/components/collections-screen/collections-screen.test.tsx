@@ -20,7 +20,7 @@ import { createTestQueryClient } from "~/common/helpers/test-query-client";
 import { themes } from "~/unistyles";
 import { CollectionsScreen } from "./collections-screen";
 
-// Mock only the data layer the real query calls; the query, its factory, and
+// mock only the data layer the real query calls; the query, its factory, and
 // the access→list mapping all run for real. `PayloadRequestError` stays real so
 // the error-mapping path is exercised end to end. `fetch-records` is mocked too
 // so that pressing a row (which navigates to the records screen) does not make a
@@ -40,7 +40,7 @@ const SESSION: Session = {
 	user: { id: "user-1", email: "you@example.com" },
 };
 
-/** Render the screen under a fresh, isolated QueryClient so the real query runs. */
+/** render the screen under a fresh, isolated QueryClient so the real query runs. */
 function renderScreen() {
 	const client = createTestQueryClient();
 	return renderRouter(
@@ -62,7 +62,7 @@ function renderScreen() {
 
 beforeEach(() => {
 	jest.clearAllMocks();
-	// The query is gated on an active session and reads the token non-reactively
+	// the query is gated on an active session and reads the token non-reactively
 	// from the store; seed one so the real query runs.
 	useAuthStore.setState({ status: "authenticated", session: SESSION });
 });
@@ -170,7 +170,7 @@ describe("<CollectionsScreen>", () => {
 		expect(getByText("No records")).toBeTruthy();
 	});
 
-	// A stack header and the tab bar clear this screen's vertical edges, so it
+	// a stack header and the tab bar clear this screen's vertical edges, so it
 	// owns only the horizontal pair — carried on the list's content container
 	// rather than the list itself. Unistyles' jest mock reports zero insets, so
 	// this is the zero-inset device: the card's margin has to fall back to the
