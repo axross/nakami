@@ -121,6 +121,10 @@ describe("reportQueryFailure()", () => {
 	});
 });
 
+// The one place this file touches the app's shared query client, and the
+// contact is read-only: one property of its cache's config, nothing built,
+// driven, or mutated. Nothing else here may reach for that instance — the
+// tests above call `reportQueryFailure` directly, so they need no client.
 describe("queryClient", () => {
 	it("reports its cache's query failures through reportQueryFailure", () => {
 		expect(queryClient.getQueryCache().config.onError).toBe(reportQueryFailure);
