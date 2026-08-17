@@ -1,5 +1,5 @@
 // `hairlineWidth` is React Native's, not Unistyles' — the two `StyleSheet`s are
-// unrelated, so both are imported and the React Native one is aliased. Every
+// unrelated, so both are imported and the React Native one is aliased. every
 // stylesheet in the app still uses the Unistyles export below.
 import { StyleSheet as ReactNativeStyleSheet } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
@@ -12,21 +12,21 @@ const gap = {
 	xl: 32,
 } as const;
 
-// Corner radii, each step named for the role a surface plays rather than for
+// corner radii, each step named for the role a surface plays rather than for
 // its value, so a surface picks by role instead of by eye.
 //
-// Deliberately its own family rather than steps borrowed from `gap`: a radius
+// deliberately its own family rather than steps borrowed from `gap`: a radius
 // is not a spacing step, and while the two scales happen to share numbers
 // today, folding them together means retuning spacing silently reshapes every
 // corner in the app.
 const radius = {
-	// Inset marks and placeholder bars — a collection monogram, a skeleton bar.
+	// inset marks and placeholder bars — a collection monogram, a skeleton bar.
 	sm: 8,
-	// The default surface corner: cards, inputs, buttons, menu-group ends.
+	// the default surface corner: cards, inputs, buttons, menu-group ends.
 	md: 12,
-	// Large marks — a message state's icon plate.
+	// large marks — a message state's icon plate.
 	lg: 16,
-	// Fully rounded. React Native clamps a radius to half the shorter side, so
+	// fully rounded. React Native clamps a radius to half the shorter side, so
 	// one step covers both a pill (the record-id chip) and a circle (the account
 	// avatar) without either naming a measurement of its own.
 	pill: 999,
@@ -42,29 +42,29 @@ const borderWidth = {
 	thin: 1,
 } as const;
 
-// Named by magnitude rather than by milliseconds, so retuning a step does not
+// named by magnitude rather than by milliseconds, so retuning a step does not
 // turn its name into a lie. `fast` and `base` are the interaction tier and are
 // declared ahead of their first consumer, for the same reason `thin` is.
 const duration = {
 	fast: 150,
 	base: 250,
-	// The skeleton pulse — an ambient cadence rather than a response to a tap.
+	// the skeleton pulse — an ambient cadence rather than a response to a tap.
 	slow: 700,
 } as const;
 
-// The app's one motion curve. Role-named, so retuning the curve neither renames
+// the app's one motion curve. role-named, so retuning the curve neither renames
 // the token nor makes it false — which `standard` survives and `easeInOutQuad`
 // would not.
 //
-// Written out rather than imported as reanimated's `Easing.inOut(Easing.quad)`:
+// written out rather than imported as reanimated's `Easing.inOut(Easing.quad)`:
 // this module is the root layout's first import and a `setupFiles` entry in
 // jest.config.cjs, so importing `react-native-reanimated` here would load the
 // real native module — failing every jest suite and pulling reanimated's native
-// initialization into the app's first tick. The curve below is that same
+// initialization into the app's first tick. the curve below is that same
 // ease-in-out quad, which is also the default `withTiming` already applies, so
 // naming it explicitly changes no existing animation.
 //
-// The `"worklet"` directive is what lets reanimated run this on the UI thread.
+// the `"worklet"` directive is what lets reanimated run this on the UI thread.
 // `babel-preset-expo` transforms it through react-native-worklets' plugin,
 // which attaches the worklet metadata inline and adds no module-scope require,
 // so the directive costs this module nothing at load time.
@@ -76,9 +76,9 @@ const easing = {
 	},
 } as const;
 
-// The bundled font files. Deliberately module-private rather than a theme
+// the bundled font files. deliberately module-private rather than a theme
 // token: a family without its size is half a typography decision, and exposing
-// one invites a style to pick a family and then invent a size. Every text style
+// one invites a style to pick a family and then invent a size. every text style
 // goes through `typography` below.
 const fonts = {
 	heading: "InnovatorGrotesk-SemiBold",
@@ -86,41 +86,41 @@ const fonts = {
 	monospace: "JetBrainsMono-Regular",
 } as const;
 
-// Composite text roles, named for the content they carry rather than their
-// size. A style applies a role whole — `...theme.typography.body` — instead of
+// composite text roles, named for the content they carry rather than their
+// size. a style applies a role whole — `...theme.typography.body` — instead of
 // picking values out of it, so family, size, and line height can never drift
 // apart across screens.
 //
-// Weight is not a field here: the bundled families encode it in the file name
+// weight is not a field here: the bundled families encode it in the file name
 // (InnovatorGrotesk-SemiBold vs -Regular), and pairing a weight-bearing family
 // with an explicit `fontWeight` makes React Native synthesize a second weight
 // on top of the real one.
 //
 // 22 is the shared line box of every role that fills a title or body line
-// (`heading`, `body`, `code`). That is what keeps a record card's height
+// (`heading`, `body`, `code`). that is what keeps a record card's height
 // deterministic — see `RECORD_CARD_LINE` in collection-record-card.tsx.
 const typography = {
-	// A screen's hero title — the Home landing.
+	// a screen's hero title — the Home landing.
 	display: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 34 },
-	// The title of a centered message state (empty, error, placeholder).
+	// the title of a centered message state (empty, error, placeholder).
 	title: { fontFamily: fonts.heading, fontSize: 20, lineHeight: 26 },
-	// Body metrics, emphasized: button labels, card titles, section headings.
+	// body metrics, emphasized: button labels, card titles, section headings.
 	heading: { fontFamily: fonts.heading, fontSize: 16, lineHeight: 22 },
-	// Default running text: body copy, text inputs, list row labels.
+	// default running text: body copy, text inputs, list row labels.
 	body: { fontFamily: fonts.paragraph, fontSize: 16, lineHeight: 22 },
-	// Anything supporting something else: a form field's name, hints, errors,
-	// counts, metadata. One role rather than a separate `label`, because the two
+	// anything supporting something else: a form field's name, hints, errors,
+	// counts, metadata. one role rather than a separate `label`, because the two
 	// carried identical values and naming them apart implied a distinction the
 	// design does not draw.
 	caption: { fontFamily: fonts.paragraph, fontSize: 13, lineHeight: 18 },
-	// Machine-readable text: a record id standing in for a missing title, an id
+	// machine-readable text: a record id standing in for a missing title, an id
 	// chip, build details.
 	code: { fontFamily: fonts.monospace, fontSize: 14, lineHeight: 22 },
 } as const;
 
-// Semantic color roles mirror axross/cunnpe's theme structure
+// semantic color roles mirror axross/cunnpe's theme structure
 // (foundation / surface / border / solid / text, each × neutral / accent /
-// destructive). Neutral is Radix Slate and destructive is Radix Ruby, as in
+// destructive). neutral is Radix Slate and destructive is Radix Ruby, as in
 // cunnpe; the accent scale is Radix Teal. `text.onAccent` is the one field
 // Nakami adds beyond cunnpe's structure — cunnpe never draws text on a solid
 // accent fill, but Nakami's filled buttons do (Radix teal pairs with white).

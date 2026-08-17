@@ -1,19 +1,19 @@
-// Runner-agnostic scenario-coverage core.
+// runner-agnostic scenario-coverage core.
 //
-// Two pure functions that know nothing about Maestro, YAML, or the file
+// two pure functions that know nothing about Maestro, YAML, or the file
 // system. `parseScenarioCatalog` turns the journey catalog's markdown into a
 // map of scenario id to its catalog facets; `evaluateScenarioCoverage` joins
 // that map against a normalized `{ title, tags, status }[]` — one entry per
 // test the runner produced — and returns the structural errors, the facet
 // mismatches, and the covered/uncovered split.
 //
-// A per-runner adapter maps its own report into that array and reports what
+// a per-runner adapter maps its own report into that array and reports what
 // comes back, so switching runners replaces the adapter and leaves the join
 // and the gate conditions untouched.
 //
-// Tokens are read from `tags` only, and a runner that carries them in the test
+// tokens are read from `tags` only, and a runner that carries them in the test
 // title instead — Vitest and Jest append them there — normalizes them into
-// `tags` in its adapter before calling in. The installed `end-to-end-testing`
+// `tags` in its adapter before calling in. the installed `end-to-end-testing`
 // capability's `references/scenario-coverage.md` has the reporter read
 // `@`-tokens from both fields; this core deliberately reads the one, because
 // the Maestro adapter's `title` is a compound `<name> (<path>)` string and
@@ -22,7 +22,7 @@
 const REQUIRED_COLUMNS = ["id", "title", "area", "priority"];
 const PRIORITIES = ["must", "should", "may"];
 const FACETS = ["area", "priority"];
-// Lower-case words joined by `.` or `-`, as the catalog's dotted ids are
+// lower-case words joined by `.` or `-`, as the catalog's dotted ids are
 // written (`auth.last-server-url`).
 const ID_PATTERN = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
 
@@ -51,7 +51,7 @@ function stripBackticks(value) {
 }
 
 /**
- * Normalizes a facet value — a catalog cell or a tag's value — so the two join
+ * normalizes a facet value — a catalog cell or a tag's value — so the two join
  * case-insensitively and one spelling of a value never disagrees with another.
  */
 function normalizeFacet(value) {
@@ -64,13 +64,13 @@ function describe(subject, title) {
 }
 
 /**
- * Parses a journey catalog written as markdown into
+ * parses a journey catalog written as markdown into
  * `Map<id, { title, area, priority }>` plus the rows it could not read.
  *
- * The table is found by its header rather than by position: the first row
+ * the table is found by its header rather than by position: the first row
  * naming all of `Id`, `Title`, `Area`, and `Priority` — case-insensitively, in
  * any order — is the catalog, and any further column is ignored, so a project
- * can add one without touching this parser. A returned error means the catalog
+ * can add one without touching this parser. a returned error means the catalog
  * itself is unusable; the caller decides what to do about that.
  */
 export function parseScenarioCatalog(source) {
@@ -144,7 +144,7 @@ export function parseScenarioCatalog(source) {
 }
 
 /**
- * Reads the join and facet tags off one normalized result. A leading `@` is
+ * reads the join and facet tags off one normalized result. a leading `@` is
  * optional, so a runner that writes `@scenario:id` joins the same as one that
  * writes `scenario:id`.
  */
@@ -172,9 +172,9 @@ function readTags(tags) {
 }
 
 /**
- * Joins a parsed catalog against a normalized `{ title, tags, status }[]`.
+ * joins a parsed catalog against a normalized `{ title, tags, status }[]`.
  *
- * A scenario counts as covered when a result carrying its tag did not fail and
+ * a scenario counts as covered when a result carrying its tag did not fail and
  * was not skipped, so an adapter that later observes a real run supplies true
  * statuses without any change here. `subject` names what a result is in the
  * runner's own vocabulary — a Maestro adapter passes `"flow"` — and only
@@ -217,7 +217,7 @@ export function evaluateScenarioCoverage({
 		for (const { kind, value } of facets) {
 			for (const id of scenarios) {
 				const row = catalog.get(id);
-				// The tag is reported as the author wrote it, so it can be found
+				// the tag is reported as the author wrote it, so it can be found
 				// in the file, and compared normalized, so only the value differs.
 				if (row === undefined || row[kind] === normalizeFacet(value)) {
 					continue;

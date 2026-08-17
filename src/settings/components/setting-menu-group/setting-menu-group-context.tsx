@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
 
 /**
- * Where a row sits among its siblings inside a `<SettingMenuGroupBody>`, which is
- * what decides the corners it rounds. The body derives it from the children it is
+ * where a row sits among its siblings inside a `<SettingMenuGroupBody>`, which is
+ * what decides the corners it rounds. the body derives it from the children it is
  * handed, so no caller ever states it.
  */
 export type SettingMenuGroupItemPosition = "first" | "middle" | "last" | "only";
@@ -13,7 +13,7 @@ const SettingMenuGroupContext =
 export const SettingMenuGroupContextProvider = SettingMenuGroupContext.Provider;
 
 /**
- * Reads the position the enclosing body published. Neither this hook nor the
+ * reads the position the enclosing body published. neither this hook nor the
  * context it reads leaves this directory: a row is a part of the group, and a
  * `View` elsewhere reading the same context would be composing the group from
  * outside it.

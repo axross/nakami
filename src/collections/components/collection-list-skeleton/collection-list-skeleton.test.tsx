@@ -5,7 +5,7 @@ import { themes } from "~/unistyles";
 import { CollectionListSkeleton } from "./collection-list-skeleton";
 
 describe("<CollectionListSkeleton>", () => {
-	// The hook and the accessible label now sit on the root rather than on the
+	// the hook and the accessible label now sit on the root rather than on the
 	// inner card, so a caller-supplied label cannot produce a second labelled
 	// node beside the component's own.
 	it("hooks and labels its root by default", () => {
@@ -16,7 +16,7 @@ describe("<CollectionListSkeleton>", () => {
 		);
 	});
 
-	// A component that hard-codes its own hook cannot be used twice on one screen
+	// a component that hard-codes its own hook cannot be used twice on one screen
 	// and told apart, so the default has to be a default rather than a fixture.
 	it("lets the caller override the test hook", () => {
 		const { getByTestId, queryByTestId } = render(
@@ -27,7 +27,7 @@ describe("<CollectionListSkeleton>", () => {
 		expect(queryByTestId("collections-loading")).toBeNull();
 	});
 
-	// How much room the skeleton gets is the consumer's half of the split; the
+	// how much room the skeleton gets is the consumer's half of the split; the
 	// Collections screen passes the fill in through `style`.
 	it("claims no fill of its own", () => {
 		const { getByTestId } = render(<CollectionListSkeleton />);
@@ -35,20 +35,20 @@ describe("<CollectionListSkeleton>", () => {
 			getByTestId("collections-loading").props.style,
 		);
 
-		// Anchored on a property the root does set, so a `resolveStyle` that ever
+		// anchored on a property the root does set, so a `resolveStyle` that ever
 		// resolved to nothing would fail here rather than satisfy the assertion
 		// below by returning an empty object.
 		expect(resolved).toHaveProperty("backgroundColor");
 		expect(resolved).not.toHaveProperty("flex");
 	});
 
-	// The placeholder card has to sit exactly where the loaded list's card sits,
+	// the placeholder card has to sit exactly where the loaded list's card sits,
 	// safe-area inset included, or the list jumps sideways when the collections
 	// arrive. Unistyles' jest mock reports zero insets, so this is the zero-inset
 	// device: the margin has to fall back to the design gutter rather than
 	// collapsing to the raw inset.
 	//
-	// Read from the card rather than the root, which carries no inset of its own.
+	// read from the card rather than the root, which carries no inset of its own.
 	it("keeps the loaded card's horizontal gutter when the runtime reports no insets", () => {
 		const { getByTestId } = render(<CollectionListSkeleton />);
 

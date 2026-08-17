@@ -2,7 +2,7 @@ import { z } from "zod";
 import { humanizeSlug } from "~/collections/helpers/humanize-slug";
 
 /**
- * A collection as the list UI needs it: the Payload slug and a display name
+ * a collection as the list UI needs it: the Payload slug and a display name
  * derived from it. Payload returns no admin labels over REST, so `label` is the
  * humanized slug.
  */
@@ -12,7 +12,7 @@ export interface Collection {
 }
 
 /**
- * One operation's access result in `GET /api/access`. Payload serializes it as
+ * one operation's access result in `GET /api/access`. Payload serializes it as
  * a bare boolean when access is unconditional (`"read": true`), or as
  * `{ permission, where }` when a constraint applies; the constraint (`where`, …)
  * is tolerated (stripped) since only the boolean verdict matters here.
@@ -25,7 +25,7 @@ const operationAccessSchema = z.union([
 type OperationAccess = z.infer<typeof operationAccessSchema>;
 
 /**
- * One collection entry in `GET /api/access`. Only `read` gates whether the user
+ * one collection entry in `GET /api/access`. only `read` gates whether the user
  * can browse the collection; the other operations and `fields` are tolerated
  * (stripped). `read` is optional so an entry without it is treated as
  * not-readable rather than a parse failure.
@@ -42,7 +42,7 @@ export const accessResponseSchema = z.object({
 	collections: z.record(z.string(), collectionAccessSchema),
 });
 
-/** The parsed, validated `GET /api/access` response (see accessResponseSchema). */
+/** the parsed, validated `GET /api/access` response (see accessResponseSchema). */
 export type AccessResponse = z.infer<typeof accessResponseSchema>;
 
 // Payload's own internal collections (preferences, migrations, locked
@@ -52,13 +52,13 @@ function isSystemCollection(slug: string): boolean {
 	return slug.startsWith("payload-");
 }
 
-/** Whether an operation-access result grants the user access. */
+/** whether an operation-access result grants the user access. */
 function grantsAccess(access: OperationAccess | undefined): boolean {
 	return access === true || (typeof access === "object" && access.permission);
 }
 
 /**
- * Derives the display list from an access response: the collections the user
+ * derives the display list from an access response: the collections the user
  * can read, excluding Payload's internal system collections, each with a
  * humanized name, sorted alphabetically by that name.
  */

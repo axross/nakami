@@ -11,7 +11,7 @@ import { describeLoadError } from "~/collections/helpers/describe-collections-er
 import { describeOfflineLoad } from "~/collections/helpers/describe-collections-offline";
 import { getCollectionListQueryOptions } from "~/collections/queries/collection-list-query";
 
-// Subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
+// subject nouns for the shared load-error mapper (the taxonomy — icon, tone,
 // retryability — is shared with the records list).
 const COLLECTIONS_LOAD_ERROR = {
 	accessTitle: "Can't access collections",
@@ -21,7 +21,7 @@ const COLLECTIONS_LOAD_ERROR = {
 		"Something went wrong loading collections. Please try again.",
 } as const;
 
-// The subject-specific half of the offline surface; its title, status line, and
+// the subject-specific half of the offline surface; its title, status line, and
 // icon are shared with the records list.
 const COLLECTIONS_OFFLINE_SUBTITLE =
 	"Collections will load as soon as you're back online.";
@@ -31,8 +31,8 @@ function CollectionListDivider(): JSX.Element {
 }
 
 /**
- * The Collections tab: lists the signed-in server's readable, non-system
- * collections, each row opening that collection's record list. Renders an
+ * the Collections tab: lists the signed-in server's readable, non-system
+ * collections, each row opening that collection's record list. renders an
  * offline state, a loading skeleton, an error state (with a message tailored to
  * the failure), an empty state, or the list.
  */
@@ -45,7 +45,7 @@ export function CollectionsScreen(): JSX.Element {
 	});
 
 	let content: JSX.Element;
-	// Ahead of the skeleton on purpose. With no connection the query pauses
+	// ahead of the skeleton on purpose. with no connection the query pauses
 	// rather than failing, so it stays `pending` with nothing cached and the
 	// skeleton below would pulse indefinitely with nothing on its way.
 	if (isPending && fetchStatus === "paused") {
@@ -122,43 +122,43 @@ export function CollectionsScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// A stack header clears the top edge and the tab bar the bottom, so this
+	// a stack header clears the top edge and the tab bar the bottom, so this
 	// screen owns only the horizontal pair — carried on the list's content
 	// container, not on the list itself, which would inset its scroll indicators
 	// and leave the rows stopping short of the screen edge.
 	// `CollectionListSkeleton` mirrors these values, or the card would shift
 	// when the collections arrive.
 	card: {
+		marginTop: theme.gap.md,
+		marginBottom: theme.gap.md,
+		marginStart: Math.max(rt.insets.left, theme.gap.md),
+		marginEnd: Math.max(rt.insets.right, theme.gap.md),
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
-		borderRadius: theme.radius.md,
 		borderWidth: theme.borderWidth.hairline,
-		marginBottom: theme.gap.md,
-		marginEnd: Math.max(rt.insets.right, theme.gap.md),
-		marginStart: Math.max(rt.insets.left, theme.gap.md),
-		marginTop: theme.gap.md,
+		borderRadius: theme.radius.md,
 		overflow: "hidden",
 	},
-	// Drawn as a filled `View` rather than a border, so the hairline is its
+	// drawn as a filled `View` rather than a border, so the hairline is its
 	// height.
 	divider: {
-		backgroundColor: theme.colors.border.neutral.subtle,
 		height: theme.borderWidth.hairline,
+		backgroundColor: theme.colors.border.neutral.subtle,
 	},
 	list: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
-	// The message state claims no space of its own, so this screen — which gives
+	// the message state claims no space of its own, so this screen — which gives
 	// it the whole tab — supplies the fill.
 	messageState: {
 		flex: 1,
 	},
 	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
 		flex: 1,
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
-	// The skeleton claims no space of its own either, and it stands in for the
+	// the skeleton claims no space of its own either, and it stands in for the
 	// whole list.
 	skeleton: {
 		flex: 1,

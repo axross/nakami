@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-// Scenario-coverage gate for the Maestro e2e suite.
+// scenario-coverage gate for the Maestro e2e suite.
 //
-// The Maestro adapter over the runner-agnostic core in ./scenario-coverage.mjs:
+// the Maestro adapter over the runner-agnostic core in ./scenario-coverage.mjs:
 // it reads the journey catalog (e2e/scenarios.md), maps every flow under
 // e2e/flows/ into the core's normalized `{ title, tags, status }` shape, and
 // reports what the core finds.
 //
-// Every flow is reported with status "declared". This gate reads files and
+// every flow is reported with status "declared". this gate reads files and
 // never launches the app — which is what lets it run where no simulator
 // exists — so it has observed no execution and says so rather than claiming a
-// pass. That is also why a green gate proves tag bookkeeping only, and never
+// pass. that is also why a green gate proves tag bookkeeping only, and never
 // that a journey passes.
 //
-// Exit is non-zero on a structural tag error (a flow tagging an uncataloged
+// exit is non-zero on a structural tag error (a flow tagging an uncataloged
 // scenario, or carrying a facet tag with no scenario tag to check it against),
 // on a facet tag that disagrees with the catalog, on an empty or malformed
-// catalog, and on any uncovered `must`-priority scenario. Uncovered `should` /
+// catalog, and on any uncovered `must`-priority scenario. uncovered `should` /
 // `may` scenarios are report-only.
 
 import { readdir, readFile } from "node:fs/promises";
@@ -39,7 +39,7 @@ function stripQuotes(value) {
 }
 
 /**
- * Strips the `# …` comment a YAML scalar may be followed by. A quoted scalar
+ * strips the `# …` comment a YAML scalar may be followed by. a quoted scalar
  * may hold a `#` of its own, so only an unquoted value is cut, and only at a
  * `#` that starts a token rather than one sitting inside a word.
  */
@@ -64,10 +64,10 @@ function readFlowName(config) {
 }
 
 /**
- * Reads a flow config's `tags:` entries. Maestro declares them as a YAML block
+ * reads a flow config's `tags:` entries. Maestro declares them as a YAML block
  * sequence; the inline `[a, b]` form is accepted too.
  *
- * A blank line or a whole-line comment inside the block is skipped rather than
+ * a blank line or a whole-line comment inside the block is skipped rather than
  * ending it, and a trailing comment is stripped off an entry — the flows here
  * carry comments, and reading a commented flow as untagged would skip the very
  * checks this gate exists to run.
@@ -80,7 +80,7 @@ function readFlowTags(config) {
 		const header = line.match(/^tags:[ \t]*(.*)$/);
 		if (header !== null) {
 			const value = header[1].trim();
-			// The inline form ends at its closing bracket; a comment may follow.
+			// the inline form ends at its closing bracket; a comment may follow.
 			const closing = value.startsWith("[") ? value.lastIndexOf("]") : -1;
 			inList = closing === -1;
 			if (!inList) {
@@ -122,7 +122,7 @@ const { scenarios, errors: catalogErrors } = parseScenarioCatalog(
 );
 
 if (catalogErrors.length > 0) {
-	// Reported repository-relative, so the path is the same wherever it ran.
+	// reported repository-relative, so the path is the same wherever it ran.
 	for (const error of catalogErrors) {
 		console.error(`e2e/${catalogFile}: ${error}`);
 	}
@@ -137,14 +137,14 @@ const flowFiles = (await readdir(flowsDir, { recursive: true }))
 const results = await Promise.all(
 	flowFiles.map(async (file) => {
 		const source = await readFile(join(flowsDir, file), "utf-8");
-		// Only the flow config — everything above the first `---` — declares tags.
+		// only the flow config — everything above the first `---` — declares tags.
 		const config = source.split(/^---$/m)[0];
 		const path = `e2e/flows/${file.split(sep).join("/")}`;
 		const name = readFlowName(config);
 
 		return {
-			// Both, because neither identifies a flow on its own: two flows may
-			// share a `name:`, and CI has no tree for the reader to grep. The
+			// both, because neither identifies a flow on its own: two flows may
+			// share a `name:`, and CI has no tree for the reader to grep. the
 			// path is repository-relative, so it reads the same wherever it ran.
 			title: name === "" ? path : `${name} (${path})`,
 			tags: readFlowTags(config),

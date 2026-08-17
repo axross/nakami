@@ -1,4 +1,4 @@
-// Lets TypeScript treat `.svg` imports as React components, matching the
+// lets TypeScript treat `.svg` imports as React components, matching the
 // runtime behavior react-native-svg-transformer gives them (see metro.config.js).
 declare module "*.svg" {
 	import type React from "react";

@@ -39,7 +39,7 @@ describe("deriveRecordTitle", () => {
 			deriveRecordTitle({ id: "1", title: 42, name: "   ", label: "Labelled" }),
 		).toEqual({ title: "Labelled", hasTitle: true });
 
-		// A relationship object under `title` is skipped, so it falls back.
+		// a relationship object under `title` is skipped, so it falls back.
 		expect(deriveRecordTitle({ id: "1", title: { id: "rel" } })).toEqual({
 			title: "1",
 			hasTitle: false,

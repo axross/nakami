@@ -6,8 +6,8 @@ import { SettingMenuGroupBody } from "./setting-menu-group-body";
 import { useSettingMenuGroupContext } from "./setting-menu-group-context";
 
 /**
- * Renders the position the body published, which is what these tests assert
- * against. The rendered corner radii cannot stand in for it: the suite mocks
+ * renders the position the body published, which is what these tests assert
+ * against. the rendered corner radii cannot stand in for it: the suite mocks
  * Unistyles (`react-native-unistyles/mocks`), and that mock strips a style's
  * `variants` and stubs `useVariants` to a no-op, so every row resolves to the
  * same radius-free style whatever its position.
@@ -45,8 +45,8 @@ describe("<SettingMenuGroupBody>", () => {
 		expect(getByTestId("bottom")).toHaveTextContent("last");
 	});
 
-	// The License row arrives wrapped in a `<Link asChild>`, so the wrapper rather
-	// than the row is what the body counts and provides to. The row still reads
+	// the License row arrives wrapped in a `<Link asChild>`, so the wrapper rather
+	// than the row is what the body counts and provides to. the row still reads
 	// its position, because the provider encloses the wrapper.
 	it("reaches a row nested inside a wrapper element", () => {
 		const { getByTestId } = render(
@@ -62,7 +62,7 @@ describe("<SettingMenuGroupBody>", () => {
 		expect(getByTestId("wrapped")).toHaveTextContent("middle");
 	});
 
-	// A row rendered by a false branch is absent rather than empty, so the row
+	// a row rendered by a false branch is absent rather than empty, so the row
 	// above it is still the last one and still rounds the bottom corners.
 	it("counts only the rows actually drawn, skipping a conditional row's `null`", () => {
 		const showDebugRow = false;

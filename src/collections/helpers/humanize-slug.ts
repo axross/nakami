@@ -1,8 +1,8 @@
 /**
- * Turns a Payload collection slug into a display name. Payload exposes no
+ * turns a Payload collection slug into a display name. Payload exposes no
  * collection labels over REST, so the slug is the only source: split on `-`/`_`
  * word separators and title-case each word (`"blog-posts"` → `"Blog Posts"`).
- * A slug with no word characters falls back to itself.
+ * a slug with no word characters falls back to itself.
  */
 export function humanizeSlug(slug: string): string {
 	const words = slug

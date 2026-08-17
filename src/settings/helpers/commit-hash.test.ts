@@ -8,7 +8,7 @@ jest.mock("expo-constants", () => ({
 }));
 
 /**
- * Sets the value the mocked Expo config exposes at
+ * sets the value the mocked Expo config exposes at
  * `Constants.expoConfig.extra.commitHash`, standing in for what
  * `app.config.ts` bakes in at build time.
  */

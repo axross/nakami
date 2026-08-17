@@ -12,7 +12,7 @@ import { SettingsScreen } from "./settings-screen";
 // `addBreadcrumb` is not used by this screen: it is reached at import time,
 // because the shared query client logs the start of its launch-time
 // connectivity probe while registering `onlineManager` at module scope, and the
-// root logger's breadcrumb transport forwards every line here. A factory that
+// root logger's breadcrumb transport forwards every line here. a factory that
 // names only what the screen calls makes the whole suite fail to load.
 jest.mock("@sentry/react-native", () => ({
 	addBreadcrumb: jest.fn(),
@@ -35,7 +35,7 @@ const session: Session = {
 	user: { id: "1", email: "you@example.com" },
 };
 
-// The Account group consumes the sign-out mutation via `useMutation`, so render
+// the Account group consumes the sign-out mutation via `useMutation`, so render
 // under a fresh, isolated QueryClient — the mutation stays idle here (never
 // invoked), and the real store still drives the auth-gated rows.
 function renderSettingsScreen() {
@@ -137,7 +137,7 @@ describe("<SettingsScreen>", () => {
 		expect(getByText("Sign out")).toBeTruthy();
 	});
 
-	// The last row used to sit flush against the tab bar; the content container
+	// the last row used to sit flush against the tab bar; the content container
 	// now ends with the screen's own gutter. Unistyles' jest mock reports zero
 	// insets, so this is the zero-inset device — the gutter is unconditional
 	// here, unlike the horizontal pair, which is deliberately the bare inset
@@ -152,9 +152,9 @@ describe("<SettingsScreen>", () => {
 		expect(content.paddingBottom).toBe(themes.light.gap.lg);
 	});
 
-	// The horizontal pair is the bare inset by design — the child rows carry the
+	// the horizontal pair is the bare inset by design — the child rows carry the
 	// gutter — so this screen is the one that asserts zero rather than a gutter.
-	// Flooring it against `theme.gap.md` would read as a fix and would stack a
+	// flooring it against `theme.gap.md` would read as a fix and would stack a
 	// second gutter on every row; pinning it here is what makes that regression
 	// fail a test instead of shipping.
 	it("leaves the horizontal pair as the bare inset, since the rows carry the gutter", () => {

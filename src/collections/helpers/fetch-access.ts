@@ -6,9 +6,9 @@ import {
 } from "~/common/helpers/payload-client";
 
 /**
- * Fetches the current user's access map from `GET {serverUrl}/api/access`. This
+ * fetches the current user's access map from `GET {serverUrl}/api/access`. this
  * endpoint is server-scoped (not collection-scoped), so it does not go through
- * the auth client's collection endpoint helper. Maps failures to a
+ * the auth client's collection endpoint helper. maps failures to a
  * {@link import("~/common/helpers/payload-client").PayloadRequestError}.
  */
 export async function fetchAccess(serverUrl: string, token: string) {
