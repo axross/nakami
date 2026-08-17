@@ -2,6 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import {
 	countSignInFieldErrors,
 	firstSignInFieldError,
+	signInFieldLabel,
 	validateSignInForm,
 } from "./sign-in-form";
 
@@ -145,5 +146,17 @@ describe("countSignInFieldErrors()", () => {
 
 	it("counts a clean form as zero", () => {
 		expect(countSignInFieldErrors({})).toBe(0);
+	});
+});
+
+describe("signInFieldLabel()", () => {
+	it("is the plain label while the field is not flagged", () => {
+		expect(signInFieldLabel("Email", undefined)).toBe("Email");
+	});
+
+	it("carries the message so a reader hears what is wrong with the field", () => {
+		expect(signInFieldLabel("Email", "Enter your email address.")).toBe(
+			"Email, Enter your email address.",
+		);
 	});
 });

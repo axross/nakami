@@ -214,6 +214,50 @@ describe("<SignInScreen>", () => {
 		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
 	});
 
+	// A flagged input's border and tint are cues only a sighted user gets. React
+	// Native has no `aria-describedby` to bind the message node to the input, so
+	// the message is folded into the input's own accessible name — which is what
+	// a reader arriving from the summary's press actually hears.
+	it("names each flagged input with its own message", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		// Collection is only ever emptied through its own input, so it has to be
+		// opened before it can be at fault.
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+		fireEvent.changeText(getByTestId("sign-in-collection-input"), "");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		expect(getByTestId("sign-in-server-url").props.accessibilityLabel).toBe(
+			"Server URL, Enter your server URL.",
+		);
+		expect(
+			getByTestId("sign-in-collection-input").props.accessibilityLabel,
+		).toBe("Collection, Enter the auth collection slug.");
+		expect(getByTestId("sign-in-email").props.accessibilityLabel).toBe(
+			"Email, Enter your email address.",
+		);
+		expect(getByTestId("sign-in-password").props.accessibilityLabel).toBe(
+			"Password, Enter your password.",
+		);
+	});
+
+	it("returns an input's name to its plain label once the message clears", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-submit"));
+		expect(getByTestId("sign-in-email").props.accessibilityLabel).toBe(
+			"Email, Enter your email address.",
+		);
+
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+
+		expect(getByTestId("sign-in-email").props.accessibilityLabel).toBe("Email");
+		// The field beside it keeps both its message and its named state.
+		expect(getByTestId("sign-in-password").props.accessibilityLabel).toBe(
+			"Password, Enter your password.",
+		);
+	});
+
 	// The message components' live region is Android-only, so iOS is announced
 	// imperatively; the suite runs as iOS, which is the branch asserted here.
 	it("announces the problem count to a screen reader on press", () => {

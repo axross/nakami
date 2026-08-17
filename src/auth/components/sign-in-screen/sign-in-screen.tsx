@@ -30,6 +30,7 @@ import {
 	firstSignInFieldError,
 	type SignInField,
 	type SignInFormErrors,
+	signInFieldLabel,
 	validateSignInForm,
 } from "~/auth/helpers/sign-in-form";
 import { getSignInMutationOptions } from "~/auth/mutations/sign-in-mutation";
@@ -281,7 +282,10 @@ export function SignInScreen(): JSX.Element {
 				<View style={styles.field}>
 					<Text style={styles.label}>Server URL</Text>
 					<TextInput
-						accessibilityLabel="Server URL"
+						accessibilityLabel={signInFieldLabel(
+							"Server URL",
+							fieldErrors.serverUrl,
+						)}
 						autoCapitalize="none"
 						autoCorrect={false}
 						inputMode="url"
@@ -325,7 +329,7 @@ export function SignInScreen(): JSX.Element {
 				<View style={styles.field}>
 					<Text style={styles.label}>Email</Text>
 					<TextInput
-						accessibilityLabel="Email"
+						accessibilityLabel={signInFieldLabel("Email", fieldErrors.email)}
 						autoCapitalize="none"
 						autoCorrect={false}
 						inputMode="email"
@@ -355,7 +359,10 @@ export function SignInScreen(): JSX.Element {
 				<View style={styles.field}>
 					<Text style={styles.label}>Password</Text>
 					<TextInput
-						accessibilityLabel="Password"
+						accessibilityLabel={signInFieldLabel(
+							"Password",
+							fieldErrors.password,
+						)}
 						autoCapitalize="none"
 						autoCorrect={false}
 						onBlur={() => onFieldBlur("password")}

@@ -123,3 +123,26 @@ export function countSignInFieldErrors(
 ): number {
 	return SIGN_IN_FIELDS.filter((field) => errors[field] !== undefined).length;
 }
+
+/**
+ * A field's accessible name: its visible label on its own, or that label
+ * followed by the field's message while it is flagged.
+ *
+ * This is how a flagged input tells assistive technology what is wrong with it.
+ * The web answer is `aria-describedby`, which React Native has no equivalent of
+ * — and its `aria-labelledby` is Android-only, so pairing an input with its
+ * separate message node would leave VoiceOver exactly as silent as the
+ * Android-only live region already does. Folding the message into the name is
+ * cross-platform: a reader landing on a flagged input hears "Email, Enter your
+ * email address." rather than "Email, text field", which is what the input's
+ * destructive border and tinted ground already say to anyone who can see them.
+ *
+ * Sighted users are unaffected — the visible label is a separate `Text` node,
+ * and this name is read by assistive technology only.
+ */
+export function signInFieldLabel(
+	label: string,
+	message: string | undefined,
+): string {
+	return message === undefined ? label : `${label}, ${message}`;
+}
