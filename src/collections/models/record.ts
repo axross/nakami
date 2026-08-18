@@ -1,8 +1,6 @@
 import { z } from "zod";
-import {
-	deriveRecordTitle,
-	formatUpdatedLabel,
-} from "~/collections/helpers/derive-record-title";
+import { deriveRecordTitle } from "~/collections/helpers/derive-record-title";
+import { parseUpdatedAt } from "~/collections/helpers/format-updated-at";
 
 /**
  * one record (document) in a Payload collection, as returned by the `find`
@@ -32,15 +30,21 @@ export const recordPageSchema = z.object({
 /** the parsed, validated `find` response (see {@link recordPageSchema}). */
 export type RecordPageResponse = z.infer<typeof recordPageSchema>;
 
-/** a record as the list UI needs it: an id, a derived title, and a metadata line. */
+/** a record as the list UI needs it: an id, a derived title, and a last-update time. */
 export interface CollectionRecord {
 	readonly id: string;
 	/** derived display title — a title-ish field's value, or the id (see `hasTitle`). */
 	readonly title: string;
 	/** `false` when the title fell back to the id (no title-ish field existed). */
 	readonly hasTitle: boolean;
-	/** "Updated 18 Jul 2026" from the record's `updatedAt`, or `null` when absent. */
-	readonly updatedLabel: string | null;
+	/**
+	 * the record's `updatedAt` as epoch milliseconds, or `null` when the field is
+	 * absent or unreadable. the *timestamp* travels rather than a formatted
+	 * label, because the card's label is relative ("5 hours ago") and one baked
+	 * in here would freeze in the query cache and go on reading as it did when
+	 * the page was fetched.
+	 */
+	readonly updatedAt: number | null;
 }
 
 /** one page of records as the list UI needs it, plus the pagination cursor. */
@@ -61,7 +65,7 @@ function toCollectionRecord(
 		id: record.id,
 		title,
 		hasTitle,
-		updatedLabel: formatUpdatedLabel(record.updatedAt),
+		updatedAt: parseUpdatedAt(record.updatedAt),
 	};
 }
 

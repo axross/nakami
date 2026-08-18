@@ -93,7 +93,7 @@ describe("getCollectionRecordsInfiniteQueryOptions", () => {
 			3,
 		);
 		expect(result.records).toEqual([
-			{ id: "5", title: "Mapped", hasTitle: true, updatedLabel: null },
+			{ id: "5", title: "Mapped", hasTitle: true, updatedAt: null },
 		]);
 	});
 

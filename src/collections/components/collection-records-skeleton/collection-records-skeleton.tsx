@@ -84,7 +84,8 @@ export function CollectionRecordsSkeleton({
 					<View style={styles.line}>
 						<Animated.View style={[styles.titleBar(width), pulse]} />
 					</View>
-					<View style={styles.line}>
+					<View style={styles.metaLine}>
+						<Animated.View style={[styles.chipBar, pulse]} />
 						<Animated.View style={[styles.metaBar, pulse]} />
 					</View>
 				</View>
@@ -103,6 +104,15 @@ const styles = StyleSheet.create((theme, rt) => ({
 		borderColor: theme.colors.border.neutral.subtle,
 		borderWidth: theme.borderWidth.hairline,
 		borderRadius: theme.radius.md,
+	},
+	// the left end of the loaded metadata row: the id pill, at the chip's own
+	// height and radius, so the placeholder reads as the pill it stands in for
+	// rather than as another thin bar.
+	chipBar: {
+		width: "62%",
+		height: RECORD_CARD_LINE,
+		backgroundColor: theme.colors.border.neutral.subtle,
+		borderRadius: theme.radius.pill,
 	},
 	// mirrors the screen's record-count header.
 	count: {
@@ -125,18 +135,28 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
-	// a card's title and metadata rows are each one fixed line box; the thin bar
-	// sits centered inside it, so the placeholder card is exactly as tall as a
-	// real one.
+	// a card's title row is one fixed line box; the thin bar sits centered inside
+	// it, so the placeholder card is exactly as tall as a real one.
 	line: {
 		justifyContent: "center",
 		height: RECORD_CARD_LINE,
 	},
+	// the right end of the loaded metadata row: the update label, which is short
+	// and never gives way.
 	metaBar: {
-		width: "40%",
+		width: "20%",
 		height: 11,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
+	},
+	// the metadata row's own line box — the same fixed height the title row's
+	// carries, laid out like the loaded card's row (see collection-record-card)
+	// so its two placeholders sit at the ends the chip and the label do.
+	metaLine: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		height: RECORD_CARD_LINE,
 	},
 	titleBar: (width: DimensionValue) => ({
 		width,

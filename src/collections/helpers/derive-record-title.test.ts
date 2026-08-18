@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { deriveRecordTitle, formatUpdatedLabel } from "./derive-record-title";
+import { deriveRecordTitle } from "./derive-record-title";
 
 describe("deriveRecordTitle", () => {
 	it("uses the first present title-ish field in priority order", () => {
@@ -44,22 +44,5 @@ describe("deriveRecordTitle", () => {
 			title: "1",
 			hasTitle: false,
 		});
-	});
-});
-
-describe("formatUpdatedLabel", () => {
-	it("formats an ISO date string in UTC", () => {
-		expect(formatUpdatedLabel("2026-07-18T12:34:56.000Z")).toBe(
-			"Updated 18 Jul 2026",
-		);
-	});
-
-	it("returns null for a missing or non-string value", () => {
-		expect(formatUpdatedLabel(undefined)).toBeNull();
-		expect(formatUpdatedLabel(1_700_000_000)).toBeNull();
-	});
-
-	it("returns null for an unparseable date string", () => {
-		expect(formatUpdatedLabel("not-a-date")).toBeNull();
 	});
 });

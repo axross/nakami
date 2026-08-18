@@ -15,7 +15,7 @@ const TITLE_FIELDS = [
 
 /** a record's derived display title and whether it came from a real field. */
 export interface DerivedRecordTitle {
-	/** the title to show — a title-ish field's value, or the record id. */
+	/** a title-ish field's value, or the record id when none existed. */
 	readonly title: string;
 	/** `false` when no title-ish field existed and the title fell back to the id. */
 	readonly hasTitle: boolean;
@@ -24,9 +24,9 @@ export interface DerivedRecordTitle {
 /**
  * derives a record's display title from its fields. returns the first present,
  * non-empty **string** field among {@link TITLE_FIELDS} (in priority order);
- * when none exists, falls back to the record's id with `hasTitle: false` so the
- * UI can style the fallback distinctly. non-string fields (numbers, objects,
- * relationships) are skipped rather than coerced.
+ * when none exists, falls back to the record's id with `hasTitle: false`, which
+ * is what the UI branches on to show placeholder copy instead. non-string
+ * fields (numbers, objects, relationships) are skipped rather than coerced.
  */
 export function deriveRecordTitle(
 	record: Record<string, unknown>,
@@ -39,38 +39,4 @@ export function deriveRecordTitle(
 	}
 
 	return { title: String(record.id), hasTitle: false };
-}
-
-const MONTHS = [
-	"Jan",
-	"Feb",
-	"Mar",
-	"Apr",
-	"May",
-	"Jun",
-	"Jul",
-	"Aug",
-	"Sep",
-	"Oct",
-	"Nov",
-	"Dec",
-] as const;
-
-/**
- * formats a record's `updatedAt` into a short "Updated 18 Jul 2026" label, or
- * `null` when the value is absent or not a valid date string. formatted in UTC
- * so the label is deterministic (no device-timezone or `Intl` dependence),
- * matching the secondary line the record card shows under the title.
- */
-export function formatUpdatedLabel(updatedAt: unknown): string | null {
-	if (typeof updatedAt !== "string") {
-		return null;
-	}
-
-	const date = new Date(updatedAt);
-	if (Number.isNaN(date.getTime())) {
-		return null;
-	}
-
-	return `Updated ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
