@@ -33,27 +33,41 @@ const UNTITLED: CollectionRecord = {
  * element inside a composite one, so the container that holds a row open is
  * several levels above the match rather than its direct parent.
  */
-function enclosingStyle(
-	element: { parent: unknown; props: { style?: unknown } } | null,
+type Node = {
+	parent: unknown;
+	props: { style?: unknown };
+	children?: readonly unknown[];
+} | null;
+
+function enclosingNode(
+	element: Node,
 	matches: (style: Record<string, unknown>) => boolean,
-): Record<string, unknown> {
+): Node {
 	for (
 		let node = element;
 		node !== null && node !== undefined;
-		node = node.parent as typeof element
+		node = node.parent as Node
 	) {
-		const style = resolveStyle(node.props?.style);
-
-		if (matches(style)) {
-			return style;
+		if (matches(resolveStyle(node.props?.style))) {
+			return node;
 		}
 	}
 
-	return {};
+	return null;
+}
+
+function enclosingStyle(
+	element: Node,
+	matches: (style: Record<string, unknown>) => boolean,
+): Record<string, unknown> {
+	return resolveStyle(enclosingNode(element, matches)?.props?.style);
 }
 
 const hasHeight = (style: Record<string, unknown>): boolean =>
 	style.height !== undefined;
+
+const isMetaRow = (style: Record<string, unknown>): boolean =>
+	style.justifyContent === "space-between";
 
 describe("<CollectionRecordCard>", () => {
 	afterEach(() => {
@@ -186,6 +200,37 @@ describe("<CollectionRecordCard>", () => {
 		expect(queryByText("5 hours ago")).toBeNull();
 		expect(enclosingStyle(getByText(UNTITLED.id), hasHeight).height).toBe(
 			RECORD_CARD_LINE,
+		);
+		// `space-between` puts a lone child at the start, so the chip keeping the
+		// left edge is a consequence of the row holding nothing else. that is what
+		// this asserts — the count, which is the mechanism — since the resolved
+		// position itself is a layout an off-device render never computes.
+		expect(
+			enclosingNode(getByText(UNTITLED.id), isMetaRow)?.children,
+		).toHaveLength(1);
+	});
+
+	// the card's height is set entirely by styles — two fixed line boxes inside a
+	// fixed padding — so two cards drawing the same ones are the same height. no
+	// off-device render computes a height to compare, and these are the values it
+	// would compute from.
+	it("gives a titled and a title-less card the same geometry", () => {
+		const geometry = (record: CollectionRecord, title: string) => {
+			const card = render(<CollectionRecordCard record={record} />);
+
+			return {
+				card: resolveStyle(
+					card.getByTestId(`collection-record-list-item-${record.id}`).props
+						.style,
+				),
+				row: enclosingStyle(card.getByText(record.id), isMetaRow),
+				titleLineHeight: resolveStyle(card.getByText(title).props.style)
+					.lineHeight,
+			};
+		};
+
+		expect(geometry(UNTITLED, "Untitled")).toEqual(
+			geometry(TITLED, TITLED.title),
 		);
 	});
 

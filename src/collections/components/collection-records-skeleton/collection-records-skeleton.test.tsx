@@ -28,6 +28,38 @@ function subtreeStyles(node: unknown): Record<string, unknown>[] {
 	];
 }
 
+type Node = { props?: { style?: unknown }; children?: readonly unknown[] };
+
+/**
+ * the *deepest* node in a rendered subtree whose own style satisfies `matches`,
+ * so a placeholder carrying no test hook can be reached and its children
+ * counted rather than only its style observed. deepest rather than first: a
+ * composite node and the host node beneath it both hold the style prop, and
+ * only the host one holds the children worth counting.
+ */
+function findNode(
+	node: unknown,
+	matches: (style: Record<string, unknown>) => boolean,
+): Node | null {
+	if (typeof node !== "object" || node === null) {
+		return null;
+	}
+
+	const { props, children } = node as Node;
+
+	for (const child of children ?? []) {
+		const found = findNode(child, matches);
+
+		if (found !== null) {
+			return found;
+		}
+	}
+
+	return props?.style !== undefined && matches(resolveStyle(props.style))
+		? (node as Node)
+		: null;
+}
+
 describe("<CollectionRecordsSkeleton>", () => {
 	it("hooks and labels its root by default", () => {
 		const { getByTestId } = render(<CollectionRecordsSkeleton />);
@@ -87,5 +119,28 @@ describe("<CollectionRecordsSkeleton>", () => {
 					style.height === RECORD_CARD_LINE,
 			),
 		).toBe(true);
+	});
+
+	// the pill alone would satisfy the row above while the label's own bar went
+	// missing, so the row is also asserted to hold two things, the second of them
+	// the short bar the update label stands behind. which end each sits at is a
+	// layout an off-device render never computes; the pair and their order are
+	// what it can show.
+	it("puts a second, shorter bar after the pill in that row", () => {
+		const { getByTestId } = render(<CollectionRecordsSkeleton />);
+		const row = findNode(
+			getByTestId("collection-records-loading"),
+			(style) =>
+				style.justifyContent === "space-between" &&
+				style.height === RECORD_CARD_LINE,
+		);
+
+		const bars = (row?.children ?? []).map((child) =>
+			resolveStyle((child as { props?: { style?: unknown } }).props?.style),
+		);
+
+		expect(bars).toHaveLength(2);
+		expect(bars[0]?.borderRadius).toBe(themes.light.radius.pill);
+		expect(bars[1]?.width).toBe("20%");
 	});
 });
