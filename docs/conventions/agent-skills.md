@@ -508,7 +508,7 @@ rule's first clause is satisfied and only its own comment records why `pressed`
 stays outside the variant groups.
 
 Two neighbouring styles look similar and are **not** deviations:
-`collection-records-skeleton.tsx:141` and `collection-list-skeleton.tsx:109` both
+`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:109` both
 take a width, which the same rule's next clause requires stay a dynamic function.
 
 The two `pressed` styles convert the moment Unistyles offers a press state a

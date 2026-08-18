@@ -16,7 +16,7 @@ function labelAfter(elapsed: number): string {
 	return formatUpdatedAt(NOW - elapsed, NOW);
 }
 
-describe("parseUpdatedAt", () => {
+describe("parseUpdatedAt()", () => {
 	it("reads an ISO date string as epoch milliseconds", () => {
 		expect(parseUpdatedAt("2026-07-18T12:34:56.000Z")).toBe(
 			Date.UTC(2026, 6, 18, 12, 34, 56),
@@ -33,7 +33,7 @@ describe("parseUpdatedAt", () => {
 	});
 });
 
-describe("formatUpdatedAt", () => {
+describe("formatUpdatedAt()", () => {
 	// each rung is asserted on both sides of the boundary below it, because an
 	// off-by-one comparison reads plausibly at every point except there.
 	it("reads 'Just now' under a minute", () => {

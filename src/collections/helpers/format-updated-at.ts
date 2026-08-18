@@ -40,7 +40,10 @@ export function parseUpdatedAt(value: unknown): number | null {
 
 // "1 hour ago" / "5 hours ago" — the plural comes off the count, so no rung
 // needs a branch of its own to read singular.
-function agoLabel(count: number, unit: string): string {
+function agoLabel(
+	count: number,
+	unit: "minute" | "hour" | "day" | "week",
+): string {
 	return `${count} ${unit}${count === 1 ? "" : "s"} ago`;
 }
 

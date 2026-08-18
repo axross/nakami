@@ -41,6 +41,8 @@ export function CollectionRecordCard({
 		record: CollectionRecord;
 	}
 >): JSX.Element {
+	styles.useVariants({ hasTitle: record.hasTitle });
+
 	// formatted here rather than on the view model: the label is relative, so one
 	// built at parse time would freeze in the query cache and go on reading as it
 	// did when the page was fetched.
@@ -59,7 +61,7 @@ export function CollectionRecordCard({
 			{...props}
 			style={[styles.card, style]}
 		>
-			<Text numberOfLines={1} style={styles.title(record.hasTitle)}>
+			<Text numberOfLines={1} style={styles.title}>
 				{record.hasTitle ? record.title : UNTITLED_TITLE}
 			</Text>
 
@@ -79,7 +81,16 @@ export function CollectionRecordCard({
 	);
 }
 
-const styles = StyleSheet.create((theme) => ({
+/**
+ * this card's stylesheet, exported for one reason. the jest mock for Unistyles
+ * strips `variants` from every stylesheet and stubs `useVariants` to a no-op,
+ * so under test a titled card and a title-less one resolve the same title
+ * colour and no assertion on the two inks can fail. the selection is the one
+ * thing still observable, and a test spies on `useVariants` through this
+ * reference — see collection-record-card.test.tsx. it is not a styling API, and
+ * nothing outside that test should consume it.
+ */
+export const styles = StyleSheet.create((theme) => ({
 	card: {
 		gap: theme.gap.xs,
 		paddingVertical: theme.gap.sm,
@@ -128,6 +139,11 @@ const styles = StyleSheet.create((theme) => ({
 		justifyContent: "space-between",
 		columnGap: theme.gap.xs,
 		height: RECORD_CARD_LINE,
+		// the label never shrinks, so at a large accessibility text size it can
+		// outgrow the row once the chip has given up all its width. clipping at
+		// the row keeps it inside the card's border rather than painting past it
+		// on iOS and being cut by the parent on Android.
+		overflow: "hidden",
 	},
 	// never the element that gives way: the label is short and its whole value is
 	// in reading it, so the chip beside it is what shrinks.
@@ -138,11 +154,24 @@ const styles = StyleSheet.create((theme) => ({
 	},
 	// one style for both cases rather than two roles: a missing title is an
 	// absence to mark, not a second kind of title, so the fallback keeps the
-	// heading role whole and differs in ink alone.
-	title: (hasTitle: boolean) => ({
+	// heading role whole and differs in ink alone. `hasTitle` is a closed
+	// boolean, so it is a variant rather than a dynamic-function argument;
+	// `default` repeats the titled ink so a body that never selected would still
+	// render a defined colour.
+	title: {
 		...theme.typography.heading,
-		color: hasTitle
-			? theme.colors.text.neutral.intense
-			: theme.colors.text.neutral.base,
-	}),
+		variants: {
+			hasTitle: {
+				default: {
+					color: theme.colors.text.neutral.intense,
+				},
+				false: {
+					color: theme.colors.text.neutral.base,
+				},
+				true: {
+					color: theme.colors.text.neutral.intense,
+				},
+			},
+		},
+	},
 }));

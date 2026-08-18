@@ -156,6 +156,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "space-between",
+		columnGap: theme.gap.xs,
 		height: RECORD_CARD_LINE,
 	},
 	titleBar: (width: DimensionValue) => ({

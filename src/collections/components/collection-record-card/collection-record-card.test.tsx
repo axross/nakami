@@ -6,6 +6,7 @@ import { themes } from "~/unistyles";
 import {
 	CollectionRecordCard,
 	RECORD_CARD_LINE,
+	styles,
 } from "./collection-record-card";
 
 const HOUR = 60 * 60 * 1_000;
@@ -70,28 +71,50 @@ describe("<CollectionRecordCard>", () => {
 			fontFamily: "InnovatorGrotesk-SemiBold",
 			fontSize: 16,
 			lineHeight: RECORD_CARD_LINE,
-			color: themes.light.colors.text.neutral.intense,
 		});
 	});
 
 	// a record with no title-ish field takes placeholder copy in the title's own
-	// type: an absence to mark, not a second kind of title. the colour is the one
-	// thing allowed to differ, so the two are compared property by property
-	// rather than each against a literal.
-	it("draws a title-less record's fallback title in the title role, differing only in colour", () => {
+	// type: an absence to mark, not a second kind of title. the type is what this
+	// asserts — the two are compared property by property rather than each
+	// against a literal, and the ink is the one thing allowed to differ.
+	it("draws a title-less record's fallback title in the title role", () => {
 		const titled = render(<CollectionRecordCard record={TITLED} />);
 		const untitled = render(<CollectionRecordCard record={UNTITLED} />);
 
-		const { color: titledColor, ...titledType } = resolveStyle(
-			titled.getByText(TITLED.title).props.style,
+		expect(resolveStyle(untitled.getByText("Untitled").props.style)).toEqual(
+			resolveStyle(titled.getByText(TITLED.title).props.style),
 		);
-		const { color: fallbackColor, ...fallbackType } = resolveStyle(
-			untitled.getByText("Untitled").props.style,
-		);
+	});
 
-		expect(fallbackType).toEqual(titledType);
-		expect(fallbackColor).toBe(themes.light.colors.text.neutral.base);
-		expect(fallbackColor).not.toBe(titledColor);
+	// the two inks are a Unistyles variant, and the jest mock strips `variants`
+	// from every stylesheet and stubs `useVariants` to a no-op — so the muted
+	// fallback colour never reaches the rendered tree here and cannot be
+	// asserted. what can still fail is the selection, which is what these two
+	// cover: delete the `useVariants` call, or compute `hasTitle` from the wrong
+	// thing, and they go red.
+	it("selects the titled variant for a record that has a title", () => {
+		const useVariants = jest.spyOn(styles, "useVariants");
+
+		try {
+			render(<CollectionRecordCard record={TITLED} />);
+
+			expect(useVariants).toHaveBeenCalledWith({ hasTitle: true });
+		} finally {
+			useVariants.mockRestore();
+		}
+	});
+
+	it("selects the fallback variant for a record that has none", () => {
+		const useVariants = jest.spyOn(styles, "useVariants");
+
+		try {
+			render(<CollectionRecordCard record={UNTITLED} />);
+
+			expect(useVariants).toHaveBeenCalledWith({ hasTitle: false });
+		} finally {
+			useVariants.mockRestore();
+		}
 	});
 
 	// the metadata row's own text is shorter than the fixed line box, so the row
@@ -148,6 +171,7 @@ describe("<CollectionRecordCard>", () => {
 				(style) => style.justifyContent === "space-between",
 			),
 		).toMatchObject({ flexDirection: "row", height: RECORD_CARD_LINE });
+		expect(enclosingStyle(getByText(TITLED.id), hasHeight).flexShrink).toBe(1);
 		expect(resolveStyle(getByText(TITLED.id).props.style).flexShrink).toBe(1);
 		expect(resolveStyle(getByText("5 hours ago").props.style).flexShrink).toBe(
 			0,
