@@ -23,8 +23,17 @@ admin UI hides them by, so their slug prefix is what identifies them.
 
 Payload's REST API reports no display label for a collection, so a row's name is
 derived from the slug: `-` and `_` separators become spaces and each word is
-capitalised, so `blog-posts` reads as Blog Posts. Each row also carries a
-monogram of that name's first letter.
+capitalised, so `blog-posts` reads as Blog Posts. Each row also carries an icon,
+and the slug is the only signal for that too — the API reports nothing about
+what a collection holds.
+
+The slug is read as words and scanned from the last word backwards, so the
+first word the app recognises decides the icon: `blog-posts` is marked as
+documents, and `product-images` as images rather than products, because an
+English name is about its last word. A word that fits two kinds equally is
+recognised as neither, which is what lets `podcast-episodes` pass over
+`episodes` and read as audio. A slug nothing recognises carries a plain box,
+since a neutral mark beats a confident wrong one.
 
 ## Opening a collection
 

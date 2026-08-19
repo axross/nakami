@@ -56,7 +56,7 @@ than for its value, so a surface picks by role instead of by eye:
 
 | Step   | Value | Role                                                              |
 | ------ | ----- | ------------------------------------------------------------------- |
-| `sm`   | 8     | Inset marks and placeholder bars — a collection monogram, a skeleton bar |
+| `sm`   | 8     | Inset marks and placeholder bars — a collection row's icon tile, a skeleton bar |
 | `md`   | 12    | The default surface corner — cards, inputs, buttons, menu-group ends |
 | `lg`   | 16    | Large marks — a message state's icon plate                        |
 | `pill` | 999   | Fully rounded — the record-id chip, the account avatar            |
@@ -109,7 +109,7 @@ size:
 | ---------- | --------------------------- | -------------- | ------------------------------------------------------------------ |
 | `display`  | `InnovatorGrotesk-SemiBold` | 28 / 34        | A screen's hero title — the Home landing                           |
 | `title`    | `InnovatorGrotesk-SemiBold` | 20 / 26        | A centered message state's title                                   |
-| `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings, the collection monogram |
+| `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings                       |
 | `body`     | `InnovatorGrotesk-Regular`  | 16 / 22        | Running text, text inputs, list row labels                         |
 | `caption`  | `InnovatorGrotesk-Regular`  | 13 / 18        | A form field's name, hints, errors, counts, metadata               |
 | `code`     | `JetBrainsMono-Regular`     | 14 / 22        | A record id standing in for a title, id chips, build details       |

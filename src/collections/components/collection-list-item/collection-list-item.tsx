@@ -9,12 +9,13 @@ import {
 	type ViewStyle,
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { getCollectionIcon } from "~/collections/helpers/collection-icon";
 import type { Collection } from "~/collections/models/collection";
 
 /**
- * the pressable row body: a monogram of the collection's initial, its name, and
- * a chevron. kept a separate component so `Link asChild` clones *this* wrapper
- * and threads its injected press/href props onto the root `Pressable` via
+ * the pressable row body: an icon guessed from the collection's slug, its name,
+ * and a chevron. kept a separate component so `Link asChild` clones *this*
+ * wrapper and threads its injected press/href props onto the root `Pressable` via
  * `...props`. wrapping the Unistyles-styled `Pressable` in `Link asChild`
  * directly drops the row's computed style — the clone takes over the ref
  * Unistyles applies styles through — collapsing the horizontal layout.
@@ -30,7 +31,7 @@ function CollectionRow({
 	}
 >): JSX.Element {
 	const { theme } = useUnistyles();
-	const initial = collection.label.charAt(0).toUpperCase() || "#";
+	const Icon = getCollectionIcon(collection.slug);
 
 	return (
 		<Pressable
@@ -40,8 +41,8 @@ function CollectionRow({
 			{...props}
 			style={({ pressed }) => [styles.row(pressed), style]}
 		>
-			<View style={styles.monogram}>
-				<Text style={styles.monogramText}>{initial}</Text>
+			<View style={styles.mark}>
+				<Icon color={theme.colors.text.neutral.base} size={20} />
 			</View>
 			<Text numberOfLines={1} style={styles.label}>
 				{collection.label}
@@ -91,17 +92,13 @@ const styles = StyleSheet.create((theme) => ({
 		flexShrink: 1,
 		color: theme.colors.text.neutral.intense,
 	},
-	monogram: {
+	mark: {
 		alignItems: "center",
 		justifyContent: "center",
 		width: 34,
 		aspectRatio: 1,
-		backgroundColor: theme.colors.surface.accent.base,
+		backgroundColor: theme.colors.surface.neutral.base,
 		borderRadius: theme.radius.sm,
-	},
-	monogramText: {
-		...theme.typography.heading,
-		color: theme.colors.text.accent.base,
 	},
 	row: (pressed: boolean) => ({
 		flexDirection: "row",

@@ -77,7 +77,7 @@ export function CollectionListSkeleton({
 			<View style={styles.card} testID="collections-loading-card">
 				{ROW_WIDTHS.map((width, index) => (
 					<View key={width} style={styles.row(index > 0)}>
-						<Animated.View style={[styles.monogram, pulse]} />
+						<Animated.View style={[styles.mark, pulse]} />
 						<Animated.View style={[styles.name(width), pulse]} />
 					</View>
 				))}
@@ -100,7 +100,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 		borderRadius: theme.radius.md,
 		overflow: "hidden",
 	},
-	monogram: {
+	mark: {
 		width: 34,
 		aspectRatio: 1,
 		backgroundColor: theme.colors.border.neutral.subtle,
