@@ -100,6 +100,20 @@ function lastFocusedTestId(): string | undefined {
 		.at(-1);
 }
 
+/**
+ * forgets every focus call recorded so far, so an assertion about the next one
+ * cannot be satisfied by an earlier one. the Collection input's own `autoFocus`
+ * is why: revealing it focuses it, which would otherwise stand in for the
+ * return-key move a test is actually asking about.
+ */
+function forgetFocusCalls(): void {
+	const { focus } = TextInput.prototype as unknown as {
+		focus: { mockClear: () => void };
+	};
+
+	focus.mockClear();
+}
+
 // a field-message row is out of the iOS accessibility tree on purpose — its
 // message is already in the input's own name, and this suite runs as iOS. every
 // query for one therefore has to opt into hidden elements: without this a
@@ -238,6 +252,152 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-collection-input")).toBeTruthy();
 		expect(getByTestId("sign-in-error-collection", HIDDEN)).toBeTruthy();
 		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
+	});
+
+	// the hints are what a password manager reads the form through, and on
+	// Android a field carrying none is opted out of autofill outright. React
+	// Native maps this one prop to both platforms, so these values are the whole
+	// of what the form declares.
+	it("hints each input at what it holds", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		// this suite runs as iOS, which is the platform the URL hint is guarded
+		// to; on Android the same expression leaves the field unhinted.
+		expect(getByTestId("sign-in-server-url").props.autoComplete).toBe("url");
+		expect(getByTestId("sign-in-email").props.autoComplete).toBe("username");
+		expect(getByTestId("sign-in-password").props.autoComplete).toBe(
+			"current-password",
+		);
+	});
+
+	// a slug is not an account name, and an unhinted field beside the credential
+	// pair is what invites a provider to offer one into it.
+	it("keeps the Collection input out of autofill once it is revealed", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+
+		expect(getByTestId("sign-in-collection-input").props.autoComplete).toBe(
+			"off",
+		);
+	});
+
+	it("moves the return key from Server URL past a Collection showing text", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-server-url"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-email");
+	});
+
+	it("moves the return key from Server URL to a Collection being edited", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+		forgetFocusCalls();
+
+		fireEvent(getByTestId("sign-in-server-url"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
+	});
+
+	it("moves the return key from the Collection input to Email", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+		forgetFocusCalls();
+
+		fireEvent(getByTestId("sign-in-collection-input"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-email");
+	});
+
+	it("moves the return key from Email to Password", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-email"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-password");
+	});
+
+	// the return key's own configuration, asserted on each input rather than
+	// through a fired event, and for two reasons. the key's label and the fact
+	// that it does not blur are only ever observable as props. and the handler
+	// has to be asserted here too, because `fireEvent` walks up to find one when
+	// the element itself carries none — so a field that took `onSubmitEditing`
+	// and never passed it to its own input would still satisfy every chain test
+	// below.
+	it("gives each input a return key that carries the chain", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+
+		for (const testID of [
+			"sign-in-server-url",
+			"sign-in-collection-input",
+			"sign-in-email",
+			"sign-in-password",
+		]) {
+			expect(typeof getByTestId(testID).props.onSubmitEditing).toBe("function");
+		}
+
+		// `submit` is what leaves the keyboard up between fields; the default
+		// blurs first, closing it and reopening it on the next one.
+		for (const testID of [
+			"sign-in-server-url",
+			"sign-in-collection-input",
+			"sign-in-email",
+		]) {
+			expect(getByTestId(testID).props.returnKeyType).toBe("next");
+			expect(getByTestId(testID).props.submitBehavior).toBe("submit");
+		}
+
+		// the last field submits instead of advancing, so it keeps the default:
+		// no field is left to move to, and dismissing the keyboard is what the
+		// user wants next.
+		expect(getByTestId("sign-in-password").props.returnKeyType).toBe("go");
+		expect(
+			getByTestId("sign-in-password").props.submitBehavior,
+		).toBeUndefined();
+	});
+
+	// the Password field's return key and the Sign in button share one callback,
+	// so these two assert the shared path rather than a second one beside it.
+	it("submits from the Password field's return key", async () => {
+		leaveLoginPending();
+
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+
+		await waitFor(() => {
+			expect(login).toHaveBeenCalledWith(
+				{ serverUrl: "https://cms.example.com", collectionSlug: "users" },
+				{ email: "you@example.com", password: "secret" },
+			);
+		});
+	});
+
+	it("validates from the Password field's return key as a press does", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+
+		expect(
+			within(getByTestId("sign-in-error-summary")).getByText(
+				"3 problems to fix",
+			),
+		).toBeTruthy();
+		expect(announceSpy).toHaveBeenCalledWith("3 problems to fix", {
+			queue: true,
+		});
+		expect(login).not.toHaveBeenCalled();
 	});
 
 	// a flagged input's border and tint are cues only a sighted user gets. React

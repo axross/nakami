@@ -108,6 +108,17 @@ function announce(message: string): void {
  * it rather than with a control the user cannot press. field-level messages
  * render beside their input; the server's own rejection belongs to the form and
  * keeps the shared slot above the button.
+ *
+ * each field tells a password manager what it holds through `autoComplete`, the
+ * one prop that reaches both platforms — React Native maps it to Android's
+ * native autofill hint and to iOS's `textContentType` itself, so neither of
+ * those is set here. a field left without it is not neutral: that is precisely
+ * the case Android reads as `IMPORTANT_FOR_AUTOFILL_NO`, which is why the
+ * Collection field says `off` rather than staying silent.
+ *
+ * the return key chains the inputs, and `submitBehavior="submit"` is what keeps
+ * the keyboard up as it moves between them — the default blurs first, closing
+ * and reopening it.
  */
 export function SignInScreen(): JSX.Element {
 	const { theme } = useUnistyles();
@@ -290,8 +301,23 @@ export function SignInScreen(): JSX.Element {
 					/>
 				) : null}
 
+				{/*
+				 * no password manager fills this field on either platform — the
+				 * credential one hands back is an account name and a password and
+				 * nothing else — so the keychain pre-fill above stays its answer, and
+				 * the hint is only worth the iOS half. on Android `url` has no mapping
+				 * to reach: it arrives unmapped, logs `Invalid autoComplete: url`, and
+				 * disables autofill for the field, which is where omitting it already
+				 * leaves it, with the noise added.
+				 *
+				 * the return key advances to whichever input exists at that moment.
+				 * the Collection field renders as plain text until its pencil is
+				 * pressed and has none to receive focus until then, so this one skips
+				 * past it to Email while it is not being edited.
+				 */}
 				<SignInTextField
 					autoCapitalize="none"
+					autoComplete={Platform.OS === "ios" ? "url" : undefined}
 					autoCorrect={false}
 					error={fieldErrors.serverUrl}
 					errorTestID="sign-in-error-server-url"
@@ -304,7 +330,12 @@ export function SignInScreen(): JSX.Element {
 						setServerUrl(next);
 						onFieldChange("serverUrl", next);
 					}}
+					onSubmitEditing={() => {
+						(editingCollection ? collectionRef : emailRef).current?.focus();
+					}}
 					placeholder="https://cms.example.com"
+					returnKeyType="next"
+					submitBehavior="submit"
 					testID="sign-in-server-url"
 					value={serverUrl}
 				/>
@@ -323,11 +354,19 @@ export function SignInScreen(): JSX.Element {
 						onFieldChange("collection", next);
 					}}
 					onEdit={() => setEditingCollection(true)}
+					onSubmitEditing={() => emailRef.current?.focus()}
 					value={collection}
 				/>
 
+				{/*
+				 * `username` rather than `email`: it is the pairing of a username hint
+				 * with a password hint that both platforms read as a login form, where
+				 * `email` describes a contact field. the email keyboard is unaffected —
+				 * that is `inputMode`, beside it.
+				 */}
 				<SignInTextField
 					autoCapitalize="none"
+					autoComplete="username"
 					autoCorrect={false}
 					error={fieldErrors.email}
 					errorTestID="sign-in-error-email"
@@ -339,13 +378,27 @@ export function SignInScreen(): JSX.Element {
 						setEmail(next);
 						onFieldChange("email", next);
 					}}
+					onSubmitEditing={() => passwordRef.current?.focus()}
 					placeholder="you@example.com"
+					returnKeyType="next"
+					submitBehavior="submit"
 					testID="sign-in-email"
 					value={email}
 				/>
 
+				{/*
+				 * the last field submits rather than advancing, through the same
+				 * callback the button presses — so the keyboard's Go and a press of
+				 * Sign in cannot come to mean different things. it keeps the default
+				 * submit behaviour: no field is left to move to, so dismissing the
+				 * keyboard is what the user wants next.
+				 *
+				 * `current-password` is the cross-platform spelling of the password
+				 * hint; the bare `password` value is Android-only here.
+				 */}
 				<SignInTextField
 					autoCapitalize="none"
+					autoComplete="current-password"
 					autoCorrect={false}
 					error={fieldErrors.password}
 					errorTestID="sign-in-error-password"
@@ -356,6 +409,8 @@ export function SignInScreen(): JSX.Element {
 						setPassword(next);
 						onFieldChange("password", next);
 					}}
+					onSubmitEditing={onSubmit}
+					returnKeyType="go"
 					secureTextEntry
 					testID="sign-in-password"
 					value={password}
