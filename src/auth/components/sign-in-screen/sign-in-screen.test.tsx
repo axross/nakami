@@ -1,8 +1,13 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, waitFor, within } from "@testing-library/react-native";
+import { act, fireEvent, waitFor, within } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
-import { AccessibilityInfo, StyleSheet, TextInput } from "react-native";
+import {
+	AccessibilityInfo,
+	Platform,
+	StyleSheet,
+	TextInput,
+} from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
 import { createTestQueryClient } from "~/common/test-helpers/query-client";
@@ -102,9 +107,12 @@ function lastFocusedTestId(): string | undefined {
 
 /**
  * forgets every focus call recorded so far, so an assertion about the next one
- * cannot be satisfied by an earlier one. the Collection input's own `autoFocus`
- * is why: revealing it focuses it, which would otherwise stand in for the
- * return-key move a test is actually asking about.
+ * cannot be satisfied by an earlier one.
+ *
+ * defensive rather than load-bearing today. the Collection input carries
+ * `autoFocus`, but that is a native prop this preset's render-only `TextInput`
+ * mock never acts on, so revealing the field records no focus call — and these
+ * assertions should not quietly depend on that staying true.
  */
 function forgetFocusCalls(): void {
 	const { focus } = TextInput.prototype as unknown as {
@@ -270,6 +278,31 @@ describe("<SignInScreen>", () => {
 		);
 	});
 
+	// the URL hint is the change's one platform-conditional value, and this suite
+	// runs as iOS — so without this, dropping the guard would keep every other
+	// test green while sending Android a value it has no mapping for, which it
+	// answers by logging `Invalid autoComplete: url` and disabling autofill on
+	// the field.
+	it("leaves the Server URL unhinted on Android, which has no URL hint", () => {
+		// restored by hand in `finally` rather than through `jest.restoreAllMocks`,
+		// which would also restore the module-scope `announceSpy` and leave every
+		// announcement assertion after this one recording nothing. this suite's
+		// `beforeEach` clears calls; it does not restore replacements.
+		const platform = jest.replaceProperty(Platform, "OS", "android");
+
+		try {
+			const { getByTestId } = renderSignInScreen();
+
+			expect(
+				getByTestId("sign-in-server-url").props.autoComplete,
+			).toBeUndefined();
+			// the credential pair is cross-platform and stays hinted either way.
+			expect(getByTestId("sign-in-email").props.autoComplete).toBe("username");
+		} finally {
+			platform.restore();
+		}
+	});
+
 	// a slug is not an account name, and an unhinted field beside the credential
 	// pair is what invites a provider to offer one into it.
 	it("keeps the Collection input out of autofill once it is revealed", () => {
@@ -323,10 +356,11 @@ describe("<SignInScreen>", () => {
 	// the return key's own configuration, asserted on each input rather than
 	// through a fired event, and for two reasons. the key's label and the fact
 	// that it does not blur are only ever observable as props. and the handler
-	// has to be asserted here too, because `fireEvent` walks up to find one when
-	// the element itself carries none — so a field that took `onSubmitEditing`
-	// and never passed it to its own input would still satisfy every chain test
-	// below.
+	// is pinned to the input itself, because `fireEvent` walks up to find one
+	// when the element carries none: no ancestor here holds `onSubmitEditing`
+	// today, so the chain tests above would catch a field that dropped it — but
+	// they would stop catching it the moment one did, and this assertion is what
+	// keeps that from passing silently.
 	it("gives each input a return key that carries the chain", () => {
 		const { getByTestId } = renderSignInScreen();
 
@@ -702,6 +736,40 @@ describe("<SignInScreen>", () => {
 			disabled: true,
 		});
 		expect(getByTestId("sign-in-submit-spinner")).toBeTruthy();
+	});
+
+	// the button carries a `disabled` state and the Password field's Go key has
+	// none, so the in-flight gate has to sit in the callback they share. without
+	// it, returning to the field and pressing Go again would start a second
+	// sign-in over the first — another login POST and another keychain write.
+	it("ignores a second Go while a submission is already in flight", async () => {
+		leaveLoginPending();
+
+		const { getByTestId, getByText } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+
+		await waitFor(() => {
+			expect(getByText("Signing in…")).toBeTruthy();
+		});
+
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		// drained before counting, because `mutate` reaches its mutation function
+		// on a later tick: counting synchronously here would read 1 even when a
+		// second sign-in had in fact started, and the assertion would hold with
+		// the guard taken out.
+		await act(async () => {});
+
+		expect(login).toHaveBeenCalledTimes(1);
 	});
 
 	it("maps an auth rejection to a friendly message in the form-level slot", async () => {
