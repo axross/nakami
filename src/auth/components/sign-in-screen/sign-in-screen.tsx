@@ -109,12 +109,17 @@ function announce(message: string): void {
  * render beside their input; the server's own rejection belongs to the form and
  * keeps the shared slot above the button.
  *
- * each field tells a password manager what it holds through `autoComplete`, the
- * one prop that reaches both platforms — React Native maps it to Android's
- * native autofill hint and to iOS's `textContentType` itself, so neither of
- * those is set here. a field left without it is not neutral: that is precisely
- * the case Android reads as `IMPORTANT_FOR_AUTOFILL_NO`, which is why the
- * Collection field says `off` rather than staying silent.
+ * each field says through `autoComplete` what it holds — or that it holds
+ * nothing worth offering. it is the one prop that reaches both platforms:
+ * React Native maps it to Android's native autofill hint and to iOS's
+ * `textContentType` itself, so neither of those is set here.
+ *
+ * the credential pair has to carry a value, because a field left silent is not
+ * neutral — silence is precisely what Android reads as
+ * `IMPORTANT_FOR_AUTOFILL_NO`. the Collection field is the other case: `off`
+ * reaches that same Android state, so it buys nothing there, and is worth
+ * saying anyway. it is the only way to reach iOS's `none`, and the only way a
+ * later reader can tell the field was excluded on purpose rather than missed.
  *
  * the return key chains the inputs, and `submitBehavior="submit"` is what keeps
  * the keyboard up as it moves between them — the default blurs first, closing
@@ -237,6 +242,16 @@ export function SignInScreen(): JSX.Element {
 	}, []);
 
 	const onSubmit = useCallback(() => {
+		// the in-flight gate lives here rather than beside one caller, because
+		// there are two: the button carries a `disabled` state, and the Password
+		// field's Go key has none to carry. guarding only the button would leave
+		// Go able to start a second sign-in over the first — another login POST
+		// and another keychain write — which is the instinct a slow self-hosted
+		// server invites.
+		if (isPending) {
+			return;
+		}
+
 		const { errors, values } = validateSignInForm({
 			serverUrl,
 			collection,
@@ -255,7 +270,7 @@ export function SignInScreen(): JSX.Element {
 		}
 
 		mutate(values);
-	}, [serverUrl, collection, email, password, mutate]);
+	}, [serverUrl, collection, email, password, isPending, mutate]);
 
 	// the summary links to the first offending field rather than focusing it on
 	// press, which would open the keyboard on every failed submit.
