@@ -35,6 +35,26 @@ naming what the value is.
 Email and password are ordinary fields, the password masked. None of the four
 fields auto-capitalises or auto-corrects.
 
+The email and password are offered to the device's password manager as one
+credential — the email as the account name, the password as the password — so a
+saved sign-in fills both in a single action. The Collection field is
+deliberately kept out of that, rather than merely left unsaid, so that a slug
+beside the credential pair is never mistaken for an account name.
+
+The server URL is not offered, and no markup could offer it: the credential a
+password manager hands back on either platform is an account name and a
+password and nothing else, with no room for an endpoint. The keychain pre-fill
+above is the whole of the answer for a returning user; where the keyboard can
+offer URL suggestions of its own, the field is declared a URL field so that it
+does.
+
+The keyboard's return key moves through the form. On every field but the
+password it reads Next and moves to the field below — from the server URL to
+the Collection input while that field is being edited, and past it to the email
+while it is still showing plain text and has no input to move to. The keyboard
+stays up across the move. On the password it reads Go and submits, taking the
+same path a press of the submit action takes, validation and all.
+
 The submit action stays pressable whenever no sign-in is in flight — pressing it
 is what validates the form, so a blank field is answered by a message naming it
 rather than by a control that cannot be pressed. It is disabled only while a
