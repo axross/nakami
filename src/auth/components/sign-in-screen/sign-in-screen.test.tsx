@@ -1,8 +1,13 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, waitFor, within } from "@testing-library/react-native";
+import { act, fireEvent, waitFor, within } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
-import { AccessibilityInfo, StyleSheet, TextInput } from "react-native";
+import {
+	AccessibilityInfo,
+	Platform,
+	StyleSheet,
+	TextInput,
+} from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
 import { createTestQueryClient } from "~/common/test-helpers/query-client";
@@ -98,6 +103,23 @@ function lastFocusedTestId(): string | undefined {
 			(testID) => testID !== undefined && SIGN_IN_INPUT_TEST_IDS.has(testID),
 		)
 		.at(-1);
+}
+
+/**
+ * forgets every focus call recorded so far, so an assertion about the next one
+ * cannot be satisfied by an earlier one.
+ *
+ * defensive rather than load-bearing today. the Collection input carries
+ * `autoFocus`, but that is a native prop this preset's render-only `TextInput`
+ * mock never acts on, so revealing the field records no focus call — and these
+ * assertions should not quietly depend on that staying true.
+ */
+function forgetFocusCalls(): void {
+	const { focus } = TextInput.prototype as unknown as {
+		focus: { mockClear: () => void };
+	};
+
+	focus.mockClear();
 }
 
 // a field-message row is out of the iOS accessibility tree on purpose — its
@@ -238,6 +260,180 @@ describe("<SignInScreen>", () => {
 		expect(getByTestId("sign-in-collection-input")).toBeTruthy();
 		expect(getByTestId("sign-in-error-collection", HIDDEN)).toBeTruthy();
 		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
+	});
+
+	// the hints are what a password manager reads the form through, and on
+	// Android a field carrying none is opted out of autofill outright. React
+	// Native maps this one prop to both platforms, so these values are the whole
+	// of what the form declares.
+	it("hints each input at what it holds", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		// this suite runs as iOS, which is the platform the URL hint is guarded
+		// to; on Android the same expression leaves the field unhinted.
+		expect(getByTestId("sign-in-server-url").props.autoComplete).toBe("url");
+		expect(getByTestId("sign-in-email").props.autoComplete).toBe("username");
+		expect(getByTestId("sign-in-password").props.autoComplete).toBe(
+			"current-password",
+		);
+	});
+
+	// the URL hint is the change's one platform-conditional value, and this suite
+	// runs as iOS — so without this, dropping the guard would keep every other
+	// test green while sending Android a value it has no mapping for, which it
+	// answers by logging `Invalid autoComplete: url` and disabling autofill on
+	// the field.
+	//
+	// `off` rather than nothing, so no field on this form is excluded by
+	// omission — the same state, said out loud. that is what the tracking issue's
+	// first acceptance criterion asks for.
+	it("turns the Server URL hint off on Android, which has no URL hint", () => {
+		// restored by hand in `finally` rather than through `jest.restoreAllMocks`,
+		// which would also restore the module-scope `announceSpy` and leave every
+		// announcement assertion after this one recording nothing. this suite's
+		// `beforeEach` clears calls; it does not restore replacements.
+		const platform = jest.replaceProperty(Platform, "OS", "android");
+
+		try {
+			const { getByTestId } = renderSignInScreen();
+
+			expect(getByTestId("sign-in-server-url").props.autoComplete).toBe("off");
+			// the credential pair is cross-platform and stays hinted either way.
+			expect(getByTestId("sign-in-email").props.autoComplete).toBe("username");
+		} finally {
+			platform.restore();
+		}
+	});
+
+	// a slug is not an account name, and an unhinted field beside the credential
+	// pair is what invites a provider to offer one into it.
+	it("keeps the Collection input out of autofill once it is revealed", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+
+		expect(getByTestId("sign-in-collection-input").props.autoComplete).toBe(
+			"off",
+		);
+	});
+
+	it("moves the return key from Server URL past a Collection showing text", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-server-url"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-email");
+	});
+
+	it("moves the return key from Server URL to a Collection being edited", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+		forgetFocusCalls();
+
+		fireEvent(getByTestId("sign-in-server-url"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-collection-input");
+	});
+
+	it("moves the return key from the Collection input to Email", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+		forgetFocusCalls();
+
+		fireEvent(getByTestId("sign-in-collection-input"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-email");
+	});
+
+	it("moves the return key from Email to Password", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-email"), "submitEditing");
+
+		expect(lastFocusedTestId()).toBe("sign-in-password");
+	});
+
+	// the return key's own configuration, asserted on each input rather than
+	// through a fired event, and for two reasons. the key's label and the fact
+	// that it does not blur are only ever observable as props. and the handler
+	// is pinned to the input itself, because `fireEvent` walks up to find one
+	// when the element carries none: no ancestor here holds `onSubmitEditing`
+	// today, so the chain tests above would catch a field that dropped it — but
+	// they would stop catching it the moment one did, and this assertion is what
+	// keeps that from passing silently.
+	it("gives each input a return key that carries the chain", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.press(getByTestId("sign-in-collection-edit"));
+
+		for (const testID of [
+			"sign-in-server-url",
+			"sign-in-collection-input",
+			"sign-in-email",
+			"sign-in-password",
+		]) {
+			expect(typeof getByTestId(testID).props.onSubmitEditing).toBe("function");
+		}
+
+		// `submit` is what leaves the keyboard up between fields; the default
+		// blurs first, closing it and reopening it on the next one.
+		for (const testID of [
+			"sign-in-server-url",
+			"sign-in-collection-input",
+			"sign-in-email",
+		]) {
+			expect(getByTestId(testID).props.returnKeyType).toBe("next");
+			expect(getByTestId(testID).props.submitBehavior).toBe("submit");
+		}
+
+		// the last field submits instead of advancing, so it keeps the default:
+		// no field is left to move to, and dismissing the keyboard is what the
+		// user wants next.
+		expect(getByTestId("sign-in-password").props.returnKeyType).toBe("go");
+		expect(
+			getByTestId("sign-in-password").props.submitBehavior,
+		).toBeUndefined();
+	});
+
+	// the Password field's return key and the Sign in button share one callback,
+	// so these two assert the shared path rather than a second one beside it.
+	it("submits from the Password field's return key", async () => {
+		leaveLoginPending();
+
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+
+		await waitFor(() => {
+			expect(login).toHaveBeenCalledWith(
+				{ serverUrl: "https://cms.example.com", collectionSlug: "users" },
+				{ email: "you@example.com", password: "secret" },
+			);
+		});
+	});
+
+	it("validates from the Password field's return key as a press does", () => {
+		const { getByTestId } = renderSignInScreen();
+
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+
+		expect(
+			within(getByTestId("sign-in-error-summary")).getByText(
+				"3 problems to fix",
+			),
+		).toBeTruthy();
+		expect(announceSpy).toHaveBeenCalledWith("3 problems to fix", {
+			queue: true,
+		});
+		expect(login).not.toHaveBeenCalled();
 	});
 
 	// a flagged input's border and tint are cues only a sighted user gets. React
@@ -542,6 +738,40 @@ describe("<SignInScreen>", () => {
 			disabled: true,
 		});
 		expect(getByTestId("sign-in-submit-spinner")).toBeTruthy();
+	});
+
+	// the button carries a `disabled` state and the Password field's Go key has
+	// none, so the in-flight gate has to sit in the callback they share. without
+	// it, returning to the field and pressing Go again would start a second
+	// sign-in over the first — another login POST and another keychain write.
+	it("ignores a second Go while a submission is already in flight", async () => {
+		leaveLoginPending();
+
+		const { getByTestId, getByText } = renderSignInScreen();
+
+		fireEvent.changeText(
+			getByTestId("sign-in-server-url"),
+			"https://cms.example.com",
+		);
+		fireEvent.changeText(getByTestId("sign-in-email"), "you@example.com");
+		fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+
+		await waitFor(() => {
+			expect(getByText("Signing in…")).toBeTruthy();
+		});
+
+		fireEvent(getByTestId("sign-in-password"), "submitEditing");
+		fireEvent.press(getByTestId("sign-in-submit"));
+
+		// drained before counting, because `mutate` reaches its mutation function
+		// on a later tick: counting synchronously here would read 1 even when a
+		// second sign-in had in fact started, and the assertion would hold with
+		// the guard taken out.
+		await act(async () => {});
+
+		expect(login).toHaveBeenCalledTimes(1);
 	});
 
 	it("maps an auth rejection to a friendly message in the form-level slot", async () => {

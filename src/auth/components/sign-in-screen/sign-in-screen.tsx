@@ -108,6 +108,22 @@ function announce(message: string): void {
  * it rather than with a control the user cannot press. field-level messages
  * render beside their input; the server's own rejection belongs to the form and
  * keeps the shared slot above the button.
+ *
+ * each field says through `autoComplete` what it holds — or that it holds
+ * nothing worth offering. it is the one prop that reaches both platforms:
+ * React Native maps it to Android's native autofill hint and to iOS's
+ * `textContentType` itself, so neither of those is set here.
+ *
+ * the credential pair has to carry a value, because a field left silent is not
+ * neutral — silence is precisely what Android reads as
+ * `IMPORTANT_FOR_AUTOFILL_NO`. the Collection field is the other case: `off`
+ * reaches that same Android state, so it buys nothing there, and is worth
+ * saying anyway. it is the only way to reach iOS's `none`, and the only way a
+ * later reader can tell the field was excluded on purpose rather than missed.
+ *
+ * the return key chains the inputs, and `submitBehavior="submit"` is what keeps
+ * the keyboard up as it moves between them — the default blurs first, closing
+ * and reopening it.
  */
 export function SignInScreen(): JSX.Element {
 	const { theme } = useUnistyles();
@@ -226,6 +242,16 @@ export function SignInScreen(): JSX.Element {
 	}, []);
 
 	const onSubmit = useCallback(() => {
+		// the in-flight gate lives here rather than beside one caller, because
+		// there are two: the button carries a `disabled` state, and the Password
+		// field's Go key has none to carry. guarding only the button would leave
+		// Go able to start a second sign-in over the first — another login POST
+		// and another keychain write — which is the instinct a slow self-hosted
+		// server invites.
+		if (isPending) {
+			return;
+		}
+
 		const { errors, values } = validateSignInForm({
 			serverUrl,
 			collection,
@@ -244,7 +270,7 @@ export function SignInScreen(): JSX.Element {
 		}
 
 		mutate(values);
-	}, [serverUrl, collection, email, password, mutate]);
+	}, [serverUrl, collection, email, password, isPending, mutate]);
 
 	// the summary links to the first offending field rather than focusing it on
 	// press, which would open the keyboard on every failed submit.
@@ -290,8 +316,29 @@ export function SignInScreen(): JSX.Element {
 					/>
 				) : null}
 
+				{/*
+				 * no password manager fills this field on either platform — the
+				 * credential one hands back is an account name and a password and
+				 * nothing else — so the keychain pre-fill above stays its answer, and
+				 * the hint is only worth the iOS half. `url` is what iOS reads as a
+				 * URL field, and Android has no server-address hint to map it to.
+				 *
+				 * Android gets `off` rather than nothing. the two reach the same
+				 * native state, so it buys no behaviour there — it is the choice the
+				 * Collection field makes, for the same reason: it leaves no field on
+				 * this form excluded by omission, which is indistinguishable from a
+				 * hint someone forgot. passing `url` through unguarded would instead
+				 * arrive unmapped, log `Invalid autoComplete: url`, and disable the
+				 * field anyway.
+				 *
+				 * the return key advances to whichever input exists at that moment.
+				 * the Collection field renders as plain text until its pencil is
+				 * pressed and has none to receive focus until then, so this one skips
+				 * past it to Email while it is not being edited.
+				 */}
 				<SignInTextField
 					autoCapitalize="none"
+					autoComplete={Platform.OS === "ios" ? "url" : "off"}
 					autoCorrect={false}
 					error={fieldErrors.serverUrl}
 					errorTestID="sign-in-error-server-url"
@@ -304,7 +351,12 @@ export function SignInScreen(): JSX.Element {
 						setServerUrl(next);
 						onFieldChange("serverUrl", next);
 					}}
+					onSubmitEditing={() => {
+						(editingCollection ? collectionRef : emailRef).current?.focus();
+					}}
 					placeholder="https://cms.example.com"
+					returnKeyType="next"
+					submitBehavior="submit"
 					testID="sign-in-server-url"
 					value={serverUrl}
 				/>
@@ -323,11 +375,19 @@ export function SignInScreen(): JSX.Element {
 						onFieldChange("collection", next);
 					}}
 					onEdit={() => setEditingCollection(true)}
+					onSubmitEditing={() => emailRef.current?.focus()}
 					value={collection}
 				/>
 
+				{/*
+				 * `username` rather than `email`: it is the pairing of a username hint
+				 * with a password hint that both platforms read as a login form, where
+				 * `email` describes a contact field. the email keyboard is unaffected —
+				 * that is `inputMode`, beside it.
+				 */}
 				<SignInTextField
 					autoCapitalize="none"
+					autoComplete="username"
 					autoCorrect={false}
 					error={fieldErrors.email}
 					errorTestID="sign-in-error-email"
@@ -339,13 +399,27 @@ export function SignInScreen(): JSX.Element {
 						setEmail(next);
 						onFieldChange("email", next);
 					}}
+					onSubmitEditing={() => passwordRef.current?.focus()}
 					placeholder="you@example.com"
+					returnKeyType="next"
+					submitBehavior="submit"
 					testID="sign-in-email"
 					value={email}
 				/>
 
+				{/*
+				 * the last field submits rather than advancing, through the same
+				 * callback the button presses — so the keyboard's Go and a press of
+				 * Sign in cannot come to mean different things. it keeps the default
+				 * submit behaviour: no field is left to move to, so dismissing the
+				 * keyboard is what the user wants next.
+				 *
+				 * `current-password` is the cross-platform spelling of the password
+				 * hint; the bare `password` value is Android-only here.
+				 */}
 				<SignInTextField
 					autoCapitalize="none"
+					autoComplete="current-password"
 					autoCorrect={false}
 					error={fieldErrors.password}
 					errorTestID="sign-in-error-password"
@@ -356,6 +430,8 @@ export function SignInScreen(): JSX.Element {
 						setPassword(next);
 						onFieldChange("password", next);
 					}}
+					onSubmitEditing={onSubmit}
+					returnKeyType="go"
 					secureTextEntry
 					testID="sign-in-password"
 					value={password}

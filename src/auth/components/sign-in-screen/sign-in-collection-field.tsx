@@ -21,6 +21,19 @@ import { SignInTextField } from "~/auth/components/sign-in-screen/sign-in-text-f
  * one of them silently dropping what it was handed. `inputRef` reaches the
  * editable input so the screen's error summary can focus it.
  *
+ * the editable input is kept out of autofill deliberately rather than by
+ * omission: it holds a Payload collection slug, and an unhinted field beside
+ * the credential pair invites a provider's heuristics to offer the account name
+ * into it. its return key advances to the field below, which is the caller's to
+ * name because the screen owns the refs the chain moves between.
+ *
+ * `onSubmitEditing` is therefore required, where `onBlur` — editing-only in the
+ * same way — is optional: this field hardcodes a Next key, and a Next key with
+ * no handler behind it is a dead control the user presses twice before
+ * believing it. requiring the prop is what stops that from being reachable.
+ * the hardcoded `next` holds only while this field is never the form's last;
+ * move it there and the key, not just the handler, becomes the caller's.
+ *
  * `error` belongs to the editable input and renders beneath it, and the props
  * are discriminated on `editing` so it can only be passed alongside `editing:
  * true`. that is the only state the value can be wrong in — it starts non-empty
@@ -37,6 +50,7 @@ export function SignInCollectionField({
 	onEdit,
 	onChangeText,
 	onBlur,
+	onSubmitEditing,
 	style,
 }: Readonly<
 	{
@@ -45,6 +59,7 @@ export function SignInCollectionField({
 		onEdit: () => void;
 		onChangeText: (value: string) => void;
 		onBlur?: () => void;
+		onSubmitEditing: () => void;
 		style?: StyleProp<ViewStyle>;
 	} & ({ editing: true; error?: string } | { editing: false; error?: never })
 >): JSX.Element {
@@ -54,6 +69,7 @@ export function SignInCollectionField({
 		return (
 			<SignInTextField
 				autoCapitalize="none"
+				autoComplete="off"
 				autoCorrect={false}
 				autoFocus
 				error={error}
@@ -63,8 +79,11 @@ export function SignInCollectionField({
 				label="Collection"
 				onBlur={onBlur}
 				onChangeText={onChangeText}
+				onSubmitEditing={onSubmitEditing}
 				placeholder="users"
+				returnKeyType="next"
 				style={style}
+				submitBehavior="submit"
 				testID="sign-in-collection-input"
 				value={value}
 			/>
