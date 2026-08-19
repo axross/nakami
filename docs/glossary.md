@@ -46,8 +46,9 @@ own bookkeeping — preferences, migrations, locked documents, jobs, folders —
 rather than for the people using the CMS. Payload prefixes each one's **slug**
 with `payload-`.
 
-**derived title** — the display name this app shows for a **record**, worked out
-from that record's own fields rather than given by the **Payload server**.
+**derived title** — the name this app works out for a **record** from that
+record's own fields, the **Payload server** giving none. A record carrying no
+such field has no derived title, and reads as `Untitled` instead.
 
 # Development vocabulary
 

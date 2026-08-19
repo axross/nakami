@@ -49,20 +49,31 @@ load-failure state rather than an empty collection.
 
 A collection's records are a scrollable feed of cards, headed by the number of
 records the server reports the collection holds. Each card carries a title over
-a metadata row of the record's id and when it was last updated. A card is a
-summary and is not interactive.
+a metadata row holding the record's id in a small pill at the row's left and
+when it was last updated at its right. Every card carries the pill, whether or
+not the record has a title, so one feed reads as one shape. A card is a summary
+and is not interactive.
 
 Payload's REST responses carry no title for a record, so the title is derived
 from the record's own fields: the first non-empty string among `title`, `name`,
 `label`, `subject`, `heading`, `slug`, `filename`, and `email`, in that order.
 Values that are not strings are skipped rather than coerced, so a numeric
-`label` does not become a title. A record with none of those fields shows its id
-as the title instead, styled distinctly to mark it as a fallback, and its
-metadata row then omits the id so it is never shown twice.
+`label` does not become a title. A record with none of those fields reads as
+`Untitled` in its title row — in exactly the type a real title takes, and in the
+muted ink of the metadata beneath it, so the absence reads as an absence rather
+than as a second kind of title. Such a card announces the record's id to a
+screen reader, the id being the only thing that identifies it.
 
-The last-updated line reads as a short date and is formatted in UTC, so the same
-record reads the same on every device. A record whose `updatedAt` is missing or
-unreadable shows no such line.
+An update within the last thirty days reads as how long ago it was: `Just now`
+under a minute, then whole minutes, whole hours, `Yesterday` for the day before
+that, whole days, and whole weeks. Anything older reads as a short date,
+`18 Jul 2026`. How long ago is elapsed time rather than a count of calendar days
+— `Yesterday` means twenty-four to forty-eight hours back — and the date is
+formatted in UTC, so the same record reads the same on every device. Each label
+is worked out as its card is drawn rather than as the page arrives, so a feed
+returned to later reads as more time having passed. A record whose `updatedAt`
+is missing or unreadable shows no label at all, and its id stays at the left of
+the row.
 
 ## Paging through a collection
 

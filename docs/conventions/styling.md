@@ -112,7 +112,7 @@ size:
 | `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings                       |
 | `body`     | `InnovatorGrotesk-Regular`  | 16 / 22        | Running text, text inputs, list row labels                         |
 | `caption`  | `InnovatorGrotesk-Regular`  | 13 / 18        | A form field's name, hints, errors, counts, metadata               |
-| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | A record id standing in for a title, id chips, build details       |
+| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Id chips, build details                                            |
 
 A text style MUST apply a role **whole** — `...theme.typography.body` — and MUST NOT
 pick values out of one or override a part of it at the use site. A numeric `fontSize`

@@ -1,8 +1,64 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
+import { RECORD_CARD_LINE } from "~/collections/components/collection-record-card/collection-record-card";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import { themes } from "~/unistyles";
 import { CollectionRecordsSkeleton } from "./collection-records-skeleton";
+
+/**
+ * every style in a rendered subtree, flattened, so a placeholder that carries
+ * no test hook of its own can still be asserted on by its shape. an element
+ * appears more than once (a composite node and the host node under it both hold
+ * the style prop), so this answers "is there one like this" rather than "how
+ * many".
+ */
+function subtreeStyles(node: unknown): Record<string, unknown>[] {
+	if (typeof node !== "object" || node === null) {
+		return [];
+	}
+
+	const { props, children } = node as {
+		props?: { style?: unknown };
+		children?: readonly unknown[];
+	};
+
+	return [
+		...(props?.style === undefined ? [] : [resolveStyle(props.style)]),
+		...(children ?? []).flatMap(subtreeStyles),
+	];
+}
+
+type Node = { props?: { style?: unknown }; children?: readonly unknown[] };
+
+/**
+ * the *deepest* node in a rendered subtree whose own style satisfies `matches`,
+ * so a placeholder carrying no test hook can be reached and its children
+ * counted rather than only its style observed. deepest rather than first: a
+ * composite node and the host node beneath it both hold the style prop, and
+ * only the host one holds the children worth counting.
+ */
+function findNode(
+	node: unknown,
+	matches: (style: Record<string, unknown>) => boolean,
+): Node | null {
+	if (typeof node !== "object" || node === null) {
+		return null;
+	}
+
+	const { props, children } = node as Node;
+
+	for (const child of children ?? []) {
+		const found = findNode(child, matches);
+
+		if (found !== null) {
+			return found;
+		}
+	}
+
+	return props?.style !== undefined && matches(resolveStyle(props.style))
+		? (node as Node)
+		: null;
+}
 
 describe("<CollectionRecordsSkeleton>", () => {
 	it("hooks and labels its root by default", () => {
@@ -38,5 +94,53 @@ describe("<CollectionRecordsSkeleton>", () => {
 
 		expect(feed.paddingStart).toBe(themes.light.gap.md);
 		expect(feed.paddingEnd).toBe(themes.light.gap.md);
+	});
+
+	// the placeholder metadata row stands in for a loaded one holding two things
+	// at opposite ends — the id pill and the update label — and both it and the
+	// pill inside it have to keep the loaded row's line box, or the list reflows
+	// the moment the records replace it.
+	it("stands its metadata placeholder in for the loaded row's pill and label", () => {
+		const { getByTestId } = render(<CollectionRecordsSkeleton />);
+		const styles = subtreeStyles(getByTestId("collection-records-loading"));
+
+		expect(
+			styles.some(
+				(style) =>
+					style.flexDirection === "row" &&
+					style.justifyContent === "space-between" &&
+					style.height === RECORD_CARD_LINE,
+			),
+		).toBe(true);
+		expect(
+			styles.some(
+				(style) =>
+					style.borderRadius === themes.light.radius.pill &&
+					style.height === RECORD_CARD_LINE,
+			),
+		).toBe(true);
+	});
+
+	// the pill alone would satisfy the row above while the label's own bar went
+	// missing, so the row is also asserted to hold two things, the second of them
+	// the short bar the update label stands behind. which end each sits at is a
+	// layout an off-device render never computes; the pair and their order are
+	// what it can show.
+	it("puts a second, shorter bar after the pill in that row", () => {
+		const { getByTestId } = render(<CollectionRecordsSkeleton />);
+		const row = findNode(
+			getByTestId("collection-records-loading"),
+			(style) =>
+				style.justifyContent === "space-between" &&
+				style.height === RECORD_CARD_LINE,
+		);
+
+		const bars = (row?.children ?? []).map((child) =>
+			resolveStyle((child as { props?: { style?: unknown } }).props?.style),
+		);
+
+		expect(bars).toHaveLength(2);
+		expect(bars[0]?.borderRadius).toBe(themes.light.radius.pill);
+		expect(bars[1]?.width).toBe("20%");
 	});
 });

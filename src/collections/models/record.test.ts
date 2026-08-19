@@ -26,9 +26,9 @@ describe("recordPageSchema + toRecordPage", () => {
 					id: "a1",
 					title: "First post",
 					hasTitle: true,
-					updatedLabel: "Updated 18 Jul 2026",
+					updatedAt: Date.UTC(2026, 6, 18),
 				},
-				{ id: "a2", title: "Second", hasTitle: true, updatedLabel: null },
+				{ id: "a2", title: "Second", hasTitle: true, updatedAt: null },
 			],
 			totalDocs: 42,
 			hasNextPage: true,
@@ -48,7 +48,7 @@ describe("recordPageSchema + toRecordPage", () => {
 			id: "7",
 			title: "7",
 			hasTitle: false,
-			updatedLabel: null,
+			updatedAt: null,
 		});
 	});
 
