@@ -46,7 +46,14 @@ password manager hands back on either platform is an account name and a
 password and nothing else, with no room for an endpoint. The keychain pre-fill
 above is the whole of the answer for a returning user; where the keyboard can
 offer URL suggestions of its own, the field is declared a URL field so that it
-does.
+does, and where it cannot, the field is declared as offering nothing rather
+than left unsaid.
+
+No field on the form is left unsaid, in fact. A field that says nothing is
+indistinguishable from one whose declaration was forgotten — and on one of the
+two platforms silence is itself read as an instruction to skip the field — so
+each of the four says either what it holds or that it holds nothing worth
+offering.
 
 The keyboard's return key moves through the form. On every field but the
 password it reads Next and moves to the field below — from the server URL to

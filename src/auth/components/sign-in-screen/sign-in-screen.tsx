@@ -320,10 +320,16 @@ export function SignInScreen(): JSX.Element {
 				 * no password manager fills this field on either platform — the
 				 * credential one hands back is an account name and a password and
 				 * nothing else — so the keychain pre-fill above stays its answer, and
-				 * the hint is only worth the iOS half. on Android `url` has no mapping
-				 * to reach: it arrives unmapped, logs `Invalid autoComplete: url`, and
-				 * disables autofill for the field, which is where omitting it already
-				 * leaves it, with the noise added.
+				 * the hint is only worth the iOS half. `url` is what iOS reads as a
+				 * URL field, and Android has no server-address hint to map it to.
+				 *
+				 * Android gets `off` rather than nothing. the two reach the same
+				 * native state, so it buys no behaviour there — it is the choice the
+				 * Collection field makes, for the same reason: it leaves no field on
+				 * this form excluded by omission, which is indistinguishable from a
+				 * hint someone forgot. passing `url` through unguarded would instead
+				 * arrive unmapped, log `Invalid autoComplete: url`, and disable the
+				 * field anyway.
 				 *
 				 * the return key advances to whichever input exists at that moment.
 				 * the Collection field renders as plain text until its pencil is
@@ -332,7 +338,7 @@ export function SignInScreen(): JSX.Element {
 				 */}
 				<SignInTextField
 					autoCapitalize="none"
-					autoComplete={Platform.OS === "ios" ? "url" : undefined}
+					autoComplete={Platform.OS === "ios" ? "url" : "off"}
 					autoCorrect={false}
 					error={fieldErrors.serverUrl}
 					errorTestID="sign-in-error-server-url"

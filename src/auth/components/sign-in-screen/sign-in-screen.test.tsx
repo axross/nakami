@@ -283,7 +283,11 @@ describe("<SignInScreen>", () => {
 	// test green while sending Android a value it has no mapping for, which it
 	// answers by logging `Invalid autoComplete: url` and disabling autofill on
 	// the field.
-	it("leaves the Server URL unhinted on Android, which has no URL hint", () => {
+	//
+	// `off` rather than nothing, so no field on this form is excluded by
+	// omission — the same state, said out loud. that is what the tracking issue's
+	// first acceptance criterion asks for.
+	it("turns the Server URL hint off on Android, which has no URL hint", () => {
 		// restored by hand in `finally` rather than through `jest.restoreAllMocks`,
 		// which would also restore the module-scope `announceSpy` and leave every
 		// announcement assertion after this one recording nothing. this suite's
@@ -293,9 +297,7 @@ describe("<SignInScreen>", () => {
 		try {
 			const { getByTestId } = renderSignInScreen();
 
-			expect(
-				getByTestId("sign-in-server-url").props.autoComplete,
-			).toBeUndefined();
+			expect(getByTestId("sign-in-server-url").props.autoComplete).toBe("off");
 			// the credential pair is cross-platform and stays hinted either way.
 			expect(getByTestId("sign-in-email").props.autoComplete).toBe("username");
 		} finally {
