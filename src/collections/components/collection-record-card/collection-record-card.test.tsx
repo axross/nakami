@@ -9,7 +9,6 @@ import {
 import { fireEvent, render } from "@testing-library/react-native";
 import type { CollectionRecord } from "~/collections/models/record";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
-import { themes } from "~/unistyles";
 import {
 	CollectionRecordCard,
 	RECORD_CARD_LINE,
@@ -226,41 +225,58 @@ describe("<CollectionRecordCard>", () => {
 		expect(enclosingStyle(metaText, hasHeight).height).toBe(RECORD_CARD_LINE);
 	});
 
-	// the chip is a fixed-height pill sized to the same line box; its text is the
-	// monospace role, so nothing in the card carries a font size of its own.
-	it("draws the id chip from the code role inside a line-box-tall pill", () => {
+	// the id takes the monospace caption role, which shares the update label's
+	// 18pt line box — the whole point of drawing it at this scale is that the
+	// row's two ends sit at one tier. as with every other text style here, the
+	// role is spread whole, and a spread resolving to nothing would type-check
+	// identically.
+	it("draws the id from the monospace caption role", () => {
 		const { getByText } = render(
 			<CollectionRecordCard record={TITLED} slug={SLUG} />,
 		);
-		const chipText = getByText(TITLED.id);
 
-		expect(resolveStyle(chipText.props.style)).toMatchObject({
+		expect(resolveStyle(getByText(TITLED.id).props.style)).toMatchObject({
 			fontFamily: "JetBrainsMono-Regular",
-			fontSize: 14,
-		});
-		expect(enclosingStyle(chipText, hasHeight)).toMatchObject({
-			height: RECORD_CARD_LINE,
-			borderRadius: themes.light.radius.pill,
+			fontSize: 12,
+			lineHeight: 18,
 		});
 	});
 
-	// the inconsistency this card was changed for: the card whose id is the only
-	// thing identifying it used to be the one card without the pill.
-	it("carries the id chip on a title-less record too", () => {
+	// the id is bare text, and "bare" is only checkable as an absence: it carries
+	// no fill, border, or padding of its own, and the nearest ancestor that sizes
+	// anything is the metadata row itself, so no wrapper sits in between drawing
+	// a chip around it.
+	it("wraps the id in no container of its own", () => {
 		const { getByText } = render(
+			<CollectionRecordCard record={TITLED} slug={SLUG} />,
+		);
+		const idText = getByText(TITLED.id);
+		const own = resolveStyle(idText.props.style);
+
+		expect(own.backgroundColor).toBeUndefined();
+		expect(own.borderWidth).toBeUndefined();
+		expect(own.paddingHorizontal).toBeUndefined();
+		expect(enclosingNode(idText, hasHeight)).toBe(
+			enclosingNode(idText, isMetaRow),
+		);
+	});
+
+	// the card whose id is the only thing identifying it draws that id exactly as
+	// every other card does, so one feed reads as one shape.
+	it("draws a title-less record's id in the same type as a titled one's", () => {
+		const titled = render(<CollectionRecordCard record={TITLED} slug={SLUG} />);
+		const untitled = render(
 			<CollectionRecordCard record={UNTITLED} slug={SLUG} />,
 		);
-		const chipText = getByText(UNTITLED.id);
 
-		expect(enclosingStyle(chipText, hasHeight)).toMatchObject({
-			height: RECORD_CARD_LINE,
-			borderRadius: themes.light.radius.pill,
-		});
+		expect(resolveStyle(untitled.getByText(UNTITLED.id).props.style)).toEqual(
+			resolveStyle(titled.getByText(TITLED.id).props.style),
+		);
 	});
 
-	// the row's two ends are fixed: the pill gives way to keep the label whole,
+	// the row's two ends are fixed: the id gives way to keep the label whole,
 	// never the other way round.
-	it("sits the chip at the start of the row and the update label at the end", () => {
+	it("sits the id at the start of the row and the update label at the end", () => {
 		const { getByText } = render(
 			<CollectionRecordCard record={TITLED} slug={SLUG} />,
 		);
@@ -271,7 +287,6 @@ describe("<CollectionRecordCard>", () => {
 				(style) => style.justifyContent === "space-between",
 			),
 		).toMatchObject({ flexDirection: "row", height: RECORD_CARD_LINE });
-		expect(enclosingStyle(getByText(TITLED.id), hasHeight).flexShrink).toBe(1);
 		expect(resolveStyle(getByText(TITLED.id).props.style).flexShrink).toBe(1);
 		expect(resolveStyle(getByText("5 hours ago").props.style).flexShrink).toBe(
 			0,
@@ -290,7 +305,7 @@ describe("<CollectionRecordCard>", () => {
 		expect(enclosingStyle(getByText(UNTITLED.id), hasHeight).height).toBe(
 			RECORD_CARD_LINE,
 		);
-		// `space-between` puts a lone child at the start, so the chip keeping the
+		// `space-between` puts a lone child at the start, so the id keeping the
 		// left edge is a consequence of the row holding nothing else. that is what
 		// this asserts — the count, which is the mechanism — since the resolved
 		// position itself is a layout an off-device render never computes.

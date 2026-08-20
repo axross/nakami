@@ -59,11 +59,11 @@ than for its value, so a surface picks by role instead of by eye:
 | `sm`   | 8     | Inset marks and placeholder bars — a collection row's icon tile, a skeleton bar |
 | `md`   | 12    | The default surface corner — cards, inputs, buttons, menu-group ends |
 | `lg`   | 16    | Large marks — a message state's icon plate                        |
-| `pill` | 999   | Fully rounded — the record-id chip, the account avatar            |
+| `pill` | 999   | Fully rounded — a record field's read-only marker, the account avatar |
 
 A border radius MUST come from this family. `pill` needs no per-surface measurement:
 React Native clamps a radius to half the shorter side, so one step draws a pill on a
-short chip and a circle on a square avatar.
+short marker and a circle on a square avatar.
 
 ## Border widths
 
@@ -112,8 +112,8 @@ size:
 | `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings                       |
 | `body`     | `InnovatorGrotesk-Regular`  | 16 / 22        | Running text, text inputs, list row labels                         |
 | `caption`  | `InnovatorGrotesk-Regular`  | 13 / 18        | A form field's name, hints, errors, counts, metadata               |
-| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Id chips, build details, read-only and raw-JSON field values        |
-| `codeCaption` | `JetBrainsMono-Regular`  | 12 / 18        | Machine-readable text supporting something else — a record field's Payload name beside its label |
+| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Build details, read-only and raw-JSON field values                  |
+| `codeCaption` | `JetBrainsMono-Regular`  | 12 / 18        | Machine-readable text supporting something else — a record field's Payload name beside its label, a record card's id beside its update label |
 
 A text style MUST apply a role **whole** — `...theme.typography.body` — and MUST NOT
 pick values out of one or override a part of it at the use site. A numeric `fontSize`
