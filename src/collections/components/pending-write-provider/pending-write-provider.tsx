@@ -18,6 +18,9 @@ import {
 } from "~/collections/helpers/pending-write-queue";
 import { updateRecordField } from "~/collections/helpers/update-record-field";
 import { setCachedRecordField } from "~/collections/queries/collection-record-query";
+import { createModuleLogger } from "~/core/helpers/logging";
+
+const logger = createModuleLogger("collections/pending-write-provider");
 
 const PendingWriteContext = createContext<PendingWriteQueue | null>(null);
 
@@ -90,6 +93,12 @@ export interface PendingWriteProviderProps {
  * inside the Collections stack is what scopes the queue to that stack's
  * lifetime, and what keeps every consumer reading the same instance without a
  * module-level singleton — which is also what lets a test mount its own.
+ *
+ * it also owns the queue's second drain trigger. connectivity is the queue's
+ * own, injected at construction; the session's token changing is this
+ * component's, because the queue reads the session imperatively through its
+ * sender and stays free of the auth store — which is what keeps it a unit under
+ * test.
  */
 export function PendingWriteProvider({
 	children,
@@ -110,6 +119,40 @@ export function PendingWriteProvider({
 			createdQueue.dispose();
 		};
 	}, [queue, createdQueue]);
+
+	// a change the server turned away because the session's token had expired is
+	// left queued rather than refused, and the token being replaced is the event
+	// that makes it sendable again. nothing else would fire one: the queue's own
+	// trigger is connectivity, and a token expires without the connection ever
+	// dropping, so the change would sit until some unrelated network change
+	// happened along.
+	//
+	// the store's own subscription rather than a selector hook, so the drain is
+	// driven by the change itself instead of by a render, and so a token replaced
+	// while this is mounted is the only thing it ever reacts to — zustand calls a
+	// listener on change alone, never once on subscribing, so the token already
+	// in place at mount fires nothing.
+	useEffect(() => {
+		return useAuthStore.subscribe((next, previous) => {
+			const token = next.session?.token ?? null;
+
+			// a token that is genuinely new and genuinely usable. every other store
+			// change — a status flip, a `null` left by signing out, a user record
+			// replaced by a refresh that kept the token — leaves the queue exactly
+			// as unsendable as it already was, and draining on one would spend a
+			// request per queued change to learn that.
+			if (token === null || token === (previous.session?.token ?? null)) {
+				return;
+			}
+
+			value.drain().catch((error: unknown) => {
+				logger.warn("Failed draining pending record-field writes.", {
+					trigger: "token-change",
+					reason: error instanceof Error ? error.message : "unknown",
+				});
+			});
+		});
+	}, [value]);
 
 	return (
 		<PendingWriteContext.Provider value={value}>

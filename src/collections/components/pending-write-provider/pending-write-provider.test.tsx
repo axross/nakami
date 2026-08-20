@@ -14,6 +14,7 @@ import {
 import { updateRecordField } from "~/collections/helpers/update-record-field";
 import type { RecordDocument } from "~/collections/models/record";
 import { getCollectionRecordQueryOptions } from "~/collections/queries/collection-record-query";
+import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import {
 	PendingWriteProvider,
@@ -39,6 +40,9 @@ function renderProvided(children: ReactNode) {
 afterEach(() => {
 	client?.clear();
 	client = null;
+	// the auth store is a module singleton, so a session left behind would be one
+	// test's state showing up in the next one's.
+	useAuthStore.setState({ status: "unauthenticated", session: null });
 });
 
 // the queue the provider builds for itself writes through this; the network
@@ -65,6 +69,53 @@ function createStuckQueue(): PendingWriteQueue {
 			},
 		},
 	});
+}
+
+/**
+ * a queue whose server turns the session's token away, which is what an expired
+ * token does to a change. it is refused nothing — an auth failure is no verdict
+ * on the value — so it stays queued, and the only thing left that can save it is
+ * a drain fired by a new token.
+ *
+ * its connectivity source reports nothing at all, which leaves the queue on its
+ * own optimistic "online" and is exactly the case this matters in: the token
+ * expired without the connection ever dropping, so no connectivity event is
+ * coming to drain it. that also makes the assertions below exact — every send
+ * these tests count was fired by something they did.
+ */
+function createTokenRejectingQueue() {
+	let isTokenAccepted = false;
+	const send = jest.fn(async () => {
+		if (!isTokenAccepted) {
+			throw new PayloadRequestError(
+				"auth",
+				"Authentication was rejected.",
+				401,
+			);
+		}
+	});
+
+	return {
+		send,
+		acceptToken() {
+			isTokenAccepted = true;
+		},
+		queue: createPendingWriteQueue({
+			send,
+			connectivity: {
+				subscribe() {
+					return () => {};
+				},
+			},
+		}),
+	};
+}
+
+/** lets a drain the provider kicked without awaiting run to completion. */
+async function settle(): Promise<void> {
+	for (let turn = 0; turn < 8; turn += 1) {
+		await Promise.resolve();
+	}
 }
 
 function QueuedFields(): JSX.Element {
@@ -164,6 +215,85 @@ describe("<PendingWriteProvider>", () => {
 		view.unmount();
 
 		expect(dispose).toHaveBeenCalledTimes(1);
+	});
+
+	// connectivity is the queue's own trigger, and a token expires without the
+	// connection ever dropping — so without this the held change would sit until
+	// some unrelated network change happened along, which may never come.
+	describe("draining on a new session token", () => {
+		async function renderHeldChange() {
+			useAuthStore.setState({ status: "authenticated", session: SESSION });
+
+			const { queue, send, acceptToken } = createTokenRejectingQueue();
+			const view = renderProvided(
+				<PendingWriteProvider queue={queue}>
+					<QueuedFields />
+				</PendingWriteProvider>,
+			);
+
+			await act(async () => {
+				await queue.enqueue(WRITE);
+				await settle();
+			});
+
+			// tried once, turned away, and still owed to the server.
+			expect(send).toHaveBeenCalledTimes(1);
+			expect(queue.getState().writes).toEqual([WRITE]);
+			expect(screen.getByText("title")).toBeTruthy();
+
+			return { acceptToken, queue, send, view };
+		}
+
+		it("sends what a rejected token held back once a new one arrives", async () => {
+			const { acceptToken, queue, send } = await renderHeldChange();
+
+			acceptToken();
+			await act(async () => {
+				useAuthStore.setState({
+					session: { ...SESSION, token: "refreshed-token" },
+				});
+				await settle();
+			});
+
+			expect(send).toHaveBeenCalledTimes(2);
+			expect(queue.getState()).toEqual({ writes: [], refusals: [] });
+			expect(screen.getByText("nothing queued")).toBeTruthy();
+		});
+
+		it("leaves the queue alone on a store change that brings no new token", async () => {
+			const { acceptToken, queue, send } = await renderHeldChange();
+
+			acceptToken();
+			await act(async () => {
+				// a refresh that returned the same token, then a sign-out that leaves
+				// none. neither makes a held change any more sendable than it was,
+				// and draining on one would spend a request to learn that.
+				useAuthStore.setState({
+					session: { ...SESSION, user: { id: "user-1", email: "new@ex.com" } },
+				});
+				useAuthStore.setState({ status: "unauthenticated", session: null });
+				await settle();
+			});
+
+			expect(send).toHaveBeenCalledTimes(1);
+			expect(queue.getState().writes).toEqual([WRITE]);
+		});
+
+		it("stops listening for a new token once unmounted", async () => {
+			const { acceptToken, send, view } = await renderHeldChange();
+
+			view.unmount();
+			acceptToken();
+
+			await act(async () => {
+				useAuthStore.setState({
+					session: { ...SESSION, token: "refreshed-token" },
+				});
+				await settle();
+			});
+
+			expect(send).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	it("refuses to read a queue outside a provider", () => {
