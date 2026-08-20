@@ -1,5 +1,6 @@
 import { onlineManager, useQuery } from "@tanstack/react-query";
 import { Stack } from "expo-router";
+import { CircleAlert } from "lucide-react-native";
 import type { JSX } from "react";
 import { useSyncExternalStore } from "react";
 import { ScrollView, View } from "react-native";
@@ -27,6 +28,18 @@ const RECORD_LOAD_ERROR = {
 	accessSubtitle: "Your account doesn't have permission to view this record.",
 	genericSubtitle:
 		"Something went wrong loading this record. Please try again.",
+} as const;
+
+// what a route carrying no usable slug or record id says. it is deliberately
+// not run through `describeLoadError`: that mapper describes a request that
+// failed, and no request was ever built from a route addressing no record. its
+// generic copy would also end by asking for a retry this surface does not
+// offer — the one thing a screen with no action must not do. a record card
+// always pushes both halves, so a link into the app is the only way to reach
+// this, which is why the copy names one.
+const RECORD_UNADDRESSED = {
+	title: "Couldn't open this link",
+	subtitle: "It doesn't point to a record.",
 } as const;
 
 // the subject-specific half of the offline surface; its title, status line, and
@@ -59,8 +72,9 @@ function useIsOnline(): boolean {
  * one record's fields: the screen a record card opens. renders an offline
  * state, a loading skeleton, a failure-aware error state (permission failures
  * get calm, retry-less copy; connectivity and unexpected failures offer a
- * retry), or the field list — one row per key in the record's own JSON, in the
- * order the server returned them, with `id` first.
+ * retry; a route naming no record gets copy of its own and no action at all),
+ * or the field list — one row per key in the record's own JSON, in the order
+ * the server returned them, with `id` first.
  *
  * two queries feed it, and both are needed before a row can be drawn: the
  * record supplies the fields and their values, and the collection's access map
@@ -143,15 +157,27 @@ export function CollectionRecordScreen({
 				title={copy.title}
 			/>
 		);
-	} else if (!hasTarget || error !== null) {
+	} else if (!hasTarget) {
+		// a route that addresses no record is the one failure a retry cannot fix:
+		// there is nothing to load again, and pressing a button would change
+		// nothing. it therefore carries no action — and, unlike the branch below,
+		// no copy asking for one.
+		content = (
+			<CollectionsMessageState
+				icon={CircleAlert}
+				iconColor={theme.colors.text.destructive.base}
+				style={styles.messageState}
+				subtitle={RECORD_UNADDRESSED.subtitle}
+				testID="collection-record-error"
+				title={RECORD_UNADDRESSED.title}
+			/>
+		);
+	} else if (error !== null) {
 		const copy = describeLoadError(error, RECORD_LOAD_ERROR);
 		content = (
 			<CollectionsMessageState
 				action={
-					// a malformed route is the one failure a retry cannot fix: there is
-					// no record to load, and pressing the button would change nothing —
-					// the same reason a permission failure carries no retry.
-					copy.retryable && hasTarget
+					copy.retryable
 						? {
 								label: "Try again",
 								onPress: retry,

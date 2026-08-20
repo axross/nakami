@@ -270,9 +270,10 @@ describe("<CollectionRecordScreen>", () => {
 			["no slug", "", RECORD_ID],
 			["no record id", SLUG, ""],
 		])(
-			"shows the load-failure state for a route with %s",
+			"states a route with %s without asking for a retry it does not offer",
 			async (_, slug, recordId) => {
-				const { getByTestId, queryByTestId } = renderScreen({ recordId, slug });
+				const { getByTestId, getByText, queryByTestId, queryByText } =
+					renderScreen({ recordId, slug });
 
 				await waitFor(() => {
 					expect(getByTestId("collection-record-error")).toBeTruthy();
@@ -281,6 +282,14 @@ describe("<CollectionRecordScreen>", () => {
 				// retrying cannot mend a route, so the button that implies it might is
 				// not offered.
 				expect(queryByTestId("collection-record-retry-button")).toBeNull();
+				expect(getByText("Couldn't open this link")).toBeTruthy();
+				expect(getByText("It doesn't point to a record.")).toBeTruthy();
+				// the copy and the absent action are pinned together deliberately:
+				// this surface borrowed the generic load-failure subtitle once, which
+				// ended by telling the user to try again on a screen giving them no
+				// way to. nothing here may ask for one — neither a button nor a
+				// sentence.
+				expect(queryByText(/try again/i)).toBeNull();
 			},
 		);
 	});
