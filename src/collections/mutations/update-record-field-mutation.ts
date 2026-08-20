@@ -1,7 +1,10 @@
-import { mutationOptions } from "@tanstack/react-query";
+import { mutationOptions, type QueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { updateRecordField } from "~/collections/helpers/update-record-field";
-import type { CollectionRecordScope } from "~/collections/queries/collection-record-query";
+import {
+	type CollectionRecordScope,
+	setCachedRecordField,
+} from "~/collections/queries/collection-record-query";
 import { getSessionQueryKeyRoot } from "~/common/helpers/session-query-key";
 import { createModuleLogger } from "~/core/helpers/logging";
 
@@ -24,14 +27,20 @@ export interface UpdateRecordFieldInput {
  * cannot land before the earlier one. writes to *different* records stay
  * parallel, which is why the id is built from the record's own key.
  *
- * no cache invalidation is wired here. a refetch on success would replace what
- * is sitting in the screen's other inputs while they are still being edited;
- * the record query re-reads the server's own copy on its next refetch instead.
- * the raw error is surfaced unwrapped so the row can show the server's message
- * beneath the value the user typed.
+ * a save that lands patches the saved field into the cached record through
+ * {@link setCachedRecordField}, and nothing is invalidated or refetched: a
+ * refetch would replace what is sitting in the screen's other inputs while they
+ * are still being edited. the raw error is surfaced unwrapped so the row can
+ * show the server's message beneath the value the user typed.
+ *
+ * `queryClient` is a parameter rather than the app's own imported singleton, so
+ * a test can drive this against a throwaway cache — which is what
+ * docs/conventions/server-state.md requires of a test that needs a working
+ * client.
  */
 export function getUpdateRecordFieldMutationOptions(
 	scope: CollectionRecordScope,
+	queryClient: QueryClient,
 ) {
 	const mutationKey = [
 		...getSessionQueryKeyRoot(scope.userId),
@@ -87,6 +96,9 @@ export function getUpdateRecordFieldMutationOptions(
 				});
 				throw error;
 			}
+		},
+		onSuccess: (_data, { fieldName, value }) => {
+			setCachedRecordField(queryClient, scope, fieldName, value);
 		},
 	});
 }

@@ -1,6 +1,7 @@
-import { queryOptions } from "@tanstack/react-query";
+import { type QueryClient, queryOptions } from "@tanstack/react-query";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchRecord } from "~/collections/helpers/fetch-record";
+import type { RecordDocument } from "~/collections/models/record";
 import { getSessionQueryKeyRoot } from "~/common/helpers/session-query-key";
 
 /**
@@ -52,4 +53,38 @@ export function getCollectionRecordQueryOptions(scope: CollectionRecordScope) {
 			);
 		},
 	});
+}
+
+/**
+ * writes one saved field's value into the cached record, so the screen's other
+ * inputs go on showing what the server now holds without anything being
+ * re-read.
+ *
+ * a patch rather than an invalidation, and deliberately so: a refetch would
+ * replace the values sitting in every *other* input on the screen while the
+ * user is still typing in them, which is the one thing a per-field save must
+ * not do. only the field that was saved moves, and only in the entry keyed
+ * above.
+ *
+ * the records **list** query is deliberately left alone. it has its own
+ * staleness and focus-refetch rules, its entries are a different shape (a
+ * derived view model, not the document), and a card showing a title one refetch
+ * behind costs nothing — where a detail screen losing a half-typed field costs
+ * the edit.
+ *
+ * a cache holding nothing for this record is left holding nothing: `undefined`
+ * would otherwise be seeded into an entry no query has populated, and the
+ * screen would render a record consisting of one field.
+ */
+export function setCachedRecordField(
+	queryClient: QueryClient,
+	scope: CollectionRecordScope,
+	fieldName: string,
+	value: unknown,
+): void {
+	const { queryKey } = getCollectionRecordQueryOptions(scope);
+
+	queryClient.setQueryData<RecordDocument>(queryKey, (record) =>
+		record === undefined ? undefined : { ...record, [fieldName]: value },
+	);
 }

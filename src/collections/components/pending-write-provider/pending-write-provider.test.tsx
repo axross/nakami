@@ -1,17 +1,40 @@
-import { describe, expect, it, jest } from "@jest/globals";
+import { afterEach, describe, expect, it, jest } from "@jest/globals";
+import type { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react-native";
-import type { JSX } from "react";
+import type { JSX, ReactNode } from "react";
 import { Text } from "react-native";
 import {
 	createPendingWriteQueue,
 	type PendingWrite,
 	type PendingWriteQueue,
 } from "~/collections/helpers/pending-write-queue";
+import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import {
 	PendingWriteProvider,
 	usePendingWriteQueue,
 	usePendingWriteState,
 } from "./pending-write-provider";
+
+/**
+ * the provider reads the query client, because a change that lands has to reach
+ * the record cache. every render here therefore needs one, and it is a
+ * throwaway per test rather than the application's own.
+ */
+let client: QueryClient | null = null;
+
+function renderProvided(children: ReactNode) {
+	client = createTestQueryClient();
+
+	return render(
+		<QueryClientProvider client={client}>{children}</QueryClientProvider>,
+	);
+}
+
+afterEach(() => {
+	client?.clear();
+	client = null;
+});
 
 /** a queue whose sender never settles, so an enqueued change stays queued. */
 function createStuckQueue(): PendingWriteQueue {
@@ -55,7 +78,7 @@ describe("<PendingWriteProvider>", () => {
 			return <Text>read</Text>;
 		}
 
-		render(
+		renderProvided(
 			<PendingWriteProvider queue={queue}>
 				<Reader />
 			</PendingWriteProvider>,
@@ -67,7 +90,7 @@ describe("<PendingWriteProvider>", () => {
 	it("re-renders a subscriber as the queue's state changes", async () => {
 		const queue = createStuckQueue();
 
-		render(
+		renderProvided(
 			<PendingWriteProvider queue={queue}>
 				<QueuedFields />
 			</PendingWriteProvider>,
@@ -86,7 +109,7 @@ describe("<PendingWriteProvider>", () => {
 		const queue = createStuckQueue();
 		const dispose = jest.spyOn(queue, "dispose");
 
-		render(
+		renderProvided(
 			<PendingWriteProvider queue={queue}>
 				<QueuedFields />
 			</PendingWriteProvider>,
@@ -107,7 +130,7 @@ describe("<PendingWriteProvider>", () => {
 			return <Text>read</Text>;
 		}
 
-		const view = render(
+		const view = renderProvided(
 			<PendingWriteProvider>
 				<Reader />
 			</PendingWriteProvider>,
