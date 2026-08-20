@@ -1,5 +1,12 @@
-import { afterEach, describe, expect, it, jest } from "@jest/globals";
-import { render } from "@testing-library/react-native";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	jest,
+} from "@jest/globals";
+import { fireEvent, render } from "@testing-library/react-native";
 import type { CollectionRecord } from "~/collections/models/record";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import { themes } from "~/unistyles";
@@ -8,6 +15,16 @@ import {
 	RECORD_CARD_LINE,
 	styles,
 } from "./collection-record-card";
+
+// the card navigates imperatively, so the router is what a press is observed
+// through. the `mock` prefix is what lets the hoisted factory close over it.
+const mockRouterPush = jest.fn();
+
+jest.mock("expo-router", () => ({
+	useRouter: () => ({ push: mockRouterPush }),
+}));
+
+const SLUG = "posts";
 
 const HOUR = 60 * 60 * 1_000;
 
@@ -70,8 +87,65 @@ const isMetaRow = (style: Record<string, unknown>): boolean =>
 	style.justifyContent === "space-between";
 
 describe("<CollectionRecordCard>", () => {
+	beforeEach(() => {
+		mockRouterPush.mockClear();
+	});
+
 	afterEach(() => {
 		jest.useRealTimers();
+	});
+
+	// the card is the only way into a record: the feed is where a reader is, and
+	// nothing else on the screen addresses one.
+	it("opens the record it stands for when pressed", () => {
+		const { getByTestId } = render(
+			<CollectionRecordCard record={TITLED} slug={SLUG} />,
+		);
+
+		fireEvent.press(getByTestId(`collection-record-list-item-${TITLED.id}`));
+
+		expect(mockRouterPush).toHaveBeenCalledTimes(1);
+		expect(mockRouterPush).toHaveBeenCalledWith({
+			pathname: "/collections/[slug]/[recordId]",
+			params: { slug: SLUG, recordId: TITLED.id },
+		});
+	});
+
+	// the props spread is what lets a caller add to the card; it must not let one
+	// take the card apart. an `onPress` landing over the push would leave a
+	// control that looks exactly the same and opens nothing.
+	it("keeps its own navigation, announcement, and test id over a caller's", () => {
+		const onPress = jest.fn();
+		const { getByTestId, queryByTestId } = render(
+			<CollectionRecordCard
+				accessibilityLabel="Something else"
+				accessibilityRole="text"
+				onPress={onPress}
+				record={TITLED}
+				slug={SLUG}
+				testID="somewhere-else"
+			/>,
+		);
+		const card = getByTestId(`collection-record-list-item-${TITLED.id}`);
+
+		fireEvent.press(card);
+
+		expect(mockRouterPush).toHaveBeenCalledTimes(1);
+		expect(onPress).not.toHaveBeenCalled();
+		expect(queryByTestId("somewhere-else")).toBeNull();
+		expect(card.props.accessibilityLabel).toBe(TITLED.title);
+		expect(card.props.accessibilityRole).toBe("button");
+	});
+
+	it("announces itself as a control", () => {
+		const { getByTestId } = render(
+			<CollectionRecordCard record={TITLED} slug={SLUG} />,
+		);
+
+		expect(
+			getByTestId(`collection-record-list-item-${TITLED.id}`).props
+				.accessibilityRole,
+		).toBe("button");
 	});
 
 	// every text style here spreads a theme role rather than setting its own
@@ -79,7 +153,9 @@ describe("<CollectionRecordCard>", () => {
 	// same while dropping the size, the family, and the line height on every
 	// screen. these assertions are the check that it resolves at run time.
 	it("draws a titled record's title from the heading role", () => {
-		const { getByText } = render(<CollectionRecordCard record={TITLED} />);
+		const { getByText } = render(
+			<CollectionRecordCard record={TITLED} slug={SLUG} />,
+		);
 
 		expect(resolveStyle(getByText(TITLED.title).props.style)).toMatchObject({
 			fontFamily: "InnovatorGrotesk-SemiBold",
@@ -93,8 +169,10 @@ describe("<CollectionRecordCard>", () => {
 	// asserts — the two are compared property by property rather than each
 	// against a literal, and the ink is the one thing allowed to differ.
 	it("draws a title-less record's fallback title in the title role", () => {
-		const titled = render(<CollectionRecordCard record={TITLED} />);
-		const untitled = render(<CollectionRecordCard record={UNTITLED} />);
+		const titled = render(<CollectionRecordCard record={TITLED} slug={SLUG} />);
+		const untitled = render(
+			<CollectionRecordCard record={UNTITLED} slug={SLUG} />,
+		);
 
 		expect(resolveStyle(untitled.getByText("Untitled").props.style)).toEqual(
 			resolveStyle(titled.getByText(TITLED.title).props.style),
@@ -111,7 +189,7 @@ describe("<CollectionRecordCard>", () => {
 		const useVariants = jest.spyOn(styles, "useVariants");
 
 		try {
-			render(<CollectionRecordCard record={TITLED} />);
+			render(<CollectionRecordCard record={TITLED} slug={SLUG} />);
 
 			expect(useVariants).toHaveBeenCalledWith({ hasTitle: true });
 		} finally {
@@ -123,7 +201,7 @@ describe("<CollectionRecordCard>", () => {
 		const useVariants = jest.spyOn(styles, "useVariants");
 
 		try {
-			render(<CollectionRecordCard record={UNTITLED} />);
+			render(<CollectionRecordCard record={UNTITLED} slug={SLUG} />);
 
 			expect(useVariants).toHaveBeenCalledWith({ hasTitle: false });
 		} finally {
@@ -135,7 +213,9 @@ describe("<CollectionRecordCard>", () => {
 	// is held open explicitly; without that, the card would be shorter than the
 	// skeleton standing in for it and the list would reflow when records arrive.
 	it("holds the metadata row open to the fixed line box", () => {
-		const { getByText } = render(<CollectionRecordCard record={UNTITLED} />);
+		const { getByText } = render(
+			<CollectionRecordCard record={UNTITLED} slug={SLUG} />,
+		);
 		const metaText = getByText("5 hours ago");
 
 		expect(resolveStyle(metaText.props.style)).toMatchObject({
@@ -149,7 +229,9 @@ describe("<CollectionRecordCard>", () => {
 	// the chip is a fixed-height pill sized to the same line box; its text is the
 	// monospace role, so nothing in the card carries a font size of its own.
 	it("draws the id chip from the code role inside a line-box-tall pill", () => {
-		const { getByText } = render(<CollectionRecordCard record={TITLED} />);
+		const { getByText } = render(
+			<CollectionRecordCard record={TITLED} slug={SLUG} />,
+		);
 		const chipText = getByText(TITLED.id);
 
 		expect(resolveStyle(chipText.props.style)).toMatchObject({
@@ -165,7 +247,9 @@ describe("<CollectionRecordCard>", () => {
 	// the inconsistency this card was changed for: the card whose id is the only
 	// thing identifying it used to be the one card without the pill.
 	it("carries the id chip on a title-less record too", () => {
-		const { getByText } = render(<CollectionRecordCard record={UNTITLED} />);
+		const { getByText } = render(
+			<CollectionRecordCard record={UNTITLED} slug={SLUG} />,
+		);
 		const chipText = getByText(UNTITLED.id);
 
 		expect(enclosingStyle(chipText, hasHeight)).toMatchObject({
@@ -177,7 +261,9 @@ describe("<CollectionRecordCard>", () => {
 	// the row's two ends are fixed: the pill gives way to keep the label whole,
 	// never the other way round.
 	it("sits the chip at the start of the row and the update label at the end", () => {
-		const { getByText } = render(<CollectionRecordCard record={TITLED} />);
+		const { getByText } = render(
+			<CollectionRecordCard record={TITLED} slug={SLUG} />,
+		);
 
 		expect(
 			enclosingStyle(
@@ -194,7 +280,10 @@ describe("<CollectionRecordCard>", () => {
 
 	it("renders no update label when the record has no readable updatedAt", () => {
 		const { getByText, queryByText } = render(
-			<CollectionRecordCard record={{ ...UNTITLED, updatedAt: null }} />,
+			<CollectionRecordCard
+				record={{ ...UNTITLED, updatedAt: null }}
+				slug={SLUG}
+			/>,
 		);
 
 		expect(queryByText("5 hours ago")).toBeNull();
@@ -216,7 +305,7 @@ describe("<CollectionRecordCard>", () => {
 	// would compute from.
 	it("gives a titled and a title-less card the same geometry", () => {
 		const geometry = (record: CollectionRecord, title: string) => {
-			const card = render(<CollectionRecordCard record={record} />);
+			const card = render(<CollectionRecordCard record={record} slug={SLUG} />);
 
 			return {
 				card: resolveStyle(
@@ -235,8 +324,10 @@ describe("<CollectionRecordCard>", () => {
 	});
 
 	it("announces a titled record by its title and a title-less one by its id", () => {
-		const titled = render(<CollectionRecordCard record={TITLED} />);
-		const untitled = render(<CollectionRecordCard record={UNTITLED} />);
+		const titled = render(<CollectionRecordCard record={TITLED} slug={SLUG} />);
+		const untitled = render(
+			<CollectionRecordCard record={UNTITLED} slug={SLUG} />,
+		);
 
 		expect(
 			titled.getByTestId(`collection-record-list-item-${TITLED.id}`).props
@@ -260,13 +351,13 @@ describe("<CollectionRecordCard>", () => {
 			updatedAt: Date.UTC(2026, 7, 18, 7, 0, 0),
 		};
 		const { getByText, rerender } = render(
-			<CollectionRecordCard record={record} />,
+			<CollectionRecordCard record={record} slug={SLUG} />,
 		);
 
 		expect(getByText("5 hours ago")).toBeTruthy();
 
 		jest.setSystemTime(Date.UTC(2026, 7, 18, 14, 0, 0));
-		rerender(<CollectionRecordCard record={record} />);
+		rerender(<CollectionRecordCard record={record} slug={SLUG} />);
 
 		expect(getByText("7 hours ago")).toBeTruthy();
 	});

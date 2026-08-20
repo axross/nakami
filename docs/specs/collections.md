@@ -1,8 +1,10 @@
 # Collections
 
-Browsing what is on the signed-in server. This domain covers the collections an
-account can read, the record feed inside one, how that feed pages, and the
-loading, empty, and failure surfaces both of them show.
+Browsing what is on the signed-in server, and editing one record's fields. This
+domain covers the collections an account can read, the record feed inside one,
+how that feed pages, the record a card opens and the fields it lists, how one of
+those fields is edited and saved, and the loading, empty, and failure surfaces
+all three screens show.
 
 Everything here needs a session, and each request carries that session's token —
 [authentication.md](./authentication.md) owns how a session comes to exist, when
@@ -51,8 +53,8 @@ A collection's records are a scrollable feed of cards, headed by the number of
 records the server reports the collection holds. Each card carries a title over
 a metadata row holding the record's id in a small pill at the row's left and
 when it was last updated at its right. Every card carries the pill, whether or
-not the record has a title, so one feed reads as one shape. A card is a summary
-and is not interactive.
+not the record has a title, so one feed reads as one shape. A card opens the
+record it stands for.
 
 Payload's REST responses carry no title for a record, so the title is derived
 from the record's own fields: the first non-empty string among `title`, `name`,
@@ -87,18 +89,158 @@ Pages are requested unpopulated: a relationship or upload field comes back as an
 id rather than the record it points at, which keeps a page small regardless of
 how connected the collection is.
 
+## Opening a record
+
+A card opens that record on a screen of its own, addressed by the collection's
+slug and the record's id, so a link into it resolves to one record. The header
+reads `Record` until the record arrives, and then carries that record's derived
+title — or its id, where the record has no title-ish field, rather than the
+`Untitled` its card in the feed shows.
+
+Both values arrive as untrusted route parameters and are validated before use. A
+link carrying no usable slug or record id identifies no record, so the screen
+shows its load-failure state rather than an empty record, and offers nothing to
+press — there is no record for a retry to load.
+
+## The fields a record shows
+
+The screen lists one row per key in the record's own JSON, in the order the
+server returned them, with `id` first. That JSON is the whole field list: the
+server answers with every field the collection configures, giving `null` for one
+that was never set, so a field with no value is a row like any other rather than
+an absence. The record is read unpopulated, as the feed's pages are, so a
+relationship or upload field carries an id rather than the record it points at.
+
+Every row shows the field's Payload name and a label derived from that name, in
+every state a row can be in. Payload's REST API reports no label for a field any
+more than it does for a collection, so the label is worked out from the name:
+`-` and `_` separators and camelCase boundaries alike become word breaks, and
+each word is capitalised, so `readingMinutes` reads as Reading Minutes and
+`created_at` as Created At. A run of capitals stays whole, so `seoURL` reads as
+Seo URL rather than Seo Url. This is a different derivation from a collection
+row's name, which starts from a slug Payload guarantees lowercase and hyphenated
+and so needs no rule about camelCase.
+
+The label and the name share one line, the label at its start and the name at
+its end, with the value beneath at the full width of the row. When the two do
+not fit on that line, the name is what shortens: a shortened name still points
+at the field, while a shortened label costs the reader what the field means. A
+label is therefore never shortened, and one long enough to need the whole line
+wraps onto a second — that row stands taller than its neighbours rather than
+losing a word of what the field means.
+
+## Editing a field
+
+Which control a row carries follows the type of the value it holds, the REST API
+reporting no field type either: a string takes a text input, a number a numeric
+one, `true` or `false` a switch, and an array or object a raw-JSON editor a few
+lines tall, opened on that value pretty-printed. Each opens on what the record
+holds today.
+
+A row is read-only for one of four reasons, and states which one — a disabled
+control would say only that something is wrong, where these are four different
+facts about the field. Where more than one is true, the row states the first of
+them:
+
+- **Server-assigned** — `id`, `createdAt`, and `updatedAt`. Payload maintains
+  them itself, and that stays the reason even for an account that could not have
+  updated them anyway.
+- **No permission** — the server's access report grants the account no update on
+  the collection, or none on that field; a collection or a field the report does
+  not mention at all is read as a denial rather than assumed. This one is
+  load-bearing rather than courteous: a write to a field the account may not
+  update is not refused, it is accepted and dropped, so the app's own reading of
+  that report is the only thing between the user and an edit that disappears
+  silently.
+- **Not editable here yet** — the value is a Rich Text document. This app can
+  neither render nor edit one, and a field holding one is left exactly as it is.
+- **No value** — the field is `null`. Nothing distinguishes an empty number
+  field from an empty Rich Text one, so no control is offered rather than the
+  wrong one.
+
+A read-only row shows what value it does have where the control would be, with
+the reason at the end of the same surface: `createdAt` and `updatedAt` read as
+short dates the way a card's update label does, a Rich Text field reads as `Rich
+Text` rather than as its markup, and a field holding `null` reads as an em dash.
+
+## Saving a change
+
+A text, numeric, or raw-JSON field saves when its input loses focus. A switch
+saves the moment it is moved, there being no later point at which a switch is
+finished with. A save carries the one field that changed and nothing else, which
+is what keeps it from reverting another account's edit elsewhere in the record,
+or clobbering a Rich Text field this app cannot even draw.
+
+Leaving an input that was not changed sends nothing. Neither does one holding
+text the app cannot read back into a value — an emptied or non-numeric numeric
+input, or raw JSON that does not parse. The server takes a value of the wrong
+type without complaint and stores `null` in its place, so a value the app cannot
+read is held back rather than sent and quietly lost.
+
+Every change goes through one queue rather than straight to the server, so a row
+is marked as not saved yet from the moment the change is made until the server
+has taken it. Changes leave that queue one at a time, oldest first, so two edits
+in quick succession cannot overtake one another.
+
+A change the server accepts is written into the record already on screen, and
+nothing is re-read on its account: reloading would replace what is sitting in
+every other input while it is still being typed in. A row takes its opening
+value from the record once and holds what was typed from then on, so the record
+going stale and loading again in the background leaves an input being edited
+exactly as it was too.
+
+## A refused save
+
+A save the server refuses leaves the typed value in its input and states the
+refusal beneath that row, in the server's own words where there are any: the
+message Payload gave for that field when it named one, its summary of the
+refusal otherwise, and — where the response body says nothing this app
+recognises — this app's own description of the failure. The server's own sentence
+is the only version of a refusal anyone can act on, which is why it is preferred
+over anything this app could compose. The row is marked as refused rather than as not
+saved yet.
+
+A refused change is not sent again by itself. Editing the field and leaving it
+again clears the refusal and queues a fresh change.
+
+A refusal is the server having read the value and declined it. A save that never
+got that far is not one, and is not shown as one: a server that could not be
+reached, and a session token turned away at the door before the value was ever
+looked at, both leave the change queued and the row marked as not saved yet,
+because neither of them says anything about what was typed.
+
+## Editing with no connection
+
+Editing goes on working with no connection, and the screen says so in a line
+above the fields rather than by taking the fields away — there is nothing to
+wait for and nothing to press. A change made offline waits in the same queue,
+which empties itself in order once the connection returns.
+
+A second change to a field already waiting replaces the first, so a field edited
+over and over offline costs one save carrying the last value. A change the
+server gave no verdict on stays where it is: one that could not reach the server
+goes with the next connection, and one the server turned away because the
+session's token had expired goes as soon as that token is renewed. Only being
+accepted or being refused takes a change out of the queue.
+
+The queue is held in memory alone and belongs to the signed-in session. It
+survives neither the app being closed nor a sign-out — including the involuntary
+one a token the server will not renew ends in: whatever is still waiting then is
+lost, sent neither later nor at the next launch.
+
 ## Loading, empty, and failure
 
-While a first page loads, both screens show a placeholder in the shape of what
-is coming — rows in the collection list, cards in the record feed — laid out to
-the same geometry as the real thing, so nothing shifts when the content arrives.
+While a first load is in flight, each screen shows a placeholder in the shape of
+what is coming — rows in the collection list, cards in the record feed, field
+rows on a record — laid out to the same geometry as the real thing, so nothing
+shifts when the content arrives.
 The placeholders pulse, and hold a steady opacity instead when the device asks
 for reduced motion.
 
-Opening either screen with no connection, and with nothing loaded yet, states
+Opening any of the three with no connection, and with nothing loaded yet, states
 that the device is offline instead of showing a placeholder: nothing is on its
 way for a placeholder to stand in for. Each screen names what it is waiting
-to load — collections on one, records on the other — under a live line
+to load — collections, records, or the record itself — under a live line
 saying it is waiting for a connection, which pulses and holds a steady
 opacity under reduced motion the same way the placeholders do. There is
 nothing to press: retrying gets no further while the device is offline, and
@@ -107,9 +249,10 @@ has content keeps showing it rather than replacing it, so only a first load
 reaches this state.
 
 An account with no readable collections gets an empty state rather than an empty
-list, and so does a collection holding no records.
+list, and so does a collection holding no records. A record always carries at
+least an id, so its field list has no empty state of its own.
 
-Both screens map a load failure the same way, differing only in the noun:
+All three map a load failure the same way, differing only in the noun:
 
 - A refusal on permission grounds is an ordinary account or configuration state
   rather than a fault, so it is stated calmly and offers no retry — retrying
@@ -131,16 +274,22 @@ down.
 
 ## Switching server or account
 
-The collection list and each record feed are scoped to the server and the user
-they were loaded for. Signing in to another server, or as another user, loads
-that account's collections and records rather than showing the previous
-account's while the new ones arrive.
+The collection list, each record feed, and each record are scoped to the server
+and the user they were loaded for. Signing in to another server, or as another
+user, loads that account's collections and records rather than showing the
+previous account's while the new ones arrive.
 
-## What browsing does not do
+## What is still not possible
 
-Browsing is read-only. Nothing here creates, edits, or deletes: there is no
-compose screen, no field editor, and no delete action. There is no single-record
-view either — a card does not open, so a record's remaining fields are not
-reachable from the app. And there is no search, filter, or sort: the collection
-list's alphabetical order and whatever order the server returns records in are
-the only orders there are.
+Nothing here creates or deletes. There is no compose screen and no delete
+action, for a collection or for a record, so every record this app edits is one
+something else made.
+
+Editing reaches a field's own value and stops there. A field holding no value
+cannot be given one, a Rich Text field cannot be written, and no field can be
+added to or removed from a record — what fields a record has is its collection's
+configuration, which lives on the server.
+
+And there is no search, filter, or sort: the collection list's alphabetical
+order and whatever order the server returns records in are the only orders there
+are.

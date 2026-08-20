@@ -25,14 +25,59 @@ const operationAccessSchema = z.union([
 type OperationAccess = z.infer<typeof operationAccessSchema>;
 
 /**
- * one collection entry in `GET /api/access`. only `read` gates whether the user
- * can browse the collection; the other operations and `fields` are tolerated
- * (stripped). `read` is optional so an entry without it is treated as
- * not-readable rather than a parse failure.
+ * one field's access result inside a collection's `fields` entry. Payload
+ * serializes it as a bare `true` when the account may do everything to the
+ * field, or as an object carrying only the operations it may do — a denied
+ * operation is the **absence** of its key rather than a `false`, so `update`
+ * is optional here and its absence is what a denial looks like. the other
+ * operations, and the nested `fields` entry a group or array field carries, are
+ * tolerated (stripped).
+ */
+const fieldAccessSchema = z.union([
+	z.boolean(),
+	z.object({ update: operationAccessSchema.optional() }),
+]);
+
+/**
+ * a collection's per-field access map. it collapses to a bare `true` on a
+ * collection with no field-level restriction anywhere, and expands into an
+ * object keyed by field name only once some restriction exists — which is why
+ * it cannot be used to enumerate a collection's fields, and why the record's
+ * own JSON is what the detail screen enumerates instead.
+ */
+const fieldsAccessSchema = z.union([
+	z.boolean(),
+	z.record(z.string(), fieldAccessSchema),
+]);
+
+/**
+ * one collection entry in `GET /api/access`. `read` gates whether the user can
+ * browse the collection and `update` whether anything in it can be saved, both
+ * optional because an absent operation key is Payload's way of denying it —
+ * treating the entry as not-readable or not-updatable rather than failing the
+ * parse. the remaining operations are tolerated (stripped).
+ *
+ * `update` and `fields` go one step further and fall back to `false` on a shape
+ * this app does not recognize, rather than failing the parse the way an
+ * unmodelled key never could. one response feeds every collections surface —
+ * the list is a `select` view over this same query — so a `fields` entry from a
+ * Payload version that serializes it differently would otherwise take down the
+ * collection list, a screen that has nothing to do with field permission. the
+ * fallback denies instead: a row this app cannot read a grant for stays
+ * read-only, which is the same direction every other unknown here degrades in.
+ *
+ * `read` deliberately carries no such fallback. it predates the write path, an
+ * unrecognized `read` has always failed this parse, and giving it one would
+ * silently hide a collection the user can browse rather than say the response
+ * was not understood.
  */
 const collectionAccessSchema = z.object({
 	read: operationAccessSchema.optional(),
+	update: operationAccessSchema.catch(false).optional(),
+	fields: fieldsAccessSchema.catch(false).optional(),
 });
+
+type CollectionAccess = z.infer<typeof collectionAccessSchema>;
 
 /**
  * `GET /api/access` payload. `collections` is keyed by slug; `canAccessAdmin`
@@ -55,6 +100,63 @@ function isSystemCollection(slug: string): boolean {
 /** whether an operation-access result grants the user access. */
 function grantsAccess(access: OperationAccess | undefined): boolean {
 	return access === true || (typeof access === "object" && access.permission);
+}
+
+/**
+ * whether the account may save this one field of this one collection.
+ *
+ * the collection's own `update` grant is checked first, since a collection the
+ * account cannot update has no updatable field in it whatever its `fields`
+ * entry says. past that the entry is read in both the forms Payload emits: a
+ * bare boolean covering every field at once, and the expanded map, where a
+ * field is granted by a bare `true` or by an object carrying an `update` key
+ * and denied by that key being absent — or by the field being absent from the
+ * map altogether.
+ *
+ * a collection or a field absent from the response is denied rather than
+ * assumed, so a response this app does not recognize leaves a row read-only
+ * instead of offering an edit the server will refuse. a `fields` entry that is
+ * absent entirely is the one exception: nothing is narrowing the collection's
+ * own grant there, so that grant stands.
+ *
+ * this reader is why an edit cannot disappear without a word, which is the
+ * whole reason it exists. **Payload does not refuse a write to a field the
+ * account may not update**: measured against a real 3.88.0 server, such a
+ * request returns 200 and the field is silently left as it was. (A type
+ * mismatch behaves the same way — a string sent to a number field stored
+ * `null`.) So nothing downstream can detect the loss, no error state can
+ * report it, and this app's own gate is the only thing standing between a user
+ * and an edit that appeared to save and did not.
+ */
+export function canUpdateField(
+	access: AccessResponse,
+	slug: string,
+	fieldName: string,
+): boolean {
+	const entry: CollectionAccess | undefined = access.collections[slug];
+
+	if (entry === undefined || !grantsAccess(entry.update)) {
+		return false;
+	}
+
+	const fields = entry.fields;
+
+	if (fields === undefined) {
+		return true;
+	}
+
+	if (typeof fields === "boolean") {
+		return fields;
+	}
+
+	const field: z.infer<typeof fieldAccessSchema> | undefined =
+		fields[fieldName];
+
+	if (field === undefined) {
+		return false;
+	}
+
+	return typeof field === "boolean" ? field : grantsAccess(field.update);
 }
 
 /**

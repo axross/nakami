@@ -48,6 +48,20 @@ function agoLabel(
 }
 
 /**
+ * formats an epoch-millisecond timestamp as the short "18 Jul 2026" date this
+ * app writes a date in: the ladder above past its last relative rung, and a
+ * record detail screen's read-only `createdAt` and `updatedAt` rows.
+ *
+ * built from UTC parts, so the same record reads the same on every device — no
+ * `Intl` and no device-timezone dependence.
+ */
+export function formatRecordDate(epochMilliseconds: number): string {
+	const date = new Date(epochMilliseconds);
+
+	return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+}
+
+/**
  * formats a record's last update into the label its card shows: a relative one
  * — "Just now", "12 minutes ago", "Yesterday", "3 weeks ago" — for anything
  * updated within the last 30 days, and the short "18 Jul 2026" date past that.
@@ -86,7 +100,5 @@ export function formatUpdatedAt(updatedAt: number, now: number): string {
 		return agoLabel(Math.floor(elapsed / WEEK), "week");
 	}
 
-	const date = new Date(updatedAt);
-
-	return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+	return formatRecordDate(updatedAt);
 }

@@ -6,12 +6,12 @@ import {
 	QueryCache,
 	QueryClient,
 } from "@tanstack/react-query";
-import * as Network from "expo-network";
 import { AppState, Platform } from "react-native";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { describeQueryKey } from "~/common/helpers/session-query-key";
 import { reportError } from "~/core/helpers/error-reporting";
 import { createModuleLogger } from "~/core/helpers/logging";
+import { subscribeToNetworkState } from "~/core/helpers/network-state";
 
 const logger = createModuleLogger("core/query-client");
 
@@ -71,51 +71,16 @@ export const queryClient = new QueryClient({
 // registered here at module scope rather than from a component, because they
 // are global: tying one to a component would unregister it on unmount.
 
-onlineManager.setEventListener((setOnline) => {
-	let hasObservedChange = false;
-
-	const subscription = Network.addNetworkStateListener((state) => {
-		hasObservedChange = true;
-		setOnline(Boolean(state.isConnected));
-	});
-
-	// the listener only reports *changes*, so nothing yet describes the
-	// connection the app launched with — a launch while offline would otherwise
-	// keep the manager's optimistic `true`. seed it once, unless a real change
-	// has already arrived and superseded it.
-	const startedAt = performance.now();
-
-	logger.debug("Started reading the launch-time network state.");
-
-	Network.getNetworkStateAsync()
-		.then((state) => {
-			const isConnected = Boolean(state.isConnected);
-
-			if (!hasObservedChange) {
-				setOnline(isConnected);
-			}
-
-			logger.debug("Completed reading the launch-time network state.", {
-				isConnected,
-				superseded: hasObservedChange,
-				duration: performance.now() - startedAt,
-			});
-		})
-		.catch((error: unknown) => {
-			// recovered rather than reported, for the same reason a `network`
-			// request failure is not reported above: connectivity is an expected
-			// operational state, and the manager's own optimistic `true` is the
-			// fallback, which the next change event corrects. the bracket still
-			// closes on this path, so the breadcrumb trail does not go quiet on
-			// the failure the trail is most likely to be read for.
-			logger.warn("Failed reading the launch-time network state.", {
-				reason: error instanceof Error ? error.message : "unknown",
-				duration: performance.now() - startedAt,
-			});
-		});
-
-	return () => subscription.remove();
-});
+// the manager's own optimistic `true` is what stands until the reading below
+// says otherwise, and a launch while offline is exactly the case its seeded
+// first report exists for — see `subscribeToNetworkState`, which the
+// pending-write queue's own trigger shares.
+onlineManager.setEventListener((setOnline) =>
+	subscribeToNetworkState(setOnline, {
+		logger,
+		subject: "the launch-time network state",
+	}),
+);
 
 // native only. `setEventListener` *replaces* whatever source the manager
 // installs for itself, so registering this on web would trade the browser's

@@ -5,12 +5,94 @@
  * identifier live here so the whole app maps Payload failures the same way.
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 import { createModuleLogger } from "~/core/helpers/logging";
 
 const logger = createModuleLogger("common/payload-client");
 
 const REQUEST_TIMEOUT_MS = 15_000;
+
+/**
+ * one field Payload named in a refusal. `path` is the field's own name, which
+ * is what lets a caller match the message to the control that produced it;
+ * `label` is Payload's admin-side label and is tolerated (stripped), since this
+ * app derives its own.
+ */
+const fieldErrorSchema = z.object({
+	path: z.string(),
+	message: z.string(),
+});
+
+/**
+ * one entry of a Payload error body. `message` is the summary — "The following
+ * field is invalid: Title" — and the per-field entries hang off `data.errors`.
+ * both nesting levels are optional: a refusal that names no field at all (a
+ * custom hook, a lock conflict) carries the summary and nothing else.
+ */
+const errorEntrySchema = z.object({
+	message: z.string(),
+	data: z.object({ errors: z.array(fieldErrorSchema).optional() }).optional(),
+});
+
+/**
+ * the body Payload returns with a refused write, measured against a real
+ * 3.88.0 server at status 400:
+ *
+ * ```json
+ * {"errors":[{"name":"ValidationError","message":"The following field is invalid: Title",
+ *   "data":{"errors":[{"label":"Title","message":"This field is required.","path":"title"}]}}]}
+ * ```
+ */
+const errorBodySchema = z.object({
+	errors: z.array(errorEntrySchema).min(1),
+});
+
+/** what a refusal said, for a caller that can put it next to the input that caused it. */
+export interface PayloadErrorDetail {
+	/** the refusal's summary, e.g. "The following field is invalid: Title". */
+	readonly message: string;
+	/**
+	 * the fields the refusal named, empty when it named none. a caller picks the
+	 * entry whose `path` matches the field it just wrote and falls back to
+	 * {@link PayloadErrorDetail.message}.
+	 */
+	readonly fieldErrors: readonly { path: string; message: string }[];
+}
+
+/**
+ * reads what a non-ok response said, and never throws. the body is untrusted
+ * server content of an unknown Payload version, so every way it can fail to be
+ * what this expects — an unreadable stream, a non-JSON body, an empty one, a
+ * shape that does not match — returns `undefined` rather than replacing the
+ * failure the caller is already reporting with one of its own.
+ */
+async function readErrorDetail(
+	response: Response,
+): Promise<PayloadErrorDetail | undefined> {
+	let body: unknown;
+
+	try {
+		body = await response.json();
+	} catch {
+		return undefined;
+	}
+
+	const result = errorBodySchema.safeParse(body);
+
+	if (!result.success) {
+		return undefined;
+	}
+
+	// the first entry is the refusal being reported; Payload lists further
+	// entries only when several operations failed at once, which a single-field
+	// write cannot produce.
+	const [entry] = result.data.errors;
+
+	return {
+		message: entry.message,
+		fieldErrors: entry.data?.errors ?? [],
+	};
+}
 
 /**
  * distinguishes an authentication rejection (the server said the credentials
@@ -23,6 +105,21 @@ export type PayloadErrorKind = "auth" | "network" | "server";
 export class PayloadRequestError extends Error {
 	readonly kind: PayloadErrorKind;
 	readonly status: number | undefined;
+	/**
+	 * what the server itself said, when the failure was a response whose body
+	 * said anything this recognizes, and `undefined` otherwise. it is additive:
+	 * {@link PayloadRequestError.message} is unchanged on every path, so a screen
+	 * reading that alone reads exactly what it read before.
+	 *
+	 * it is for display beside the control that caused the refusal, and it is
+	 * deliberately **not** reported: it is untrusted server prose that can quote
+	 * the value a user typed, so it must not become telemetry. no report path
+	 * carries it today — `reportQueryFailure` sends the described query key and
+	 * nothing else, and the tracker serializes an `Error`'s name, message, and
+	 * stack rather than its own fields, the way it already does not carry `kind`
+	 * or `status` — and none of that may be widened while this field exists.
+	 */
+	readonly detail: PayloadErrorDetail | undefined;
 
 	/**
 	 * `options.cause` carries the originating failure — the rejection `fetch`
@@ -35,11 +132,13 @@ export class PayloadRequestError extends Error {
 		message: string,
 		status?: number,
 		options?: ErrorOptions,
+		detail?: PayloadErrorDetail,
 	) {
 		super(message, options);
 		this.name = "PayloadRequestError";
 		this.kind = kind;
 		this.status = status;
+		this.detail = detail;
 	}
 }
 
@@ -60,6 +159,9 @@ export function serverBaseUrl(serverUrl: string): string {
  * on success. credentials only ever travel to the caller-supplied host. the
  * `operation` label identifies the call in the request-lifecycle breadcrumbs.
  *
+ * the timeout covers the whole call, the body read included, rather than only
+ * the wait for a response — see the comment on it below.
+ *
  * @throws {PayloadRequestError} on every failure path, in one of three kinds:
  * `"network"` when the transport never returned a response, whether the host
  * was unreachable or the timeout above aborted the call; `"auth"` on a 401 or
@@ -67,6 +169,17 @@ export function serverBaseUrl(serverUrl: string): string {
  * whose body will not parse. the two paths with no HTTP status to report — the
  * dead transport and the unparseable body — carry the originating error as
  * `cause`.
+ *
+ * a status that did arrive keeps its kind even where the deadline expired while
+ * its body was being read: a 401 whose body never lands is still an `"auth"`
+ * rejection, and an ok response whose body never lands is a `"server"` one,
+ * since the status is the more useful of the two facts to a caller.
+ *
+ * a failure that *was* a response also carries whatever its body said as
+ * {@link PayloadRequestError.detail}, so a caller can show the server's own
+ * words. reading it cannot fail the request: an unreadable, unrecognized, or
+ * abandoned body leaves `detail` undefined and changes nothing else about the
+ * error.
  */
 export async function request(
 	operation: string,
@@ -81,63 +194,83 @@ export async function request(
 	// identifies the call; the URL and body are omitted to keep credentials out.
 	logger.debug("Started request.", { operation });
 
-	let response: Response;
+	// the deadline is cleared here rather than beside the `fetch` below, so that
+	// it covers reading the body as well as arriving at it. a body is a second
+	// read over the same socket: a server can answer its headers and then stall,
+	// and a deadline that ended with the headers would leave the call waiting on
+	// that body with nothing left to interrupt it — forever, on a path that runs
+	// at sign-in. an abort mid-body surfaces as whichever failure that read was
+	// already going to be reported as.
 	try {
-		response = await fetch(url, { ...init, signal: controller.signal });
-	} catch (error) {
-		// network down, DNS failure, timeout/abort — the server was unreachable.
-		// close the bracket at debug (callers report the failure at their own
-		// level) so the breadcrumb trail doesn't go quiet on the failure path.
-		// the rejection rides on the thrown error's `cause` rather than this line:
-		// `isReportableQueryError()` keeps `"network"` out of the tracker, so the
-		// cause serves local diagnosis and whatever path does capture the error,
-		// while a breadcrumb leaves the device either way — putting the underlying
-		// message on one would add a telemetry surface for no triage gain.
-		logger.debug("Failed request.", {
+		let response: Response;
+		try {
+			response = await fetch(url, { ...init, signal: controller.signal });
+		} catch (error) {
+			// network down, DNS failure, timeout/abort — the server was unreachable.
+			// close the bracket at debug (callers report the failure at their own
+			// level) so the breadcrumb trail doesn't go quiet on the failure path.
+			// the rejection rides on the thrown error's `cause` rather than this line:
+			// `isReportableQueryError()` keeps `"network"` out of the tracker, so the
+			// cause serves local diagnosis and whatever path does capture the error,
+			// while a breadcrumb leaves the device either way — putting the underlying
+			// message on one would add a telemetry surface for no triage gain.
+			logger.debug("Failed request.", {
+				operation,
+				duration: performance.now() - startedAt,
+			});
+			throw new PayloadRequestError(
+				"network",
+				"The server could not be reached.",
+				undefined,
+				{ cause: error },
+			);
+		}
+
+		logger.debug("Completed request.", {
 			operation,
+			status: response.status,
 			duration: performance.now() - startedAt,
 		});
-		throw new PayloadRequestError(
-			"network",
-			"The server could not be reached.",
-			undefined,
-			{ cause: error },
-		);
+
+		if (!response.ok) {
+			// read once, before the kinds part ways: both are refusals, and Payload
+			// answers a rejected token in the same shape it answers a rejected
+			// value. the kind, the message, and the status below are exactly what
+			// they were before the body was read at all — `detail` is the only
+			// addition.
+			const detail = await readErrorDetail(response);
+
+			if (response.status === 401 || response.status === 403) {
+				throw new PayloadRequestError(
+					"auth",
+					"Authentication was rejected.",
+					response.status,
+					undefined,
+					detail,
+				);
+			}
+
+			throw new PayloadRequestError(
+				"server",
+				`Unexpected response (${response.status}).`,
+				response.status,
+				undefined,
+				detail,
+			);
+		}
+
+		try {
+			return await response.json();
+		} catch (error) {
+			throw new PayloadRequestError(
+				"server",
+				"The server returned an invalid response.",
+				undefined,
+				{ cause: error },
+			);
+		}
 	} finally {
 		clearTimeout(timeout);
-	}
-
-	logger.debug("Completed request.", {
-		operation,
-		status: response.status,
-		duration: performance.now() - startedAt,
-	});
-
-	if (response.status === 401 || response.status === 403) {
-		throw new PayloadRequestError(
-			"auth",
-			"Authentication was rejected.",
-			response.status,
-		);
-	}
-
-	if (!response.ok) {
-		throw new PayloadRequestError(
-			"server",
-			`Unexpected response (${response.status}).`,
-			response.status,
-		);
-	}
-
-	try {
-		return await response.json();
-	} catch (error) {
-		throw new PayloadRequestError(
-			"server",
-			"The server returned an invalid response.",
-			undefined,
-			{ cause: error },
-		);
 	}
 }
 

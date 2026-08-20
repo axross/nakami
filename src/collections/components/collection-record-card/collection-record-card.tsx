@@ -1,5 +1,6 @@
+import { useRouter } from "expo-router";
 import type { ComponentPropsWithRef, JSX } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { formatUpdatedAt } from "~/collections/helpers/format-updated-at";
 import type { CollectionRecord } from "~/collections/models/record";
@@ -24,23 +25,36 @@ export const RECORD_CARD_LINE = 22;
 const UNTITLED_TITLE = "Untitled";
 
 /**
- * one record in a collection, as a non-interactive elevated card (the chosen
- * "card feed" design): the derived title over a metadata row carrying a
- * monospace record-id chip on the left and the last-updated label on the right.
- * every card carries the chip, and a record with no title of its own takes
- * {@link UNTITLED_TITLE} in the title's own type, so the two card shapes read
- * as one feed. browsing into a single record is a follow-up; the card is
- * read-only.
+ * one record in a collection, as an elevated card (the chosen "card feed"
+ * design) that opens that record: the derived title over a metadata row
+ * carrying a monospace record-id chip on the left and the last-updated label on
+ * the right. every card carries the chip, and a record with no title of its own
+ * takes {@link UNTITLED_TITLE} in the title's own type, so the two card shapes
+ * read as one feed.
+ *
+ * it navigates imperatively rather than through `Link asChild`, which the
+ * sibling collection row uses. that pattern needs the styled `Pressable`
+ * wrapped in a plain component for the clone to target, and it costs the
+ * wrapper its `style` prop — `Link` slots its child through a slot that
+ * composes `style` by spreading it, which detaches a Unistyles style from the
+ * reference it applies updates through (see collection-list-item's own note).
+ * This card publishes `style`, and a push is what the feed needs; `useRouter`
+ * gives it that without either cost.
  */
 export function CollectionRecordCard({
 	record,
+	slug,
 	style,
 	...props
 }: Readonly<
-	Omit<ComponentPropsWithRef<typeof View>, "children"> & {
+	Omit<ComponentPropsWithRef<typeof Pressable>, "children" | "style"> & {
 		record: CollectionRecord;
+		/** the collection the record belongs to — half of the route it opens. */
+		slug: string;
+		style?: ComponentPropsWithRef<typeof View>["style"];
 	}
 >): JSX.Element {
+	const router = useRouter();
 	styles.useVariants({ hasTitle: record.hasTitle });
 
 	// formatted here rather than on the view model: the label is relative, so one
@@ -52,14 +66,28 @@ export function CollectionRecordCard({
 			: formatUpdatedAt(record.updatedAt, Date.now());
 
 	return (
-		<View
+		<Pressable
 			accessible
-			// a title-less card shows placeholder copy, so the id is what actually
-			// identifies the record and is what the announcement has to carry.
-			accessibilityLabel={record.hasTitle ? record.title : record.id}
-			testID={`collection-record-list-item-${record.id}`}
 			{...props}
-			style={[styles.card, style]}
+			// everything below the spread is what the card *is*, so it wins over
+			// whatever a caller passes: the push is the card's whole purpose, and a
+			// caller handing in an `onPress` of its own would silently disable
+			// navigation. the announcement and the test id are derived from the
+			// record for the same reason — a title-less card shows placeholder copy,
+			// so the id is what actually identifies the record and is what the
+			// announcement has to carry. (the sibling collection row spreads last
+			// instead, because `Link asChild` clones it and its injected press props
+			// have to land.)
+			accessibilityLabel={record.hasTitle ? record.title : record.id}
+			accessibilityRole="button"
+			onPress={() => {
+				router.push({
+					pathname: "/collections/[slug]/[recordId]",
+					params: { slug, recordId: record.id },
+				});
+			}}
+			testID={`collection-record-list-item-${record.id}`}
+			style={({ pressed }) => [styles.card(pressed), style]}
 		>
 			<Text numberOfLines={1} style={styles.title}>
 				{record.hasTitle ? record.title : UNTITLED_TITLE}
@@ -77,7 +105,7 @@ export function CollectionRecordCard({
 					</Text>
 				) : null}
 			</View>
-		</View>
+		</Pressable>
 	);
 }
 
@@ -91,7 +119,11 @@ export function CollectionRecordCard({
  * nothing outside that test should consume it.
  */
 export const styles = StyleSheet.create((theme) => ({
-	card: {
+	// a dynamic function rather than a variant: a feed draws every card from this
+	// one component body, and `useVariants` selects once per body — so one
+	// pressed card could not have been expressed without dimming the rest. the
+	// dip matches the collection row's, the app's other list control.
+	card: (pressed: boolean) => ({
 		gap: theme.gap.xs,
 		paddingVertical: theme.gap.sm,
 		paddingHorizontal: theme.gap.md,
@@ -99,7 +131,8 @@ export const styles = StyleSheet.create((theme) => ({
 		borderColor: theme.colors.border.neutral.subtle,
 		borderWidth: theme.borderWidth.hairline,
 		borderRadius: theme.radius.md,
-	},
+		opacity: pressed ? 0.6 : 1,
+	}),
 	// the pill takes whatever width the update label leaves and shrinks past it
 	// rather than pushing the label off the row — a 24-character id is the only
 	// thing identifying a title-less record, so it is capped by the row it sits

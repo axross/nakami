@@ -25,8 +25,10 @@ Documents under `specs/` describe rather than instruct, and use none of them.
   server and stays signed in: the signed-out landing, the sign-in form and what it
   validates, the session held on the device, keeping its token alive, and signing out.
 - [specs/collections.md](./specs/collections.md) — browsing what is on the signed-in
-  server: which collections an account can read, the record feed inside one and how it
-  pages, and the loading, empty, and failure surfaces both screens show.
+  server, and editing one record: which collections an account can read, the record
+  feed inside one and how it pages, the fields the record a card opens lists, how one
+  of them is edited, saved, refused, and queued while offline, and the loading, empty,
+  and failure surfaces all three screens show.
 
 ## Conventions
 

@@ -34,9 +34,17 @@ unchanged.
 in its code, in its UI, and here — and the two name the same thing. The glossary
 records that divergence rather than settling it.
 
+**field** — one named value a **record** carries. Which fields a record has is
+its **Collection**'s own configuration on the **Payload server**, and this app
+never sees that configuration: a record's JSON is the whole list, the server
+returning every configured field and giving `null` for one that was never set.
+
 **access** — a **Payload server**'s own verdict on what the signed-in account
 may do with each **Collection**, answered per collection and per operation,
-either as a plain yes or no or as a yes qualified by a condition.
+either as a plain yes or no or as a yes qualified by a condition. Where the
+server restricts an individual **field**, the verdict reaches that far as well;
+a denial at either level is the operation going unmentioned rather than being
+answered no.
 
 **slug** — the lowercase, hyphenated identifier a **Collection** is addressed
 by, in Payload's REST paths and in this app's routes alike.
@@ -49,6 +57,24 @@ with `payload-`.
 **derived title** — the name this app works out for a **record** from that
 record's own fields, the **Payload server** giving none. A record carrying no
 such field has no derived title, and reads as `Untitled` instead.
+
+**derived label** — the display name this app works out for a **field** from
+that field's Payload name, the **Payload server** publishing none. Separators
+and camelCase boundaries alike read as word breaks, so `readingMinutes` reads as
+`Reading Minutes`. A **Collection**'s own row name is derived the same way but
+from a **slug**, which Payload guarantees lowercase and hyphenated and which
+therefore needs no camelCase rule.
+
+**Rich Text** — Payload's own **field** type for formatted content, whose value
+is a document tree rather than a string. Nothing in a REST response says a field
+is one, so this app recognises the tree by its shape, shows such a field as
+holding Rich Text, and never writes to it.
+
+**queued change** — an edit to one **field** of one **record** that has not
+reached the **Payload server** yet. Changes wait in one queue and leave it
+oldest first, and a second change to a field already waiting replaces it. The
+queue is held in memory alone and belongs to the signed-in session, so whatever
+is still waiting when the app closes or the session ends is lost.
 
 # Development vocabulary
 

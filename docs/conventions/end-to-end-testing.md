@@ -25,7 +25,7 @@ parser strips them.
 `Priority` MUST be one of `must`, `should`, or `may`. The capability also allows a
 `manual` entry for a journey that truly requires the external network, and no row
 here uses it: no cataloged journey depends on a live third-party endpoint, and the
-six that need a server at all need *a* Payload server, which a fixture supplies
+ten that need a server at all need *a* Payload server, which a fixture supplies
 deterministically. A journey nobody has automated yet SHOULD stay in the table with
 an honest priority and a gap note rather than leave the table, which is what makes
 the report show real gaps.
@@ -98,7 +98,7 @@ deviation in [agent-skills.md](./agent-skills.md) rather than left to be found h
 
 ## The Payload fixture contract
 
-Six cataloged journeys need the app to be signed in, and signing in needs a Payload
+Ten cataloged journeys need the app to be signed in, and signing in needs a Payload
 server. That server is **bring-your-own**: no Payload instance, seed script,
 container definition, or compose file lives in this repository, and no npm command
 starts one. A developer running the authenticated flows points the variables below
@@ -107,11 +107,12 @@ omission — keeping a CMS, its database, and a seed script inside a mobile app'
 repository is a second stack to maintain, for a suite that needs a simulator and so
 cannot run in CI either way.
 
-No flow reads these variables today. The six journeys are cataloged as gaps in
-[`e2e/scenarios.md`](../../e2e/scenarios.md) and tracked by
-[#135](https://github.com/axross/nakami/issues/135); the contract is written down
-first so those flows are built against a settled shape rather than each inventing
-one.
+No flow reads these variables today. All ten are cataloged as gaps in
+[`e2e/scenarios.md`](../../e2e/scenarios.md), and the eight a fixture alone unblocks
+are tracked by [#135](https://github.com/axross/nakami/issues/135); the remaining two
+need the run to cut and restore the device's connectivity as well, which no fixture
+supplies. The contract is written down first so those flows are built against a
+settled shape rather than each inventing one.
 
 ### The environment variables an authenticated run reads
 
@@ -158,3 +159,8 @@ A fixture MUST carry all three:
   requests 25 per page (`RECORDS_PAGE_SIZE` in
   `src/collections/helpers/fetch-records.ts`), so asserting that scrolling to the
   end loads more needs at least 26 records in that collection.
+- **A record carrying at least one field the signed-in account may update.** The
+  record detail screen lists whatever a record's own JSON holds, and `id`,
+  `createdAt`, and `updatedAt` are read-only whatever the access report says (see
+  `toRecordFields` in `src/collections/helpers/record-fields.ts`). A collection whose
+  records carry nothing else can show the screen but can never exercise a save.

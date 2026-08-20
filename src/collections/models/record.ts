@@ -4,15 +4,23 @@ import { parseUpdatedAt } from "~/collections/helpers/format-updated-at";
 
 /**
  * one record (document) in a Payload collection, as returned by the `find`
- * endpoint with `depth=0`. the shape is collection-specific and unknown to the
- * app, so only `id` is required (a string or number depending on the DB
- * adapter, normalized to a string, like {@link import("~/auth/models/session").PayloadUser}.id);
+ * endpoint with `depth=0` and, unwrapped, as the whole body of the `findByID`
+ * endpoint (`GET /api/{collection}/{id}`). the shape is collection-specific and
+ * unknown to the app, so only `id` is required (a string or number depending on
+ * the DB adapter, normalized to a string, like {@link import("~/auth/models/session").PayloadUser}.id);
  * every other field is tolerated (kept, via the loose object) so the title
- * heuristic can read whatever title-ish fields the record happens to have.
+ * heuristic can read whatever title-ish fields the record happens to have and
+ * the detail screen can list them all.
+ *
+ * one schema serves both endpoints because the document is the same either way
+ * — they differ in what wraps it, which is what {@link recordPageSchema} adds.
  */
 export const recordSchema = z.looseObject({
 	id: z.union([z.string(), z.number()]).transform(String),
 });
+
+/** one parsed record document (see {@link recordSchema}). */
+export type RecordDocument = z.infer<typeof recordSchema>;
 
 /**
  * `GET /api/{collection}` paginated `find` response. Payload returns rich

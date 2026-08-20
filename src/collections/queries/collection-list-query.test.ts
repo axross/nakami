@@ -9,6 +9,7 @@ import {
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchAccess } from "~/collections/helpers/fetch-access";
+import { getCollectionAccessQueryOptions } from "~/collections/queries/collection-access-query";
 import { getCollectionListQueryOptions } from "./collection-list-query";
 
 jest.mock("~/collections/helpers/fetch-access", () => ({
@@ -43,14 +44,15 @@ describe("getCollectionListQueryOptions", () => {
 		]);
 	});
 
-	it("fetches against the session's server and token, and maps the access map", async () => {
-		jest.mocked(fetchAccess).mockResolvedValue({
+	it("fetches against the session's server and token, caching the access map whole", async () => {
+		const access = {
 			collections: {
 				posts: { read: true },
 				media: { read: false },
 				"payload-preferences": { read: true },
 			},
-		});
+		};
+		jest.mocked(fetchAccess).mockResolvedValue(access);
 
 		const { queryFn } = getCollectionListQueryOptions(SCOPE);
 		if (typeof queryFn !== "function") {
@@ -66,7 +68,35 @@ describe("getCollectionListQueryOptions", () => {
 			"https://cms.example.com",
 			"jwt-token",
 		);
-		expect(result).toEqual([{ slug: "posts", label: "Posts" }]);
+		// what is cached is the response, not the list: the record detail screen
+		// reads the same entry for its per-field entries, which the list drops.
+		expect(result).toEqual(access);
+	});
+
+	// the list is a view of that entry, applied on the way out.
+	it("narrows the cached map to the readable, non-system collections", () => {
+		const { select } = getCollectionListQueryOptions(SCOPE);
+		if (typeof select !== "function") {
+			throw new Error("expected a select");
+		}
+
+		expect(
+			select({
+				collections: {
+					posts: { read: true },
+					media: { read: false },
+					"payload-preferences": { read: true },
+				},
+			}),
+		).toEqual([{ slug: "posts", label: "Posts" }]);
+	});
+
+	// one key, one request: a detail screen opened from the list finds the access
+	// map already cached rather than fetching it a second time.
+	it("shares the access query's own key", () => {
+		expect(getCollectionListQueryOptions(SCOPE).queryKey).toEqual(
+			getCollectionAccessQueryOptions(SCOPE).queryKey,
+		);
 	});
 
 	it("throws without fetching when there is no session", async () => {

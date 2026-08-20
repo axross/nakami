@@ -30,20 +30,24 @@ without losing what a flow has to assert.
 | `collections.list`     | The Collections tab lists the server's readable collections             | collections | should   |
 | `collections.records`  | A collection's records load as a paging card feed                       | collections | should   |
 | `collections.offline`  | Losing the connection states it, and reconnecting loads on its own      | collections | should   |
+| `collections.record`   | A card opens the record, listing every field it carries                 | collections | should   |
+| `collections.record-edit` | Editing a field saves it on blur, and a refusal states why           | collections | should   |
+| `collections.record-offline` | A change made offline is queued and sends itself on reconnect     | collections | should   |
 | `settings.menu`        | The Settings menu shows About and pushes the Licenses screen            | settings    | should   |
 
 ## Journeys
 
-Seven of the ten carry a gap note. Each names what it is waiting on in its own
-terms, and six of the seven wait on the same thing: a session signed in against a
+Ten of the thirteen carry a gap note. Each names what it is waiting on in its own
+terms, and eight of the ten wait on the same thing: a session signed in against a
 Payload fixture, which this suite does not have.
 [docs/conventions/end-to-end-testing.md](../docs/conventions/end-to-end-testing.md)
-states the contract such a fixture satisfies, and those six flows are tracked by
-[#135](https://github.com/axross/nakami/issues/135). The seventh,
-[`collections.offline`](#collectionsoffline), needs a device whose connectivity can
-be cut on top of that fixture, so it is not in that issue's scope. Nothing else
-covers any of these journeys end-to-end in the meantime: the unit suite exercises
-their components in isolation, which is not the same claim.
+states the contract such a fixture satisfies, and those eight flows are tracked by
+[#135](https://github.com/axross/nakami/issues/135). The other two,
+[`collections.offline`](#collectionsoffline) and
+[`collections.record-offline`](#collectionsrecord-offline), need a device whose
+connectivity can be cut on top of that fixture, so neither is in that issue's
+scope. Nothing else covers any of these journeys end-to-end in the meantime: the
+unit suite exercises their components in isolation, which is not the same claim.
 
 ### `app.launch`
 
@@ -112,11 +116,46 @@ Signed in with no connection, opening the Collections tab or a collection states
 that the device is offline, offers nothing to press, and loads on its own once the
 connection returns.
 
-**Gap:** no automated flow asserts this, and it is the one gap a Payload fixture
-alone does not close. The journey is about the connection rather than the server, so
-it needs the run to cut and restore the device's connectivity mid-flow — a control
-the suite does not have today — on top of the signed-in session every other gap
-here waits on.
+**Gap:** no automated flow asserts this, and it is one of the two gaps a Payload
+fixture alone does not close. The journey is about the connection rather than the
+server, so it needs the run to cut and restore the device's connectivity mid-flow —
+a control the suite does not have today — on top of the signed-in session the other
+gaps here wait on.
+
+### `collections.record`
+
+Signed in, tapping a record card opens that record on a screen of its own: one row
+per field in the record's JSON with `id` first, each row naming the Payload field
+and the label derived from it, and carrying either a control matching the value's
+type or a stated reason it cannot be edited.
+
+**Gap:** no automated flow asserts this. What rows the screen draws is whatever a
+Payload fixture's records happen to hold, so there is nothing to assert against
+without one.
+
+### `collections.record-edit`
+
+Signed in on a record, changing a field and leaving its input saves that one
+field, and the row stops being marked unsaved once the server takes it. A save the
+server refuses keeps what was typed in the input and states the server's own
+message beneath that row.
+
+**Gap:** no automated flow asserts this. Beyond a session it needs a fixture record
+holding a field the account may update, and — for the refusal half — a field whose
+validation can be made to fail on demand.
+
+### `collections.record-offline`
+
+Signed in on a record with no connection, editing a field marks the row unsaved
+instead of failing, editing the same field again replaces what is waiting, and
+restoring the connection sends one change carrying the last value without anything
+being pressed.
+
+**Gap:** no automated flow asserts this, and like
+[`collections.offline`](#collectionsoffline) a Payload fixture alone does not close
+it. The journey is about the connection as much as about the server, so it needs
+the run to cut and restore the device's connectivity mid-flow — a control the suite
+does not have today — on top of the signed-in session.
 
 ### `settings.menu`
 

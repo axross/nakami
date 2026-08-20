@@ -117,6 +117,10 @@ const typography = {
 	// machine-readable text: a record id standing in for a missing title, an id
 	// chip, build details.
 	code: { fontFamily: fonts.monospace, fontSize: 14, lineHeight: 22 },
+	// machine-readable text supporting something else: a record field's Payload
+	// name, shown beside the label derived from it. it borrows `caption`'s 18pt
+	// line box, which is what lets the two sit on one shared baseline.
+	codeCaption: { fontFamily: fonts.monospace, fontSize: 12, lineHeight: 18 },
 } as const;
 
 // semantic color roles mirror axross/cunnpe's theme structure

@@ -524,6 +524,70 @@ colours cannot be asserted at all; only the selection can, by spying on
 `useVariants`. Converting a style therefore trades a test that checks what is drawn
 for one that checks what was asked for.
 
+## A screen's loading branch is selected from `isPending`, not `isLoading`
+
+The installed `tanstack-query-development` capability's
+[consuming-queries.md](../../.claude/skills/tanstack-query-development/references/consuming-queries.md)
+states a MUST:
+
+> MUST select the loading branch from `isLoading` and the empty branch from the
+> resolved `data`, so neither becomes unreachable on a gated or offline query.
+
+The same file states the reason twice more — once as "MUST read `isLoading` rather than
+`isPending` for a first-load spinner wherever a query can be disabled or paused", and
+once as a **Major** review check on "`isPending` driving a first-load spinner where the
+query is gated or the app can be offline".
+
+All three of this app's list and detail screens instead branch on `isPending` plus
+`fetchStatus`, in this order:
+
+| Screen | File |
+| --- | --- |
+| Collections list | `src/collections/components/collections-screen/collections-screen.tsx` |
+| Record feed | `src/collections/components/collection-records-screen/collection-records-screen.tsx` |
+| Record detail | `src/collections/components/collection-record-screen/collection-record-screen.tsx` |
+
+```tsx
+if (isPending && fetchStatus === "paused") {
+  // the offline state
+} else if (isPending) {
+  // the skeleton
+}
+```
+
+The empty-branch half of that MUST **is** followed: every one of the three selects it
+from the resolved `data`. Only the loading half departs.
+
+**The paused case is handled, and better than `isLoading` would handle it.** With no
+connection a first fetch pauses rather than failing, so the query sits at `pending` with
+`fetchStatus: "paused"` and nothing on its way. `isLoading` is `isPending && isFetching`,
+so reading it would resolve the never-ending skeleton the rule is written to prevent —
+by rendering nothing at all. These screens render a stated offline surface instead,
+which is what
+[`docs/specs/collections.md`](../specs/collections.md) promises and what the ordering of
+the two branches above exists to produce. Following the rule literally would be a
+regression here rather than a fix.
+
+**The gated case is unreachable, and by a mechanism outside these files.** Each of the
+three queries carries `enabled: session !== null`, so a disabled query would leave
+`isPending` true with `fetchStatus: "idle"` and the skeleton pulsing forever. No path
+reaches it: `src/auth/components/root-navigator/root-navigator.tsx` mounts the `(tabs)`
+group behind `<Stack.Protected guard={status === "authenticated"}>`, and the auth store
+sets `status: "authenticated"` only together with a non-null session. A signed-out app
+does not have these screens mounted, so the gate never closes underneath one that is.
+
+That invariant is the whole of what holds this exception up, and it lives two features
+away from the screens it protects. **A change that mounts any of these screens outside
+that guard — a tab group visible while signed out, a preview of a collection before
+sign-in, a route reachable from the welcome stack — makes the unreachable branch
+reachable, and the skeleton becomes permanent.** Such a change revisits this entry
+rather than working around it: the fix is to select the skeleton from `isLoading` and
+give the gated case a surface of its own, keeping the paused branch ahead of it.
+
+Until then the three screens' branching MUST NOT be raised as a fresh finding, and a
+fourth screen added to this pattern MUST be listed in the table above rather than left
+for the next reader to find.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this

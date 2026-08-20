@@ -39,7 +39,7 @@ function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
  * state, a loading skeleton, a failure-aware error state (permission failures
  * get calm, retry-less copy; connectivity/unexpected failures offer a retry), an
  * empty state, or the paginated card feed — appending the next page on scroll.
- * rows are read-only; browsing into a single record is a follow-up.
+ * each card opens that record's own detail screen.
  */
 export function CollectionRecordsScreen({
 	slug,
@@ -147,7 +147,9 @@ export function CollectionRecordsScreen({
 						}
 					}}
 					onEndReachedThreshold={0.5}
-					renderItem={({ item }) => <CollectionRecordCard record={item} />}
+					renderItem={({ item }) => (
+						<CollectionRecordCard record={item} slug={slug} />
+					)}
 					testID="collection-records-list"
 				/>
 			);
