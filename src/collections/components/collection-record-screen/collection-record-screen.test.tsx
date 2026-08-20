@@ -26,6 +26,7 @@ import { fetchRecord } from "~/collections/helpers/fetch-record";
 import {
 	createPendingWriteQueue,
 	type PendingWrite,
+	type PendingWriteQueue,
 } from "~/collections/helpers/pending-write-queue";
 import type { AccessResponse } from "~/collections/models/collection";
 import { accessResponseSchema } from "~/collections/models/collection";
@@ -109,32 +110,41 @@ let resolveSend: (() => void) | null = null;
  * — the screen's whole write path runs, and this is what it writes into.
  */
 function renderScreen({
+	existingQueue,
 	send,
 	slug = SLUG,
 	recordId = RECORD_ID,
 }: {
+	/**
+	 * a queue built by an earlier render, for the cases about what does and does
+	 * not survive the screen — the real one is mounted on the Collections stack
+	 * and outlives every screen inside it.
+	 */
+	existingQueue?: PendingWriteQueue;
 	send?: (write: PendingWrite) => Promise<void>;
 	slug?: string;
 	recordId?: string;
 } = {}) {
 	const client = createTestQueryClient();
 	activeClient = client;
-	const queue = createPendingWriteQueue({
-		send:
-			send ??
-			(async (write) => {
-				sent.push(write);
-			}),
-		connectivity: {
-			subscribe(onChange) {
-				onChange(onlineManager.isOnline());
+	const queue =
+		existingQueue ??
+		createPendingWriteQueue({
+			send:
+				send ??
+				(async (write) => {
+					sent.push(write);
+				}),
+			connectivity: {
+				subscribe(onChange) {
+					onChange(onlineManager.isOnline());
 
-				return onlineManager.subscribe((isOnline) => {
-					onChange(isOnline);
-				});
+					return onlineManager.subscribe((isOnline) => {
+						onChange(isOnline);
+					});
+				},
 			},
-		},
-	});
+		});
 
 	return Object.assign(
 		render(
@@ -560,6 +570,51 @@ describe("<CollectionRecordScreen>", () => {
 			});
 			expect(getByTestId("record-field-title-input").props.value).toBe("");
 			expect(getByText("Refused")).toBeTruthy();
+		});
+
+		// the queue is mounted on the whole Collections stack, so it outlives any
+		// one record screen. a refusal describes a value that left with the screen
+		// that produced it: keeping it would put a "Refused" marker and a message
+		// about an emptied field over the perfectly good value the reopened row
+		// seeds from the record.
+		it("leaves its refusals behind when the screen is closed and reopened", async () => {
+			const refuse = async () => {
+				throw new PayloadRequestError(
+					"server",
+					"Unexpected response (400).",
+					400,
+					undefined,
+					{
+						message: "The following field is invalid: Title",
+						fieldErrors: [
+							{ path: "title", message: "This field is required." },
+						],
+					},
+				);
+			};
+			const view = await renderLoaded({ send: refuse });
+			const input = view.getByTestId("record-field-title-input");
+
+			fireEvent.changeText(input, "");
+			await act(async () => {
+				fireEvent(input, "blur");
+			});
+			await waitFor(() => {
+				expect(view.getByText("This field is required.")).toBeTruthy();
+			});
+
+			view.unmount();
+
+			const reopened = await renderLoaded({
+				existingQueue: view.queue,
+				send: refuse,
+			});
+
+			expect(reopened.queryByText("This field is required.")).toBeNull();
+			expect(reopened.queryByText("Refused")).toBeNull();
+			expect(reopened.getByTestId("record-field-title-input").props.value).toBe(
+				RECORD.title,
+			);
 		});
 
 		it("falls back to the refusal's summary when it named no field", async () => {

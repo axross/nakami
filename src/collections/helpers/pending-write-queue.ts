@@ -4,10 +4,14 @@ import { createModuleLogger } from "~/core/helpers/logging";
 
 const logger = createModuleLogger("collections/pending-write-queue");
 
-/** the one field of the one record a queued change belongs to. */
-export interface PendingWriteTarget {
+/** the one record a queued change belongs to. */
+export interface PendingWriteRecord {
 	readonly slug: string;
 	readonly recordId: string;
+}
+
+/** the one field of the one record a queued change belongs to. */
+export interface PendingWriteTarget extends PendingWriteRecord {
 	readonly fieldName: string;
 }
 
@@ -66,6 +70,12 @@ export interface PendingWriteQueue {
 	enqueue(write: PendingWrite): Promise<void>;
 	/** sends what is queued, oldest first, for as long as the device is online. */
 	drain(): Promise<void>;
+	/**
+	 * drops the refusals recorded against one record, leaving everything queued
+	 * for it alone. a screen closing calls it: a refusal describes a value that
+	 * left with the input it was typed into, and this queue outlives that input.
+	 */
+	clearRefusals(record: PendingWriteRecord): void;
 	getState(): PendingWriteState;
 	/** subscribes to state changes, returning the unsubscribe. */
 	subscribe(listener: () => void): () => void;
@@ -127,6 +137,11 @@ function describeRefusal(error: unknown, fieldName: string): string {
  * lands in {@link PendingWriteState.refusals} for the row to show, and editing
  * the field again queues a fresh change. a change that fails because the device
  * is unreachable stays queued, and the next connectivity change sends it.
+ *
+ * the two states have different lifetimes, which is the whole reason
+ * {@link PendingWriteQueue.clearRefusals} exists. a queued change is owed to the
+ * server and outlives any screen; a refusal describes what the user typed and
+ * does not.
  *
  * nothing here is a module singleton: a caller builds its own queue and hands
  * it down, which is what lets a test mount one with its own sender and its own
@@ -288,6 +303,24 @@ export function createPendingWriteQueue({
 		return Promise.resolve();
 	}
 
+	function clearRefusals(record: PendingWriteRecord): void {
+		let cleared = false;
+
+		for (const [key, refusal] of refusals) {
+			if (
+				refusal.target.slug === record.slug &&
+				refusal.target.recordId === record.recordId
+			) {
+				refusals.delete(key);
+				cleared = true;
+			}
+		}
+
+		if (cleared) {
+			publish();
+		}
+	}
+
 	const unsubscribe = connectivity.subscribe((online) => {
 		isOnline = online;
 
@@ -299,6 +332,7 @@ export function createPendingWriteQueue({
 	return {
 		enqueue,
 		drain,
+		clearRefusals,
 		getState: () => state,
 		subscribe(listener) {
 			listeners.add(listener);

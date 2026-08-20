@@ -337,6 +337,41 @@ describe("createPendingWriteQueue()", () => {
 		expect(queue.getState()).toEqual({ writes: [], refusals: [] });
 	});
 
+	it("drops one record's refusals on request, and keeps what is still queued", async () => {
+		const connectivity = createFakeConnectivity(true);
+		const send = jest.fn(async () => {
+			throw new PayloadRequestError("server", "Refused.", 400);
+		});
+		const queue = createPendingWriteQueue({
+			send,
+			connectivity: connectivity.source,
+		});
+
+		await queue.enqueue(writeOf("title", "Hello"));
+		await queue.enqueue({
+			slug: "posts",
+			recordId: "b2",
+			fieldName: "title",
+			value: "Elsewhere",
+		});
+		await queue.drain();
+
+		expect(queue.getState().refusals).toHaveLength(2);
+
+		connectivity.set(false);
+		await queue.enqueue(writeOf("views", 3));
+		queue.clearRefusals({ slug: "posts", recordId: "a1" });
+
+		// only the named record's refusals go, and nothing owed to the server does.
+		expect(queue.getState().refusals).toEqual([
+			{
+				target: { slug: "posts", recordId: "b2", fieldName: "title" },
+				message: "Refused.",
+			},
+		]);
+		expect(queue.getState().writes).toEqual([writeOf("views", 3)]);
+	});
+
 	it("keeps a change queued when the device turns out to be unreachable", async () => {
 		const attempted: string[] = [];
 		let isReachable = false;

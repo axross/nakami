@@ -2,7 +2,7 @@ import { onlineManager, useQuery } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { CircleAlert } from "lucide-react-native";
 import type { JSX } from "react";
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useAuthSession } from "~/auth/stores/auth-store";
@@ -107,6 +107,18 @@ export function CollectionRecordScreen({
 		recordId,
 	};
 	const enabled = session !== null && hasTarget;
+
+	// the queue is mounted on the Collections stack and outlives this screen, but
+	// a refusal is about a value that leaves with it: the input that held the
+	// rejected text is gone, and a row reopened from the cached record seeds the
+	// last good value instead. leaving the refusal behind would put "Refused" and
+	// a message about an emptied field over that perfectly valid value. what is
+	// still queued is untouched — it is owed to the server either way.
+	useEffect(() => {
+		return () => {
+			queue.clearRefusals({ slug, recordId });
+		};
+	}, [queue, slug, recordId]);
 
 	const recordQuery = useQuery({
 		...getCollectionRecordQueryOptions(scope),
