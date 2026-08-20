@@ -205,12 +205,20 @@ export function CollectionRecordsScreen({
 			// an errored search shows what failed rather than the matches of the
 			// query before it, which `keepPreviousData` would otherwise leave
 			// standing underneath the failure.
+			//
+			// the matches are deduplicated by id on the way out. a record found by
+			// the id lookup leads the first page, and the field search can return
+			// that same record again on a later page — it is only checked against
+			// the page it was prepended to (see `toRecordPage`). offset pagination
+			// can repeat a record across pages by itself too, when the collection
+			// is written to mid-scroll. neither is worth a request to rule out, and
+			// both draw the same duplicate row.
 			let listed = records;
 			if (isSearching) {
 				listed =
 					matches.isError || matchPages === undefined
 						? []
-						: matchPages.flatMap((page) => page.records);
+						: dedupeById(matchPages.flatMap((page) => page.records));
 			}
 
 			// what the count line reports. a search still in flight says so; one
@@ -229,14 +237,21 @@ export function CollectionRecordsScreen({
 						: { kind: "matches", total };
 			}
 
-			// what stands where the cards would be, in each state a search can leave
-			// the list empty in. it stays `null` for the unfiltered feed, which
-			// reaches this branch with records in hand and can never be empty here.
-			let emptyState: JSX.Element | null = null;
+			// what a search puts where the cards would be, when it has none to show.
+			// each of these takes the rest of the screen below the section rather
+			// than riding inside the list: `MessageState` carries the horizontal
+			// safe-area inset for every call site on the understanding that it is
+			// drawn flush against the screen's edges, so nesting one inside the
+			// feed's already-inset content container would land that inset a gutter
+			// in from the edge it is measured from and draw the card at both
+			// paddings at once. `null` for the unfiltered feed, which reaches this
+			// branch with records in hand.
+			let searchState: JSX.Element | null = null;
 			if (isSearching && matches.isError) {
-				emptyState = loadErrorState(
+				searchState = loadErrorState(
 					matches.error,
 					() => void matches.refetch(),
+					styles.messageState,
 				);
 			} else if (
 				isSearching &&
@@ -245,17 +260,17 @@ export function CollectionRecordsScreen({
 			) {
 				// a search needs the server, so one made with no connection says what
 				// the first load would have said rather than spinning forever.
-				emptyState = offlineState();
+				searchState = offlineState(styles.messageState);
 			} else if (isSearching && matchPages === undefined) {
-				emptyState = (
+				searchState = (
 					<ActivityIndicator
 						color={theme.colors.text.neutral.base}
 						style={styles.searching}
 						testID="collection-records-searching"
 					/>
 				);
-			} else if (isSearching) {
-				emptyState = (
+			} else if (isSearching && listed.length === 0) {
+				searchState = (
 					<CollectionsMessageState
 						action={{
 							label: "Clear search",
@@ -264,6 +279,7 @@ export function CollectionRecordsScreen({
 						}}
 						icon={SearchX}
 						iconColor={theme.colors.text.neutral.base}
+						style={styles.messageState}
 						subtitle={`No records match “${settledQuery}”.`}
 						testID="collection-records-no-matches"
 						title="No matches"
@@ -273,7 +289,8 @@ export function CollectionRecordsScreen({
 
 			// the section is a sibling of the feed rather than its list header,
 			// which is what fixes it under the screen header instead of letting it
-			// scroll away with the first card.
+			// scroll away with the first card. whatever a search has instead of
+			// cards is a sibling of both, for the inset reason above.
 			content = (
 				<>
 					<CollectionRecordsHeader
@@ -283,32 +300,33 @@ export function CollectionRecordsScreen({
 						query={query}
 					/>
 
-					<FlatList
-						contentContainerStyle={styles.list}
-						data={listed}
-						keyExtractor={(record: CollectionRecord) => record.id}
-						ListEmptyComponent={emptyState}
-						ListFooterComponent={
-							active.isFetchingNextPage ? (
-								<ActivityIndicator
-									color={theme.colors.text.neutral.base}
-									style={styles.footer}
-								/>
-							) : null
-						}
-						onEndReached={() => {
-							if (active.hasNextPage && !active.isFetchingNextPage) {
-								void active.fetchNextPage();
+					{searchState ?? (
+						<FlatList
+							contentContainerStyle={styles.list}
+							data={listed}
+							keyExtractor={(record: CollectionRecord) => record.id}
+							ListFooterComponent={
+								active.isFetchingNextPage ? (
+									<ActivityIndicator
+										color={theme.colors.text.neutral.base}
+										style={styles.footer}
+									/>
+								) : null
 							}
-						}}
-						onEndReachedThreshold={0.5}
-						onScroll={handleScroll}
-						renderItem={({ item }) => (
-							<CollectionRecordCard record={item} slug={slug} />
-						)}
-						scrollEventThrottle={16}
-						testID="collection-records-list"
-					/>
+							onEndReached={() => {
+								if (active.hasNextPage && !active.isFetchingNextPage) {
+									void active.fetchNextPage();
+								}
+							}}
+							onEndReachedThreshold={0.5}
+							onScroll={handleScroll}
+							renderItem={({ item }) => (
+								<CollectionRecordCard record={item} slug={slug} />
+							)}
+							scrollEventThrottle={16}
+							testID="collection-records-list"
+						/>
+					)}
 				</>
 			);
 		}
@@ -319,6 +337,19 @@ export function CollectionRecordsScreen({
 			{content}
 		</View>
 	);
+}
+
+/**
+ * the records in order, keeping the first of any id that appears more than
+ * once. see the call site for the two ways a search can produce one.
+ *
+ * the count beside the field is the server's own and is left alone, so a search
+ * that did repeat a record reports one more match than it lists. That is the
+ * lesser of the two: the number is off by one in a case a reader is unlikely to
+ * notice, where the duplicate row is not.
+ */
+function dedupeById(records: readonly CollectionRecord[]): CollectionRecord[] {
+	return [...new Map(records.map((record) => [record.id, record])).values()];
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
@@ -338,9 +369,10 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
-	// the message state claims no space of its own, so a screen-filling one is
-	// wrapped in this. a message drawn inside the list takes only the room its
-	// own padding gives it, and is left unwrapped.
+	// the message state claims no space of its own, so every call site here
+	// supplies the fill — the screen's own terminal states and the search's
+	// alike, since both take the whole surface below whatever chrome is above
+	// them.
 	messageState: {
 		flex: 1,
 	},
@@ -350,8 +382,9 @@ const styles = StyleSheet.create((theme, rt) => ({
 	},
 	// a spinner rather than the card skeleton: the section above it already says
 	// what is being waited on, and a skeleton in the shape of records would
-	// promise matches that may not exist.
+	// promise matches that may not exist. it sits near the top of the room it is
+	// given rather than centred in it, so it appears where the first card would.
 	searching: {
-		paddingVertical: theme.gap.xl,
+		paddingTop: theme.gap.xl,
 	},
 }));

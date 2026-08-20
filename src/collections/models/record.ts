@@ -100,7 +100,13 @@ function toCollectionRecord(
  * the count would otherwise miss.
  *
  * a page carrying an `idMatch` is by definition the first page — a later page
- * would prepend it again — and the records query is what holds it to that.
+ * would prepend it again — and the records query is what holds it to that. The
+ * flip side is that the record is only checked against *this* page: one that the
+ * field search also matches on its own merits, but returns beyond the first
+ * page, is prepended here and returned again later, and counted twice. Ruling
+ * that out would mean holding every page here, so the screen deduplicates the
+ * rows it draws instead and the count keeps the off-by-one — see
+ * `collection-records-screen`.
  */
 export function toRecordPage(
 	response: RecordPageResponse,

@@ -453,6 +453,12 @@ describe("<CollectionRecordsScreen>", () => {
 		expect(screen.getByTestId("collection-records-search")).toBeTruthy();
 		expect(screen.getByText("No matching records")).toBeTruthy();
 
+		// the message stands where the cards would be rather than inside the feed:
+		// `MessageState` carries the horizontal safe-area inset on the
+		// understanding that it meets the screen's own edge, so nesting it in the
+		// list's already-inset content container would draw it at both paddings.
+		expect(screen.queryByTestId("collection-records-list")).toBeNull();
+
 		fireEvent.press(
 			screen.getByTestId("collection-records-clear-search-button"),
 		);
@@ -461,6 +467,73 @@ describe("<CollectionRecordsScreen>", () => {
 			expect(screen.getByText("A field guide")).toBeTruthy();
 		});
 		expect(screen.getByText("1 record")).toBeTruthy();
+	});
+
+	// the id lookup prepends its record to the first page, and the field search
+	// can return that same record again on a later page — it is only checked
+	// against the page it was prepended to. the rows are deduplicated by id, so
+	// the reader never sees the same card twice.
+	it("lists a record once when the id match reappears on a later page", async () => {
+		jest
+			.mocked(fetchRecords)
+			.mockImplementation(
+				async (_serverUrl, _token, _slug, pageParam, term) => {
+					if (term === undefined) {
+						return page({
+							docs: [{ id: "r1", title: "A field guide" }],
+							totalDocs: 1,
+						});
+					}
+
+					return pageParam === 1
+						? page({
+								docs: [{ id: "r5", title: "Another match" }],
+								totalDocs: 2,
+								hasNextPage: true,
+								nextPage: 2,
+							})
+						: page({
+								docs: [{ id: "r9", title: "Found by id" }],
+								totalDocs: 2,
+							});
+				},
+			);
+		jest
+			.mocked(findRecordById)
+			.mockResolvedValue({ id: "r9", title: "Found by id" });
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+
+		await search(screen, "r9");
+
+		await waitFor(() => {
+			expect(screen.getByText("Found by id")).toBeTruthy();
+		});
+
+		// seed the virtualized list's layout/content metrics (no real layout runs
+		// in the test renderer) so scrolling to the bottom computes a distance and
+		// fires onEndReached.
+		const list = screen.getByTestId("collection-records-list");
+		fireEvent(list, "layout", {
+			nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 500 } },
+		});
+		fireEvent(list, "contentSizeChange", 400, 1000);
+		fireEvent.scroll(list, {
+			nativeEvent: {
+				contentOffset: { y: 600 },
+				contentSize: { height: 1000, width: 400 },
+				layoutMeasurement: { height: 500, width: 400 },
+			},
+		});
+
+		await waitFor(() => {
+			expect(screen.getByText("Another match")).toBeTruthy();
+		});
+		// page 2 returned the id-matched record a second time; one card is drawn.
+		expect(screen.getAllByText("Found by id")).toHaveLength(1);
 	});
 
 	it("shows the feed's own failure surface when a search fails", async () => {
@@ -490,6 +563,9 @@ describe("<CollectionRecordsScreen>", () => {
 		// the section stays, so the query that failed can be changed or dropped.
 		expect(screen.getByTestId("collection-records-search")).toBeTruthy();
 		expect(screen.getByTestId("collection-records-retry-button")).toBeTruthy();
+		// and the failure takes the screen below it rather than riding inside the
+		// feed's own padding, for the same reason the no-match surface does.
+		expect(screen.queryByTestId("collection-records-list")).toBeNull();
 	});
 
 	// a stack header and the tab bar clear this screen's vertical edges, so it

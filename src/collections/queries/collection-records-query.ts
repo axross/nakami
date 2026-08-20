@@ -90,29 +90,38 @@ export function getCollectionRecordsInfiniteQueryOptions(
 			// the id lookup is speculative and exact, so it is worth one request on
 			// the first page only: a later page would prepend the same record again,
 			// and a query with a space in it is a phrase rather than an id.
-			const idMatch =
+			const idLookup =
 				search !== undefined &&
 				pageParam === 1 &&
 				!/\s/.test(search.query) &&
 				search.query.length > 0
-					? await findRecordById(
+					? findRecordById(
 							session.serverUrl,
 							session.token,
 							scope.slug,
 							search.query,
 						)
-					: null;
+					: Promise.resolve(null);
 
-			const page =
+			const pageRequest =
 				search !== undefined && !canSearchFields
-					? { docs: [], totalDocs: 0, hasNextPage: false, nextPage: null }
-					: await fetchRecords(
+					? Promise.resolve({
+							docs: [],
+							totalDocs: 0,
+							hasNextPage: false,
+							nextPage: null,
+						})
+					: fetchRecords(
 							session.serverUrl,
 							session.token,
 							scope.slug,
 							pageParam,
 							search,
 						);
+
+			// neither reads the other's result, so a search that also looks like an
+			// id costs the slower of the two round trips rather than their sum.
+			const [page, idMatch] = await Promise.all([pageRequest, idLookup]);
 
 			return toRecordPage(page, idMatch);
 		},
