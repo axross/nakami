@@ -9,9 +9,11 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
  * the whole point of the dialog is that the two read as a matched pair a user
  * weighs against each other rather than as a headline and a disclaimer.
  *
- * `tone` selects the surface and the icon colour. it is never the only cue: the
- * icon and the heading say which block this is on their own, so the pair
- * survives a reader who cannot tell the two surfaces apart.
+ * `tone` selects the surface and the icon colour, and its two values name the
+ * colour role each is actually drawn in — `accent` and `destructive`, the
+ * vocabulary the theme itself uses. it is never the only cue: the icon and the
+ * heading say which block this is on their own, so the pair survives a reader
+ * who cannot tell the two surfaces apart.
  */
 export function CredentialConsentPoint({
 	body,
@@ -25,7 +27,7 @@ export function CredentialConsentPoint({
 		body: string;
 		heading: string;
 		icon: LucideIcon;
-		tone: "neutral" | "destructive";
+		tone: "accent" | "destructive";
 	}
 >): JSX.Element {
 	const { theme } = useUnistyles();
@@ -35,7 +37,7 @@ export function CredentialConsentPoint({
 			{...props}
 			style={[
 				styles.point,
-				tone === "destructive" ? styles.pointDestructive : styles.pointNeutral,
+				tone === "destructive" ? styles.pointDestructive : styles.pointAccent,
 				style,
 			]}
 		>
@@ -53,7 +55,7 @@ export function CredentialConsentPoint({
 						styles.heading,
 						tone === "destructive"
 							? styles.headingDestructive
-							: styles.headingNeutral,
+							: styles.headingAccent,
 					]}
 				>
 					{heading}
@@ -78,11 +80,11 @@ const styles = StyleSheet.create((theme) => ({
 		...theme.typography.caption,
 		fontFamily: theme.typography.heading.fontFamily,
 	},
+	headingAccent: {
+		color: theme.colors.text.accent.base,
+	},
 	headingDestructive: {
 		color: theme.colors.text.destructive.base,
-	},
-	headingNeutral: {
-		color: theme.colors.text.accent.base,
 	},
 	// the icon sits on the first line of the heading rather than centred against
 	// the whole block: the body runs to several lines, and centring would drift
@@ -95,12 +97,12 @@ const styles = StyleSheet.create((theme) => ({
 		flexDirection: "row",
 		padding: theme.gap.sm,
 	},
+	pointAccent: {
+		backgroundColor: theme.colors.surface.accent.base,
+		borderColor: theme.colors.border.accent.subtle,
+	},
 	pointDestructive: {
 		backgroundColor: theme.colors.surface.destructive.base,
 		borderColor: theme.colors.border.destructive.subtle,
-	},
-	pointNeutral: {
-		backgroundColor: theme.colors.surface.accent.base,
-		borderColor: theme.colors.border.accent.subtle,
 	},
 }));

@@ -15,8 +15,20 @@ import { CredentialConsentPoint } from "~/auth/components/credential-consent-dia
  * scrim is a plain `View` rather than a `Pressable`, so a tap outside has
  * nothing to press; and `onRequestClose` — which React Native requires on
  * Android, where it is the hardware and gesture Back — is deliberately a no-op.
- * iOS has no swipe to intercept, because a `transparent` modal presents
- * `overFullScreen` rather than as a sheet.
+ * iOS has no swipe to intercept because swipe-to-dismiss is opt-in there:
+ * `allowSwipeDismissal` is left unset, and React Native only routes the gesture
+ * to `onRequestClose` when it is `true`.
+ *
+ * the two translucent props are what make the scrim reach the screen edges on
+ * Android. a `Modal` opens in its own native window, outside the app's
+ * edge-to-edge theme, so `react-native-edge-to-edge` (1.8.1, pinned) states
+ * that both have to be set for one to draw under the system bars — without
+ * them the bars show through as an unstyled band and the scrim's own
+ * inset-derived padding is measured against a surface that does not reach
+ * them. React Native pairs the two itself, warning that a translucent
+ * navigation bar without a translucent status bar is unsupported, so they are
+ * set together or not at all. Both are Android-only and inert on iOS, which
+ * already covers the whole screen through `overFullScreen`.
  *
  * the body scrolls and the actions sit outside that scroll view, so the two
  * answers stay reachable at the largest system text size — the case where an
@@ -45,12 +57,14 @@ export function CredentialConsentDialog({
 	return (
 		<Modal
 			animationType="fade"
+			navigationBarTranslucent
 			onRequestClose={() => {
 				// intentionally empty: Android's Back must not answer this dialog.
 				// React Native requires the prop there, so refusing to close is
 				// expressed by handling the event and doing nothing rather than by
 				// leaving it off.
 			}}
+			statusBarTranslucent
 			transparent
 			visible
 		>
@@ -76,7 +90,7 @@ export function CredentialConsentDialog({
 							heading="What storing it buys"
 							icon={Clock}
 							testID="credential-consent-benefit"
-							tone="neutral"
+							tone="accent"
 						/>
 
 						<CredentialConsentPoint
@@ -120,8 +134,7 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// text above them rather than as a separate band.
 	actions: {
 		paddingBottom: theme.gap.md,
-		paddingLeft: theme.gap.md,
-		paddingRight: theme.gap.md,
+		paddingHorizontal: theme.gap.md,
 		paddingTop: theme.gap.sm,
 		rowGap: theme.gap.xs,
 	},

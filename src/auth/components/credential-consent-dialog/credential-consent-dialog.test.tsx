@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { StyleSheet } from "react-native";
+import { Modal, StyleSheet } from "react-native";
 import { themes } from "~/unistyles";
 import { CredentialConsentDialog } from "./credential-consent-dialog";
 
@@ -111,6 +111,21 @@ describe("<CredentialConsentDialog>", () => {
 		expect(
 			screen.getByTestId("credential-consent-decline").props.accessibilityState,
 		).toEqual({ disabled: true });
+	});
+
+	// a `Modal` opens in its own native window on Android, outside the app's
+	// edge-to-edge theme, and `react-native-edge-to-edge` requires both props for
+	// one to draw under the system bars. React Native pairs them itself — a
+	// translucent navigation bar without a translucent status bar is unsupported
+	// — so this asserts both, and dropping either would leave the bars showing
+	// through beside the inset-derived padding asserted below.
+	it("draws under Android's system bars", () => {
+		renderDialog();
+
+		const modal = screen.UNSAFE_getByType(Modal);
+
+		expect(modal.props.statusBarTranslucent).toBe(true);
+		expect(modal.props.navigationBarTranslucent).toBe(true);
 	});
 
 	// the dialog covers the screen edge to edge, under the system bars with it,
