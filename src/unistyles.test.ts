@@ -96,6 +96,21 @@ describe("themes", () => {
 		});
 	});
 
+	// a record field row draws its label and its Payload field name on one line,
+	// which lines up only while the two roles share a line box. nothing at a use
+	// site catches a drift: each style spreads a role whole, so a retuned role
+	// still renders — just off the baseline it was meant to share.
+	it.each(["light", "dark"] as const)(
+		"gives caption and codeCaption a shared 18pt line box in %s",
+		(name) => {
+			const { caption, codeCaption } = themes[name].typography;
+
+			expect(caption.lineHeight).toBe(18);
+			expect(codeCaption.lineHeight).toBe(18);
+			expect(codeCaption.fontFamily).toBe("JetBrainsMono-Regular");
+		},
+	);
+
 	// a record card's height is fixed by RECORD_CARD_LINE (22), which the title
 	// row reaches from its own role rather than from an override at the use site.
 	it("gives heading, body, and code the record card's 22pt line box", () => {
