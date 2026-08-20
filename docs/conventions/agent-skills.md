@@ -207,7 +207,7 @@ finding raised anyway costs a review round to answer.
 The installed `react-component-styling` capability requires `style` on every
 mobile-native component that renders a styled root, and
 `src/collections/components/collection-list-item/collection-list-item.tsx` renders one —
-the `Pressable` inside `CollectionRow`. It accepts every other prop that root takes, and
+the `Pressable` inside `CollectionCard`. It accepts every other prop that root takes, and
 omits `style` from its published type on purpose.
 
 The cause is in the platform rather than in the component. `Link asChild` slots its
@@ -221,7 +221,7 @@ here would type-check and not work — the exact defect the props-and-spread con
 issue #69 exists to remove, so publishing one to satisfy the rule would defeat the rule's
 own purpose.
 
-A row is therefore sized and placed from the list's `contentContainerStyle`. Any other
+A card is therefore spaced and inset from the list's `contentContainerStyle`. Any other
 component this repository slots through `Link asChild` inherits the same constraint;
 one that must take a `style` needs a different navigation shape — `onPress` with
 `router.push`, as `WelcomeScreen`'s button already uses for an unrelated `Link asChild`
@@ -458,7 +458,7 @@ rule's first clause is satisfied and only its own comment records why `pressed`
 stays outside the variant groups.
 
 Two neighbouring styles look similar and are **not** deviations:
-`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:123` both
+`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:125` both
 take a width, which the same rule's next clause requires stay a dynamic function.
 
 All three convert the moment Unistyles offers a press state a component body can

@@ -70,11 +70,13 @@ export function CollectionListSkeleton({
 			{...props}
 			style={[styles.feed, style]}
 		>
-			{/* each placeholder is hooked, not just the feed: what a guard has to
-			    be able to read is the card's own geometry, which is what has to
-			    match the loaded item's or the list reflows when it arrives. */}
+			{/* deliberately unhooked, as the records skeleton's placeholders are:
+			    this project's e2e runner matches an identifier flatly across the
+			    whole screen, so one hook repeated across six siblings would not
+			    be the globally unique hook it needs. a test reaches a card by its
+			    shape instead — see `subtreeStyles`. */}
 			{CARD_WIDTHS.map((width) => (
-				<View key={width} style={styles.card} testID="collections-loading-card">
+				<View key={width} style={styles.card}>
 					<Animated.View style={[styles.mark, pulse]} />
 					<Animated.View style={[styles.name(width), pulse]} />
 				</View>

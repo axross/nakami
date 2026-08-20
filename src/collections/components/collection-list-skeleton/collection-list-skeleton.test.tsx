@@ -3,6 +3,7 @@ import { render } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import { CollectionListItem } from "~/collections/components/collection-list-item/collection-list-item";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
+import { subtreeStyles } from "~/common/test-helpers/subtree-styles";
 import { themes } from "~/unistyles";
 import { CollectionListSkeleton } from "./collection-list-skeleton";
 
@@ -111,11 +112,14 @@ describe("<CollectionListSkeleton>", () => {
 			{ initialUrl: "/collections" },
 		);
 
-		expect(
-			geometryOf(
-				skeleton.getAllByTestId("collections-loading-card")[0]?.props.style,
-			),
-		).toEqual(
+		// the placeholder carries no hook of its own, so it is reached by the one
+		// property only a card has in this subtree — the feed above it lays out
+		// no row, and the mark and name bars below it are plain blocks.
+		const placeholder = subtreeStyles(
+			skeleton.getByTestId("collections-loading"),
+		).find((style) => style.flexDirection === "row");
+
+		expect(geometryOf(placeholder)).toEqual(
 			geometryOf(
 				loaded.getByTestId("collection-list-item-blog-posts").props.style,
 			),
