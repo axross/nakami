@@ -16,8 +16,7 @@ import {
 	type PendingWriteQueue,
 	type PendingWriteState,
 } from "~/collections/helpers/pending-write-queue";
-import { updateRecordField } from "~/collections/helpers/update-record-field";
-import { setCachedRecordField } from "~/collections/queries/collection-record-query";
+import { getUpdateRecordFieldMutationOptions } from "~/collections/mutations/update-record-field-mutation";
 import { createModuleLogger } from "~/core/helpers/logging";
 
 const logger = createModuleLogger("collections/pending-write-provider");
@@ -29,38 +28,41 @@ async function sendRecordFieldWrite(
 	write: PendingWrite,
 ): Promise<void> {
 	// the queue holds no hooks and outlives any one screen: read the session
-	// imperatively, at the moment the change is actually sent.
+	// imperatively, at the moment the change is actually sent. only the tenant
+	// the write belongs to is taken from here — the URL and token the request
+	// goes out with are read again inside the mutation, so a drain long after
+	// the blur still uses the session the app holds then.
 	const session = useAuthStore.getState().session;
 
 	if (session === null) {
 		throw new Error("Cannot save a field without a session.");
 	}
 
-	await updateRecordField(
-		session.serverUrl,
-		session.token,
-		write.slug,
-		write.recordId,
-		write.fieldName,
-		write.value,
-	);
-
-	// the change has reached the server, so the cached record is now the stale
-	// copy. only the saved field moves, and nothing is invalidated — see
-	// `setCachedRecordField` for why a refetch is the one thing a per-field save
-	// must not trigger. it runs here because the queue is the only thing that
-	// sends: a change made offline reaches the server from a drain, long after
-	// the blur that queued it returned.
-	setCachedRecordField(
-		queryClient,
-		{
-			userId: session.user.id,
-			slug: write.slug,
-			recordId: write.recordId,
-		},
-		write.fieldName,
-		write.value,
-	);
+	// the write goes through the record-field mutation rather than straight to
+	// the transport helper, because a server write belongs to the server-state
+	// layer — docs/conventions/server-state.md, which adopts the installed
+	// capability's rule whole. it is built against the mutation cache instead of
+	// observed by `useMutation` because the queue is what sends: the row that
+	// queued the change has usually stopped caring by the time a drain gets to
+	// it. the mutation is unobserved, so it is collected once it settles.
+	//
+	// the cached record moves from the mutation's own `onSuccess`, not from
+	// here, which is what keeps the cache patch attached to the write rather
+	// than to whichever caller happened to fire it.
+	await queryClient
+		.getMutationCache()
+		.build(
+			queryClient,
+			getUpdateRecordFieldMutationOptions(
+				{
+					userId: session.user.id,
+					slug: write.slug,
+					recordId: write.recordId,
+				},
+				queryClient,
+			),
+		)
+		.execute({ fieldName: write.fieldName, value: write.value });
 }
 
 /**
