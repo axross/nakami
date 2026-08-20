@@ -24,11 +24,18 @@ export interface CollectionRecordsScope {
 /**
  * an unfiltered feed's key: the REST path beneath the session root.
  *
- * a search hangs one more segment off it, and that segment is an **object**
- * rather than the query text. `describeQueryKey` writes a string segment into a
- * failure report verbatim and reduces anything else to `?`, so this is what
- * keeps what someone typed — which can be anything, a record id included — out
- * of the error tracker while still giving each query its own cache entry.
+ * a search hangs one more segment off it, carrying **both** halves of what the
+ * server is asked — the text, and the fields it is looked for in. The fields
+ * belong there because they change the answer and are not constant for a
+ * collection: they are read off the unfiltered feed's first page, so a page
+ * that comes back different after a refetch yields a different set, and a key
+ * holding only the text would serve that new search the old set's results.
+ *
+ * that segment is an **object** rather than a string, which is the second thing
+ * it is for. `describeQueryKey` writes a string segment into a failure report
+ * verbatim and reduces anything else to `?`, so this is what keeps what someone
+ * typed — which can be anything, a record id included — out of the error
+ * tracker while still giving each query its own cache entry.
  */
 function recordsQueryKey(scope: CollectionRecordsScope) {
 	const root = [
@@ -40,7 +47,10 @@ function recordsQueryKey(scope: CollectionRecordsScope) {
 
 	return scope.search === undefined
 		? root
-		: ([...root, { search: scope.search.query }] as const);
+		: ([
+				...root,
+				{ search: scope.search.query, fields: scope.search.fields },
+			] as const);
 }
 
 /**

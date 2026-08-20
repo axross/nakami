@@ -131,8 +131,6 @@ const styles = StyleSheet.create((theme, rt) => ({
 	body: {
 		rowGap: theme.gap.xs,
 		overflow: "hidden",
-		paddingStart: Math.max(rt.insets.left, theme.gap.md),
-		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	// the same caption role and muted ink the count line carried when it was a
 	// bare header above the feed; only what encloses it has changed.
@@ -145,7 +143,16 @@ const styles = StyleSheet.create((theme, rt) => ({
 	// the screen header, so its only edge is the one facing the feed, and a
 	// corner anywhere would read as a card that had come loose from it. the fill
 	// is the elevated one the stack header itself takes, for the same reason.
+	//
+	// this is the surface that spans the screen, so the horizontal safe-area
+	// inset is its own rather than the feed's — floored against the same gutter
+	// the cards below already sit in, per docs/conventions/safe-areas.md. it
+	// belongs here rather than on the animated body inside it, because this is
+	// the box that actually meets the screen's edges. written as longhands, as
+	// that document requires of an edge an inset applies to.
 	section: {
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderBottomColor: theme.colors.border.neutral.subtle,
 		borderBottomWidth: theme.borderWidth.hairline,

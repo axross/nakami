@@ -132,13 +132,31 @@ describe("getCollectionRecordsInfiniteQueryOptions", () => {
 			"collections",
 			"posts",
 			"records",
-			{ search: "release" },
+			{ search: "release", fields: ["title"] },
 		]);
 		// what a failed query would report: the resource, and nothing a reader
 		// typed into the field.
 		expect(describeQueryKey(queryKey)).toBe(
 			"users/*/collections/posts/records/?",
 		);
+	});
+
+	// the searched fields are read off the unfiltered feed's own first page, so
+	// they are not constant for a collection: a page that comes back different
+	// yields a different set, and the same text asked of a different set is a
+	// different question. a key holding only the text would answer the second
+	// from the first's cache entry.
+	it("separates two searches for the same text over different fields", () => {
+		const overTitle = getCollectionRecordsInfiniteQueryOptions({
+			...SCOPE,
+			search: { query: "release", fields: ["title"] },
+		}).queryKey;
+		const overTitleAndName = getCollectionRecordsInfiniteQueryOptions({
+			...SCOPE,
+			search: { query: "release", fields: ["title", "name"] },
+		}).queryKey;
+
+		expect(overTitle).not.toEqual(overTitleAndName);
 	});
 
 	it("asks the server for the search, and merges an id match into the first page", async () => {

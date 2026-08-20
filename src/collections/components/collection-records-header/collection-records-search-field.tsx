@@ -75,6 +75,11 @@ export function CollectionRecordsSearchField({
 				<Pressable
 					accessibilityLabel="Clear search"
 					accessibilityRole="button"
+					// the drawn control is narrower than a finger: 32pt against the
+					// 44pt/48dp floor, which the row's own height satisfies on the long
+					// side only. `hitSlop` widens what answers a tap without widening
+					// the mark, the way the sign-in collection field's edit button does.
+					hitSlop={8}
 					onPress={() => onChangeQuery("")}
 					style={({ pressed }) => styles.clear(pressed)}
 					testID={`${testID}-clear`}
@@ -95,7 +100,10 @@ const styles = StyleSheet.create((theme) => ({
 		justifyContent: "center",
 		// the glyph is 18pt and the row is {@link SEARCH_FIELD_HEIGHT} tall, so the
 		// control stretches to the row's full height and takes a width of its own:
-		// the touch target is the area around the mark rather than the mark itself.
+		// the pressable area is the box around the mark rather than the mark itself.
+		// that box is still under the touch-target floor on its short side, which is
+		// what the `hitSlop` above is for — the drawn width stays 32pt so the mark
+		// sits at the field's end rather than pushing the text away from it.
 		alignSelf: "stretch",
 		width: 32,
 		opacity: pressed ? 0.6 : 1,

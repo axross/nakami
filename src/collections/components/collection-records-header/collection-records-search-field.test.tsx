@@ -57,6 +57,22 @@ describe("<CollectionRecordsSearchField>", () => {
 		expect(onChangeQuery).toHaveBeenCalledWith("");
 	});
 
+	// the drawn box is 32pt wide against a 44pt/48dp floor, which the row's own
+	// height meets on the long side only. what closes the short side is the hit
+	// slop, so it is pinned rather than left to be tidied away as decoration.
+	it("widens what answers a tap beyond the mark it draws", () => {
+		const { getByTestId } = render(
+			<CollectionRecordsSearchField
+				onChangeQuery={jest.fn()}
+				query="release"
+			/>,
+		);
+
+		expect(getByTestId("collection-records-search-clear").props.hitSlop).toBe(
+			8,
+		);
+	});
+
 	// a component that hard-codes its own hook cannot be used twice on one screen
 	// and told apart, so the default has to be a default rather than a fixture.
 	it("lets the caller override the test hook", () => {

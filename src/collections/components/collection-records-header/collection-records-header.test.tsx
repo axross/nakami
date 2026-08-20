@@ -1,5 +1,7 @@
 import { describe, expect, it, jest } from "@jest/globals";
 import { fireEvent, render } from "@testing-library/react-native";
+import { resolveStyle } from "~/common/test-helpers/resolve-style";
+import { themes } from "~/unistyles";
 import { CollectionRecordsHeader } from "./collection-records-header";
 
 // the section animates its own height, which pulls in react-native-reanimated
@@ -69,6 +71,29 @@ describe("<CollectionRecordsHeader>", () => {
 		);
 
 		expect(onChangeQuery).toHaveBeenCalledWith("release");
+	});
+
+	// this section spans the screen rather than sitting inside the feed's gutter,
+	// so the horizontal safe-area inset is its own rather than the cards'.
+	// Unistyles' jest mock resolves every stylesheet with zero insets, so this
+	// assertion stands in for a device reporting none: the gutter the cards below
+	// already use has to survive, rather than the edge collapsing to the raw
+	// inset and putting the field hard against the screen.
+	it("keeps the feed's own gutter when the runtime reports no insets", () => {
+		const { getByTestId } = render(
+			<CollectionRecordsHeader
+				count={{ kind: "all", total: 128 }}
+				onChangeQuery={jest.fn()}
+				query=""
+			/>,
+		);
+
+		const section = resolveStyle(
+			getByTestId("collection-records-header").props.style,
+		);
+
+		expect(section.paddingStart).toBe(themes.light.gap.md);
+		expect(section.paddingEnd).toBe(themes.light.gap.md);
 	});
 
 	it("passes the query through to the field", () => {

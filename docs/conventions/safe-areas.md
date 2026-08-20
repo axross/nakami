@@ -96,15 +96,21 @@ reporting zero insets renders exactly as it did before this convention existed:
 | `collections-screen` + `collection-list-skeleton`           | `theme.gap.md`       |
 | `collection-records-screen` + `collection-records-skeleton` | `theme.gap.md`       |
 | `collection-record-screen` + `collection-record-skeleton`   | `theme.gap.md`       |
+| `collection-records-header`                                 | `theme.gap.md`       |
 | `collection-record-offline-notice`                          | `theme.gap.md`       |
 | `licenses-screen` root                                      | `theme.gap.lg`       |
 | `settings-screen` content container                         | nothing — see below  |
 
-`collection-record-offline-notice` is the one row above that is not a screen or a
-placeholder for one. It is the band the record detail screen draws above its fields
-while the device is offline, and it spans the screen rather than sitting inside the
-fields' gutter — so it carries the horizontal pair itself, floored against the same
-value the fields it sits above use.
+Two rows above are neither a screen nor a placeholder for one, and both are there for
+the same reason: a band that spans the screen carries the horizontal pair itself rather
+than inheriting the gutter of the list beside it.
+`collection-record-offline-notice` is the band the record detail screen draws above its
+fields while the device is offline. `collection-records-header` is the search section
+fixed beneath the record feed's stack header — it meets the screen's edges rather than
+sitting inside the cards' gutter, so it floors against the same value those cards use.
+On that section the pair sits on the outer box that spans the screen, not on the
+animated body inside it that shrinks as the feed is scrolled: the inset belongs to
+whichever box actually reaches the edge.
 
 A new surface takes the gutter it already had rather than inventing one, so adding
 clearance never doubles as a redesign.
