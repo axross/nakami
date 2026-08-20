@@ -44,7 +44,10 @@ async function sendRecordFieldWrite(
 	// capability's rule whole. it is built against the mutation cache instead of
 	// observed by `useMutation` because the queue is what sends: the row that
 	// queued the change has usually stopped caring by the time a drain gets to
-	// it. the mutation is unobserved, so it is collected once it settles.
+	// it. nothing observes the mutation, so the collection timer armed when it
+	// was built is the only one it gets — `gcTime`, five minutes by default,
+	// counted from the build rather than from the send — and it drops out of
+	// the cache the first time that elapses on a mutation no longer pending.
 	//
 	// the cached record moves from the mutation's own `onSuccess`, not from
 	// here, which is what keeps the cache patch attached to the write rather
