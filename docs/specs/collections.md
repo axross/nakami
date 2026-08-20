@@ -177,8 +177,14 @@ width they took is the value's and is different every time. Nothing is lost by
 a reader who has not learned them: tapping the mark opens the sentence in a
 bubble anchored to it, over a layer that closes it again on the next tap
 anywhere. The bubble opens below the mark where the screen has room beneath it
-and above it where it does not, and it never runs off either side. One is open
-at a time, and tapping a second mark moves it rather than stacking another.
+and above it where it does not, and it never runs off either side.
+
+Exactly one bubble is on screen at any moment, and the layer is what guarantees
+it rather than any coordination between the marks. While a bubble is open that
+layer covers the screen, so no mark is reachable — a tap aimed at a second mark
+closes the open bubble instead, and opening the second one is the tap after
+that. Two bubbles therefore cannot stack, and moving between two marks costs two
+taps rather than one.
 
 The sentence is also what a screen reader announces — from the mark itself, and
 alongside the value on the value's own announcement — so it is heard without

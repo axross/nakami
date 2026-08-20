@@ -114,7 +114,10 @@ export function CollectionRecordFieldTooltip({
 				hitSlop={theme.gap.xs}
 				onPress={open}
 				ref={triggerRef}
-				style={styles.trigger}
+				style={({ pressed }) => [
+					styles.trigger,
+					pressed ? styles.triggerPressed : null,
+				]}
 				testID={testID}
 			>
 				{children}
@@ -225,5 +228,14 @@ const styles = StyleSheet.create((theme) => ({
 		padding: theme.gap.sm,
 		margin: -theme.gap.sm,
 		flexShrink: 0,
+	},
+	// the codebase's standard pressed-opacity dip, and the whole of this mark's
+	// press feedback: it is icon-only and has no fill or border to tint. a
+	// separate style selected in the render prop rather than a dynamic-function
+	// argument, so this stylesheet adds no row to the `pressed`-as-argument table
+	// in docs/conventions/agent-skills.md — the same shape
+	// `setting-menu-group-item.tsx` uses.
+	triggerPressed: {
+		opacity: 0.6,
 	},
 }));
