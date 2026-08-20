@@ -45,9 +45,9 @@ async function sendRecordFieldWrite(
 	// the change has reached the server, so the cached record is now the stale
 	// copy. only the saved field moves, and nothing is invalidated — see
 	// `setCachedRecordField` for why a refetch is the one thing a per-field save
-	// must not trigger. this runs here rather than only in the update mutation
-	// because the queue is what actually sends: a change made offline reaches the
-	// server from a drain, long after any mutation the blur could have fired.
+	// must not trigger. it runs here because the queue is the only thing that
+	// sends: a change made offline reaches the server from a drain, long after
+	// the blur that queued it returned.
 	setCachedRecordField(
 		queryClient,
 		{

@@ -179,8 +179,8 @@ describe("<PendingWriteProvider>", () => {
 	});
 
 	// the queue the provider builds is the one that actually sends — a change
-	// made offline reaches the server from a drain, long after any mutation a
-	// blur could have fired — so the cached record has to move from here.
+	// made offline reaches the server from a drain, long after the blur that
+	// queued it returned — so the cached record has to move from here.
 	describe("the queue it builds for itself", () => {
 		const SCOPE = { userId: "user-1", slug: "posts", recordId: "a1" };
 		const { queryKey } = getCollectionRecordQueryOptions(SCOPE);
