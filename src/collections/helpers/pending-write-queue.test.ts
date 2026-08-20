@@ -254,6 +254,10 @@ describe("createPendingWriteQueue()", () => {
 				{
 					target: { slug: "posts", recordId: "a1", fieldName: "title" },
 					message: "Unexpected response (400).",
+					// the refused value is kept beside the message: the editor that
+					// held it may already have closed, and it is what a correction
+					// starts from.
+					value: "Hello",
 				},
 			],
 		});
@@ -367,6 +371,7 @@ describe("createPendingWriteQueue()", () => {
 			{
 				target: { slug: "posts", recordId: "b2", fieldName: "title" },
 				message: "Refused.",
+				value: "Elsewhere",
 			},
 		]);
 		expect(queue.getState().writes).toEqual([writeOf("views", 3)]);

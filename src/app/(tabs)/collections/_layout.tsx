@@ -30,7 +30,30 @@ export default function CollectionsLayout(): JSX.Element {
 			>
 				<Stack.Screen name="index" options={{ title: "Collections" }} />
 				<Stack.Screen name="[slug]/index" />
-				<Stack.Screen name="[slug]/[recordId]" />
+				<Stack.Screen name="[slug]/[recordId]/index" />
+				{/* the field editor is a sheet over the record rather than another
+				    card on the stack: the record stays visible above it, which is
+				    what says the edit belongs to the record still on screen.
+
+				    it draws its own header inside the sheet — Cancel, the field's
+				    label, Save — so the navigator's is hidden rather than left to
+				    repeat the label above a second one. `gestureEnabled` is left to
+				    the screen, which turns the drag off while there is an unsaved
+				    edit to lose; see `useDiscardGuard` there for why that is the
+				    mechanism rather than a prevented dismissal. */}
+				<Stack.Screen
+					name="[slug]/[recordId]/[fieldName]"
+					options={{
+						headerShown: false,
+						presentation: "formSheet",
+						// one detent rather than a ladder: there is one thing on this
+						// sheet and it wants the room, and the fraction is what leaves
+						// the record recognisable above it.
+						sheetAllowedDetents: [0.85],
+						sheetCornerRadius: theme.radius.lg,
+						sheetGrabberVisible: true,
+					}}
+				/>
 			</Stack>
 		</PendingWriteProvider>
 	);

@@ -132,10 +132,20 @@ losing a word of what the field means.
 ## Editing a field
 
 Which control a row carries follows the type of the value it holds, the REST API
-reporting no field type either: a string takes a text input, a number a numeric
-one, `true` or `false` a switch, and an array or object a raw-JSON editor a few
-lines tall, opened on that value pretty-printed. Each opens on what the record
-holds today.
+reporting no field type either: a single-line string takes a text input, a
+number a numeric one, and `true` or `false` a switch, each opening on what the
+record holds today. A value that does not fit a line — a string containing a
+newline, or an array or object shown as raw JSON — takes no input at all. It
+shows a three-line preview of the value instead, and is edited in [a screen of
+its own](#editing-a-field-in-its-own-screen).
+
+Payload's `textarea` and its `text` are the same `string` over the wire, so
+"does not fit a line" is inferred from the value: **a string is multi-line when,
+and only when, it contains a newline**. Two consequences follow and are accepted
+rather than worked around. A long single-line description stays a one-line
+input, and a multi-line value whose newlines are all deleted becomes a one-line
+input once that save lands. The row's shape follows the record's stored value,
+so it never changes shape while it is being edited.
 
 A row is read-only for one of four reasons, and states which one — a disabled
 control would say only that something is wrong, where these are four different
@@ -163,17 +173,52 @@ the reason at the end of the same surface: `createdAt` and `updatedAt` read as
 short dates the way a card's update label does, a Rich Text field reads as `Rich
 Text` rather than as its markup, and a field holding `null` reads as an em dash.
 
+## Editing a field in its own screen
+
+A field whose value does not fit a line is edited in a sheet that opens over the
+record, keeping the record recognisable behind it rather than replacing it. The
+row's three-line box is what opens it: a button rather than an input, which is
+what it announces itself as, so nobody is invited to type into a preview. A
+value longer than three lines is cut off at the third — the box is where a value
+is recognised, not where it is read — and a field holding nothing says `Empty`
+rather than showing a bare frame.
+
+The sheet carries the field's label, its Payload name, an editing area as tall
+as the sheet allows, and two controls: Cancel and Save. It opens on the value
+the row was previewing, which is not always the record's own — see [A refused
+save](#a-refused-save).
+
+Save is the only thing that commits. Unlike every control on the record screen
+this one does **not** save when the editing area loses focus: the keyboard
+closing is not the user saying they are finished, and treating it as such would
+queue a change nobody asked for. Save with unchanged text queues nothing, the
+same rule a row's blur follows. Save with raw JSON that does not parse queues
+nothing either, and the sheet stays open with the text still in it and the
+problem stated beneath — the value is not sent, for the reason [Saving a
+change](#saving-a-change) gives.
+
+Cancel discards, and asks first whenever there is something to lose: an edit
+that changed nothing closes silently, and one that changed something asks
+whether to discard it. The platform's own back control takes the same path. The
+drag that dismisses a sheet is turned off for exactly as long as there is an
+unsaved edit, so no dismissal can discard one silently — the sheet holds still
+instead of asking, in the way a sheet with unsaved content does.
+
+A field's editor is addressable, so a link can open one. A link naming a field
+the record does not carry, one that cannot be edited, or one the row edits in
+place states that it cannot be edited here and offers only a way back.
+
 ## Saving a change
 
-A text, numeric, or raw-JSON field saves when its input loses focus. A switch
+A single-line text or numeric field saves when its input loses focus. A switch
 saves the moment it is moved, there being no later point at which a switch is
-finished with. A save carries the one field that changed and nothing else, which
+finished with. A field edited in its own screen saves when Save is pressed. A save carries the one field that changed and nothing else, which
 is what keeps it from reverting another account's edit elsewhere in the record,
 or clobbering a Rich Text field this app cannot even draw.
 
-Leaving an input that was not changed sends nothing. Neither does one holding
-text the app cannot read back into a value — an emptied or non-numeric numeric
-input, or raw JSON that does not parse. The server takes a value of the wrong
+Leaving an input that was not changed sends nothing, and neither does a Save
+that changed nothing. Neither does text the app cannot read back into a value —
+an emptied or non-numeric numeric input, or raw JSON that does not parse. The server takes a value of the wrong
 type without complaint and stores `null` in its place, so a value the app cannot
 read is held back rather than sent and quietly lost.
 
@@ -202,6 +247,15 @@ saved yet.
 
 A refused change is not sent again by itself. Editing the field and leaving it
 again clears the refusal and queues a fresh change.
+
+The refused **value** is kept as well as the message, and it is what the row
+previews and what the field's editor reopens on. A field edited in its own
+screen has no input left holding the rejected text once that screen closes, and
+the record's own value is the one the refused edit was meant to replace —
+seeding from it would silently discard what the user wrote and leave the
+refusal pinned over a value nothing is wrong with. So what a row shows for a
+field, and what its editor opens on, is the refused value if there is one, else
+the value still queued, else the record's own.
 
 A refusal is the server having read the value and declined it. A save that never
 got that far is not one, and is not shown as one: a server that could not be

@@ -28,6 +28,18 @@ export interface RefusedWrite {
 	 * that field where it named one, its summary where it did not.
 	 */
 	readonly message: string;
+	/**
+	 * the value the server refused, kept so it can be corrected rather than
+	 * retyped.
+	 *
+	 * an inline input holds its own refused text and needs nothing from here.
+	 * A field edited in the dialog does: the input that held the text closed with
+	 * the dialog, and the record's own value — the only other thing a reopened
+	 * dialog could seed from — is the value that was there *before* the refused
+	 * edit. seeding from that would silently discard what the user wrote and
+	 * leave a refusal message pinned over a value nothing is wrong with.
+	 */
+	readonly value: unknown;
 }
 
 /** everything a screen reads off the queue, as one immutable snapshot. */
@@ -271,6 +283,7 @@ export function createPendingWriteQueue({
 						refusals.set(key, {
 							target: toTarget(write),
 							message: describeRefusal(error, write.fieldName),
+							value: write.value,
 						});
 					}
 				}

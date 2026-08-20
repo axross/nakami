@@ -4,6 +4,7 @@ import {
 } from "~/collections/helpers/format-updated-at";
 import type {
 	RecordField,
+	RecordFieldKind,
 	RecordFieldReadOnlyReason,
 } from "~/collections/helpers/record-fields";
 
@@ -90,6 +91,20 @@ export function toJsonText(value: unknown): string {
 }
 
 /**
+ * the text an editor opens with, for a value that is not necessarily the one
+ * the record carries. the dialog editor seeds from a value that may be still
+ * queued or already refused, and the row's preview shows that same value, so
+ * both take the kind and the value rather than the field.
+ */
+export function toEditorText(kind: RecordFieldKind, value: unknown): string {
+	if (kind === "json") {
+		return toJsonText(value);
+	}
+
+	return value === null || value === undefined ? "" : String(value);
+}
+
+/**
  * the text an editable field's input opens with. it is the value as the user
  * will edit it — a number as its digits, an array or object as the JSON its
  * editor round-trips — so what is typed and what was loaded are the same kind
@@ -99,13 +114,7 @@ export function toJsonText(value: unknown): string {
  * value itself.
  */
 export function toEditableText(field: RecordField): string {
-	if (field.kind === "json") {
-		return toJsonText(field.value);
-	}
-
-	return field.value === null || field.value === undefined
-		? ""
-		: String(field.value);
+	return toEditorText(field.kind, field.value);
 }
 
 /** what a boolean row shows beside its switch. */
@@ -126,11 +135,11 @@ export function describeBoolean(value: unknown): string {
  * case — there is no number in it to send — while an emptied text input is an
  * ordinary edit that clears the field.
  */
-export function parseEditedText(
-	field: RecordField,
+export function parseEditorText(
+	kind: RecordFieldKind,
 	text: string,
 ): { readonly value: unknown } | null {
-	if (field.kind === "json") {
+	if (kind === "json") {
 		try {
 			return { value: JSON.parse(text) as unknown };
 		} catch {
@@ -138,13 +147,21 @@ export function parseEditedText(
 		}
 	}
 
-	if (field.kind === "number") {
+	if (kind === "number") {
 		const value = Number(text);
 
 		return text.trim().length > 0 && Number.isFinite(value) ? { value } : null;
 	}
 
 	return { value: text };
+}
+
+/** {@link parseEditorText} for a field whose own value is what was edited. */
+export function parseEditedText(
+	field: RecordField,
+	text: string,
+): { readonly value: unknown } | null {
+	return parseEditorText(field.kind, text);
 }
 
 /**

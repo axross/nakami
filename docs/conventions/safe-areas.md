@@ -55,12 +55,24 @@ bottom edge would double the clearance.
 | `collections-screen`        | stack header + tab bar | horizontal          |
 | `collection-records-screen` | stack header + tab bar | horizontal          |
 | `collection-record-screen`  | stack header + tab bar | horizontal          |
+| `collection-field-editor-screen` | sheet presentation, no header | bottom + horizontal |
 | `settings-screen`           | stack header + tab bar | horizontal          |
 | `licenses-screen`           | stack header + tab bar | horizontal          |
 
 A screen MUST apply an inset only at an edge this table marks as its own, and a change
 to a screen's chrome MUST be accompanied by a re-reading of this table — hiding a
 header silently transfers an edge to the screen it uncovered.
+
+`collection-field-editor-screen` is the one screen here presented as a **sheet**
+rather than pushed as a card, and its edges follow from that. It draws its own
+header inside the sheet rather than taking the navigator's, so it might look as
+though it owns its top edge — it does not: the sheet is inset from the top by
+the presentation itself, on both platforms. What it does own is the bottom edge,
+which no tab bar clears because the sheet is presented over the tab UI rather
+than inside it, and the horizontal pair. A change to that presentation — a
+detent that reaches the top of the screen, or a fall back to a full-screen modal
+— MUST re-read this row, because either would hand the screen its top edge with
+nothing else drawing it.
 
 One surface carries an inset on its callers' behalf, and it is deliberate.
 `src/common/components/message-state/message-state.tsx` is rendered flush against the
@@ -96,6 +108,7 @@ reporting zero insets renders exactly as it did before this convention existed:
 | `collections-screen` + `collection-list-skeleton`           | `theme.gap.md`       |
 | `collection-records-screen` + `collection-records-skeleton` | `theme.gap.md`       |
 | `collection-record-screen` + `collection-record-skeleton`   | `theme.gap.md`       |
+| `collection-field-editor-screen` body                       | `theme.gap.md`       |
 | `collection-record-offline-notice`                          | `theme.gap.md`       |
 | `licenses-screen` root                                      | `theme.gap.lg`       |
 | `settings-screen` content container                         | nothing — see below  |

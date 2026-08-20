@@ -33,15 +33,24 @@ function fieldOf(
 function renderRow(
 	field: RecordField,
 	overrides: {
+		editedValue?: unknown;
 		isQueued?: boolean;
 		refusalMessage?: string | null;
 	} = {},
 ) {
 	const onSave = jest.fn<(fieldName: string, value: unknown) => void>();
+	const onOpenEditor = jest.fn<(fieldName: string) => void>();
 	const row = (subject: RecordField) => (
 		<CollectionRecordFieldRow
+			// the caller derives this from the queue; a row asked for nothing in
+			// particular previews the record's own value, which is what the queue
+			// resolves to when it holds nothing for the field.
+			editedValue={
+				"editedValue" in overrides ? overrides.editedValue : subject.value
+			}
 			field={subject}
 			isQueued={overrides.isQueued ?? false}
+			onOpenEditor={onOpenEditor}
 			onSave={onSave}
 			refusalMessage={overrides.refusalMessage ?? null}
 		/>
@@ -49,6 +58,7 @@ function renderRow(
 	const view = render(row(field));
 
 	return Object.assign(view, {
+		onOpenEditor,
 		onSave,
 		/** re-renders the same row against a field the record has since changed. */
 		rerenderField(next: RecordField) {
@@ -138,7 +148,10 @@ describe("<CollectionRecordFieldRow>", () => {
 
 			expect(input.props.value).toBe("Shipping v2");
 			expect(input.props.keyboardType).toBe("default");
-			expect(input.props.multiline).toBe(false);
+			// the inline control is one line by construction now rather than by a
+			// prop: everything it can hold fits on one, and everything that cannot
+			// is edited in the sheet.
+			expect(input.props.multiline).toBeFalsy();
 		});
 
 		it("gives a number field a numeric input holding its digits", () => {
@@ -158,16 +171,88 @@ describe("<CollectionRecordFieldRow>", () => {
 			expect(getByText("On")).toBeTruthy();
 		});
 
-		it("gives an array or object a multi-line editor holding its JSON", () => {
-			const { getByTestId } = renderRow(
+		it("gives an array or object a preview of its JSON, not an input", () => {
+			const { getByTestId, queryByTestId } = renderRow(
 				fieldOf("seo", { title: "A", noIndex: false }, "json"),
 			);
-			const input = getByTestId("record-field-seo-input");
 
-			expect(input.props.value).toBe(
-				'{\n  "title": "A",\n  "noIndex": false\n}',
+			expect(getByTestId("record-field-seo-preview")).toBeTruthy();
+			// the whole of the change: raw JSON is no longer typed into on this
+			// screen, so there is no input here to type into.
+			expect(queryByTestId("record-field-seo-input")).toBeNull();
+		});
+
+		it("gives a newline-carrying string the same preview", () => {
+			const { getByTestId, queryByTestId } = renderRow(
+				fieldOf("body", "First line\nSecond line", "multiline-text"),
 			);
-			expect(input.props.multiline).toBe(true);
+
+			expect(getByTestId("record-field-body-preview")).toBeTruthy();
+			expect(queryByTestId("record-field-body-input")).toBeNull();
+		});
+	});
+
+	// the preview is the affordance for the editor, and it is a button rather
+	// than a text field in every sense a user could notice.
+	describe("the preview", () => {
+		it("shows three lines of the value and no more", () => {
+			const { getByText } = renderRow(
+				fieldOf("body", "One\nTwo\nThree\nFour", "multiline-text"),
+			);
+
+			expect(getByText("One\nTwo\nThree\nFour").props.numberOfLines).toBe(3);
+		});
+
+		it("shows the JSON its editor would open on", () => {
+			const { getByText } = renderRow(
+				fieldOf("seo", { title: "A", noIndex: false }, "json"),
+			);
+
+			expect(
+				getByText('{\n  "title": "A",\n  "noIndex": false\n}'),
+			).toBeTruthy();
+		});
+
+		it("names itself a button that opens an editor, not a text field", () => {
+			const { getByTestId } = renderRow(
+				fieldOf("body", "First\nSecond", "multiline-text"),
+			);
+			const preview = getByTestId("record-field-body-preview");
+
+			expect(preview.props.accessibilityRole).toBe("button");
+			expect(preview.props.accessibilityHint).toBe(
+				"Opens an editor for this field.",
+			);
+			expect(preview.props.accessibilityLabel).toBe("Body: First\nSecond");
+		});
+
+		it("says so rather than showing an empty frame", () => {
+			const { getByText } = renderRow(fieldOf("body", "", "multiline-text"));
+
+			expect(getByText("Empty")).toBeTruthy();
+		});
+
+		it("asks the caller to open the editor when pressed", () => {
+			const { getByTestId, onOpenEditor } = renderRow(
+				fieldOf("body", "First\nSecond", "multiline-text"),
+			);
+
+			fireEvent.press(getByTestId("record-field-body-preview"));
+
+			expect(onOpenEditor).toHaveBeenCalledWith("body");
+		});
+
+		// what the row seeds an inline input with and what the preview shows are
+		// two different values, deliberately: the preview shows the queue's, so a
+		// change the row cannot hold — because nothing here is being typed into —
+		// survives this row unmounting.
+		it("previews the caller's value rather than the record's", () => {
+			const { getByText } = renderRow(
+				fieldOf("body", "Saved\nvalue", "multiline-text"),
+				{ editedValue: "Queued\nvalue" },
+			);
+
+			expect(getByText("Queued\nvalue")).toBeTruthy();
 		});
 	});
 
@@ -239,18 +324,6 @@ describe("<CollectionRecordFieldRow>", () => {
 			expect(onSave).toHaveBeenCalledWith("readingMinutes", 12);
 		});
 
-		it("sends raw JSON parsed", () => {
-			const { getByTestId, onSave } = renderRow(
-				fieldOf("tags", ["release"], "json"),
-			);
-			const input = getByTestId("record-field-tags-input");
-
-			fireEvent.changeText(input, '["release", "shipping"]');
-			fireEvent(input, "blur");
-
-			expect(onSave).toHaveBeenCalledWith("tags", ["release", "shipping"]);
-		});
-
 		it("sends nothing when the blur changed nothing", () => {
 			const { getByTestId, onSave } = renderRow(
 				fieldOf("title", "Shipping v2", "text"),
@@ -313,9 +386,11 @@ describe("<CollectionRecordFieldRow>", () => {
 
 		// the server answers 200 and stores `null` for a value of the wrong type,
 		// so nothing downstream could report the loss. it is not sent at all.
+		// only the number case is a row's any more: raw JSON is typed into the
+		// field editor now, and the same guard is asserted there against the same
+		// helper.
 		it.each<[string, RecordFieldKind, unknown, string]>([
 			["a number that will not parse", "number", 7, "seven"],
-			["raw JSON that will not parse", "json", ["a"], "[release"],
 		])("sends nothing for %s", (_, kind, value, typed) => {
 			const { getByTestId, onSave } = renderRow(fieldOf("field", value, kind));
 			const input = getByTestId("record-field-field-input");
@@ -381,8 +456,10 @@ describe("<CollectionRecordFieldRow>", () => {
 
 			rerender(
 				<CollectionRecordFieldRow
+					editedValue={field.value}
 					field={field}
 					isQueued={false}
+					onOpenEditor={jest.fn()}
 					onSave={onSave}
 					refusalMessage="This field is required."
 				/>,

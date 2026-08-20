@@ -2,9 +2,10 @@ import type { JSX } from "react";
 import { useRef, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { CollectionRecordFieldError } from "~/collections/components/collection-record-field-row/collection-record-field-error";
+import { CollectionFieldError } from "~/collections/components/collection-field-error/collection-field-error";
 import { CollectionRecordFieldHead } from "~/collections/components/collection-record-field-row/collection-record-field-head";
 import { CollectionRecordFieldInput } from "~/collections/components/collection-record-field-row/collection-record-field-input";
+import { CollectionRecordFieldPreview } from "~/collections/components/collection-record-field-row/collection-record-field-preview";
 import { CollectionRecordFieldStatic } from "~/collections/components/collection-record-field-row/collection-record-field-static";
 import { CollectionRecordFieldSwitch } from "~/collections/components/collection-record-field-row/collection-record-field-switch";
 import {
@@ -12,7 +13,10 @@ import {
 	parseEditedText,
 	toEditableText,
 } from "~/collections/helpers/record-field-display";
-import type { RecordField } from "~/collections/helpers/record-fields";
+import {
+	editsInDialog,
+	type RecordField,
+} from "~/collections/helpers/record-fields";
 
 /**
  * the test hooks a row publishes, derived from the field's own name: the row
@@ -37,20 +41,42 @@ function recordFieldRowTestID(name: string): string {
  * what it shows from then on. a saved field is patched into the cache with the
  * value this row sent, so the two do not drift.
  *
+ * a field whose value does not fit a line is the exception to all of that, and
+ * deliberately so: it carries a preview rather than a control, and its editing
+ * happens in a screen of its own. the row holds nothing for it, because there is
+ * nothing being typed here to hold — what the preview shows is `editedValue`,
+ * which the caller derives from the queue, so a change still on its way and one
+ * the server refused both survive this row unmounting and remounting.
+ *
  * saving is the caller's, through `onSave`. the row never writes to the server
  * itself — every change goes through the pending-write queue, which is what
  * makes an edit survive having no connection and keeps two saves on one record
  * from interleaving.
  */
 export function CollectionRecordFieldRow({
+	editedValue,
 	field,
 	isQueued,
+	onOpenEditor,
 	onSave,
 	refusalMessage,
 }: Readonly<{
+	/**
+	 * what the field currently holds, once the queue is taken into account —
+	 * refused, else queued, else the record's own value. only the preview reads
+	 * it; the inline controls seed from the record and hold their own text from
+	 * then on, exactly as they did before.
+	 */
+	editedValue: unknown;
 	field: RecordField;
 	/** the row's change has not reached the server yet. */
 	isQueued: boolean;
+	/**
+	 * asks the caller to open the field's editor. the row does not navigate
+	 * itself: which screen this opens is the route tree's business, and a row
+	 * that knew would not render outside one.
+	 */
+	onOpenEditor: (fieldName: string) => void;
 	/** hands the caller a value to save. fired on blur, or on a switch's toggle. */
 	onSave: (fieldName: string, value: unknown) => void;
 	/** what the server said about a refused save, and `null` when none was. */
@@ -115,6 +141,19 @@ export function CollectionRecordFieldRow({
 		control = (
 			<CollectionRecordFieldStatic field={field} testID={`${testID}-value`} />
 		);
+	} else if (editsInDialog(field.kind)) {
+		control = (
+			<CollectionRecordFieldPreview
+				fieldLabel={field.label}
+				isRefused={isRefused}
+				kind={field.kind}
+				onPress={() => {
+					onOpenEditor(field.name);
+				}}
+				testID={`${testID}-preview`}
+				value={editedValue}
+			/>
+		);
 	} else if (field.kind === "boolean") {
 		control = (
 			<CollectionRecordFieldSwitch
@@ -148,7 +187,7 @@ export function CollectionRecordFieldRow({
 			/>
 			{control}
 			{refusalMessage === null ? null : (
-				<CollectionRecordFieldError
+				<CollectionFieldError
 					message={refusalMessage}
 					testID={`${testID}-error`}
 				/>
