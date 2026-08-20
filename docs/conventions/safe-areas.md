@@ -132,11 +132,10 @@ asserted the other way round — its horizontal pair is pinned at `0`, because t
 inset above is a decision rather than an oversight, and flooring it would go unnoticed
 otherwise.
 
-`collection-record-offline-notice` is the one surface in the table above that does not
-satisfy that yet: it has no colocated test file at all, so nothing would catch its
-horizontal pair collapsing to a raw inset. That is a gap in the guards rather than an
-exception to the rule, which is why the sentence above is written as a rule rather
-than as a statement of fact about the tree.
+Every surface in the table above carries one. `collection-record-offline-notice` was
+the last to get one — it is neither a screen nor a placeholder for one, which is how it
+arrived with no colocated test file at all — so the sentence above is now a statement of
+fact about the tree as well as a rule.
 
 Two limits of those guards are worth stating rather than discovering. **No unit test
 here observes a non-zero inset at all**: the mock's insets are fixed at zero and
@@ -144,7 +143,7 @@ here observes a non-zero inset at all**: the mock's insets are fixed at zero and
 fallback, never the clearance the change exists to produce — that is the manual
 on-device pass. And each guard has to flatten an already-rendered style array itself,
 because Unistyles' own `flatten` mock returns its argument untouched: most import
-React Native's `StyleSheet` for that, against Unistyles' usual rule, while the three
+React Native's `StyleSheet` for that, against Unistyles' usual rule, while the four
 component suites use the shared `resolveStyle` helper in `src/common/test-helpers/`.
 That rule governs the stylesheet-declaration path, which none of these tests touch.
 
