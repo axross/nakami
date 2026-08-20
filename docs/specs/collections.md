@@ -192,10 +192,10 @@ exactly as it was too.
 A save the server refuses leaves the typed value in its input and states the
 refusal beneath that row, in the server's own words where there are any: the
 message Payload gave for that field when it named one, its summary of the
-refusal otherwise, and a plain statement that the change was refused when the
-response says nothing this app recognises. The server's own sentence is the only
-version of a refusal anyone can act on, which is why it is preferred over
-anything this app could compose. The row is marked as refused rather than as not
+refusal otherwise, and — where the response body says nothing this app
+recognises — this app's own description of the failure. The server's own sentence
+is the only version of a refusal anyone can act on, which is why it is preferred
+over anything this app could compose. The row is marked as refused rather than as not
 saved yet.
 
 A refused change is not sent again by itself. Editing the field and leaving it
