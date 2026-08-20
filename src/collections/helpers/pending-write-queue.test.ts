@@ -62,6 +62,21 @@ function writeOf(fieldName: string, value: unknown): PendingWrite {
 	return { slug: "posts", recordId: "a1", fieldName, value };
 }
 
+/**
+ * lets whatever the queue kicked off without awaiting — a drain started from an
+ * enqueue or from a connectivity change — reach its first `await send(…)`.
+ */
+async function settle(): Promise<void> {
+	for (let turn = 0; turn < 8; turn += 1) {
+		await Promise.resolve();
+	}
+}
+
+/** the values a sender spy was handed, in order. */
+function sentValues(send: jest.Mock<(write: PendingWrite) => Promise<void>>) {
+	return send.mock.calls.map(([write]) => write.value);
+}
+
 beforeEach(() => {
 	jest.clearAllMocks();
 });
@@ -125,6 +140,76 @@ describe("createPendingWriteQueue()", () => {
 
 		expect(sender.send).toHaveBeenCalledTimes(1);
 		expect(sender.sent).toEqual([writeOf("title", "Third")]);
+	});
+
+	// the row is marked from the queue's published state, so a blur made while an
+	// earlier save is still open has to reach that state before the open request
+	// finishes — otherwise the typed value sits on screen with no marker at all
+	// for as long as the request takes, which is up to the client's 15s timeout.
+	it("publishes a change made while an earlier send is still in flight", async () => {
+		let release: (() => void) | undefined;
+		const send = jest.fn(async (write: PendingWrite) => {
+			if (write.fieldName !== "title") {
+				return;
+			}
+
+			await new Promise<void>((resolve) => {
+				release = resolve;
+			});
+		});
+		const queue = createPendingWriteQueue({
+			send,
+			connectivity: createFakeConnectivity(true).source,
+		});
+
+		await queue.enqueue(writeOf("title", "Hello"));
+		await settle();
+
+		expect(send).toHaveBeenCalledTimes(1);
+
+		// deliberately not awaited: what is asserted is that the change is already
+		// published by the time `enqueue` returns to its caller.
+		void queue.enqueue(writeOf("views", 3));
+
+		expect(queue.getState().writes).toEqual([
+			writeOf("title", "Hello"),
+			writeOf("views", 3),
+		]);
+		expect(send).toHaveBeenCalledTimes(1);
+
+		release?.();
+		await queue.drain();
+
+		expect(queue.getState()).toEqual({ writes: [], refusals: [] });
+	});
+
+	// the lock the fix above steps around is what keeps the drain from deleting a
+	// value it never sent.
+	it("keeps a change enqueued while its own field was being sent", async () => {
+		let release: (() => void) | undefined;
+		const send = jest.fn(async (write: PendingWrite) => {
+			if (write.value !== "First") {
+				return;
+			}
+
+			await new Promise<void>((resolve) => {
+				release = resolve;
+			});
+		});
+		const queue = createPendingWriteQueue({
+			send,
+			connectivity: createFakeConnectivity(true).source,
+		});
+
+		await queue.enqueue(writeOf("title", "First"));
+		await settle();
+
+		void queue.enqueue(writeOf("title", "Second"));
+		release?.();
+		await queue.drain();
+
+		expect(queue.getState()).toEqual({ writes: [], refusals: [] });
+		expect(sentValues(send)).toEqual(["First", "Second"]);
 	});
 
 	it("never has two changes in flight at once", async () => {
@@ -265,18 +350,28 @@ describe("createPendingWriteQueue()", () => {
 				);
 			}
 		});
+		// built offline, so the only drains that run are the ones this test asks
+		// for and the whole attempt sequence below is exact. asserting it as a set
+		// would collapse a repeat attempt at one field into a single member and
+		// hide it.
+		const connectivity = createFakeConnectivity(false);
 		const queue = createPendingWriteQueue({
 			send,
-			connectivity: createFakeConnectivity(true).source,
+			connectivity: connectivity.source,
 		});
 
 		await queue.enqueue(writeOf("title", "Hello"));
 		await queue.enqueue(writeOf("views", 3));
-		await queue.drain();
+		await settle();
 
-		// nothing behind the failed change is ever attempted, so what is queued
-		// keeps both its members and its order.
-		expect(new Set(attempted)).toEqual(new Set(["title"]));
+		expect(attempted).toEqual([]);
+
+		connectivity.set(true);
+		await settle();
+
+		// one attempt, at the head: nothing behind a change that could not be sent
+		// is ever tried, so what is queued keeps both its members and its order.
+		expect(attempted).toEqual(["title"]);
 		expect(queue.getState()).toEqual({
 			writes: [writeOf("title", "Hello"), writeOf("views", 3)],
 			refusals: [],
@@ -285,7 +380,7 @@ describe("createPendingWriteQueue()", () => {
 		isReachable = true;
 		await queue.drain();
 
-		expect(attempted.slice(-2)).toEqual(["title", "views"]);
+		expect(attempted).toEqual(["title", "title", "views"]);
 		expect(queue.getState().writes).toEqual([]);
 	});
 

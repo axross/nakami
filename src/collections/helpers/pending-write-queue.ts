@@ -118,10 +118,10 @@ function describeRefusal(error: unknown, fieldName: string): string {
  *
  * a change for a field that already has one queued **replaces** it, so a field
  * edited repeatedly offline costs one request carrying the last value rather
- * than one per edit. the queue drains oldest-first, and both halves — queueing
- * and draining — run under one mutex, so no two changes are ever in flight at
- * once and a change queued mid-drain cannot overtake what is already being
- * sent.
+ * than one per edit. the queue drains oldest-first under a mutex, so no two
+ * changes are ever in flight at once and a change queued mid-drain cannot
+ * overtake what is already being sent. queueing takes no lock at all — see
+ * {@link enqueue} for why, and {@link forget} for what keeps that safe.
  *
  * a change the server refuses leaves the queue and is not retried; its message
  * lands in {@link PendingWriteState.refusals} for the row to show, and editing
@@ -159,6 +159,25 @@ export function createPendingWriteQueue({
 		}
 	}
 
+	/**
+	 * takes a sent change out of the queue, and reports whether the entry it
+	 * removed is the one that was actually sent.
+	 *
+	 * a change enqueued while this one was in flight replaced the entry under the
+	 * same key — that is what makes an offline field edited twice cost one
+	 * request — and deleting by key alone would throw that newer value away
+	 * unsent. it is left where it is instead, and the loop sends it next.
+	 */
+	function forget(key: string, write: PendingWrite): boolean {
+		if (writes.get(key) !== write) {
+			return false;
+		}
+
+		writes.delete(key);
+
+		return true;
+	}
+
 	async function drain(): Promise<void> {
 		await mutex.runExclusive(async () => {
 			if (writes.size === 0 || !isOnline) {
@@ -186,8 +205,8 @@ export function createPendingWriteQueue({
 
 				try {
 					await send(write);
-					writes.delete(key);
 					sent += 1;
+					forget(key, write);
 				} catch (error) {
 					if (isUnreachable(error)) {
 						// left queued deliberately: the next connectivity change is
@@ -195,11 +214,6 @@ export function createPendingWriteQueue({
 						break;
 					}
 
-					writes.delete(key);
-					refusals.set(key, {
-						target: toTarget(write),
-						message: describeRefusal(error, write.fieldName),
-					});
 					refused += 1;
 					// the field name is a schema identifier; the value the user typed
 					// never reaches a log line or a breadcrumb.
@@ -207,6 +221,17 @@ export function createPendingWriteQueue({
 						slug: write.slug,
 						fieldName: write.fieldName,
 					});
+
+					// a refusal describes the value that was sent. where a newer one
+					// replaced it mid-flight the row is already showing that newer
+					// value as unsent, so recording this message would put a refusal
+					// under a change nobody has tried yet.
+					if (forget(key, write)) {
+						refusals.set(key, {
+							target: toTarget(write),
+							message: describeRefusal(error, write.fieldName),
+						});
+					}
 				}
 
 				publish();
@@ -234,20 +259,33 @@ export function createPendingWriteQueue({
 		});
 	}
 
-	async function enqueue(write: PendingWrite): Promise<void> {
-		await mutex.runExclusive(() => {
-			const key = keyOf(write);
+	/**
+	 * queues a change and publishes it, without waiting on anything — the caller
+	 * is a blur handler, and the row it just left has to be marked unsent now
+	 * rather than whenever the network next answers.
+	 *
+	 * it takes **no lock**, which is what makes that true. the drain holds the
+	 * mutex across every `await send(…)`, so an enqueue asking for it would block
+	 * for as long as the open request takes — up to the client's 15s timeout —
+	 * and the row would show the typed value with no marker for all of it. the
+	 * body below mutates synchronously, and JavaScript runs one thing at a time,
+	 * so nothing can interleave with it however long the drain is parked. what
+	 * the lock protected is instead handled where the danger actually is: see
+	 * {@link forget}.
+	 */
+	function enqueue(write: PendingWrite): Promise<void> {
+		const key = keyOf(write);
 
-			writes.set(key, write);
-			// the row is about to show the change as unsent, so whatever the last
-			// attempt was refused for no longer describes it.
-			refusals.delete(key);
-			publish();
-		});
-
-		// deliberately not awaited, and deliberately outside the lock above: the
-		// caller is a blur handler, and the send is what it must not wait on.
+		writes.set(key, write);
+		// the row is about to show the change as unsent, so whatever the last
+		// attempt was refused for no longer describes it.
+		refusals.delete(key);
+		publish();
+		// deliberately not awaited: the outcome arrives through the published
+		// state above, which is what marks the row.
 		startDrain();
+
+		return Promise.resolve();
 	}
 
 	const unsubscribe = connectivity.subscribe((online) => {
