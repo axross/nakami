@@ -58,6 +58,51 @@ describe("fetchRecords()", () => {
 		);
 	});
 
+	it("filters on every named field at once when a search is given", async () => {
+		const fetchMock = mockFetch({
+			ok: true,
+			status: 200,
+			json: async () => ({
+				docs: [],
+				totalDocs: 0,
+				hasNextPage: false,
+				nextPage: null,
+			}),
+		});
+
+		await fetchRecords("https://cms.example.com", "jwt-token", "posts", 2, {
+			query: "a release",
+			fields: ["title", "name"],
+		});
+
+		const [url] = fetchMock.mock.calls[0] as unknown as [string];
+		expect(url).toBe(
+			`https://cms.example.com/api/posts?depth=0&limit=${RECORDS_PAGE_SIZE}&page=2` +
+				"&where[or][0][title][like]=a%20release" +
+				"&where[or][1][name][like]=a%20release",
+		);
+	});
+
+	// the unfiltered feed's request is the one this argument must not disturb:
+	// it is the same cache entry and the same URL it always was.
+	it("builds the unfiltered URL when no search is given", async () => {
+		const fetchMock = mockFetch({
+			ok: true,
+			status: 200,
+			json: async () => ({
+				docs: [],
+				totalDocs: 0,
+				hasNextPage: false,
+				nextPage: null,
+			}),
+		});
+
+		await fetchRecords("https://cms.example.com", "jwt-token", "posts", 1);
+
+		const [url] = fetchMock.mock.calls[0] as unknown as [string];
+		expect(url).not.toContain("where");
+	});
+
 	it("throws an auth error on 401", async () => {
 		mockFetch({ ok: false, status: 401 });
 

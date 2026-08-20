@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { recordPageSchema, toRecordPage } from "./record";
+import { recordPageSchema, recordSchema, toRecordPage } from "./record";
 
 describe("recordPageSchema + toRecordPage", () => {
 	it("maps a page into records with derived titles and pagination", () => {
@@ -33,6 +33,7 @@ describe("recordPageSchema + toRecordPage", () => {
 			totalDocs: 42,
 			hasNextPage: true,
 			nextPage: 2,
+			searchableFields: ["title", "name"],
 		});
 	});
 
@@ -65,6 +66,55 @@ describe("recordPageSchema + toRecordPage", () => {
 			totalDocs: 0,
 			hasNextPage: false,
 			nextPage: null,
+			searchableFields: [],
 		});
+	});
+
+	it("leads the page with a record found by its id, and counts it", () => {
+		const page = recordPageSchema.parse({
+			docs: [{ id: "a1", title: "A field guide" }],
+			totalDocs: 1,
+			hasNextPage: false,
+		});
+		const idMatch = recordSchema.parse({ id: "a9", title: "Found by id" });
+
+		const mapped = toRecordPage(page, idMatch);
+
+		expect(mapped.records.map((record) => record.id)).toEqual(["a9", "a1"]);
+		expect(mapped.totalDocs).toBe(2);
+	});
+
+	it("lists a record found both ways once, and counts it once", () => {
+		const page = recordPageSchema.parse({
+			docs: [{ id: "a1", title: "A field guide" }],
+			totalDocs: 1,
+			hasNextPage: false,
+		});
+		const idMatch = recordSchema.parse({ id: "a1", title: "A field guide" });
+
+		const mapped = toRecordPage(page, idMatch);
+
+		expect(mapped.records.map((record) => record.id)).toEqual(["a1"]);
+		expect(mapped.totalDocs).toBe(1);
+	});
+
+	it("leaves the page as it is when no id matched", () => {
+		const page = recordPageSchema.parse({
+			docs: [{ id: "a1", title: "A field guide" }],
+			totalDocs: 1,
+			hasNextPage: false,
+		});
+
+		expect(toRecordPage(page, null)).toEqual(toRecordPage(page));
+	});
+
+	it("reports the title-ish fields its own documents carry", () => {
+		const page = recordPageSchema.parse({
+			docs: [{ id: "a1", slug: "a-field-guide", views: 12 }],
+			totalDocs: 1,
+			hasNextPage: false,
+		});
+
+		expect(toRecordPage(page).searchableFields).toEqual(["slug"]);
 	});
 });

@@ -29,6 +29,7 @@ without losing what a flow has to assert.
 | `tabs.navigation`      | The bottom tabs reach Home, Collections, and Settings                   | tabs        | should   |
 | `collections.list`     | The Collections tab lists the server's readable collections             | collections | should   |
 | `collections.records`  | A collection's records load as a paging card feed                       | collections | should   |
+| `collections.search`   | Typing in the record feed's search field narrows it to matching records  | collections | should   |
 | `collections.offline`  | Losing the connection states it, and reconnecting loads on its own      | collections | should   |
 | `collections.record`   | A card opens the record, listing every field it carries                 | collections | should   |
 | `collections.record-edit` | Editing a field saves it on blur, and a refusal states why           | collections | should   |
@@ -37,12 +38,14 @@ without losing what a flow has to assert.
 
 ## Journeys
 
-Ten of the thirteen carry a gap note. Each names what it is waiting on in its own
-terms, and eight of the ten wait on the same thing: a session signed in against a
-Payload fixture, which this suite does not have.
+Eleven of the fourteen carry a gap note. Each names what it is waiting on in its own
+terms, and nine of the eleven wait on the same thing: a session signed in against
+a Payload fixture, which this suite does not have.
 [docs/conventions/end-to-end-testing.md](../docs/conventions/end-to-end-testing.md)
-states the contract such a fixture satisfies, and those eight flows are tracked by
-[#135](https://github.com/axross/nakami/issues/135). The other two,
+states the contract such a fixture satisfies, and eight of those flows are tracked
+by [#135](https://github.com/axross/nakami/issues/135); the ninth,
+[`collections.search`](#collectionssearch), arrived after that issue was written
+and is not in its scope. The other two,
 [`collections.offline`](#collectionsoffline) and
 [`collections.record-offline`](#collectionsrecord-offline), need a device whose
 connectivity can be cut on top of that fixture, so neither is in that issue's
@@ -109,6 +112,18 @@ failure-aware error states, and scrolling to the end loads more.
 **Gap:** no automated flow asserts this. Beyond a session, the paging half needs a
 fixture collection holding more than one page of records, and the empty state needs
 a second collection holding none.
+
+### `collections.search`
+
+Signed in on a collection's records, typing into the search field above the feed
+narrows it to the records the server matched, the count beside the field reports
+how many, typing a record's id finds that record, a query nothing matches states
+so and offers to clear it, and clearing returns the whole feed.
+
+**Gap:** no automated flow asserts this. What a query should match is whatever a
+Payload fixture is seeded with, so beyond a session it needs a collection whose
+records carry a title-ish field and enough of them that a search is narrower
+than the feed.
 
 ### `collections.offline`
 

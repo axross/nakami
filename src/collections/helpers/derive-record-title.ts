@@ -1,8 +1,16 @@
-// Payload's REST API exposes no per-record title or `useAsTitle` hint (the same
-// gap the collection list hit for labels), so a record's display title is
-// derived from its own fields: the first present, non-empty string field among
-// these common title-ish names, in priority order.
-const TITLE_FIELDS = [
+/**
+ * Payload's REST API exposes no per-record title or `useAsTitle` hint (the same
+ * gap the collection list hit for labels), so a record's display title is
+ * derived from its own fields: the first present, non-empty string field among
+ * these common title-ish names, in priority order.
+ *
+ * exported because the record search is scoped to the same vocabulary — it asks
+ * the server about whichever of these a collection turns out to have (see
+ * {@link import("./searchable-fields").deriveSearchableFields}). Order matters
+ * here and not there, but the *set* has to be one list, or a record could be
+ * found by a field its own card would never take a title from.
+ */
+export const TITLE_FIELDS = [
 	"title",
 	"name",
 	"label",

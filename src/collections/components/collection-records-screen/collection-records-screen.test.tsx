@@ -21,6 +21,7 @@ import { StyleSheet } from "react-native";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { fetchRecords } from "~/collections/helpers/fetch-records";
+import { findRecordById } from "~/collections/helpers/find-record-by-id";
 import type { RecordPageResponse } from "~/collections/models/record";
 import { PayloadRequestError } from "~/common/helpers/payload-client";
 import { createTestQueryClient } from "~/common/test-helpers/query-client";
@@ -39,6 +40,12 @@ jest.mock("react-native-reanimated", () =>
 // real, so pagination and error mapping are exercised end to end.
 jest.mock("~/collections/helpers/fetch-records", () => ({
 	fetchRecords: jest.fn(),
+}));
+
+// the id lookup runs beside every search; mocked so a suite that never types an
+// id does not reach for the network to be told so.
+jest.mock("~/collections/helpers/find-record-by-id", () => ({
+	findRecordById: jest.fn(),
 }));
 
 const SESSION: Session = {
@@ -80,8 +87,41 @@ function renderScreen() {
 	);
 }
 
+/**
+ * answers the unfiltered feed with `all` and every search with `matched`, so a
+ * test states what each of the two queries returns rather than counting calls.
+ */
+function respondWith(all: RecordPageResponse, matched: RecordPageResponse) {
+	jest
+		.mocked(fetchRecords)
+		.mockImplementation(async (_serverUrl, _token, _slug, _page, search) =>
+			search === undefined ? all : matched,
+		);
+}
+
+/**
+ * types into the search field and waits out the screen's own debounce.
+ *
+ * the wait is a real one inside `act`, comfortably past the 300ms the screen
+ * settles on, rather than a `waitFor` poll: the settled query arrives from a
+ * bare `setTimeout`, and React holds an update from outside `act` until the
+ * surrounding one exits — which a `waitFor` whose checks run *inside* that act
+ * never sees.
+ */
+async function search(screen: ReturnType<typeof renderScreen>, query: string) {
+	fireEvent.changeText(
+		screen.getByTestId("collection-records-search-input"),
+		query,
+	);
+
+	await act(async () => {
+		await new Promise((resolve) => setTimeout(resolve, 400));
+	});
+}
+
 beforeEach(() => {
 	jest.clearAllMocks();
+	jest.mocked(findRecordById).mockResolvedValue(null);
 	useAuthStore.setState({ status: "authenticated", session: SESSION });
 });
 
@@ -301,7 +341,155 @@ describe("<CollectionRecordsScreen>", () => {
 			"jwt-token",
 			"posts",
 			2,
+			undefined,
 		);
+	});
+
+	it("shows no search field for a collection holding no records", async () => {
+		jest.mocked(fetchRecords).mockResolvedValue(page({}));
+
+		const { getByTestId, queryByTestId } = renderScreen();
+
+		await waitFor(() => {
+			expect(getByTestId("collection-records-empty")).toBeTruthy();
+		});
+		expect(queryByTestId("collection-records-search")).toBeNull();
+	});
+
+	it("replaces the feed with what the server matched, and counts the matches", async () => {
+		respondWith(
+			page({
+				docs: [
+					{ id: "r1", title: "A field guide" },
+					{ id: "r2", title: "Release notes" },
+				],
+				totalDocs: 2,
+			}),
+			page({ docs: [{ id: "r2", title: "Release notes" }], totalDocs: 1 }),
+		);
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+
+		await search(screen, "release");
+
+		await waitFor(() => {
+			expect(screen.getByText("Release notes")).toBeTruthy();
+		});
+		expect(screen.queryByText("A field guide")).toBeNull();
+		expect(screen.getByText("1 matching record")).toBeTruthy();
+	});
+
+	it("asks the server only about the fields the loaded records carry", async () => {
+		respondWith(
+			page({ docs: [{ id: "r1", slug: "a-field-guide" }], totalDocs: 1 }),
+			page({ docs: [], totalDocs: 0 }),
+		);
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByText("a-field-guide")).toBeTruthy();
+		});
+
+		await search(screen, "guide");
+
+		await waitFor(() => {
+			expect(jest.mocked(fetchRecords).mock.calls.length).toBeGreaterThan(1);
+		});
+		expect(fetchRecords).toHaveBeenLastCalledWith(
+			"https://cms.example.com",
+			"jwt-token",
+			"posts",
+			1,
+			{ query: "guide", fields: ["slug"] },
+		);
+	});
+
+	it("finds a record by the id typed into the field", async () => {
+		respondWith(
+			page({ docs: [{ id: "r1", title: "A field guide" }], totalDocs: 1 }),
+			page({ docs: [], totalDocs: 0 }),
+		);
+		jest
+			.mocked(findRecordById)
+			.mockResolvedValue({ id: "r9", title: "Found by id" });
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+
+		await search(screen, "r9");
+
+		await waitFor(() => {
+			expect(screen.getByText("Found by id")).toBeTruthy();
+		});
+		expect(screen.getByText("1 matching record")).toBeTruthy();
+	});
+
+	// the section is fixed under the screen header rather than carried by the
+	// list, which is what keeps the query editable from a feed it emptied.
+	it("states that nothing matched, and clears back to the whole feed", async () => {
+		respondWith(
+			page({ docs: [{ id: "r1", title: "A field guide" }], totalDocs: 1 }),
+			page({ docs: [], totalDocs: 0 }),
+		);
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+
+		await search(screen, "kubernetes");
+
+		await waitFor(() => {
+			expect(screen.getByTestId("collection-records-no-matches")).toBeTruthy();
+		});
+		expect(
+			screen.getByText("No records match \u201Ckubernetes\u201D."),
+		).toBeTruthy();
+		expect(screen.getByTestId("collection-records-search")).toBeTruthy();
+		expect(screen.getByText("No matching records")).toBeTruthy();
+
+		fireEvent.press(
+			screen.getByTestId("collection-records-clear-search-button"),
+		);
+
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+		expect(screen.getByText("1 record")).toBeTruthy();
+	});
+
+	it("shows the feed's own failure surface when a search fails", async () => {
+		jest
+			.mocked(fetchRecords)
+			.mockImplementation(async (_serverUrl, _token, _slug, _page, term) => {
+				if (term !== undefined) {
+					throw new PayloadRequestError("network", "unreachable");
+				}
+
+				return page({
+					docs: [{ id: "r1", title: "A field guide" }],
+					totalDocs: 1,
+				});
+			});
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByText("A field guide")).toBeTruthy();
+		});
+
+		await search(screen, "release");
+
+		await waitFor(() => {
+			expect(screen.getByTestId("collection-records-error")).toBeTruthy();
+		});
+		// the section stays, so the query that failed can be changed or dropped.
+		expect(screen.getByTestId("collection-records-search")).toBeTruthy();
+		expect(screen.getByTestId("collection-records-retry-button")).toBeTruthy();
 	});
 
 	// a stack header and the tab bar clear this screen's vertical edges, so it
