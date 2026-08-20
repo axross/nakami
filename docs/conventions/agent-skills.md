@@ -227,56 +227,6 @@ one that must take a `style` needs a different navigation shape — `onPress` wi
 `router.push`, as `WelcomeScreen`'s button already uses for an unrelated `Link asChild`
 failure — rather than an exception here.
 
-## A native-primitive root's props are based on `ComponentPropsWithRef`
-
-The installed `react-component-development` capability's
-[props.md](../../.claude/skills/react-component-development/references/props.md) names a
-base type per kind of root in one sentence:
-
-> MUST base the props type on the root rendered element: `ComponentProps<"div">` for an
-> intrinsic web element, `ComponentPropsWithoutRef<typeof Primitive>` for a native
-> primitive, and `ComponentProps<typeof Component>` when the component wraps another
-> component.
-
-Every props type in this repository built on a native primitive — a `View`, a `Text`, a
-`Pressable` — uses `ComponentPropsWithRef<typeof Primitive>` instead. The same file's
-Refs section is why:
-
-> MUST let `ref` reach the root element on React 19 and later, where it is an ordinary
-> prop: leave it in the rest object and let the spread carry it, or destructure it and
-> pass it explicitly.
-
-This app is on React 19.2.3, where `ref` **is** that ordinary prop — and
-`ComponentPropsWithoutRef` is the helper whose whole job is removing it. A props type
-built on it strips `ref` before any spread can carry it, so `<MessageState ref={r} …/>`
-fails to compile with TS2322 and the caller is pushed into the wrapper node the Refs
-section exists to prevent. For a native-primitive root the two rules cannot both be
-followed literally: one names a base type, the other names an outcome that base type
-makes unreachable. The with-ref form is the one taken, because it is the one that
-satisfies the MUST — and it serves the base-type rule's own stated purpose, that every
-attribute the root accepts passes through without being re-declared, rather than
-defeating it.
-
-Two things mark this as a live upstream contradiction rather than a stale pin. The
-installed copy of `props.md` is byte-identical to `axross/skills`' `main`, verified when
-the report was filed. And the same sentence's intrinsic-web branch already carries `ref`
-on React 19, because `ComponentProps<"div">` does not strip it — only the
-native-primitive branch collides with the Refs MUST, and that asymmetry is the evidence
-the branch predates React 19 making `ref` an ordinary prop. It is filed upstream as
-[axross/skills#405](https://github.com/axross/skills/issues/405); this entry stands until
-that lands, and a props type based on `ComponentPropsWithoutRef` MUST NOT be reintroduced
-in the meantime.
-
-One component needs more than the substitution.
-`src/settings/components/setting-menu-group/setting-menu-group-item-icon.tsx` renders a
-caller-supplied Lucide icon, and `lucide-react-native` aliases `LucideIcon` as
-`ForwardRefExoticComponent<LucideProps>` without the `RefAttributes` its concrete icon
-exports carry — so `ComponentProps` and `ComponentPropsWithRef` resolve to the same
-ref-less `LucideProps`. That part intersects `RefAttributes<SVGSVGElement>` on by hand,
-`SVGSVGElement` being what those exports declare on native as well as on web. The cause
-there is the vendor's type alias rather than the capability, and the file records it in
-place.
-
 ## `settings-screen`'s content container carries a raw inset
 
 Two installed capabilities forbid the raw inset outright:
