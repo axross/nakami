@@ -72,9 +72,9 @@ export const queryClient = new QueryClient({
 // are global: tying one to a component would unregister it on unmount.
 
 // the manager's own optimistic `true` is what stands until the reading below
-// says otherwise, and a launch while offline is exactly the case the seeded
-// read exists for — see {@link subscribeToNetworkState}, which the pending-write
-// queue's own trigger shares.
+// says otherwise, and a launch while offline is exactly the case its seeded
+// first report exists for — see `subscribeToNetworkState`, which the
+// pending-write queue's own trigger shares.
 onlineManager.setEventListener((setOnline) =>
 	subscribeToNetworkState(setOnline, {
 		logger,

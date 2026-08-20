@@ -603,12 +603,14 @@ describe("<CollectionRecordScreen>", () => {
 				expect(view.getByText("This field is required.")).toBeTruthy();
 			});
 
+			// closed the way the stack closes it, and its cache emptied with it, so
+			// the reopened screen re-reads the record exactly as a fresh visit
+			// would. the queue is the one thing carried across — it belongs to the
+			// stack, not to either screen.
 			view.unmount();
+			view.client.clear();
 
-			const reopened = await renderLoaded({
-				existingQueue: view.queue,
-				send: refuse,
-			});
+			const reopened = await renderLoaded({ existingQueue: view.queue });
 
 			expect(reopened.queryByText("This field is required.")).toBeNull();
 			expect(reopened.queryByText("Refused")).toBeNull();

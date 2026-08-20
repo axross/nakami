@@ -213,14 +213,12 @@ describe("canUpdateField", () => {
 	])(
 		"parses, and denies every field, for a fields entry that is %s",
 		(_, fields) => {
-			const result = accessResponseSchema.safeParse({
-				collections: { posts: { read: true, update: true, fields } },
-			});
-
-			expect(result.success).toBe(true);
+			// `parse` rather than `safeParse`: the whole point is that it does not
+			// throw, and a throw here fails the test with the parse error itself.
 			const access = accessResponseSchema.parse({
 				collections: { posts: { read: true, update: true, fields } },
 			});
+
 			expect(canUpdateField(access, "posts", "title")).toBe(false);
 			// the list this response also feeds is untouched by the bad entry.
 			expect(toCollectionList(access)).toEqual([
