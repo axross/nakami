@@ -345,7 +345,7 @@ describe("<CollectionRecordScreen>", () => {
 		});
 
 		it("locks the four kinds of row that cannot be edited", async () => {
-			const { getByText, queryByTestId } = await renderLoaded();
+			const { getByTestId, getByText, queryByTestId } = await renderLoaded();
 
 			for (const name of [
 				"id",
@@ -355,10 +355,23 @@ describe("<CollectionRecordScreen>", () => {
 				"archivedAt",
 			]) {
 				expect(queryByTestId(`record-field-${name}-input`)).toBeNull();
+				expect(getByTestId(`record-field-${name}-value-reason`)).toBeTruthy();
 			}
-			expect(getByText("Not editable here yet")).toBeTruthy();
-			expect(getByText("No value")).toBeTruthy();
+			// the value half is untouched by the mark replacing the reason beside it.
 			expect(getByText("Rich Text")).toBeTruthy();
+			expect(getByText("—")).toBeTruthy();
+		});
+
+		it("explains a locked row's mark when it is tapped", async () => {
+			const { getByTestId, getByText, queryByText } = await renderLoaded();
+			const sentence =
+				"Payload maintains this field itself, so it can't be edited here.";
+
+			expect(queryByText(sentence)).toBeNull();
+
+			fireEvent.press(getByTestId("record-field-createdAt-value-reason"));
+
+			expect(getByText(sentence)).toBeTruthy();
 		});
 
 		it("locks a field the access response denies update on", async () => {
@@ -382,14 +395,16 @@ describe("<CollectionRecordScreen>", () => {
 			});
 			expect(queryByTestId("record-field-readingMinutes-input")).toBeNull();
 			// scoped to the row: every field the map does not mention is denied
-			// too, so the screen states this in several places at once.
+			// too, so the screen marks this in several places at once.
 			expect(
-				within(getByTestId("record-field-readingMinutes")).getByText(
-					"No permission",
+				within(getByTestId("record-field-readingMinutes")).getByLabelText(
+					"Your account doesn't have permission to update this field.",
 				),
 			).toBeTruthy();
 			expect(
-				within(getByTestId("record-field-title")).queryByText("No permission"),
+				within(getByTestId("record-field-title")).queryByLabelText(
+					"Your account doesn't have permission to update this field.",
+				),
 			).toBeNull();
 		});
 
