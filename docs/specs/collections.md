@@ -123,9 +123,11 @@ and so needs no rule about camelCase.
 
 The label and the name share one line, the label at its start and the name at
 its end, with the value beneath at the full width of the row. When the two do
-not fit on that line, the name is what truncates: a shortened name still points
-at the field, while a shortened label costs the reader what the field means. So
-a row is the same height whatever its field is called.
+not fit on that line, the name is what shortens: a shortened name still points
+at the field, while a shortened label costs the reader what the field means. A
+label is therefore never shortened, and one long enough to need the whole line
+wraps onto a second — that row stands taller than its neighbours rather than
+losing a word of what the field means.
 
 ## Editing a field
 
