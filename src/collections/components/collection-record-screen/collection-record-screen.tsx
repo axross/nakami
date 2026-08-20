@@ -59,10 +59,15 @@ const subscribeToOnline = (onStoreChange: () => void): (() => void) =>
 const getIsOnline = (): boolean => onlineManager.isOnline();
 
 /**
- * whether the device can currently reach the server, read from the same
- * `onlineManager` the query client already drives from `expo-network` — so this
- * screen's notice and the queue's own trigger cannot disagree about what
- * "offline" means.
+ * whether the device can currently reach the server, read from the
+ * `onlineManager` the query client drives from `expo-network`.
+ *
+ * the pending-write queue's own trigger reads the same *source* through a
+ * subscription of its own rather than through that manager, so that it does not
+ * depend on the query layer being mounted. the two therefore agree about what
+ * "offline" means and can still differ for the moment it takes both to observe
+ * one change — which costs at most a notice that appears or clears a beat
+ * before or after the queue starts holding changes back.
  */
 function useIsOnline(): boolean {
 	return useSyncExternalStore(subscribeToOnline, getIsOnline, getIsOnline);

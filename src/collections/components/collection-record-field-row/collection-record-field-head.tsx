@@ -15,10 +15,15 @@ import {
  * the two share one line, and when they do not both fit **the field name is
  * what truncates**: the label is the readable half and losing its end costs the
  * reader the field's meaning, while a clipped name still identifies it against
- * the collection's config. so the label never shrinks, the name shrinks and
- * ellipsizes at its tail, and every row keeps the same height whatever its
- * identifiers are — no measurement pass, and no row that silently becomes two
- * lines tall.
+ * the collection's config. so the label never shrinks and is never truncated,
+ * and the name shrinks and ellipsizes at its tail. no measurement pass is
+ * involved either way.
+ *
+ * a label long enough to fill the line on its own does wrap, and its row grows
+ * to fit — the label carries no line limit, precisely because never truncating
+ * it is the promise. rows are therefore of a uniform height only while the
+ * labels are short enough for one line, which at ordinary field names and text
+ * sizes is every row; it is not something this component enforces.
  */
 export function CollectionRecordFieldHead({
 	label,

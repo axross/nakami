@@ -113,8 +113,9 @@ describe("<CollectionRecordFieldRow>", () => {
 		});
 
 		// the one thing the row promises about overflow: the name gives way and
-		// the label does not, so the readable half is never the part that is lost
-		// and every row keeps the same height.
+		// the label does not, so the readable half is never the part that is
+		// lost. a label with no room left wraps rather than being cut, and its
+		// row grows with it.
 		it("truncates the field name at its tail and never the label", () => {
 			const field = fieldOf("aVeryLongFieldNameIndeed", "Hello", "text");
 			const { getByText } = renderRow(field);
