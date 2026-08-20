@@ -56,11 +56,25 @@ const fieldsAccessSchema = z.union([
  * optional because an absent operation key is Payload's way of denying it —
  * treating the entry as not-readable or not-updatable rather than failing the
  * parse. the remaining operations are tolerated (stripped).
+ *
+ * `update` and `fields` go one step further and fall back to `false` on a shape
+ * this app does not recognize, rather than failing the parse the way an
+ * unmodelled key never could. one response feeds every collections surface —
+ * the list is a `select` view over this same query — so a `fields` entry from a
+ * Payload version that serializes it differently would otherwise take down the
+ * collection list, a screen that has nothing to do with field permission. the
+ * fallback denies instead: a row this app cannot read a grant for stays
+ * read-only, which is the same direction every other unknown here degrades in.
+ *
+ * `read` deliberately carries no such fallback. it predates the write path, an
+ * unrecognized `read` has always failed this parse, and giving it one would
+ * silently hide a collection the user can browse rather than say the response
+ * was not understood.
  */
 const collectionAccessSchema = z.object({
 	read: operationAccessSchema.optional(),
-	update: operationAccessSchema.optional(),
-	fields: fieldsAccessSchema.optional(),
+	update: operationAccessSchema.catch(false).optional(),
+	fields: fieldsAccessSchema.catch(false).optional(),
 });
 
 type CollectionAccess = z.infer<typeof collectionAccessSchema>;

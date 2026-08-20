@@ -191,6 +191,57 @@ describe("canUpdateField", () => {
 		expect(canUpdateField(access, "posts", "title")).toBe(true);
 	});
 
+	it("denies every field when the fields entry collapses to false", () => {
+		const access = accessResponseSchema.parse({
+			collections: { posts: { update: true, fields: false } },
+		});
+
+		expect(canUpdateField(access, "posts", "title")).toBe(false);
+	});
+
+	// one response feeds every collections surface, so a shape this app does not
+	// recognize must not fail the parse: doing so would take the collection list
+	// down over a field-permission entry it never reads. it denies instead.
+	it.each<[string, unknown]>([
+		["a bare string", "everything"],
+		["a number", 1],
+		["a map whose entry is neither a boolean nor an object", { title: "yes" }],
+		[
+			"a map whose entry carries an unreadable update",
+			{ title: { update: 1 } },
+		],
+	])(
+		"parses, and denies every field, for a fields entry that is %s",
+		(_, fields) => {
+			const result = accessResponseSchema.safeParse({
+				collections: { posts: { read: true, update: true, fields } },
+			});
+
+			expect(result.success).toBe(true);
+			const access = accessResponseSchema.parse({
+				collections: { posts: { read: true, update: true, fields } },
+			});
+			expect(canUpdateField(access, "posts", "title")).toBe(false);
+			// the list this response also feeds is untouched by the bad entry.
+			expect(toCollectionList(access)).toEqual([
+				{ slug: "posts", label: "Posts" },
+			]);
+		},
+	);
+
+	// the same regression, one key over: `update` was an unmodelled key before
+	// this reader existed and could not fail a parse either.
+	it("parses, and denies every field, for an update entry it cannot read", () => {
+		const access = accessResponseSchema.parse({
+			collections: { posts: { read: true, update: "maybe", fields: true } },
+		});
+
+		expect(canUpdateField(access, "posts", "title")).toBe(false);
+		expect(toCollectionList(access)).toEqual([
+			{ slug: "posts", label: "Posts" },
+		]);
+	});
+
 	it("tolerates a field entry carrying operations and a nested fields map", () => {
 		const access = accessResponseSchema.parse({
 			collections: {
