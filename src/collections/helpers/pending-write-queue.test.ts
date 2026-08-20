@@ -419,6 +419,60 @@ describe("createPendingWriteQueue()", () => {
 		expect(queue.getState().writes).toEqual([]);
 	});
 
+	// an expired token is not a verdict on the value: the token lives two hours
+	// and the refresh check comes round every five minutes, so a device sitting
+	// offline across the expiry drains against a stale token before anything
+	// notices. treating that as a refusal would delete the edit and pin a message
+	// about the session under the field, as though the field were what was wrong.
+	it("keeps a change queued when the session's token was rejected", async () => {
+		const attempted: string[] = [];
+		let isTokenAccepted = false;
+		const send = jest.fn(async (write: PendingWrite) => {
+			attempted.push(write.fieldName);
+
+			if (!isTokenAccepted) {
+				throw new PayloadRequestError(
+					"auth",
+					"Authentication was rejected.",
+					401,
+				);
+			}
+		});
+		// built offline for the same reason as the test above: the only drains that
+		// run are the ones this test asks for, so the attempt sequence is exact.
+		const connectivity = createFakeConnectivity(false);
+		const queue = createPendingWriteQueue({
+			send,
+			connectivity: connectivity.source,
+		});
+
+		await queue.enqueue(writeOf("title", "Hello"));
+		await queue.enqueue(writeOf("views", 3));
+		await settle();
+
+		expect(attempted).toEqual([]);
+
+		connectivity.set(true);
+		await settle();
+
+		// one attempt, at the head, and not a refusal anywhere: nothing is dropped,
+		// and nothing behind the held change is spent on a request the same token
+		// would fail in the same way.
+		expect(attempted).toEqual(["title"]);
+		expect(queue.getState()).toEqual({
+			writes: [writeOf("title", "Hello"), writeOf("views", 3)],
+			refusals: [],
+		});
+
+		// which is what makes the queue still able to save the edit once the token
+		// is a good one again.
+		isTokenAccepted = true;
+		await queue.drain();
+
+		expect(attempted).toEqual(["title", "title", "views"]);
+		expect(queue.getState()).toEqual({ writes: [], refusals: [] });
+	});
+
 	it("notifies its subscribers as the queue changes, and stops on unsubscribe", async () => {
 		const sender = createRecordingSender();
 		const queue = createPendingWriteQueue({

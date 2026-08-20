@@ -68,7 +68,12 @@ export interface PendingWriteQueue {
 	 * not once it is sent — the outcome arrives through {@link getState}.
 	 */
 	enqueue(write: PendingWrite): Promise<void>;
-	/** sends what is queued, oldest first, for as long as the device is online. */
+	/**
+	 * sends what is queued, oldest first, for as long as the device is online.
+	 * stops at the first change that got no verdict — see
+	 * {@link createPendingWriteQueue} — leaving it and everything behind it
+	 * queued for whatever drains next.
+	 */
 	drain(): Promise<void>;
 	/**
 	 * drops the refusals recorded against one record, leaving everything queued
@@ -94,12 +99,25 @@ function toTarget({ slug, recordId, fieldName }: PendingWrite) {
 }
 
 /**
- * whether a failure means the device could not reach the server, as opposed to
- * the server having refused the change. the two part ways in the queue: one
- * leaves the change queued for the next drain, the other takes it out.
+ * whether a failure left the change without a verdict, as opposed to the server
+ * having considered the value and said no. the two part ways in the queue: one
+ * leaves the change queued, still owed a verdict, the other takes it out.
+ *
+ * two kinds qualify. a `"network"` failure never reached the server at all. an
+ * `"auth"` one — the 401 or 403 an expired or rejected token earns — reached it
+ * and was turned away at the door, before the value was ever looked at. that
+ * second one is not exotic: the token lives two hours, `useSessionRefresh`
+ * re-checks it every five minutes or on a return to the foreground, and a device
+ * that sits offline across the expiry drains on reconnection — which is a
+ * connectivity event, not a refresh one — so the stale token goes out first.
+ * calling that a refusal would discard the edit and pin "Authentication was
+ * rejected." under the field, as though the field were what was wrong.
  */
-function isUnreachable(error: unknown): boolean {
-	return error instanceof PayloadRequestError && error.kind === "network";
+function isWithoutVerdict(error: unknown): boolean {
+	return (
+		error instanceof PayloadRequestError &&
+		(error.kind === "network" || error.kind === "auth")
+	);
 }
 
 /**
@@ -135,8 +153,11 @@ function describeRefusal(error: unknown, fieldName: string): string {
  *
  * a change the server refuses leaves the queue and is not retried; its message
  * lands in {@link PendingWriteState.refusals} for the row to show, and editing
- * the field again queues a fresh change. a change that fails because the device
- * is unreachable stays queued, and the next connectivity change sends it.
+ * the field again queues a fresh change. a change that never got a verdict at
+ * all — the server was unreachable, or it turned the session's token away
+ * before reading the value — stays queued for a later drain, and the drain stops
+ * at it rather than working through a queue every member of which is about to
+ * fail the same way.
  *
  * the two states have different lifetimes, which is the whole reason
  * {@link PendingWriteQueue.clearRefusals} exists. a queued change is owed to the
@@ -223,9 +244,14 @@ export function createPendingWriteQueue({
 					sent += 1;
 					forget(key, write);
 				} catch (error) {
-					if (isUnreachable(error)) {
-						// left queued deliberately: the next connectivity change is
-						// what sends it, and stopping here keeps the order intact.
+					if (isWithoutVerdict(error)) {
+						// left queued deliberately: nothing about the value was
+						// rejected, so a later drain — the next connectivity change,
+						// or the session's token being replaced — is what sends it.
+						// stopping here matters as much as queueing does: whatever
+						// turned this one away turns every change behind it away too,
+						// so going on would spend one pointless request per queued
+						// change. it also keeps the order intact.
 						break;
 					}
 
