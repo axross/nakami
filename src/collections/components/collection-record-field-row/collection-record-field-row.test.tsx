@@ -1,0 +1,413 @@
+import { describe, expect, it, jest } from "@jest/globals";
+import { fireEvent, render } from "@testing-library/react-native";
+import { humanizeFieldName } from "~/collections/helpers/humanize-field-name";
+import type {
+	RecordField,
+	RecordFieldKind,
+	RecordFieldReadOnlyReason,
+} from "~/collections/helpers/record-fields";
+import { resolveStyle } from "~/common/test-helpers/resolve-style";
+import { themes } from "~/unistyles";
+import { styles } from "./collection-record-field-input";
+import { CollectionRecordFieldRow } from "./collection-record-field-row";
+
+function fieldOf(
+	name: string,
+	value: unknown,
+	kind: RecordFieldKind,
+	readOnlyReason: RecordFieldReadOnlyReason | null = null,
+): RecordField {
+	return {
+		name,
+		// the real derivation, so the label and the name are the two distinct
+		// strings a row actually shows rather than one string twice.
+		label: humanizeFieldName(name),
+		value,
+		kind,
+		isEditable: readOnlyReason === null,
+		readOnlyReason,
+	};
+}
+
+/** the row under test, with a spy standing in for the pending-write queue. */
+function renderRow(
+	field: RecordField,
+	overrides: {
+		isQueued?: boolean;
+		refusalMessage?: string | null;
+	} = {},
+) {
+	const onSave = jest.fn<(fieldName: string, value: unknown) => void>();
+
+	return Object.assign(
+		render(
+			<CollectionRecordFieldRow
+				field={field}
+				isQueued={overrides.isQueued ?? false}
+				onSave={onSave}
+				refusalMessage={overrides.refusalMessage ?? null}
+			/>,
+		),
+		{ onSave },
+	);
+}
+
+describe("<CollectionRecordFieldRow>", () => {
+	// the identifiers are the whole point of the row: a reader matching what is
+	// on screen against a Payload config needs the name, and a reader reading the
+	// screen needs the label.
+	describe("the label line", () => {
+		it("shows the label and the Payload field name together", () => {
+			const { getByText } = renderRow(fieldOf("readingMinutes", 7, "number"));
+
+			expect(getByText("Reading Minutes")).toBeTruthy();
+			expect(getByText("readingMinutes")).toBeTruthy();
+		});
+
+		it("shows both on a read-only row too", () => {
+			const { getByText } = renderRow(
+				fieldOf("internalNote", "Draft copy", "text", "permission"),
+			);
+
+			expect(getByText("Internal Note")).toBeTruthy();
+			expect(getByText("internalNote")).toBeTruthy();
+		});
+
+		// every text style here spreads a theme role rather than setting its own
+		// metrics, and a spread that resolved to nothing would type-check exactly
+		// the same while dropping the size, the family, and the line height.
+		it("sets the field name in the monospace caption role", () => {
+			const { getByText } = renderRow(fieldOf("title", "Hello", "text"));
+
+			expect(resolveStyle(getByText("title").props.style)).toMatchObject({
+				fontFamily: "JetBrainsMono-Regular",
+				fontSize: 12,
+				lineHeight: 18,
+			});
+		});
+
+		it("sets the label in the caption role, at the emphatic ink", () => {
+			const { getByText } = renderRow(fieldOf("title", "Hello", "text"));
+
+			expect(resolveStyle(getByText("Title").props.style)).toMatchObject({
+				fontFamily: "InnovatorGrotesk-Regular",
+				fontSize: themes.light.typography.caption.fontSize,
+				color: themes.light.colors.text.neutral.intense,
+			});
+		});
+
+		// the two identifiers share an 18pt line box, which is the whole reason
+		// `codeCaption` was added rather than a size inlined: it is what puts them
+		// on one baseline.
+		it("sets both identifiers on one shared line box", () => {
+			const { getByText } = renderRow(fieldOf("title", "Hello", "text"));
+
+			expect(resolveStyle(getByText("Title").props.style).lineHeight).toBe(
+				resolveStyle(getByText("title").props.style).lineHeight,
+			);
+		});
+
+		// the one thing the row promises about overflow: the name gives way and
+		// the label does not, so the readable half is never the part that is lost
+		// and every row keeps the same height.
+		it("truncates the field name at its tail and never the label", () => {
+			const field = fieldOf("aVeryLongFieldNameIndeed", "Hello", "text");
+			const { getByText } = renderRow(field);
+			const name = getByText("aVeryLongFieldNameIndeed");
+
+			expect(name.props.numberOfLines).toBe(1);
+			expect(resolveStyle(name.props.style).flexShrink).toBe(1);
+			expect(resolveStyle(getByText(field.label).props.style).flexShrink).toBe(
+				0,
+			);
+		});
+	});
+
+	describe("the control each kind gets", () => {
+		it("gives a string field a text input holding the record's value", () => {
+			const { getByTestId } = renderRow(
+				fieldOf("title", "Shipping v2", "text"),
+			);
+			const input = getByTestId("record-field-title-input");
+
+			expect(input.props.value).toBe("Shipping v2");
+			expect(input.props.keyboardType).toBe("default");
+			expect(input.props.multiline).toBe(false);
+		});
+
+		it("gives a number field a numeric input holding its digits", () => {
+			const { getByTestId } = renderRow(fieldOf("readingMinutes", 7, "number"));
+			const input = getByTestId("record-field-readingMinutes-input");
+
+			expect(input.props.value).toBe("7");
+			expect(input.props.keyboardType).toBe("numeric");
+		});
+
+		it("gives a boolean field a switch at the record's position", () => {
+			const { getByTestId, getByText } = renderRow(
+				fieldOf("featured", true, "boolean"),
+			);
+
+			expect(getByTestId("record-field-featured-input").props.value).toBe(true);
+			expect(getByText("On")).toBeTruthy();
+		});
+
+		it("gives an array or object a multi-line editor holding its JSON", () => {
+			const { getByTestId } = renderRow(
+				fieldOf("seo", { title: "A", noIndex: false }, "json"),
+			);
+			const input = getByTestId("record-field-seo-input");
+
+			expect(input.props.value).toBe(
+				'{\n  "title": "A",\n  "noIndex": false\n}',
+			);
+			expect(input.props.multiline).toBe(true);
+		});
+	});
+
+	describe("the four read-only reasons", () => {
+		it.each<[RecordFieldReadOnlyReason, unknown, string]>([
+			["server-assigned", "a1", "Server-assigned"],
+			["permission", "Draft copy", "No permission"],
+			[
+				"rich-text",
+				{ root: { type: "root", children: [] } },
+				"Not editable here yet",
+			],
+			["no-value", null, "No value"],
+		])("states %s rather than showing a control", (reason, value, stated) => {
+			const kind: RecordFieldKind = reason === "no-value" ? "none" : "text";
+			const { getByText, queryByTestId } = renderRow(
+				fieldOf("field", value, kind, reason),
+			);
+
+			expect(getByText(stated)).toBeTruthy();
+			expect(queryByTestId("record-field-field-input")).toBeNull();
+		});
+
+		it("shows a Rich Text field's shape rather than its markup", () => {
+			const { getByText } = renderRow(
+				fieldOf(
+					"content",
+					{ root: { type: "root", children: [{ type: "paragraph" }] } },
+					"json",
+					"rich-text",
+				),
+			);
+
+			expect(getByText("Rich Text")).toBeTruthy();
+		});
+
+		it("shows an em dash where a field holding no value would have a control", () => {
+			const { getByText } = renderRow(
+				fieldOf("archivedAt", null, "none", "no-value"),
+			);
+
+			expect(getByText("—")).toBeTruthy();
+		});
+	});
+
+	describe("saving", () => {
+		it("sends the typed value on blur, naming only that field", () => {
+			const { getByTestId, onSave } = renderRow(
+				fieldOf("title", "Shipping v2", "text"),
+			);
+			const input = getByTestId("record-field-title-input");
+
+			fireEvent.changeText(input, "Shipping v2 — revised");
+			fireEvent(input, "blur");
+
+			expect(onSave).toHaveBeenCalledTimes(1);
+			expect(onSave).toHaveBeenCalledWith("title", "Shipping v2 — revised");
+		});
+
+		it("sends a number as a number rather than as its digits", () => {
+			const { getByTestId, onSave } = renderRow(
+				fieldOf("readingMinutes", 7, "number"),
+			);
+			const input = getByTestId("record-field-readingMinutes-input");
+
+			fireEvent.changeText(input, "12");
+			fireEvent(input, "blur");
+
+			expect(onSave).toHaveBeenCalledWith("readingMinutes", 12);
+		});
+
+		it("sends raw JSON parsed", () => {
+			const { getByTestId, onSave } = renderRow(
+				fieldOf("tags", ["release"], "json"),
+			);
+			const input = getByTestId("record-field-tags-input");
+
+			fireEvent.changeText(input, '["release", "shipping"]');
+			fireEvent(input, "blur");
+
+			expect(onSave).toHaveBeenCalledWith("tags", ["release", "shipping"]);
+		});
+
+		it("sends nothing when the blur changed nothing", () => {
+			const { getByTestId, onSave } = renderRow(
+				fieldOf("title", "Shipping v2", "text"),
+			);
+
+			fireEvent(getByTestId("record-field-title-input"), "blur");
+
+			expect(onSave).not.toHaveBeenCalled();
+		});
+
+		// the server answers 200 and stores `null` for a value of the wrong type,
+		// so nothing downstream could report the loss. it is not sent at all.
+		it.each<[string, RecordFieldKind, unknown, string]>([
+			["a number that will not parse", "number", 7, "seven"],
+			["raw JSON that will not parse", "json", ["a"], "[release"],
+		])("sends nothing for %s", (_, kind, value, typed) => {
+			const { getByTestId, onSave } = renderRow(fieldOf("field", value, kind));
+			const input = getByTestId("record-field-field-input");
+
+			fireEvent.changeText(input, typed);
+			fireEvent(input, "blur");
+
+			expect(onSave).not.toHaveBeenCalled();
+		});
+
+		// a switch has no focus to lose: moving it is the whole edit.
+		it("sends a switch's new position as soon as it is moved", () => {
+			const { getByTestId, onSave } = renderRow(
+				fieldOf("featured", true, "boolean"),
+			);
+
+			fireEvent(
+				getByTestId("record-field-featured-input"),
+				"valueChange",
+				false,
+			);
+
+			expect(onSave).toHaveBeenCalledWith("featured", false);
+		});
+
+		it("leaves a moved switch where it was moved to while the change is queued", () => {
+			const { getByTestId, getByText } = renderRow(
+				fieldOf("featured", true, "boolean"),
+			);
+			const input = getByTestId("record-field-featured-input");
+
+			fireEvent(input, "valueChange", false);
+
+			expect(input.props.value).toBe(false);
+			expect(getByText("Off")).toBeTruthy();
+		});
+	});
+
+	describe("the row's state", () => {
+		it("marks a change that has not reached the server", () => {
+			const { getByText } = renderRow(fieldOf("title", "Hello", "text"), {
+				isQueued: true,
+			});
+
+			expect(getByText("Not saved yet")).toBeTruthy();
+		});
+
+		it("shows nothing on the label line while there is nothing to say", () => {
+			const { queryByText } = renderRow(fieldOf("title", "Hello", "text"));
+
+			expect(queryByText("Not saved yet")).toBeNull();
+			expect(queryByText("Refused")).toBeNull();
+		});
+
+		it("keeps the typed value and shows the server's own message on a refusal", () => {
+			const field = fieldOf("readingMinutes", 7, "number");
+			const { getByTestId, getByText, rerender, onSave } = renderRow(field);
+			const input = getByTestId("record-field-readingMinutes-input");
+
+			fireEvent.changeText(input, "12");
+			fireEvent(input, "blur");
+			expect(onSave).toHaveBeenCalled();
+
+			rerender(
+				<CollectionRecordFieldRow
+					field={field}
+					isQueued={false}
+					onSave={onSave}
+					refusalMessage="This field is required."
+				/>,
+			);
+
+			// the value the user typed is still there to correct, not the record's.
+			expect(getByTestId("record-field-readingMinutes-input").props.value).toBe(
+				"12",
+			);
+			expect(getByText("This field is required.")).toBeTruthy();
+			expect(getByText("Refused")).toBeTruthy();
+		});
+
+		// a refusal outranks a queued change on the one line the row has for it.
+		it("marks a refusal rather than the queue when both are true", () => {
+			const { getByText, queryByText } = renderRow(
+				fieldOf("title", "Hello", "text"),
+				{ isQueued: true, refusalMessage: "Nope." },
+			);
+
+			expect(getByText("Refused")).toBeTruthy();
+			expect(queryByText("Not saved yet")).toBeNull();
+		});
+
+		// the refused ground and border are a Unistyles variant, and the jest mock
+		// strips `variants` and stubs `useVariants` to a no-op — so the destructive
+		// pair never reaches the rendered tree and cannot be asserted. what can
+		// still fail is the selection, which is what these two cover.
+		it("selects the refused treatment for the input", () => {
+			const useVariants = jest.spyOn(styles, "useVariants");
+
+			try {
+				renderRow(fieldOf("title", "Hello", "text"), {
+					refusalMessage: "Nope.",
+				});
+
+				expect(useVariants).toHaveBeenCalledWith({ refused: true });
+			} finally {
+				useVariants.mockRestore();
+			}
+		});
+
+		it("selects the resting treatment while nothing was refused", () => {
+			const useVariants = jest.spyOn(styles, "useVariants");
+
+			try {
+				renderRow(fieldOf("title", "Hello", "text"));
+
+				expect(useVariants).toHaveBeenCalledWith({ refused: false });
+			} finally {
+				useVariants.mockRestore();
+			}
+		});
+	});
+
+	// no component may carry a size of its own: every size in this app is a role,
+	// and a size with no role is a missing role.
+	it("inlines no font size anywhere in the row", () => {
+		const { getByText, getByTestId } = renderRow(
+			fieldOf("title", "Hello", "text"),
+			{ refusalMessage: "This field is required." },
+		);
+
+		for (const node of [
+			getByText("Title"),
+			getByText("title"),
+			getByText("Refused"),
+			getByText("This field is required."),
+			getByTestId("record-field-title-input"),
+		]) {
+			const style = resolveStyle(node.props.style);
+			// present, and from a role: every role in the theme pairs its size with
+			// a family, so a hand-written size would arrive without one.
+			expect(style.fontFamily).toEqual(expect.any(String));
+			const roleSizes: readonly number[] = [
+				themes.light.typography.caption.fontSize,
+				themes.light.typography.codeCaption.fontSize,
+				themes.light.typography.body.fontSize,
+				themes.light.typography.code.fontSize,
+			];
+			expect(roleSizes).toContain(style.fontSize);
+		}
+	});
+});
