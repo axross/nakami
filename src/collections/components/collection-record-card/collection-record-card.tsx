@@ -33,7 +33,7 @@ const UNTITLED_TITLE = "Untitled";
  * read as one feed.
  *
  * it navigates imperatively rather than through `Link asChild`, which the
- * sibling collection row uses. that pattern needs the styled `Pressable`
+ * sibling collection card uses. that pattern needs the styled `Pressable`
  * wrapped in a plain component for the clone to target, and it costs the
  * wrapper its `style` prop — `Link` slots its child through a slot that
  * composes `style` by spreading it, which detaches a Unistyles style from the
@@ -75,7 +75,7 @@ export function CollectionRecordCard({
 			// navigation. the announcement and the test id are derived from the
 			// record for the same reason — a title-less card shows placeholder copy,
 			// so the id is what actually identifies the record and is what the
-			// announcement has to carry. (the sibling collection row spreads last
+			// announcement has to carry. (the sibling collection card spreads last
 			// instead, because `Link asChild` clones it and its injected press props
 			// have to land.)
 			accessibilityLabel={record.hasTitle ? record.title : record.id}
@@ -122,7 +122,7 @@ export const styles = StyleSheet.create((theme) => ({
 	// a dynamic function rather than a variant: a feed draws every card from this
 	// one component body, and `useVariants` selects once per body — so one
 	// pressed card could not have been expressed without dimming the rest. the
-	// dip matches the collection row's, the app's other list control.
+	// dip matches the collection card's, the app's other list control.
 	card: (pressed: boolean) => ({
 		gap: theme.gap.xs,
 		paddingVertical: theme.gap.sm,

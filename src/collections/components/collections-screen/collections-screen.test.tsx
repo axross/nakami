@@ -29,7 +29,7 @@ import { CollectionsScreen } from "./collections-screen";
 // mock only the data layer the real query calls; the query, its factory, and
 // the access→list mapping all run for real. `PayloadRequestError` stays real so
 // the error-mapping path is exercised end to end. `fetch-records` is mocked too
-// so that pressing a row (which navigates to the records screen) does not make a
+// so that pressing a card (which navigates to the records screen) does not make a
 // real request.
 jest.mock("~/collections/helpers/fetch-access", () => ({
 	fetchAccess: jest.fn(),
