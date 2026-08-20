@@ -97,14 +97,23 @@ reporting zero insets renders exactly as it did before this convention existed:
 | `collection-records-screen` + `collection-records-skeleton` | `theme.gap.md`       |
 | `collection-record-screen` + `collection-record-skeleton`   | `theme.gap.md`       |
 | `collection-record-offline-notice`                          | `theme.gap.md`       |
+| `credential-consent-dialog` scrim (all four edges)          | `theme.gap.md`       |
 | `licenses-screen` root                                      | `theme.gap.lg`       |
 | `settings-screen` content container                         | nothing — see below  |
 
-`collection-record-offline-notice` is the one row above that is not a screen or a
+`collection-record-offline-notice` is one of two rows above that are not a screen or a
 placeholder for one. It is the band the record detail screen draws above its fields
 while the device is offline, and it spans the screen rather than sitting inside the
 fields' gutter — so it carries the horizontal pair itself, floored against the same
 value the fields it sits above use.
+
+`credential-consent-dialog` is the other, and it is the one surface here that owns all
+four edges. It is a React Native `Modal` rather than a screen, so it appears in no row
+of the table above: it covers everything the navigator has mounted, under the system
+bars with it, and no chrome clears any edge for it. The inset sits on the scrim rather
+than on the card, so the card is centred inside the safe area rather than centred on
+the screen and cropped by a notch or a home indicator. Any future modal surface takes
+the same shape, and the table above stays a table of screens.
 
 A new surface takes the gutter it already had rather than inventing one, so adding
 clearance never doubles as a redesign.

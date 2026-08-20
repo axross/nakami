@@ -4,12 +4,15 @@ import { act, fireEvent, waitFor, within } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import {
 	AccessibilityInfo,
+	Modal,
 	Platform,
 	StyleSheet,
 	TextInput,
 } from "react-native";
 import { readLastServerUrl } from "~/auth/helpers/last-server-url";
 import { login, PayloadRequestError } from "~/auth/helpers/payload-client";
+import type { Session } from "~/auth/models/session";
+import type { StoredCredentials } from "~/auth/models/stored-credentials";
 import { createTestQueryClient } from "~/common/test-helpers/query-client";
 import { themes } from "~/unistyles";
 import { SignInScreen } from "./sign-in-screen";
@@ -22,14 +25,21 @@ jest.mock("~/auth/helpers/payload-client", () => ({
 	),
 	login: jest.fn(),
 }));
-// the sign-in mutation persists the session via the auth store's `authenticate`
-// action (read non-reactively with `getState()`); stub it to a resolved no-op so
-// the success path does not touch the keychain.
+// the screen commits the sign-in through the auth store's `authenticate` action
+// (read non-reactively with `getState()`), once the consent dialog has an
+// answer. one shared stub rather than a fresh one per call, so the tests below
+// can assert what the answer handed it; the `mock` prefix is what lets the
+// hoisted factory close over it.
+const mockAuthenticate =
+	jest.fn<
+		(session: Session, credentials?: StoredCredentials) => Promise<void>
+	>();
+
 jest.mock("~/auth/stores/auth-store", () => ({
 	...jest.requireActual<typeof import("~/auth/stores/auth-store")>(
 		"~/auth/stores/auth-store",
 	),
-	useAuthStore: { getState: () => ({ authenticate: jest.fn(async () => {}) }) },
+	useAuthStore: { getState: () => ({ authenticate: mockAuthenticate }) },
 }));
 jest.mock("~/auth/helpers/last-server-url", () => ({
 	readLastServerUrl: jest.fn(),
@@ -51,6 +61,30 @@ function renderSignInScreen() {
 		{ initialUrl: "/sign-in" },
 	);
 }
+
+/** what a Payload server answers a valid login with. */
+const LOGIN_RESULT = {
+	user: { id: "1", email: "you@example.com" },
+	token: "issued-token",
+	exp: 1_800_000_000,
+};
+
+/** the session that {@link LOGIN_RESULT} produces for the form below. */
+const SIGNED_IN_SESSION: Session = {
+	serverUrl: "https://cms.example.com",
+	collectionSlug: "users",
+	token: LOGIN_RESULT.token,
+	exp: LOGIN_RESULT.exp,
+	user: LOGIN_RESULT.user,
+};
+
+/** the credentials the same form submitted, as the dialog offers to keep them. */
+const SUBMITTED_CREDENTIALS: StoredCredentials = {
+	serverUrl: "https://cms.example.com",
+	collectionSlug: "users",
+	email: "you@example.com",
+	password: "secret",
+};
 
 /** leaves the sign-in request pending, so the in-flight state stays on screen. */
 function leaveLoginPending() {
@@ -132,7 +166,24 @@ const HIDDEN = { includeHiddenElements: true } as const;
 beforeEach(() => {
 	jest.clearAllMocks();
 	jest.mocked(readLastServerUrl).mockResolvedValue(null);
+	mockAuthenticate.mockResolvedValue(undefined);
 });
+
+/**
+ * fills the form with the values {@link SUBMITTED_CREDENTIALS} describes and
+ * presses Sign in. the caller decides what `login` does first.
+ */
+function submitValidForm(
+	getByTestId: ReturnType<typeof renderSignInScreen>["getByTestId"],
+) {
+	fireEvent.changeText(
+		getByTestId("sign-in-server-url"),
+		"https://cms.example.com/",
+	);
+	fireEvent.changeText(getByTestId("sign-in-email"), " you@example.com ");
+	fireEvent.changeText(getByTestId("sign-in-password"), "secret");
+	fireEvent.press(getByTestId("sign-in-submit"));
+}
 
 describe("<SignInScreen>", () => {
 	it("shows the collection value as text and reveals an input when edited", () => {
@@ -860,5 +911,138 @@ describe("<SignInScreen>", () => {
 		expect(content.paddingBottom).toBe(themes.light.gap.md);
 		expect(content.paddingStart).toBe(themes.light.gap.md);
 		expect(content.paddingEnd).toBe(themes.light.gap.md);
+	});
+});
+
+// the dialog is the whole of the consent behind keeping a password on the
+// device, so what these hold is that it cannot be skipped, that each answer
+// commits exactly what it says, and that declining leaves nothing behind.
+describe("<SignInScreen> credential consent", () => {
+	it("stops at the dialog instead of signing in", async () => {
+		jest.mocked(login).mockResolvedValue(LOGIN_RESULT);
+
+		const { getByTestId } = renderSignInScreen();
+
+		submitValidForm(getByTestId);
+
+		await waitFor(() => {
+			expect(getByTestId("credential-consent-dialog")).toBeTruthy();
+		});
+		// the sign-in is not committed until the dialog is answered — which is
+		// what keeps the dialog on screen at all, since committing it unmounts
+		// this whole stack.
+		expect(mockAuthenticate).not.toHaveBeenCalled();
+	});
+
+	it("keeps the submitted credentials when the dialog is allowed", async () => {
+		jest.mocked(login).mockResolvedValue(LOGIN_RESULT);
+
+		const { getByTestId } = renderSignInScreen();
+
+		submitValidForm(getByTestId);
+		await waitFor(() => {
+			expect(getByTestId("credential-consent-allow")).toBeTruthy();
+		});
+		fireEvent.press(getByTestId("credential-consent-allow"));
+
+		// the normalized values the form submitted, not what was typed into it:
+		// a credential that differs from what the server accepted would fail the
+		// first silent re-authentication rather than the sign-in that stored it.
+		await waitFor(() => {
+			expect(mockAuthenticate).toHaveBeenCalledWith(
+				SIGNED_IN_SESSION,
+				SUBMITTED_CREDENTIALS,
+			);
+		});
+	});
+
+	it("keeps nothing but the session when the dialog is declined", async () => {
+		jest.mocked(login).mockResolvedValue(LOGIN_RESULT);
+
+		const { getByTestId } = renderSignInScreen();
+
+		submitValidForm(getByTestId);
+		await waitFor(() => {
+			expect(getByTestId("credential-consent-decline")).toBeTruthy();
+		});
+		fireEvent.press(getByTestId("credential-consent-decline"));
+
+		await waitFor(() => {
+			expect(mockAuthenticate).toHaveBeenCalledWith(
+				SIGNED_IN_SESSION,
+				undefined,
+			);
+		});
+	});
+
+	// Android's hardware and gesture Back reaches React Native as the modal's
+	// `onRequestClose`. handling it and doing nothing is what refuses it, and a
+	// prop left off would instead let Back dismiss the dialog — with the sign-in
+	// neither committed nor abandoned.
+	it("refuses Android's Back", async () => {
+		jest.mocked(login).mockResolvedValue(LOGIN_RESULT);
+
+		const { UNSAFE_getByType, getByTestId } = renderSignInScreen();
+
+		submitValidForm(getByTestId);
+		await waitFor(() => {
+			expect(getByTestId("credential-consent-dialog")).toBeTruthy();
+		});
+
+		act(() => {
+			UNSAFE_getByType(Modal).props.onRequestClose();
+		});
+
+		expect(getByTestId("credential-consent-dialog")).toBeTruthy();
+		expect(mockAuthenticate).not.toHaveBeenCalled();
+	});
+
+	it("ignores a second answer while the first is being written", async () => {
+		jest.mocked(login).mockResolvedValue(LOGIN_RESULT);
+		mockAuthenticate.mockReturnValue(new Promise<void>(() => {}));
+
+		const { getByTestId } = renderSignInScreen();
+
+		submitValidForm(getByTestId);
+		await waitFor(() => {
+			expect(getByTestId("credential-consent-allow")).toBeTruthy();
+		});
+
+		fireEvent.press(getByTestId("credential-consent-allow"));
+		await act(async () => {});
+		fireEvent.press(getByTestId("credential-consent-decline"));
+		fireEvent.press(getByTestId("credential-consent-allow"));
+
+		// one keychain write, not three, and in particular not a decline queued
+		// behind an allow — which would store the credentials and then leave the
+		// user believing they had refused.
+		expect(mockAuthenticate).toHaveBeenCalledTimes(1);
+	});
+
+	// the server already said yes by this point, so this is not the mutation's
+	// error; it reaches the person through the same slot anyway, because "the
+	// sign-in did not happen" is the same news to them.
+	it("returns to the form when the keychain refuses the write", async () => {
+		jest.mocked(login).mockResolvedValue(LOGIN_RESULT);
+		mockAuthenticate.mockRejectedValue(new Error("keychain unavailable"));
+
+		const { getByTestId, queryByTestId } = renderSignInScreen();
+
+		submitValidForm(getByTestId);
+		await waitFor(() => {
+			expect(getByTestId("credential-consent-allow")).toBeTruthy();
+		});
+		fireEvent.press(getByTestId("credential-consent-allow"));
+
+		await waitFor(() => {
+			expect(queryByTestId("credential-consent-dialog")).toBeNull();
+		});
+		expect(
+			within(getByTestId("sign-in-error")).getByText(
+				"Something went wrong. Please try again.",
+			),
+		).toBeTruthy();
+		// nothing typed is lost — the form is still holding it.
+		expect(getByTestId("sign-in-email").props.value).toBe(" you@example.com ");
 	});
 });

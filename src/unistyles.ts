@@ -244,6 +244,13 @@ const defaultTheme = {
 			// text drawn on top of a solid accent fill (Radix teal contrast)
 			onAccent: "#ffffff",
 		},
+		// the dim behind a modal surface. flat, with no tone or step, for the
+		// same reason `text.onAccent` is: it is one value with one use, and it
+		// belongs to no scale — Radix's own overlay is black-with-alpha in both
+		// themes rather than a step of any hue. it is a token rather than a
+		// literal at the use site so the dark theme cannot silently miss it, and
+		// it is darker there because the surface it dims is already dark.
+		scrim: "#00000073",
 	},
 	duration,
 	easing,
@@ -372,6 +379,7 @@ const themes: Record<ThemeName, Theme> = {
 				// text drawn on top of a solid accent fill (Radix teal contrast)
 				onAccent: "#ffffff",
 			},
+			scrim: "#000000a6",
 		},
 	},
 };

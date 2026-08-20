@@ -22,6 +22,13 @@ like any other **Collection**.
 which **auth collection** the account lives in, the token Payload issued for it,
 that token's expiry, and the signed-in user's id and email.
 
+**stored sign-in** — the email and password of a **session**, kept on the device
+so the app can start a new session by itself once the **Payload server** ends
+the current one. It exists only where the user allowed it at the dialog every
+sign-in ends with, it is discarded when they sign out or the server refuses it,
+and it is what makes a session outlast the server's own token lifetime. A
+**session** without one ends when its token does.
+
 ## Collections
 
 **Collection** — a named group of **records** on a **Payload server**, addressed

@@ -31,12 +31,16 @@ Within a role the steps run from least to most emphatic, which is what decides b
 them: a secondary or muted label takes `theme.colors.text.<tone>.base` and the primary
 one takes `intense` — Radix steps 11 and 12 respectively.
 
-`theme.colors.text.onAccent` is the one flat token, with no tone or step: text drawn on
-top of a solid accent fill. The scales mirror
+Two tokens are flat, with no tone or step. `theme.colors.text.onAccent` is text drawn
+on top of a solid accent fill. `theme.colors.scrim` is the dim behind a modal surface —
+one value with one use, belonging to no scale, since Radix's own overlay is
+black-with-alpha in both themes rather than a step of any hue; it is darker in the dark
+theme, because the surface it dims is already dark. The scales mirror
 [axross/cunnpe](https://github.com/axross/cunnpe) — Radix Slate for neutral, Teal for
 accent, Ruby for destructive — and `text.onAccent` is the one field this app adds
 beyond that structure, because cunnpe never draws text on a solid accent fill and this
-app's filled buttons do.
+app's filled buttons do. `scrim` is this app's own too, for the same kind of reason —
+cunnpe has no modal surface to dim.
 
 A colour MUST come from a token. A shade the tokens do not already carry MUST be added
 to `src/unistyles.ts` rather than inlined at the use site, so that the value has one
