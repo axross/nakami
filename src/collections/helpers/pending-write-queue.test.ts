@@ -176,6 +176,61 @@ describe("createPendingWriteQueue()", () => {
 		expect(send).toHaveBeenCalledTimes(2);
 	});
 
+	// the transport's own "Unexpected response (400)." tells a user nothing.
+	// where Payload named the field, its message for *that* field is what the row
+	// shows.
+	it("prefers the server's per-field message over the transport's", async () => {
+		const send = jest.fn(async () => {
+			throw new PayloadRequestError(
+				"server",
+				"Unexpected response (400).",
+				400,
+				undefined,
+				{
+					message: "The following field is invalid: Title",
+					fieldErrors: [
+						{ path: "title", message: "This field is required." },
+						{ path: "slug", message: "Another field's problem." },
+					],
+				},
+			);
+		});
+		const queue = createPendingWriteQueue({
+			send,
+			connectivity: createFakeConnectivity(true).source,
+		});
+
+		await queue.enqueue(writeOf("title", ""));
+		await queue.drain();
+
+		expect(queue.getState().refusals[0]?.message).toBe(
+			"This field is required.",
+		);
+	});
+
+	it("falls back to the refusal's summary when it named no field", async () => {
+		const send = jest.fn(async () => {
+			throw new PayloadRequestError(
+				"server",
+				"Unexpected response (400).",
+				400,
+				undefined,
+				{ message: "This record is locked by another user.", fieldErrors: [] },
+			);
+		});
+		const queue = createPendingWriteQueue({
+			send,
+			connectivity: createFakeConnectivity(true).source,
+		});
+
+		await queue.enqueue(writeOf("title", "Hello"));
+		await queue.drain();
+
+		expect(queue.getState().refusals[0]?.message).toBe(
+			"This record is locked by another user.",
+		);
+	});
+
 	it("clears a refusal when the field is edited again", async () => {
 		const send = jest
 			.fn<(write: PendingWrite) => Promise<void>>()

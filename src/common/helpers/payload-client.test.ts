@@ -76,6 +76,42 @@ function unparseableResponse(parseFailure: Error): Response {
 	} as unknown as Response;
 }
 
+/** a refused response carrying whatever body the case is about. */
+function refusalResponse(
+	status: number,
+	json: () => Promise<unknown>,
+): Response {
+	return { ok: false, status, json } as unknown as Response;
+}
+
+// the shape a real Payload 3.88.0 server returns for a rejected write, measured
+// at status 400. `name` and the per-field `label` are present and unmodelled,
+// so this is also the check that they are tolerated rather than fatal.
+const REFUSAL_BODY = {
+	errors: [
+		{
+			name: "ValidationError",
+			message: "The following field is invalid: Title",
+			data: {
+				id: 1,
+				collection: "posts",
+				errors: [
+					{ label: "Title", message: "This field is required.", path: "title" },
+				],
+			},
+		},
+	],
+};
+
+/** the `detail` a refused request produced, whatever else the error carries. */
+async function detailFrom(response: Response) {
+	stubFetch(async () => response);
+
+	const error = (await attemptRequest()) as PayloadRequestError;
+
+	return error.detail;
+}
+
 /** the call under test, as a promise the rejection matchers can take directly. */
 function sendRequest(): Promise<unknown> {
 	return request("fetchRecords", "https://cms.example.com/api/users", {});
@@ -125,6 +161,7 @@ describe("PayloadRequestError", () => {
 			expect(error.message).toBe("Failed.");
 			expect(error.kind).toBe("network");
 			expect(error.status).toBeUndefined();
+			expect(error.detail).toBeUndefined();
 		});
 	});
 });
@@ -180,6 +217,104 @@ describe("request()", () => {
 				operation: "fetchRecords",
 				duration: expect.any(Number),
 			});
+		});
+	});
+
+	describe("when the server refuses the request", () => {
+		it("carries the summary and the per-field messages the body named", async () => {
+			const detail = await detailFrom(
+				refusalResponse(400, async () => REFUSAL_BODY),
+			);
+
+			expect(detail).toEqual({
+				message: "The following field is invalid: Title",
+				fieldErrors: [{ path: "title", message: "This field is required." }],
+			});
+		});
+
+		// the whole point of the addition: the sign-in screen reads `message`, and
+		// every other consumer branches on `kind`. neither may move because a body
+		// turned out to be readable.
+		it("leaves the message, the kind, and the status exactly as they were", async () => {
+			stubFetch(async () => refusalResponse(400, async () => REFUSAL_BODY));
+
+			const error = (await attemptRequest()) as PayloadRequestError;
+
+			expect(error.message).toBe("Unexpected response (400).");
+			expect(error.kind).toBe("server");
+			expect(error.status).toBe(400);
+		});
+
+		it("reads a rejected token's body the same way, without changing its kind", async () => {
+			stubFetch(async () =>
+				refusalResponse(401, async () => ({
+					errors: [{ message: "The email or password provided is incorrect." }],
+				})),
+			);
+
+			const error = (await attemptRequest()) as PayloadRequestError;
+
+			expect(error.kind).toBe("auth");
+			expect(error.message).toBe("Authentication was rejected.");
+			expect(error.detail?.message).toBe(
+				"The email or password provided is incorrect.",
+			);
+		});
+
+		it("carries the summary alone when the refusal named no field", async () => {
+			const detail = await detailFrom(
+				refusalResponse(400, async () => ({
+					errors: [{ message: "Something went wrong." }],
+				})),
+			);
+
+			expect(detail).toEqual({
+				message: "Something went wrong.",
+				fieldErrors: [],
+			});
+		});
+
+		// each of these is a body this app will meet on some server it has never
+		// seen, and none of them may replace the failure being reported with a
+		// parse failure of its own.
+		it.each([
+			[
+				"a body that will not decode",
+				async () => Promise.reject(new SyntaxError("Bad JSON")),
+			],
+			["an empty body", async () => undefined],
+			["a body of the wrong shape", async () => ({ message: "Nope." })],
+			["an empty errors array", async () => ({ errors: [] })],
+			["an entry with no message", async () => ({ errors: [{ name: "E" }] })],
+			[
+				"a per-field entry missing its path",
+				async () => ({
+					errors: [
+						{
+							message: "Invalid.",
+							data: { errors: [{ message: "Required." }] },
+						},
+					],
+				}),
+			],
+		])("leaves the detail undefined for %s", async (_, json) => {
+			const detail = await detailFrom(
+				refusalResponse(400, json as () => Promise<unknown>),
+			);
+
+			expect(detail).toBeUndefined();
+		});
+
+		it("leaves the detail undefined when the response cannot be read at all", async () => {
+			// a stub with no `json` at all, which is what every other suite in this
+			// repository hands a non-ok status — reading it must not start failing
+			// them.
+			const detail = await detailFrom({
+				ok: false,
+				status: 500,
+			} as unknown as Response);
+
+			expect(detail).toBeUndefined();
 		});
 	});
 

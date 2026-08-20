@@ -78,6 +78,34 @@ describe("reportQueryFailure()", () => {
 		jest.mocked(reportError).mockClear();
 	});
 
+	// `PayloadRequestError.detail` carries the server's own refusal prose, which
+	// can quote the value a user typed. it is for a row to display, never for
+	// telemetry — and what keeps it off the wire is that this report sends the
+	// described key and nothing else. `toEqual` on the whole payload is what
+	// proves the "and nothing else".
+	it("sends the described key alone, never what the server said", () => {
+		const error = new PayloadRequestError(
+			"server",
+			"Unexpected response (400).",
+			400,
+			undefined,
+			{
+				message: "The following field is invalid: Title",
+				fieldErrors: [{ path: "title", message: "This field is required." }],
+			},
+		);
+
+		reportQueryFailure(
+			error,
+			failedQuery([...getSessionQueryKeyRoot(USER_ID), "collections", "posts"]),
+		);
+
+		expect(reportError).toHaveBeenCalledTimes(1);
+		expect(jest.mocked(reportError).mock.calls[0]?.[1]).toEqual({
+			extra: { queryKey: "users/*/collections/posts" },
+		});
+	});
+
 	it("names the collection list that failed", () => {
 		const error = new PayloadRequestError("server", "boom", 500);
 

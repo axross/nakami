@@ -19,7 +19,10 @@ export interface PendingWrite extends PendingWriteTarget {
 /** a change the server would not accept, and what it said about it. */
 export interface RefusedWrite {
 	readonly target: PendingWriteTarget;
-	/** the failure's own message, which the row shows beneath the typed value. */
+	/**
+	 * what the row shows beneath the typed value — the server's own message for
+	 * that field where it named one, its summary where it did not.
+	 */
 	readonly message: string;
 }
 
@@ -89,7 +92,22 @@ function isUnreachable(error: unknown): boolean {
 	return error instanceof PayloadRequestError && error.kind === "network";
 }
 
-function describeRefusal(error: unknown): string {
+/**
+ * what the row shows beneath the value the user typed. the server's own words
+ * come first, because "This field is required." is the only version of a
+ * refusal that tells anyone what to do about it: the per-field entry whose
+ * path is the field just written, then the refusal's summary, and only then
+ * the transport's own generic message.
+ */
+function describeRefusal(error: unknown, fieldName: string): string {
+	if (error instanceof PayloadRequestError && error.detail !== undefined) {
+		const fieldError = error.detail.fieldErrors.find(
+			(entry) => entry.path === fieldName,
+		);
+
+		return fieldError?.message ?? error.detail.message;
+	}
+
 	return error instanceof Error ? error.message : "The change was refused.";
 }
 
@@ -180,7 +198,7 @@ export function createPendingWriteQueue({
 					writes.delete(key);
 					refusals.set(key, {
 						target: toTarget(write),
-						message: describeRefusal(error),
+						message: describeRefusal(error, write.fieldName),
 					});
 					refused += 1;
 					// the field name is a schema identifier; the value the user typed
