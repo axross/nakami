@@ -106,9 +106,11 @@ export function CollectionRecordFieldRow({
 	}
 
 	let control: JSX.Element;
-	// `none` joins the read-only branch on its own account rather than only
-	// through `isEditable`: a field holding `null` has no value to put in a
-	// control, whatever else the access response says about it.
+	// `field.kind === "none"` is belt and braces, and is kept deliberately: a
+	// `null` value already yields the `no-value` read-only reason, so the first
+	// half of this test always catches it today. what it guards is a field
+	// arriving from anywhere that does not pair the two — the row would put an
+	// empty text input over a value it has no editor for.
 	if (!field.isEditable || field.kind === "none") {
 		control = (
 			<CollectionRecordFieldStatic field={field} testID={`${testID}-value`} />
@@ -141,7 +143,7 @@ export function CollectionRecordFieldRow({
 			<CollectionRecordFieldHead
 				label={field.label}
 				marker={marker}
-				markerTestID={`${testID}-${marker ?? "marker"}`}
+				markerTestID={marker === undefined ? undefined : `${testID}-${marker}`}
 				name={field.name}
 			/>
 			{control}

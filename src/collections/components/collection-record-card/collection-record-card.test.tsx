@@ -111,6 +111,32 @@ describe("<CollectionRecordCard>", () => {
 		});
 	});
 
+	// the props spread is what lets a caller add to the card; it must not let one
+	// take the card apart. an `onPress` landing over the push would leave a
+	// control that looks exactly the same and opens nothing.
+	it("keeps its own navigation, announcement, and test id over a caller's", () => {
+		const onPress = jest.fn();
+		const { getByTestId, queryByTestId } = render(
+			<CollectionRecordCard
+				accessibilityLabel="Something else"
+				accessibilityRole="text"
+				onPress={onPress}
+				record={TITLED}
+				slug={SLUG}
+				testID="somewhere-else"
+			/>,
+		);
+		const card = getByTestId(`collection-record-list-item-${TITLED.id}`);
+
+		fireEvent.press(card);
+
+		expect(mockRouterPush).toHaveBeenCalledTimes(1);
+		expect(onPress).not.toHaveBeenCalled();
+		expect(queryByTestId("somewhere-else")).toBeNull();
+		expect(card.props.accessibilityLabel).toBe(TITLED.title);
+		expect(card.props.accessibilityRole).toBe("button");
+	});
+
 	it("announces itself as a control", () => {
 		const { getByTestId } = render(
 			<CollectionRecordCard record={TITLED} slug={SLUG} />,

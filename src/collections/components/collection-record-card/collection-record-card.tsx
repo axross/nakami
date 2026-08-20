@@ -68,8 +68,16 @@ export function CollectionRecordCard({
 	return (
 		<Pressable
 			accessible
-			// a title-less card shows placeholder copy, so the id is what actually
-			// identifies the record and is what the announcement has to carry.
+			{...props}
+			// everything below the spread is what the card *is*, so it wins over
+			// whatever a caller passes: the push is the card's whole purpose, and a
+			// caller handing in an `onPress` of its own would silently disable
+			// navigation. the announcement and the test id are derived from the
+			// record for the same reason — a title-less card shows placeholder copy,
+			// so the id is what actually identifies the record and is what the
+			// announcement has to carry. (the sibling collection row spreads last
+			// instead, because `Link asChild` clones it and its injected press props
+			// have to land.)
 			accessibilityLabel={record.hasTitle ? record.title : record.id}
 			accessibilityRole="button"
 			onPress={() => {
@@ -79,7 +87,6 @@ export function CollectionRecordCard({
 				});
 			}}
 			testID={`collection-record-list-item-${record.id}`}
-			{...props}
 			style={({ pressed }) => [styles.card(pressed), style]}
 		>
 			<Text numberOfLines={1} style={styles.title}>
