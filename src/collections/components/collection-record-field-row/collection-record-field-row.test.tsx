@@ -38,18 +38,23 @@ function renderRow(
 	} = {},
 ) {
 	const onSave = jest.fn<(fieldName: string, value: unknown) => void>();
-
-	return Object.assign(
-		render(
-			<CollectionRecordFieldRow
-				field={field}
-				isQueued={overrides.isQueued ?? false}
-				onSave={onSave}
-				refusalMessage={overrides.refusalMessage ?? null}
-			/>,
-		),
-		{ onSave },
+	const row = (subject: RecordField) => (
+		<CollectionRecordFieldRow
+			field={subject}
+			isQueued={overrides.isQueued ?? false}
+			onSave={onSave}
+			refusalMessage={overrides.refusalMessage ?? null}
+		/>
 	);
+	const view = render(row(field));
+
+	return Object.assign(view, {
+		onSave,
+		/** re-renders the same row against a field the record has since changed. */
+		rerenderField(next: RecordField) {
+			view.rerender(row(next));
+		},
+	});
 }
 
 describe("<CollectionRecordFieldRow>", () => {
@@ -253,6 +258,56 @@ describe("<CollectionRecordFieldRow>", () => {
 			fireEvent(getByTestId("record-field-title-input"), "blur");
 
 			expect(onSave).not.toHaveBeenCalled();
+		});
+
+		// the record moves under a screen that is left open — the query refetches
+		// on focus and after 30s — while the row goes on showing what it seeded
+		// with. a blur nobody typed into must not push that seeded text back over
+		// whatever another account saved in the meantime; the server answers 200,
+		// so nothing downstream would ever report the revert.
+		it("sends nothing on an untouched blur after the record moved underneath", () => {
+			const { getByTestId, onSave, rerenderField } = renderRow(
+				fieldOf("title", "Written here", "text"),
+			);
+
+			rerenderField(fieldOf("title", "Written elsewhere", "text"));
+			fireEvent(getByTestId("record-field-title-input"), "blur");
+
+			expect(onSave).not.toHaveBeenCalled();
+			// the seed still stands: the row deliberately does not re-seed itself,
+			// so a half-typed field is never replaced by a background refetch.
+			expect(getByTestId("record-field-title-input").props.value).toBe(
+				"Written here",
+			);
+		});
+
+		// the other half of the same guard: having typed is necessary, not
+		// sufficient. a real edit still goes.
+		it("sends an edit made after the record moved underneath", () => {
+			const { getByTestId, onSave, rerenderField } = renderRow(
+				fieldOf("title", "Written here", "text"),
+			);
+
+			rerenderField(fieldOf("title", "Written elsewhere", "text"));
+
+			const input = getByTestId("record-field-title-input");
+			fireEvent.changeText(input, "Written by hand");
+			fireEvent(input, "blur");
+
+			expect(onSave).toHaveBeenCalledWith("title", "Written by hand");
+		});
+
+		it("sends nothing on a second blur once the change has been sent", () => {
+			const { getByTestId, onSave } = renderRow(
+				fieldOf("title", "Shipping v2", "text"),
+			);
+			const input = getByTestId("record-field-title-input");
+
+			fireEvent.changeText(input, "Shipping v3");
+			fireEvent(input, "blur");
+			fireEvent(input, "blur");
+
+			expect(onSave).toHaveBeenCalledTimes(1);
 		});
 
 		// the server answers 200 and stores `null` for a value of the wrong type,

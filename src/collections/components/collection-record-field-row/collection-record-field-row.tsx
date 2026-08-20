@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { CollectionRecordFieldError } from "~/collections/components/collection-record-field-row/collection-record-field-error";
@@ -58,6 +58,10 @@ export function CollectionRecordFieldRow({
 }>): JSX.Element {
 	const [text, setText] = useState(() => toEditableText(field));
 	const [isOn, setIsOn] = useState(field.value === true);
+	// whether this input has been typed into since it was seeded or last saved.
+	// a ref rather than state: nothing on screen changes with it, so making it
+	// state would only re-render the row on the first keystroke.
+	const hasTypedRef = useRef(false);
 	const testID = recordFieldRowTestID(field.name);
 	const isRefused = refusalMessage !== null;
 
@@ -65,11 +69,24 @@ export function CollectionRecordFieldRow({
 	// field again clears it, at which point the row is queued once more.
 	const marker = isRefused ? "refused" : isQueued ? "queued" : undefined;
 
+	function edit(next: string): void {
+		hasTypedRef.current = true;
+		setText(next);
+	}
+
 	// a blur that changed nothing sends nothing, and text that does not parse is
 	// not sent at all — the server would answer 200 and quietly store `null`, so
 	// nothing downstream could report the loss.
+	//
+	// "changed nothing" is asked of the *user* first, and only then of the text.
+	// the row seeds once and `field.value` does not: a background refetch moves
+	// it while the input stands still, so a comparison against it alone would
+	// read an untouched input as an edit and send the seeded text — reverting
+	// whatever another account had saved in the meantime, at a 200 nothing
+	// surfaces. the text comparison stays as the second guard, so typing a
+	// character and undoing it still sends nothing.
 	function commit(): void {
-		if (!hasEditedText(field, text)) {
+		if (!hasTypedRef.current || !hasEditedText(field, text)) {
 			return;
 		}
 
@@ -77,6 +94,9 @@ export function CollectionRecordFieldRow({
 
 		if (parsed !== null) {
 			onSave(field.name, parsed.value);
+			// what was typed is now what was sent, so the next blur is untouched
+			// again until the user types once more.
+			hasTypedRef.current = false;
 		}
 	}
 
@@ -108,7 +128,7 @@ export function CollectionRecordFieldRow({
 				accessibilityLabel={field.label}
 				isRefused={isRefused}
 				kind={field.kind}
-				onChangeText={setText}
+				onChangeText={edit}
 				onCommit={commit}
 				testID={`${testID}-input`}
 				value={text}

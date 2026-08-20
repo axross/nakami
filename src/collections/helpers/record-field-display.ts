@@ -148,11 +148,17 @@ export function parseEditedText(
 }
 
 /**
- * whether what is in the input differs from what the record was loaded with, so
- * a blur that changed nothing sends nothing. the comparison is on the text
+ * whether what is in the input differs from what the field currently holds, so
+ * a character typed and undone sends nothing. the comparison is on the text
  * rather than on the parsed value, because the text is what the user actually
  * edited — re-indented JSON that parses to the same object is a change to the
  * stored string and is worth sending.
+ *
+ * this is the *second* of the two guards a save passes, and cannot be the only
+ * one: `field.value` moves with the record's query while the input holds what
+ * it was seeded with, so an untouched input can differ from it without anyone
+ * having edited anything. the row asks whether the user typed at all first —
+ * see `CollectionRecordFieldRow`.
  */
 export function hasEditedText(field: RecordField, text: string): boolean {
 	return text !== toEditableText(field);
