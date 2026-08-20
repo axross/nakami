@@ -54,6 +54,7 @@ bottom edge would double the clearance.
 | `home-screen`               | tab bar, header hidden | top + horizontal    |
 | `collections-screen`        | stack header + tab bar | horizontal          |
 | `collection-records-screen` | stack header + tab bar | horizontal          |
+| `collection-record-screen`  | stack header + tab bar | horizontal          |
 | `settings-screen`           | stack header + tab bar | horizontal          |
 | `licenses-screen`           | stack header + tab bar | horizontal          |
 
@@ -74,10 +75,11 @@ holds it. A future call site MUST NOT rely on this component for the horizontal 
 unless it renders it flush against the screen edges, because the inset would otherwise
 land somewhere other than the edge it is measured from.
 
-Separately, each loading skeleton mirrors the inset of the list it stands in for —
+Separately, each loading skeleton mirrors the inset of the surface it stands in for —
 `collection-list-skeleton` matching `collections-screen`, `collection-records-skeleton`
-matching `collection-records-screen` — so the placeholder does not shift sideways when
-the data arrives.
+matching `collection-records-screen`, and `collection-record-skeleton` matching
+`collection-record-screen`'s field list — so the placeholder does not shift sideways
+when the data arrives.
 
 ## An inset is floored against the surface's own gutter
 
@@ -93,8 +95,16 @@ reporting zero insets renders exactly as it did before this convention existed:
 | `home-screen` root                                          | `theme.gap.lg`       |
 | `collections-screen` + `collection-list-skeleton`           | `theme.gap.md`       |
 | `collection-records-screen` + `collection-records-skeleton` | `theme.gap.md`       |
+| `collection-record-screen` + `collection-record-skeleton`   | `theme.gap.md`       |
+| `collection-record-offline-notice`                          | `theme.gap.md`       |
 | `licenses-screen` root                                      | `theme.gap.lg`       |
 | `settings-screen` content container                         | nothing — see below  |
+
+`collection-record-offline-notice` is the one row above that is not a screen or a
+placeholder for one. It is the band the record detail screen draws above its fields
+while the device is offline, and it spans the screen rather than sitting inside the
+fields' gutter — so it carries the horizontal pair itself, floored against the same
+value the fields it sits above use.
 
 A new surface takes the gutter it already had rather than inventing one, so adding
 clearance never doubles as a redesign.
@@ -114,13 +124,19 @@ installed rule — along with what the exception costs — is recorded as a devi
 Any future surface taking this exception MUST carry the same comment, naming the
 children that hold the gutter, and MUST be recorded there too.
 
-Every inset-bearing surface has a colocated unit test pinning what its owned edges
+An inset-bearing surface MUST have a colocated unit test pinning what its owned edges
 resolve to. Unistyles' jest mock reports zero insets, which makes the whole suite a
 zero-inset device, so each floored surface asserts its design gutter and a surface that
 replaced its `Math.max` with a raw inset fails its own test. `settings-screen` is
 asserted the other way round — its horizontal pair is pinned at `0`, because the bare
 inset above is a decision rather than an oversight, and flooring it would go unnoticed
 otherwise.
+
+`collection-record-offline-notice` is the one surface in the table above that does not
+satisfy that yet: it has no colocated test file at all, so nothing would catch its
+horizontal pair collapsing to a raw inset. That is a gap in the guards rather than an
+exception to the rule, which is why the sentence above is written as a rule rather
+than as a statement of fact about the tree.
 
 Two limits of those guards are worth stating rather than discovering. **No unit test
 here observes a non-zero inset at all**: the mock's insets are fixed at zero and
@@ -134,12 +150,13 @@ That rule governs the stylesheet-declaration path, which none of these tests tou
 
 ## A scrolling screen insets its content, not its container
 
-Four screens scroll, and each carries its inset on the `contentContainerStyle` rather
-than on the scroll container: `sign-in-screen` and `settings-screen` on their
-`ScrollView`, `collections-screen` and `collection-records-screen` on their `FlatList`.
-None of the four scroll containers carries padding; two are not styled at all
-(`sign-in-screen`, whose `flex` sits on the enclosing `KeyboardAvoidingView`, and
-`collection-records-screen`, whose background sits on a wrapping `View`), and the other
+Five screens scroll, and each carries its inset on the `contentContainerStyle` rather
+than on the scroll container: `sign-in-screen`, `settings-screen`, and
+`collection-record-screen` on their `ScrollView`, `collections-screen` and
+`collection-records-screen` on their `FlatList`. None of the five scroll containers
+carries padding; three are not styled at all (`sign-in-screen`, whose `flex` sits on
+the enclosing `KeyboardAvoidingView`, and `collection-records-screen` and
+`collection-record-screen`, whose backgrounds sit on a wrapping `View`), and the other
 two hold background and `flex` only. `expo-app-development`'s
 [safe-areas.md](../../.claude/skills/expo-app-development/references/safe-areas.md) owns
 why.

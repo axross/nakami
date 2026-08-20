@@ -101,7 +101,7 @@ back off the registered theme, because no use site would catch its loss.
 
 ## Typography
 
-`theme.typography.*` carries six composite text roles, each bundling a font family, a
+`theme.typography.*` carries seven composite text roles, each bundling a font family, a
 size, and a line height, and each named for the content it carries rather than for its
 size:
 
@@ -112,7 +112,8 @@ size:
 | `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings                       |
 | `body`     | `InnovatorGrotesk-Regular`  | 16 / 22        | Running text, text inputs, list row labels                         |
 | `caption`  | `InnovatorGrotesk-Regular`  | 13 / 18        | A form field's name, hints, errors, counts, metadata               |
-| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Id chips, build details                                            |
+| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Id chips, build details, read-only and raw-JSON field values        |
+| `codeCaption` | `JetBrainsMono-Regular`  | 12 / 18        | Machine-readable text supporting something else — a record field's Payload name beside its label |
 
 A text style MUST apply a role **whole** — `...theme.typography.body` — and MUST NOT
 pick values out of one or override a part of it at the use site. A numeric `fontSize`
@@ -134,6 +135,12 @@ real one.
 card's height deterministic: `RECORD_CARD_LINE` in
 `src/collections/components/collection-record-card/collection-record-card.tsx` is a
 geometry constant sizing elements to that same 22, and no text style sets it.
+
+`caption` and `codeCaption` share an 18pt line box for the same kind of reason: a
+record field row sets its label in one and its Payload field name in the other, and
+the two read as a single line only because that shared line box puts them on one
+baseline. `codeCaption` exists rather than being inlined because a size with no role
+is a missing role, and no monospace role below `code`'s 14 existed.
 
 ## Breakpoints
 
