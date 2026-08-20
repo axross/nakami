@@ -73,8 +73,8 @@ holding Rich Text, and never writes to it.
 **queued change** — an edit to one **field** of one **record** that has not
 reached the **Payload server** yet. Changes wait in one queue and leave it
 oldest first, and a second change to a field already waiting replaces it. The
-queue is held in memory alone, so whatever is still waiting when the app closes
-is lost.
+queue is held in memory alone and belongs to the signed-in session, so whatever
+is still waiting when the app closes or the session ends is lost.
 
 # Development vocabulary
 

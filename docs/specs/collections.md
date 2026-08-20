@@ -203,6 +203,12 @@ saved yet.
 A refused change is not sent again by itself. Editing the field and leaving it
 again clears the refusal and queues a fresh change.
 
+A refusal is the server having read the value and declined it. A save that never
+got that far is not one, and is not shown as one: a server that could not be
+reached, and a session token turned away at the door before the value was ever
+looked at, both leave the change queued and the row marked as not saved yet,
+because neither of them says anything about what was typed.
+
 ## Editing with no connection
 
 Editing goes on working with no connection, and the screen says so in a line
@@ -211,14 +217,16 @@ wait for and nothing to press. A change made offline waits in the same queue,
 which empties itself in order once the connection returns.
 
 A second change to a field already waiting replaces the first, so a field edited
-over and over offline costs one save carrying the last value. A change that
-could not be sent because the server was unreachable stays where it is and goes
-with the next connection; only being accepted or being refused takes a change
-out of the queue.
+over and over offline costs one save carrying the last value. A change the
+server gave no verdict on stays where it is: one that could not reach the server
+goes with the next connection, and one the server turned away because the
+session's token had expired goes as soon as that token is renewed. Only being
+accepted or being refused takes a change out of the queue.
 
-The queue is held in memory alone. It does not survive the app being closed:
-whatever is still waiting then is lost, sent neither later nor at the next
-launch.
+The queue is held in memory alone and belongs to the signed-in session. It
+survives neither the app being closed nor a sign-out — including the involuntary
+one a token the server will not renew ends in: whatever is still waiting then is
+lost, sent neither later nor at the next launch.
 
 ## Loading, empty, and failure
 
