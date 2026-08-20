@@ -538,6 +538,44 @@ Until then the three screens' branching MUST NOT be raised as a fresh finding, a
 fourth screen added to this pattern MUST be listed in the table above rather than left
 for the next reader to find.
 
+## A record field's read-only reason mark is a 36×36pt target
+
+The installed `high-fidelity-ui-design` capability sets a floor on every tappable
+target:
+
+> MUST size every tappable target to at least 44×44 pt (24×24 CSS px absolute floor),
+> extending the hit area with padding or hit-slop rather than shrinking the visible
+> glyph, so no control's hit area is smaller than its interactive appearance implies.
+> — [interaction-states-and-feedback.md](../../.claude/skills/high-fidelity-ui-design/references/interaction-states-and-feedback.md)
+
+`CollectionRecordFieldReason` — the mark in the top-right corner of a read-only field
+row's value surface, which opens the reason it cannot be edited — has a pressable box
+of **36×36pt**. It is the one control in this app under the floor.
+
+The three numbers that produce it are each deliberate, and the first is a product
+decision rather than an implementation one. The glyph is 12pt, below the caption role's
+13, because a mark at the size of the surrounding text reads as a second piece of
+content competing with the value — which is exactly what the sentence it replaced did,
+and removing that was the point of [#161](https://github.com/axross/nakami/issues/161).
+The mark sits inside the surface's own top-right corner, which is where that issue's
+approval gate put it. And the surface's padding is `theme.gap.sm`, so a trigger padded
+by that same step — with a matching negative margin cancelling the layout footprint —
+reaches exactly the surface's outer edges. 12 + 12 + 12 is 36, and the box cannot grow
+past the surface without leaving its parent's bounds, which is not somewhere this app
+routes a touch. `hitSlop` is set to `theme.gap.xs` and buys reach only inside those
+bounds, chiefly leftward across the column gap; it is not what makes the target
+adequate and is not counted here as if it were.
+
+Both ways to reach 44 give up something the change was for. A larger glyph is the
+competing-content problem again. Making the whole value surface the trigger takes the
+tap away from the value, on the one row whose value is the server's own string.
+
+The deviation would end, rather than be re-argued, if the read-only surface's minimum
+height or padding grows, or if the row gains a control layout that gives the mark a
+column of its own. Until then this target MUST NOT be raised as a fresh finding, and a
+**second** control under 44×44 is not covered by this entry — it is its own decision,
+and this one is the exception rather than a precedent.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this

@@ -374,6 +374,28 @@ describe("<CollectionRecordScreen>", () => {
 			expect(getByText(sentence)).toBeTruthy();
 		});
 
+		// every mark owns its own bubble, and nothing coordinates them — what keeps
+		// one on screen is that an open bubble's own dismiss layer takes the next
+		// tap, so reaching a second mark means closing the first. this walks that
+		// sequence, which is the only one a finger can actually perform.
+		it("leaves one explanation on screen as marks are tapped in turn", async () => {
+			const { getByTestId, getByText, queryByText } = await renderLoaded();
+			const serverAssigned =
+				"Payload maintains this field itself, so it can't be edited here.";
+			const richText =
+				"This app can't edit a Rich Text field yet, so it's left as it is.";
+
+			fireEvent.press(getByTestId("record-field-createdAt-value-reason"));
+			fireEvent.press(getByTestId("record-field-createdAt-value-reason-scrim"));
+
+			expect(queryByText(serverAssigned)).toBeNull();
+
+			fireEvent.press(getByTestId("record-field-content-value-reason"));
+
+			expect(getByText(richText)).toBeTruthy();
+			expect(queryByText(serverAssigned)).toBeNull();
+		});
+
 		it("locks a field the access response denies update on", async () => {
 			jest.mocked(fetchRecord).mockResolvedValue(RECORD);
 			jest.mocked(fetchAccess).mockResolvedValue(
