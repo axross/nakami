@@ -44,6 +44,20 @@ const mismatchedBody = {
 	totalDocs: SENSITIVE_VALUE,
 };
 
+/** the deadline `request()` puts on a whole call, mirrored from the module. */
+const REQUEST_TIMEOUT_MS = 15_000;
+
+/**
+ * lets a call in flight reach its next real await — the body read, in the cases
+ * about the deadline. microtasks are not what fake timers replace, so this runs
+ * under them unchanged.
+ */
+async function flushMicrotasks(): Promise<void> {
+	for (let turn = 0; turn < 8; turn += 1) {
+		await Promise.resolve();
+	}
+}
+
 function thrownFrom(run: () => unknown): unknown {
 	try {
 		run();
@@ -341,6 +355,63 @@ describe("request()", () => {
 			// identity again, for the same reason as the network case above.
 			expect((error as PayloadRequestError).cause).toBe(parseFailure);
 		});
+	});
+
+	// a body is a second read over the same socket, and a server that answers its
+	// headers and then stalls is exactly what a timeout exists for. the deadline
+	// therefore has to outlast the headers — on the refusal path, which is on
+	// sign-in, as much as on the ok one.
+	describe("when the body stalls after the headers arrived", () => {
+		it.each<[string, (json: () => Promise<never>) => Response, string]>([
+			["a refusal", (json) => refusalResponse(401, json), "auth"],
+			[
+				"an accepted response",
+				(json) => ({ ok: true, status: 200, json }) as unknown as Response,
+				"server",
+			],
+		])(
+			"aborts the request rather than waiting forever on %s",
+			async (_, respond, kind) => {
+				jest.useFakeTimers();
+
+				try {
+					let signal: AbortSignal | null | undefined;
+
+					jest
+						.spyOn(globalThis, "fetch")
+						.mockImplementation(async (_input, init) => {
+							signal = init?.signal;
+
+							return respond(
+								() =>
+									new Promise<never>((_resolve, reject) => {
+										signal?.addEventListener("abort", () => {
+											reject(new Error("The body read was aborted."));
+										});
+									}),
+							);
+						});
+
+					const attempt = attemptRequest();
+					await flushMicrotasks();
+
+					// the deadline is still armed while the body is being read; clearing
+					// it with the headers is what would leave the request hanging.
+					expect(jest.getTimerCount()).toBe(1);
+
+					jest.advanceTimersByTime(REQUEST_TIMEOUT_MS);
+
+					const error = (await attempt) as PayloadRequestError;
+
+					expect(signal?.aborted).toBe(true);
+					expect(error.kind).toBe(kind);
+					// and the deadline is cleared once the request is done with it.
+					expect(jest.getTimerCount()).toBe(0);
+				} finally {
+					jest.useRealTimers();
+				}
+			},
+		);
 	});
 });
 

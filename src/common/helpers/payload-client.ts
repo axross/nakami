@@ -159,6 +159,9 @@ export function serverBaseUrl(serverUrl: string): string {
  * on success. credentials only ever travel to the caller-supplied host. the
  * `operation` label identifies the call in the request-lifecycle breadcrumbs.
  *
+ * the timeout covers the whole call, the body read included, rather than only
+ * the wait for a response — see the comment on it below.
+ *
  * @throws {PayloadRequestError} on every failure path, in one of three kinds:
  * `"network"` when the transport never returned a response, whether the host
  * was unreachable or the timeout above aborted the call; `"auth"` on a 401 or
@@ -167,10 +170,16 @@ export function serverBaseUrl(serverUrl: string): string {
  * dead transport and the unparseable body — carry the originating error as
  * `cause`.
  *
+ * a status that did arrive keeps its kind even where the deadline expired while
+ * its body was being read: a 401 whose body never lands is still an `"auth"`
+ * rejection, and an ok response whose body never lands is a `"server"` one,
+ * since the status is the more useful of the two facts to a caller.
+ *
  * a failure that *was* a response also carries whatever its body said as
  * {@link PayloadRequestError.detail}, so a caller can show the server's own
- * words. reading it cannot fail the request: an unreadable or unrecognized
- * body leaves `detail` undefined and changes nothing else about the error.
+ * words. reading it cannot fail the request: an unreadable, unrecognized, or
+ * abandoned body leaves `detail` undefined and changes nothing else about the
+ * error.
  */
 export async function request(
 	operation: string,
@@ -185,73 +194,83 @@ export async function request(
 	// identifies the call; the URL and body are omitted to keep credentials out.
 	logger.debug("Started request.", { operation });
 
-	let response: Response;
+	// the deadline is cleared here rather than beside the `fetch` below, so that
+	// it covers reading the body as well as arriving at it. a body is a second
+	// read over the same socket: a server can answer its headers and then stall,
+	// and a deadline that ended with the headers would leave the call waiting on
+	// that body with nothing left to interrupt it — forever, on a path that runs
+	// at sign-in. an abort mid-body surfaces as whichever failure that read was
+	// already going to be reported as.
 	try {
-		response = await fetch(url, { ...init, signal: controller.signal });
-	} catch (error) {
-		// network down, DNS failure, timeout/abort — the server was unreachable.
-		// close the bracket at debug (callers report the failure at their own
-		// level) so the breadcrumb trail doesn't go quiet on the failure path.
-		// the rejection rides on the thrown error's `cause` rather than this line:
-		// `isReportableQueryError()` keeps `"network"` out of the tracker, so the
-		// cause serves local diagnosis and whatever path does capture the error,
-		// while a breadcrumb leaves the device either way — putting the underlying
-		// message on one would add a telemetry surface for no triage gain.
-		logger.debug("Failed request.", {
+		let response: Response;
+		try {
+			response = await fetch(url, { ...init, signal: controller.signal });
+		} catch (error) {
+			// network down, DNS failure, timeout/abort — the server was unreachable.
+			// close the bracket at debug (callers report the failure at their own
+			// level) so the breadcrumb trail doesn't go quiet on the failure path.
+			// the rejection rides on the thrown error's `cause` rather than this line:
+			// `isReportableQueryError()` keeps `"network"` out of the tracker, so the
+			// cause serves local diagnosis and whatever path does capture the error,
+			// while a breadcrumb leaves the device either way — putting the underlying
+			// message on one would add a telemetry surface for no triage gain.
+			logger.debug("Failed request.", {
+				operation,
+				duration: performance.now() - startedAt,
+			});
+			throw new PayloadRequestError(
+				"network",
+				"The server could not be reached.",
+				undefined,
+				{ cause: error },
+			);
+		}
+
+		logger.debug("Completed request.", {
 			operation,
+			status: response.status,
 			duration: performance.now() - startedAt,
 		});
-		throw new PayloadRequestError(
-			"network",
-			"The server could not be reached.",
-			undefined,
-			{ cause: error },
-		);
-	} finally {
-		clearTimeout(timeout);
-	}
 
-	logger.debug("Completed request.", {
-		operation,
-		status: response.status,
-		duration: performance.now() - startedAt,
-	});
+		if (!response.ok) {
+			// read once, before the kinds part ways: both are refusals, and Payload
+			// answers a rejected token in the same shape it answers a rejected
+			// value. the kind, the message, and the status below are exactly what
+			// they were before the body was read at all — `detail` is the only
+			// addition.
+			const detail = await readErrorDetail(response);
 
-	if (!response.ok) {
-		// read once, before the kinds part ways: both are refusals, and Payload
-		// answers a rejected token in the same shape it answers a rejected value.
-		// the kind, the message, and the status below are exactly what they were
-		// before the body was read at all — `detail` is the only addition.
-		const detail = await readErrorDetail(response);
+			if (response.status === 401 || response.status === 403) {
+				throw new PayloadRequestError(
+					"auth",
+					"Authentication was rejected.",
+					response.status,
+					undefined,
+					detail,
+				);
+			}
 
-		if (response.status === 401 || response.status === 403) {
 			throw new PayloadRequestError(
-				"auth",
-				"Authentication was rejected.",
+				"server",
+				`Unexpected response (${response.status}).`,
 				response.status,
 				undefined,
 				detail,
 			);
 		}
 
-		throw new PayloadRequestError(
-			"server",
-			`Unexpected response (${response.status}).`,
-			response.status,
-			undefined,
-			detail,
-		);
-	}
-
-	try {
-		return await response.json();
-	} catch (error) {
-		throw new PayloadRequestError(
-			"server",
-			"The server returned an invalid response.",
-			undefined,
-			{ cause: error },
-		);
+		try {
+			return await response.json();
+		} catch (error) {
+			throw new PayloadRequestError(
+				"server",
+				"The server returned an invalid response.",
+				undefined,
+				{ cause: error },
+			);
+		}
+	} finally {
+		clearTimeout(timeout);
 	}
 }
 
