@@ -568,6 +568,38 @@ describe("<CollectionRecordsScreen>", () => {
 		expect(screen.queryByTestId("collection-records-list")).toBeNull();
 	});
 
+	// the collection's records carry none of the eight title-ish fields, so the
+	// field query is never sent and the id lookup is the search's only request.
+	// a connectivity failure there has to reach the screen: read as "no id
+	// match" it would report that nothing matched, which is a different claim.
+	it("fails the search when its only request fails, rather than reporting no matches", async () => {
+		respondWith(
+			page({ docs: [{ id: "r1", views: 12 }], totalDocs: 1 }),
+			page({ docs: [], totalDocs: 0 }),
+		);
+		jest
+			.mocked(findRecordById)
+			.mockRejectedValue(new PayloadRequestError("network", "unreachable"));
+
+		const screen = renderScreen();
+		await waitFor(() => {
+			expect(screen.getByTestId("collection-record-list-item-r1")).toBeTruthy();
+		});
+
+		await search(screen, "r9");
+
+		await waitFor(() => {
+			expect(screen.getByTestId("collection-records-error")).toBeTruthy();
+		});
+		expect(screen.queryByTestId("collection-records-no-matches")).toBeNull();
+		// the field query was never sent: no record carries a field to search.
+		expect(
+			jest
+				.mocked(fetchRecords)
+				.mock.calls.every(([, , , , term]) => term === undefined),
+		).toBe(true);
+	});
+
 	// a stack header and the tab bar clear this screen's vertical edges, so it
 	// owns only the horizontal pair — carried on the feed's content container
 	// rather than the list itself. Unistyles' jest mock reports zero insets, so

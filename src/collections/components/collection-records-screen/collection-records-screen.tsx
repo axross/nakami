@@ -340,8 +340,15 @@ export function CollectionRecordsScreen({
 }
 
 /**
- * the records in order, keeping the first of any id that appears more than
- * once. see the call site for the two ways a search can produce one.
+ * the records in order, keeping the first of any id that appears more than once.
+ * see the call site for the two ways a search can produce one.
+ *
+ * the first is kept outright rather than through a `Map` built from every entry,
+ * which would keep the first occurrence's *position* while overwriting its value
+ * with the last one under that key. Here the two are the same document fetched
+ * two ways, so the distinction changes nothing today — but the code should mean
+ * what it says, and the id lookup's record leading the page is the one worth
+ * pinning.
  *
  * the count beside the field is the server's own and is left alone, so a search
  * that did repeat a record reports one more match than it lists. That is the
@@ -349,7 +356,17 @@ export function CollectionRecordsScreen({
  * notice, where the duplicate row is not.
  */
 function dedupeById(records: readonly CollectionRecord[]): CollectionRecord[] {
-	return [...new Map(records.map((record) => [record.id, record])).values()];
+	const seen = new Set<string>();
+
+	return records.filter((record) => {
+		if (seen.has(record.id)) {
+			return false;
+		}
+
+		seen.add(record.id);
+
+		return true;
+	});
 }
 
 const styles = StyleSheet.create((theme, rt) => ({

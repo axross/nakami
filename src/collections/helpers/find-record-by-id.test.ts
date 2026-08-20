@@ -36,20 +36,10 @@ describe("findRecordById()", () => {
 		).resolves.toBeNull();
 	});
 
-	// the lookup is speculative — the reader typed text, which may be nothing
-	// like an id of the type this server uses — so every way it can fail means
-	// "not an id", including the ways that are not a 404.
-	it("answers null when the server could not be reached", async () => {
-		jest
-			.mocked(fetchRecord)
-			.mockRejectedValue(new PayloadRequestError("network", "unreachable"));
-
-		await expect(
-			findRecordById("https://cms.example.com", "jwt-token", "posts", "12"),
-		).resolves.toBeNull();
-	});
-
-	it("answers null when the id was rejected outright", async () => {
+	// Payload reports an unusable id as a 404 on some database adapters and as a
+	// cast failure on others, so the status cannot be the test — both arrive as
+	// the same kind, and both mean the typed string is not one of these ids.
+	it("answers null when the id was refused rather than missing", async () => {
 		jest
 			.mocked(fetchRecord)
 			.mockRejectedValue(new PayloadRequestError("server", "cast failed", 500));
@@ -57,5 +47,37 @@ describe("findRecordById()", () => {
 		await expect(
 			findRecordById("https://cms.example.com", "jwt-token", "posts", "12"),
 		).resolves.toBeNull();
+	});
+
+	// a failure that says nothing about the typed string is not this helper's to
+	// answer: it belongs to the search around it, which has a surface for it.
+	it("propagates a connectivity failure rather than reading it as no match", async () => {
+		const failure = new PayloadRequestError("network", "unreachable");
+		jest.mocked(fetchRecord).mockRejectedValue(failure);
+
+		await expect(
+			findRecordById("https://cms.example.com", "jwt-token", "posts", "12"),
+		).rejects.toBe(failure);
+	});
+
+	it("propagates a rejected token rather than reading it as no match", async () => {
+		const failure = new PayloadRequestError("auth", "rejected", 403);
+		jest.mocked(fetchRecord).mockRejectedValue(failure);
+
+		await expect(
+			findRecordById("https://cms.example.com", "jwt-token", "posts", "12"),
+		).rejects.toBe(failure);
+	});
+
+	// nothing else in the app throws a bare Error across this boundary, but a
+	// helper that decides by kind has to say what it does with one that carries
+	// no kind at all.
+	it("propagates a failure that is not a Payload request error", async () => {
+		const failure = new TypeError("undefined is not a function");
+		jest.mocked(fetchRecord).mockRejectedValue(failure);
+
+		await expect(
+			findRecordById("https://cms.example.com", "jwt-token", "posts", "12"),
+		).rejects.toBe(failure);
 	});
 });
