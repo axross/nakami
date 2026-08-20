@@ -1,4 +1,4 @@
-import { humanizeSlug } from "~/collections/helpers/humanize-slug";
+import { humanizeFieldName } from "~/collections/helpers/humanize-field-name";
 import {
 	type AccessResponse,
 	canUpdateField,
@@ -44,7 +44,11 @@ export type RecordFieldReadOnlyReason =
 export interface RecordField {
 	/** the Payload field name, shown as-is beside the label. */
 	readonly name: string;
-	/** the display label, humanized from {@link RecordField.name}. */
+	/**
+	 * the display label, humanized from {@link RecordField.name} — split on
+	 * word separators and camelCase boundaries alike, since a field name is an
+	 * identifier rather than a slug.
+	 */
 	readonly label: string;
 	/** the value the record carries, unconverted. */
 	readonly value: unknown;
@@ -160,7 +164,7 @@ export function toRecordFields({
 
 		return {
 			name,
-			label: humanizeSlug(name),
+			label: humanizeFieldName(name),
 			value,
 			kind: inferKind(value),
 			isEditable: readOnlyReason === null,

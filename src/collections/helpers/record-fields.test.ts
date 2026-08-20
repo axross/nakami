@@ -39,15 +39,23 @@ describe("toRecordFields()", () => {
 		]);
 	});
 
-	// the same rule a collection slug goes through, which is all Payload's REST
-	// API leaves to work with: it splits on word separators only, so a
-	// camelCased field name comes back as one word.
+	// Payload's REST API publishes no admin label, so the name is all there is
+	// to work with: it splits on word separators and on camelCase boundaries
+	// alike, since a field name is an identifier rather than a slug.
 	it("labels a field by humanizing its own name", () => {
-		const [, blogAuthor] = fieldsOf({ id: "a1", blog_author: "Ada" });
+		const [, blogAuthor, readingMinutes] = fieldsOf({
+			id: "a1",
+			blog_author: "Ada",
+			readingMinutes: 7,
+		});
 
 		expect(blogAuthor).toMatchObject({
 			name: "blog_author",
 			label: "Blog Author",
+		});
+		expect(readingMinutes).toMatchObject({
+			name: "readingMinutes",
+			label: "Reading Minutes",
 		});
 	});
 
@@ -80,7 +88,7 @@ describe("toRecordFields()", () => {
 			},
 			{
 				name: "isDraft",
-				label: "IsDraft",
+				label: "Is Draft",
 				value: false,
 				kind: "boolean",
 				isEditable: true,
