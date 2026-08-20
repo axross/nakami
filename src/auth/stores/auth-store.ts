@@ -90,6 +90,27 @@ interface AuthStore {
 	) => Promise<void>;
 }
 
+/**
+ * the re-authentication currently in flight, or `null`. it exists because
+ * `reauthenticate` has two callers that meet the rejection of the *same* token
+ * milliseconds apart on the launch this whole feature is for: `hydrate` flips
+ * `status` to `"authenticated"` optimistically, before its own `/me` settles,
+ * and that flip is what starts `useSessionRefresh`'s check — so `fetchMe` and
+ * `refreshToken` are in flight together against one expired token, and both are
+ * rejected together.
+ *
+ * without this, each caller would replay the stored password on its own: two
+ * logins for one logical event, which spends two of Payload's
+ * `maxLoginAttempts` when the password is stale — the very budget the
+ * never-retried rule below exists to protect — and lets a rejected second
+ * attempt sign out over a successful first one.
+ *
+ * the promise is shared rather than the work serialized, so the second caller
+ * gets the outcome of the attempt that actually ran and closes its own log
+ * bracket with what happened.
+ */
+let reauthenticating: Promise<ReauthenticationOutcome> | null = null;
+
 export const useAuthStore = create<AuthStore>((set, get) => ({
 	status: "loading",
 	session: null,
@@ -198,7 +219,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 		// today's behaviour and recoverable, rather than a password with no
 		// session, which nothing would ever read and `hydrate` has to clean up.
 		if (credentials !== undefined) {
-			await writeCredentials(credentials);
+			try {
+				await writeCredentials(credentials);
+			} catch (error) {
+				// the session is in the keychain but this call is about to reject,
+				// so the sign-in screen will say the sign-in failed. take the session
+				// back out first: left there, the next launch would read it, verify
+				// it against `/me`, and sign the user in — contradicting the failure
+				// they were just shown, with nothing on screen ever explaining it.
+				try {
+					await clearSession();
+				} catch (rollbackError) {
+					// the keychain is refusing both directions now. report it, and let
+					// the original failure be the one the screen reports — a keychain
+					// that cannot be written cannot be rolled back either, and the
+					// mismatch above is the lesser of what is already wrong.
+					reportError(rollbackError, {
+						extra: { scope: "auth/auth-store.authenticate.rollback" },
+					});
+				}
+
+				throw error;
+			}
 		}
 		// remember the endpoint so the next sign-in can pre-fill it; best-effort
 		// inside the helper, so it never blocks authentication. sign-out clears
@@ -221,74 +263,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 	},
 
 	async reauthenticate() {
-		const credentials = await readCredentials();
-
-		if (credentials === null) {
-			// nobody allowed anything to be kept, or the entry was unreadable and
-			// `readCredentials` already discarded it. this is the path every
-			// rejected token took before this feature existed.
-			await get().deauthenticate();
-			return "signed-out";
-		}
-
-		const startedAt = performance.now();
-		// bracketed like `refreshSessionIfDue`, and for the same reason: this runs
-		// unattended, and the breadcrumb trail is the only record of it on a device
-		// nobody can reach. the endpoint only — never the email or the password.
-		logger.debug("Started re-authenticating from stored credentials.", {
-			serverUrl: credentials.serverUrl,
+		// `??=` rather than a boolean flag: a second caller has to await the
+		// attempt already running and receive its outcome, not skip it and report
+		// an end that never happened. the entry is cleared once it settles, so a
+		// later rejection can still start a fresh attempt.
+		reauthenticating ??= attemptReauthentication().finally(() => {
+			reauthenticating = null;
 		});
 
-		try {
-			const result = await login(
-				{
-					serverUrl: credentials.serverUrl,
-					collectionSlug: credentials.collectionSlug,
-				},
-				{ email: credentials.email, password: credentials.password },
-			);
-			const session: Session = {
-				serverUrl: credentials.serverUrl,
-				collectionSlug: credentials.collectionSlug,
-				token: result.token,
-				exp: result.exp,
-				user: result.user,
-			};
-
-			await writeSession(session);
-			set({ status: "authenticated", session });
-			logger.info("Completed re-authenticating from stored credentials.", {
-				outcome: "reauthenticated",
-				duration: performance.now() - startedAt,
-			});
-
-			return "reauthenticated";
-		} catch (error) {
-			if (error instanceof PayloadRequestError && error.kind === "auth") {
-				// terminal, and deliberately not retried: the stored password no
-				// longer opens the account — changed, or the user deactivated — and
-				// replaying it on every trigger would walk the account into Payload's
-				// `maxLoginAttempts` lockout. `deauthenticate` discards it.
-				logger.info("Completed re-authenticating from stored credentials.", {
-					outcome: "signed-out",
-					reason: "credentials-rejected",
-					duration: performance.now() - startedAt,
-				});
-				await get().deauthenticate();
-
-				return "signed-out";
-			}
-
-			// the server said nothing about validity, so neither does this: the
-			// session and the credentials both stay, and the next trigger retries.
-			logger.warn("Completed re-authenticating from stored credentials.", {
-				outcome: "deferred",
-				reason: error instanceof Error ? error.message : "unknown",
-				duration: performance.now() - startedAt,
-			});
-
-			return "deferred";
-		}
+		return reauthenticating;
 	},
 
 	async deauthenticate() {
@@ -339,6 +322,103 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 		logger.debug("Replaced the session token.", { exp });
 	},
 }));
+
+/**
+ * one attempt at reviving a rejected session from the stored sign-in. it is a
+ * module-level function rather than a store action so that {@link
+ * reauthenticating} can hold exactly one of them; `reauthenticate` is the entry
+ * point, and nothing else calls this.
+ *
+ * it settles rather than rejects, on every path. its two callers reach it from
+ * inside their own `catch` blocks — `hydrate`'s, and `refreshSessionIfDue`'s,
+ * which nothing awaits — so a throw here would surface as an unhandled
+ * rejection rather than as a decision.
+ */
+async function attemptReauthentication(): Promise<ReauthenticationOutcome> {
+	const startedAt = performance.now();
+
+	try {
+		const credentials = await readCredentials();
+
+		if (credentials === null) {
+			// nobody allowed anything to be kept, or the entry was unreadable and
+			// `readCredentials` already discarded it. this is the path every
+			// rejected token took before this feature existed.
+			await useAuthStore.getState().deauthenticate();
+
+			return "signed-out";
+		}
+
+		// bracketed like `refreshSessionIfDue`, and for the same reason: this runs
+		// unattended, and the breadcrumb trail is the only record of it on a device
+		// nobody can reach. the endpoint only — never the email or the password.
+		logger.debug("Started re-authenticating from stored credentials.", {
+			serverUrl: credentials.serverUrl,
+		});
+
+		try {
+			const result = await login(
+				{
+					serverUrl: credentials.serverUrl,
+					collectionSlug: credentials.collectionSlug,
+				},
+				{ email: credentials.email, password: credentials.password },
+			);
+			const session: Session = {
+				serverUrl: credentials.serverUrl,
+				collectionSlug: credentials.collectionSlug,
+				token: result.token,
+				exp: result.exp,
+				user: result.user,
+			};
+
+			await writeSession(session);
+			useAuthStore.setState({ status: "authenticated", session });
+			logger.info("Completed re-authenticating from stored credentials.", {
+				outcome: "reauthenticated",
+				duration: performance.now() - startedAt,
+			});
+
+			return "reauthenticated";
+		} catch (error) {
+			if (error instanceof PayloadRequestError && error.kind === "auth") {
+				// terminal, and deliberately not retried: the stored password no
+				// longer opens the account — changed, or the user deactivated — and
+				// replaying it on every trigger would walk the account into Payload's
+				// `maxLoginAttempts` lockout. `deauthenticate` discards it.
+				logger.info("Completed re-authenticating from stored credentials.", {
+					outcome: "signed-out",
+					reason: "credentials-rejected",
+					duration: performance.now() - startedAt,
+				});
+				await useAuthStore.getState().deauthenticate();
+
+				return "signed-out";
+			}
+
+			// the server said nothing about validity, so neither does this: the
+			// session and the credentials both stay, and the next trigger retries.
+			logger.warn("Completed re-authenticating from stored credentials.", {
+				outcome: "deferred",
+				reason: error instanceof Error ? error.message : "unknown",
+				duration: performance.now() - startedAt,
+			});
+
+			return "deferred";
+		}
+	} catch (error) {
+		// the keychain itself refused a read or a write — the one failure the two
+		// inner paths do not already answer. nothing about the session was
+		// decided, so this defers like an unreachable server; it is reported
+		// because, unlike the paths above, it is a defect rather than an expected
+		// operational state.
+		reportError(error, {
+			extra: { scope: "auth/auth-store.reauthenticate" },
+		});
+
+		return "deferred";
+	}
+}
 
 /** selector hook for app-wide auth status (Home, Settings, the tabs layout). */
 export function useAuthStatus(): AuthStatus {

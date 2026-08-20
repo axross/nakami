@@ -259,6 +259,51 @@ describe("reauthenticate", () => {
 		expect(login).toHaveBeenCalledTimes(1);
 	});
 
+	// the two callers can meet the rejection of the same token milliseconds apart
+	// — `hydrate` flips `status` optimistically before its own `/me` settles,
+	// which starts `useSessionRefresh`'s check beside it — and each would
+	// otherwise replay the stored password on its own. two logins for one logical
+	// event spend two of Payload's `maxLoginAttempts` when the password is stale,
+	// and let one branch sign out over the other's fresh session.
+	it("replays the credentials once when both callers arrive at the same time", async () => {
+		useAuthStore.setState({ status: "authenticated", session });
+		storedCredentials();
+		jest.mocked(login).mockResolvedValue({
+			user: { id: "1", email: "you@example.com" },
+			token: "reissued-token",
+			exp: 1_900_000_000,
+		});
+
+		const [first, second] = await Promise.all([
+			useAuthStore.getState().reauthenticate(),
+			useAuthStore.getState().reauthenticate(),
+		]);
+
+		expect(login).toHaveBeenCalledTimes(1);
+		// both callers get the outcome of that one attempt, so each closes its own
+		// log bracket with what actually happened rather than with a guess.
+		expect(first).toBe("reauthenticated");
+		expect(second).toBe("reauthenticated");
+	});
+
+	// the guard releases rather than latching: a later rejection has to be able to
+	// start a fresh attempt, or the first re-authentication of a launch would be
+	// the only one the process ever makes.
+	it("allows a later attempt once the first has settled", async () => {
+		useAuthStore.setState({ status: "authenticated", session });
+		storedCredentials();
+		jest.mocked(login).mockResolvedValue({
+			user: { id: "1", email: "you@example.com" },
+			token: "reissued-token",
+			exp: 1_900_000_000,
+		});
+
+		await useAuthStore.getState().reauthenticate();
+		await useAuthStore.getState().reauthenticate();
+
+		expect(login).toHaveBeenCalledTimes(2);
+	});
+
 	// this module now handles a password, and every line it writes is mirrored to
 	// the error tracker's breadcrumb trail — so a log context that named the
 	// email or the password would carry both off the device. asserted across all
@@ -360,6 +405,22 @@ describe("authenticate / deauthenticate / applyRefresh", () => {
 		).toBeLessThan(
 			jest.mocked(writeCredentials).mock.invocationCallOrder[0] ?? Number.NaN,
 		);
+	});
+
+	// left in the keychain, that session would be read and verified by the next
+	// launch and sign the user in — contradicting the failure the sign-in screen
+	// showed them, with nothing on screen ever explaining it.
+	it("takes the session back out when the credentials write fails", async () => {
+		jest
+			.mocked(writeCredentials)
+			.mockRejectedValue(new Error("keychain unavailable"));
+
+		await expect(
+			useAuthStore.getState().authenticate(session, credentials),
+		).rejects.toThrow("keychain unavailable");
+
+		expect(clearSession).toHaveBeenCalled();
+		expect(useAuthStore.getState().status).not.toBe("authenticated");
 	});
 
 	it("clears the session but keeps the remembered server URL on deauthenticate", async () => {
