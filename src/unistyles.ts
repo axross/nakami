@@ -20,8 +20,8 @@ const gap = {
 // today, folding them together means retuning spacing silently reshapes every
 // corner in the app.
 const radius = {
-	// inset marks and placeholder bars — a collection row's icon tile, a skeleton
-	// bar.
+	// inset marks and placeholder bars — a collection card's icon tile, a
+	// skeleton bar.
 	sm: 8,
 	// the default surface corner: cards, inputs, buttons, menu-group ends.
 	md: 12,

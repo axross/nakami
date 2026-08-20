@@ -12,12 +12,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 
-// placeholder name-bar widths per row, so the skeleton reads as varied content
+// placeholder name-bar widths per card, so the skeleton reads as varied content
 // rather than a repeated block.
-const ROW_WIDTHS = [70, 96, 58, 84, 66, 78];
+const CARD_WIDTHS = [70, 96, 58, 84, 66, 78];
 
 /**
- * the Collections loading state: placeholder rows in the same inset card as the
+ * the Collections loading state: placeholder cards in the same feed as the
  * loaded list, gently pulsing. honors the OS "reduce motion" setting (via
  * reanimated's `useReducedMotion`) by holding a steady opacity instead of
  * animating.
@@ -68,37 +68,51 @@ export function CollectionListSkeleton({
 			accessibilityLabel="Loading collections"
 			testID={testID}
 			{...props}
-			style={[styles.root, style]}
+			style={[styles.feed, style]}
 		>
-			{/* hooked separately from the root: the root carries the accessible
-			    label and the caller-overridable hook, while the safe-area inset
-			    this card mirrors from the loaded list is what a guard has to be
-			    able to read. */}
-			<View style={styles.card} testID="collections-loading-card">
-				{ROW_WIDTHS.map((width, index) => (
-					<View key={width} style={styles.row(index > 0)}>
-						<Animated.View style={[styles.mark, pulse]} />
-						<Animated.View style={[styles.name(width), pulse]} />
-					</View>
-				))}
-			</View>
+			{/* each placeholder is hooked, not just the feed: what a guard has to
+			    be able to read is the card's own geometry, which is what has to
+			    match the loaded item's or the list reflows when it arrives. */}
+			{CARD_WIDTHS.map((width) => (
+				<View key={width} style={styles.card} testID="collections-loading-card">
+					<Animated.View style={[styles.mark, pulse]} />
+					<Animated.View style={[styles.name(width), pulse]} />
+				</View>
+			))}
 		</View>
 	);
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// mirrors the loaded list's card, safe-area inset included (see
-	// collections-screen), so the placeholder does not shift when data arrives.
+	// mirrors the loaded item's own card (see collection-list-item), down to the
+	// touch-target minimum, so a placeholder is exactly as tall as the card it
+	// stands in for.
 	card: {
-		marginTop: theme.gap.md,
-		marginBottom: theme.gap.md,
-		marginStart: Math.max(rt.insets.left, theme.gap.md),
-		marginEnd: Math.max(rt.insets.right, theme.gap.md),
+		flexDirection: "row",
+		alignItems: "center",
+		columnGap: theme.gap.sm,
+		minHeight: 56,
+		paddingVertical: theme.gap.sm,
+		paddingHorizontal: theme.gap.md,
 		backgroundColor: theme.colors.foundation.neutral.subtle,
 		borderColor: theme.colors.border.neutral.subtle,
 		borderWidth: theme.borderWidth.hairline,
 		borderRadius: theme.radius.md,
-		overflow: "hidden",
+	},
+	// mirrors the loaded list's content container, safe-area inset included (see
+	// collections-screen), so the placeholder does not shift when data arrives.
+	// the ground is this component's own rather than part of that mirror: it
+	// stands in for a whole tab, and the loaded list's own container paints
+	// nothing. deliberately no fill here, though: how much room the skeleton
+	// gets is the consumer's half of the split, so do not "fix" this by adding
+	// one.
+	feed: {
+		gap: theme.gap.sm,
+		paddingTop: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		backgroundColor: theme.colors.foundation.neutral.bare,
 	},
 	mark: {
 		width: 34,
@@ -111,20 +125,5 @@ const styles = StyleSheet.create((theme, rt) => ({
 		height: 11,
 		backgroundColor: theme.colors.border.neutral.subtle,
 		borderRadius: theme.radius.sm,
-	}),
-	// deliberately no fill here: how much room the skeleton gets is the
-	// consumer's half of the split, so do not "fix" this by adding one.
-	root: {
-		backgroundColor: theme.colors.foundation.neutral.bare,
-	},
-	row: (divided: boolean) => ({
-		flexDirection: "row",
-		alignItems: "center",
-		columnGap: theme.gap.sm,
-		minHeight: 56,
-		paddingVertical: theme.gap.xs,
-		paddingHorizontal: theme.gap.md,
-		borderTopColor: theme.colors.border.neutral.subtle,
-		borderTopWidth: divided ? theme.borderWidth.hairline : 0,
 	}),
 }));

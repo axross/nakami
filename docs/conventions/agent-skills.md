@@ -446,9 +446,9 @@ rule asks for.
 
 | Style | Argument | Why it stays |
 | --- | --- | --- |
-| `collection-list-item.tsx:106` `row` | `pressed` | `pressed` |
+| `collection-list-item.tsx:102` `card` | `pressed` | `pressed` |
+| `collection-record-card.tsx:126` `card` | `pressed` | `pressed` |
 | `collections-message-state.tsx:63` `button` | `pressed` | `pressed` |
-| `collection-list-skeleton.tsx:120` `row` | `divided` | rendered through `ROW_WIDTHS.map(…)`, so the value differs per row within one body |
 
 `setting-menu-group-item.tsx` shows the third shape a `pressed` style can take and
 is **not** a deviation: its `item` is a static style carrying `position` and
@@ -458,13 +458,11 @@ rule's first clause is satisfied and only its own comment records why `pressed`
 stays outside the variant groups.
 
 Two neighbouring styles look similar and are **not** deviations:
-`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:109` both
+`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:123` both
 take a width, which the same rule's next clause requires stay a dynamic function.
 
-The two `pressed` styles convert the moment Unistyles offers a press state a
-component body can read, or its native `Pressable` honours the `variants` prop it
-already accepts. The skeleton row converts when its rows become a component of
-their own, which is worth doing for its own reasons rather than for this rule.
+All three convert the moment Unistyles offers a press state a component body can
+read, or its native `Pressable` honours the `variants` prop it already accepts.
 
 **One cost of following the rule is worth knowing before extending it.** The jest
 mock strips `variants` and `compoundVariants` from every stylesheet and stubs
