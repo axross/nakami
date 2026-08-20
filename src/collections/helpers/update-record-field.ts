@@ -8,9 +8,11 @@ import { request, serverBaseUrl } from "~/common/helpers/payload-client";
  * Payload's update is a partial one — a field the body omits keeps whatever
  * value it already had — so sending one key is what keeps a save from reverting
  * another account's concurrent edit or clobbering a Rich Text field this app
- * cannot even render. the response body is the updated document, which nothing
- * here consumes: the row keeps the value the user typed, and the record query
- * is what re-reads the server's own copy.
+ * cannot even render. a successful `PATCH` answers with the updated document
+ * *wrapped* — `{"doc": {…}, "message": "Updated successfully."}`, measured
+ * against a real 3.88.0 server — and nothing here consumes any of it: the row
+ * keeps the value the user typed, and the caller patches that one field into
+ * the cached record.
  *
  * @throws {import("~/common/helpers/payload-client").PayloadRequestError} on
  * every failure path, in the same three kinds every other Payload call in this

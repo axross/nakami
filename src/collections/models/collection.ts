@@ -104,6 +104,15 @@ function grantsAccess(access: OperationAccess | undefined): boolean {
  * instead of offering an edit the server will refuse. a `fields` entry that is
  * absent entirely is the one exception: nothing is narrowing the collection's
  * own grant there, so that grant stands.
+ *
+ * this reader is why an edit cannot disappear without a word, which is the
+ * whole reason it exists. **Payload does not refuse a write to a field the
+ * account may not update**: measured against a real 3.88.0 server, such a
+ * request returns 200 and the field is silently left as it was. (A type
+ * mismatch behaves the same way — a string sent to a number field stored
+ * `null`.) So nothing downstream can detect the loss, no error state can
+ * report it, and this app's own gate is the only thing standing between a user
+ * and an edit that appeared to save and did not.
  */
 export function canUpdateField(
 	access: AccessResponse,
