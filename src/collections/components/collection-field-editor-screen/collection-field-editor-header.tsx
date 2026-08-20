@@ -46,6 +46,7 @@ export function CollectionFieldEditorHeader({
 			</Text>
 			<Pressable
 				accessibilityRole="button"
+				hitSlop={styles.hitSlop}
 				onPress={onSave}
 				style={styles.save}
 				testID="collection-field-editor-save"

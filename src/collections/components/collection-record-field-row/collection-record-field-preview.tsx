@@ -2,7 +2,10 @@ import { Maximize2 } from "lucide-react-native";
 import type { JSX } from "react";
 import { Pressable, Text, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { toEditorText } from "~/collections/helpers/record-field-display";
+import {
+	describePreviewValue,
+	toEditorText,
+} from "~/collections/helpers/record-field-display";
 import type { RecordFieldKind } from "~/collections/helpers/record-fields";
 
 /**
@@ -54,13 +57,16 @@ export function CollectionRecordFieldPreview({
 	const { theme } = useUnistyles();
 	const text = toEditorText(kind, value);
 	const isEmpty = text.length === 0;
+	// what is announced is not always what is drawn: raw JSON is summarised for
+	// a screen reader, where the serialized text is unreadable aloud.
+	const announced = isEmpty ? EMPTY_PREVIEW : describePreviewValue(kind, value);
 
 	styles.useVariants({ refused: isRefused });
 
 	return (
 		<Pressable
 			accessibilityHint="Opens an editor for this field."
-			accessibilityLabel={`${fieldLabel}: ${isEmpty ? EMPTY_PREVIEW : text}`}
+			accessibilityLabel={`${fieldLabel}: ${announced}`}
 			accessibilityRole="button"
 			onPress={onPress}
 			style={styles.surface}

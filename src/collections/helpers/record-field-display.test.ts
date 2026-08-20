@@ -6,6 +6,7 @@ import type {
 } from "~/collections/helpers/record-fields";
 import {
 	describeBoolean,
+	describePreviewValue,
 	describeReadOnlyReason,
 	formatReadOnlyValue,
 	hasEditedText,
@@ -253,5 +254,27 @@ describe("parseEditorText()", () => {
 	it("takes an emptied multi-line string as an edit, and an emptied number as nothing", () => {
 		expect(parseEditorText("multiline-text", "")).toEqual({ value: "" });
 		expect(parseEditorText("number", "")).toBeNull();
+	});
+});
+
+describe("describePreviewValue()", () => {
+	// a screen reader given the serialized value reads out every brace and
+	// quotation mark, on a control whose whole job is to be tapped.
+	it.each<[unknown, string]>([
+		[{ title: "A", noIndex: false }, "Object with 2 keys"],
+		[{ title: "A" }, "Object with 1 key"],
+		[{}, "Empty object"],
+		[["a", "b", "c"], "List of 3 items"],
+		[["a"], "List of 1 item"],
+		[[], "Empty list"],
+	])("summarises raw JSON rather than reading it out", (value, expected) => {
+		expect(describePreviewValue("json", value)).toBe(expected);
+	});
+
+	// every other kind is prose or digits, and reads perfectly well as itself.
+	it("announces every other kind as its own text", () => {
+		expect(describePreviewValue("multiline-text", "One\nTwo")).toBe("One\nTwo");
+		expect(describePreviewValue("text", "Hello")).toBe("Hello");
+		expect(describePreviewValue("number", 7)).toBe("7");
 	});
 });

@@ -548,6 +548,25 @@ describe("<CollectionFieldEditorScreen>", () => {
 		});
 	});
 
+	// both header controls are text rather than boxes, so the 48pt target every
+	// control on this screen keeps is extended past the ink rather than drawn.
+	// Save is the one that had it missing.
+	it("extends both header controls to the minimum touch target", async () => {
+		const { getByTestId } = await renderLoaded();
+
+		for (const testID of [
+			"collection-field-editor-cancel",
+			"collection-field-editor-save",
+		]) {
+			expect(getByTestId(testID).props.hitSlop).toEqual({
+				bottom: themes.light.gap.sm,
+				left: themes.light.gap.sm,
+				right: themes.light.gap.sm,
+				top: themes.light.gap.sm,
+			});
+		}
+	});
+
 	// the sheet draws no navigator header and reaches the bottom of the screen,
 	// so it owns its bottom and horizontal edges. Unistyles' jest mock reports
 	// zero insets, so what this pins is the gutter each edge falls back to — the

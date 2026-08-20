@@ -117,6 +117,47 @@ export function toEditableText(field: RecordField): string {
 	return toEditorText(field.kind, field.value);
 }
 
+/**
+ * what a field's preview announces to assistive technology.
+ *
+ * for everything but raw JSON that is the text itself. for raw JSON it is a
+ * summary — "Object with 2 keys" — rather than the serialized value, because a
+ * screen reader given `{"title": "A", "noIndex": false}` reads out every brace
+ * and quotation mark, which is worse than useless on a control whose whole job
+ * is to be tapped. what the value actually is stays on screen for a sighted
+ * reader, and the editor the control opens announces the text in full.
+ */
+export function describePreviewValue(
+	kind: RecordFieldKind,
+	value: unknown,
+): string {
+	if (kind !== "json") {
+		return toEditorText(kind, value);
+	}
+
+	if (Array.isArray(value)) {
+		return value.length === 0
+			? "Empty list"
+			: `List of ${countOf(value.length, "item")}`;
+	}
+
+	if (typeof value === "object" && value !== null) {
+		const keys = Object.keys(value).length;
+
+		return keys === 0 ? "Empty object" : `Object with ${countOf(keys, "key")}`;
+	}
+
+	// a `json` kind is an array or an object by construction, so nothing should
+	// reach here. the text is the honest fallback rather than a thrown error: a
+	// wrong announcement is a defect, and a crashed row is a worse one.
+	return toEditorText(kind, value);
+}
+
+/** `1 key` and `2 keys`, so a summary never reads as `1 keys`. */
+function countOf(count: number, noun: string): string {
+	return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
 /** what a boolean row shows beside its switch. */
 export function describeBoolean(value: unknown): string {
 	return value === true ? "On" : "Off";

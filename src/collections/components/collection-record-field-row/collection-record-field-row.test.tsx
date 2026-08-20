@@ -213,6 +213,18 @@ describe("<CollectionRecordFieldRow>", () => {
 			).toBeTruthy();
 		});
 
+		// raw JSON is announced as a summary rather than read out brace by brace;
+		// what is drawn is still the value itself, above.
+		it("announces raw JSON as what it is rather than as its punctuation", () => {
+			const { getByTestId } = renderRow(
+				fieldOf("seo", { title: "A", noIndex: false }, "json"),
+			);
+
+			expect(
+				getByTestId("record-field-seo-preview").props.accessibilityLabel,
+			).toBe("Seo: Object with 2 keys");
+		});
+
 		it("names itself a button that opens an editor, not a text field", () => {
 			const { getByTestId } = renderRow(
 				fieldOf("body", "First\nSecond", "multiline-text"),
