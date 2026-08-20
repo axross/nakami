@@ -37,6 +37,11 @@ recognised as neither, which is what lets `podcast-episodes` pass over
 `episodes` and read as audio. A slug nothing recognises carries a plain box,
 since a neutral mark beats a confident wrong one.
 
+Those silences are REST's, and REST is the API the app reads by a settled choice:
+[reading Payload over REST rather than GraphQL](../decisions/2026-08-20-read-payload-over-rest-rather-than-graphql.md)
+holds why the GraphQL API Payload also serves answers none of them either, and why it
+cannot be queried at all by a client that has not been told a server's schema.
+
 ## Opening a collection
 
 A row opens that collection's records, titled with the same derived name the row
