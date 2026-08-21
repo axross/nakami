@@ -2,9 +2,9 @@
 
 Browsing what is on the signed-in server, and editing one record's fields. This
 domain covers the collections an account can read, the record feed inside one,
-how that feed pages, the record a card opens and the fields it lists, how one of
-those fields is edited and saved, and the loading, empty, and failure surfaces
-all three screens show.
+how that feed pages and is searched, the record a card opens and the fields it
+lists, how one of those fields is edited and saved, and the loading, empty, and
+failure surfaces all three screens show.
 
 Everything here needs a session, and each request carries that session's token —
 [authentication.md](./authentication.md) owns how a session comes to exist, when
@@ -58,14 +58,14 @@ load-failure state rather than an empty collection.
 
 ## The record feed
 
-A collection's records are a scrollable feed of cards, headed by the number of
-records the server reports the collection holds. Each card carries a title over
-a metadata row holding the record's id at the row's left and when it was last
-updated at its right. Both sit at the same supporting scale as plain text, with
-nothing drawn around the id — the id in the monospace face, the update label in
-the reading one, on one shared line box. Every card carries the id, whether or
-not the record has a title, so one feed reads as one shape. A card opens the
-record it stands for.
+A collection's records are a scrollable feed of cards, under a section holding
+the search field and the number of records the server reports the collection
+holds. Each card carries a title over a metadata row holding the record's id at
+the row's left and when it was last updated at its right. Both sit at the same
+supporting scale as plain text, with nothing drawn around the id — the id in the
+monospace face, the update label in the reading one, on one shared line box.
+Every card carries the id, whether or not the record has a title, so one feed
+reads as one shape. A card opens the record it stands for.
 
 Payload's REST responses carry no title for a record, so the title is derived
 from the record's own fields: the first non-empty string among `title`, `name`,
@@ -93,12 +93,55 @@ the row.
 Records arrive a page at a time, twenty-five to a page. Scrolling near the end
 of the feed loads the next page and appends it, with a spinner under the list
 while that page is in flight, and paging stops at the last page the server
-reports. The count in the header is the collection's total, not the number
-loaded so far.
+reports. The count beside the search field is the collection's total, not the
+number loaded so far.
 
 Pages are requested unpopulated: a relationship or upload field comes back as an
 id rather than the record it points at, which keeps a page small regardless of
 how connected the collection is.
+
+## Searching a collection
+
+The section above the feed carries a search field, and typing in it narrows the
+feed to the records that match. The whole collection is searched rather than
+the pages already loaded, so a record found this way is one no amount of
+scrolling had reached yet. Matches page exactly as the unfiltered feed does, and
+the count beside the field reports how many the server matched rather than how
+many the collection holds.
+
+Which fields are searched is worked out from the records the collection has
+already returned. Payload's REST API reports no field configuration and answers
+a query naming a field a collection does not have with a refusal rather than an
+empty result, so the app asks only about the title-ish fields — the same eight a
+record's title is derived from — that the loaded records were seen carrying text
+under. A collection whose records carry none of them is searched by id alone,
+and anything else typed into it matches nothing.
+
+A record is also found by typing its id exactly. That is a separate lookup
+rather than part of the query, because an id's type is the server's database's
+rather than the app's, and it leads the results when it finds something. An id
+nothing matches changes nothing on screen — it is not an error, only the answer
+that what was typed is not an id.
+
+The field answers what was typed rather than what was submitted, a short moment
+after the typing stops, so a word costs one request rather than one per letter.
+The matches already on screen stay while the next query is in flight. Clearing
+the field returns the whole feed without asking the server again.
+
+A query the server matches nothing to is stated as such, with the query quoted
+back and an action that clears it. The search section stays where it is
+throughout — a query that emptied the feed can always be edited or dropped.
+
+The section is fixed directly beneath the screen's own header rather than
+scrolling away with the cards, so a search is reachable from anywhere in a
+collection. It gives that room back while the reader is moving: scrolling down
+shrinks it to the field alone, and scrolling back up restores the count. The
+field itself never shrinks. A collection holding no records has no search field
+at all, there being nothing in it to find.
+
+A search reaches the server, so it needs a connection: one made with none states
+that the device is offline the same way a first load does, and one the server
+refuses states the failure and offers the same Try again the feed does.
 
 ## Opening a record
 
@@ -323,9 +366,9 @@ lost, sent neither later nor at the next launch.
 ## Loading, empty, and failure
 
 While a first load is in flight, each screen shows a placeholder in the shape of
-what is coming — cards in the collection list and in the record feed, field rows
-on a record — laid out to the same geometry as the real thing, so nothing
-shifts when the content arrives.
+what is coming — cards in the collection list, the search section and cards in
+the record feed, field rows on a record — laid out to the same geometry as the
+real thing, so nothing shifts when the content arrives.
 The placeholders pulse, and hold a steady opacity instead when the device asks
 for reduced motion.
 
@@ -382,6 +425,7 @@ cannot be given one, a Rich Text field cannot be written, and no field can be
 added to or removed from a record — what fields a record has is its collection's
 configuration, which lives on the server.
 
-And there is no search, filter, or sort: the collection list's alphabetical
-order and whatever order the server returns records in are the only orders there
-are.
+Searching reaches a collection's records and stops there. There is no search on
+the Collections tab, no filtering by a named field, and no sort: the collection
+list's alphabetical order and whatever order the server returns records in are
+the only orders there are.
