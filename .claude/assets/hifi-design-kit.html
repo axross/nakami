@@ -138,7 +138,7 @@
     --dur-fast: 150ms; --dur-base: 250ms; --dur-slow: 700ms;
     --ease-standard: cubic-bezier(0.455, 0.03, 0.515, 0.955);
 
-    /* theme.typography.* — the six composite text roles, one CSS `font`
+    /* theme.typography.* — the seven composite text roles, one CSS `font`
        shorthand each so a rule applies a role WHOLE (`font: var(--t-body)`),
        the way a style spreads `...theme.typography.body` rather than picking
        values out of it. Never set font-size or font-weight beside one.
@@ -152,6 +152,10 @@
     --t-body:    400 16px/22px var(--app-sans);
     --t-caption: 400 13px/18px var(--app-sans);
     --t-code:    400 14px/22px var(--app-mono);
+    /* typography.codeCaption — monospace supporting something else, sharing
+       `caption`'s 18px line box so the two sit on one baseline (a record
+       field's Payload name beside its derived label). */
+    --t-code-caption: 400 12px/18px var(--app-mono);
   }
   .device.dark, .el-surface.dark {
     /* dark — mirror the src/unistyles.ts dark theme */
@@ -287,7 +291,7 @@
   <header class="masthead">
     <p class="eyebrow">Hi-Fi Design Kit · High fidelity</p>
     <h1>Real-token render for high-fidelity design rounds</h1>
-    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, the <code>theme.radius.*</code> corner roles, <code>theme.borderWidth.*</code>, the <code>theme.duration.*</code> / <code>theme.easing.*</code> motion scale, and the six composite text roles of <code>theme.typography.*</code> from <code>src/unistyles.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
+    <p class="lede">The app's components and screens rendered with the <b>real design tokens</b> (colors, the <code>theme.radius.*</code> corner roles, <code>theme.borderWidth.*</code>, the <code>theme.duration.*</code> / <code>theme.easing.*</code> motion scale, and the seven composite text roles of <code>theme.typography.*</code> from <code>src/unistyles.ts</code>), in light <b>and</b> dark. For low-fidelity wireframes, use the wireframe-design skill's own kit. Delete the parts you are not presenting, fill in your screen(s), and publish as an Artifact. Design rationale lives in the high-fidelity UI design skill; this repository's token roles are recorded in <code>docs/conventions/styling.md</code>.</p>
     <div class="meta">
       <span class="tag"><strong>Fidelity</strong> high · real tokens</span>
       <span class="tag"><strong>Tokens</strong> mirror src/unistyles.ts</span>

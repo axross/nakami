@@ -35,20 +35,24 @@ without losing what a flow has to assert.
 | `collections.offline`  | Losing the connection states it, and reconnecting loads on its own      | collections | should   |
 | `collections.record`   | A card opens the record, listing every field it carries                 | collections | should   |
 | `collections.record-edit` | Editing a field saves it on blur, and a refusal states why           | collections | should   |
+| `collections.record-field-editor` | A long field opens in its own editor, saving or discarding deliberately | collections | should   |
 | `collections.record-offline` | A change made offline is queued and sends itself on reconnect     | collections | should   |
 | `settings.menu`        | The Settings menu shows About and pushes the Licenses screen            | settings    | should   |
 
 ## Journeys
 
-Thirteen of the sixteen carry a gap note. Each names what it is waiting on in its own
-terms, and ten of the thirteen wait on the same thing: a session signed in against a
-Payload fixture, which this suite does not have.
+Fourteen of the seventeen carry a gap note. Each names what it is waiting on in its
+own terms, and eleven of the fourteen wait on the same thing: a session signed in
+against a Payload fixture, which this suite does not have.
 [docs/conventions/end-to-end-testing.md](../docs/conventions/end-to-end-testing.md)
-states the contract such a fixture satisfies. Eight of those ten are tracked by
-[#135](https://github.com/axross/nakami/issues/135), which predates both
-[`auth.credential-consent`](#authcredential-consent) and
-[`collections.search`](#collectionssearch); neither of those two needs anything the
-other eight do not, so both belong with them rather than with the three below.
+states the contract such a fixture satisfies. Eight of those eleven are tracked by
+[#135](https://github.com/axross/nakami/issues/135), which predates
+[`auth.credential-consent`](#authcredential-consent),
+[`collections.search`](#collectionssearch), and
+[`collections.record-field-editor`](#collectionsrecord-field-editor); the first two
+need nothing the other eight do not, and the third needs only that the runner can
+answer a native alert, so all three belong with them rather than with the three
+below.
 
 The other three need something further on top of that fixture.
 [`collections.offline`](#collectionsoffline) and
@@ -192,6 +196,22 @@ message beneath that row.
 **Gap:** no automated flow asserts this. Beyond a session it needs a fixture record
 holding a field the account may update, and — for the refusal half — a field whose
 validation can be made to fail on demand.
+
+### `collections.record-field-editor`
+
+Signed in on a record, a field whose value does not fit a line shows a three-line
+preview rather than an input, and tapping it opens that field's own editor over the
+record. Editing the text and pressing Save marks the row unsaved and closes the
+editor; pressing Cancel after editing asks whether to discard, and closing without
+having edited anything asks nothing. Raw JSON that does not parse keeps the editor
+open and states the problem rather than saving.
+
+**Gap:** no automated flow asserts this. Beyond a session it needs a fixture record
+carrying both a newline-bearing string field and an array or object field, and the
+discard half needs the runner to answer a native alert. The sheet's own dismiss
+gesture is the part least reachable from a flow, and it is also the part the unit
+suite can say least about — what it holds is that the gesture is disabled while
+there is an unsaved edit, not that the platform honours that.
 
 ### `collections.record-offline`
 

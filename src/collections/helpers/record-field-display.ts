@@ -11,6 +11,7 @@ import {
 } from "~/collections/helpers/format-updated-at";
 import type {
 	RecordField,
+	RecordFieldKind,
 	RecordFieldReadOnlyReason,
 } from "~/collections/helpers/record-fields";
 
@@ -129,6 +130,20 @@ export function toJsonText(value: unknown): string {
 }
 
 /**
+ * the text an editor opens with, for a value that is not necessarily the one
+ * the record carries. the dialog editor seeds from a value that may be still
+ * queued or already refused, and the row's preview shows that same value, so
+ * both take the kind and the value rather than the field.
+ */
+export function toEditorText(kind: RecordFieldKind, value: unknown): string {
+	if (kind === "json") {
+		return toJsonText(value);
+	}
+
+	return value === null || value === undefined ? "" : String(value);
+}
+
+/**
  * the text an editable field's input opens with. it is the value as the user
  * will edit it — a number as its digits, an array or object as the JSON its
  * editor round-trips — so what is typed and what was loaded are the same kind
@@ -138,13 +153,48 @@ export function toJsonText(value: unknown): string {
  * value itself.
  */
 export function toEditableText(field: RecordField): string {
-	if (field.kind === "json") {
-		return toJsonText(field.value);
+	return toEditorText(field.kind, field.value);
+}
+
+/**
+ * what a field's preview announces to assistive technology.
+ *
+ * for everything but raw JSON that is the text itself. for raw JSON it is a
+ * summary — "Object with 2 keys" — rather than the serialized value, because a
+ * screen reader given `{"title": "A", "noIndex": false}` reads out every brace
+ * and quotation mark, which is worse than useless on a control whose whole job
+ * is to be tapped. what the value actually is stays on screen for a sighted
+ * reader, and the editor the control opens announces the text in full.
+ */
+export function describePreviewValue(
+	kind: RecordFieldKind,
+	value: unknown,
+): string {
+	if (kind !== "json") {
+		return toEditorText(kind, value);
 	}
 
-	return field.value === null || field.value === undefined
-		? ""
-		: String(field.value);
+	if (Array.isArray(value)) {
+		return value.length === 0
+			? "Empty list"
+			: `List of ${countOf(value.length, "item")}`;
+	}
+
+	if (typeof value === "object" && value !== null) {
+		const keys = Object.keys(value).length;
+
+		return keys === 0 ? "Empty object" : `Object with ${countOf(keys, "key")}`;
+	}
+
+	// a `json` kind is an array or an object by construction, so nothing should
+	// reach here. the text is the honest fallback rather than a thrown error: a
+	// wrong announcement is a defect, and a crashed row is a worse one.
+	return toEditorText(kind, value);
+}
+
+/** `1 key` and `2 keys`, so a summary never reads as `1 keys`. */
+function countOf(count: number, noun: string): string {
+	return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
 /** what a boolean row shows beside its switch. */
@@ -165,11 +215,11 @@ export function describeBoolean(value: unknown): string {
  * case — there is no number in it to send — while an emptied text input is an
  * ordinary edit that clears the field.
  */
-export function parseEditedText(
-	field: RecordField,
+export function parseEditorText(
+	kind: RecordFieldKind,
 	text: string,
 ): { readonly value: unknown } | null {
-	if (field.kind === "json") {
+	if (kind === "json") {
 		try {
 			return { value: JSON.parse(text) as unknown };
 		} catch {
@@ -177,13 +227,21 @@ export function parseEditedText(
 		}
 	}
 
-	if (field.kind === "number") {
+	if (kind === "number") {
 		const value = Number(text);
 
 		return text.trim().length > 0 && Number.isFinite(value) ? { value } : null;
 	}
 
 	return { value: text };
+}
+
+/** {@link parseEditorText} for a field whose own value is what was edited. */
+export function parseEditedText(
+	field: RecordField,
+	text: string,
+): { readonly value: unknown } | null {
+	return parseEditorText(field.kind, text);
 }
 
 /**

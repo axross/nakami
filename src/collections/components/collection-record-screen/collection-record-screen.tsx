@@ -1,5 +1,5 @@
 import { onlineManager, useQuery } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { CircleAlert } from "lucide-react-native";
 import type { JSX } from "react";
 import { useEffect, useSyncExternalStore } from "react";
@@ -17,6 +17,7 @@ import {
 import { deriveRecordTitle } from "~/collections/helpers/derive-record-title";
 import { describeLoadError } from "~/collections/helpers/describe-collections-error";
 import { describeOfflineLoad } from "~/collections/helpers/describe-collections-offline";
+import { resolveFieldPendingState } from "~/collections/helpers/record-field-pending";
 import { toRecordFields } from "~/collections/helpers/record-fields";
 import { getCollectionAccessQueryOptions } from "~/collections/queries/collection-access-query";
 import { getCollectionRecordQueryOptions } from "~/collections/queries/collection-record-query";
@@ -97,9 +98,10 @@ export function CollectionRecordScreen({
 	slug,
 }: Readonly<{ recordId: string; slug: string }>): JSX.Element {
 	const { theme } = useUnistyles();
+	const router = useRouter();
 	const session = useAuthSession();
 	const queue = usePendingWriteQueue();
-	const { writes, refusals } = usePendingWriteState();
+	const pendingWrites = usePendingWriteState();
 	const isOnline = useIsOnline();
 
 	// a route missing either half addresses no record, so nothing is asked of the
@@ -148,6 +150,13 @@ export function CollectionRecordScreen({
 	function retry(): void {
 		void recordQuery.refetch();
 		void accessQuery.refetch();
+	}
+
+	function openFieldEditor(fieldName: string): void {
+		router.push({
+			pathname: "/collections/[slug]/[recordId]/[fieldName]",
+			params: { slug, recordId, fieldName },
+		});
 	}
 
 	function save(fieldName: string, value: unknown): void {
@@ -229,27 +238,29 @@ export function CollectionRecordScreen({
 				keyboardShouldPersistTaps="handled"
 				testID="collection-record-fields"
 			>
-				{fields.map((field) => (
-					<CollectionRecordFieldRow
-						field={field}
-						isQueued={writes.some(
-							(write) =>
-								write.slug === slug &&
-								write.recordId === recordId &&
-								write.fieldName === field.name,
-						)}
-						key={field.name}
-						onSave={save}
-						refusalMessage={
-							refusals.find(
-								({ target }) =>
-									target.slug === slug &&
-									target.recordId === recordId &&
-									target.fieldName === field.name,
-							)?.message ?? null
-						}
-					/>
-				))}
+				{fields.map((field) => {
+					// what the row shows is resolved from the queue rather than read off
+					// the record — the same resolution the field editor runs, from the
+					// same helper, which is what keeps the two screens agreeing about a
+					// change neither the server nor the record has yet.
+					const pending = resolveFieldPendingState(
+						pendingWrites,
+						{ slug, recordId, fieldName: field.name },
+						field.value,
+					);
+
+					return (
+						<CollectionRecordFieldRow
+							editedValue={pending.value}
+							field={field}
+							isQueued={pending.isQueued}
+							key={field.name}
+							onOpenEditor={openFieldEditor}
+							onSave={save}
+							refusalMessage={pending.refusalMessage}
+						/>
+					);
+				})}
 			</ScrollView>
 		);
 	}

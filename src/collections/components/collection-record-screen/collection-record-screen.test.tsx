@@ -52,6 +52,11 @@ jest.mock("react-native-reanimated", () =>
 // the screen draws below the header. the stub captures the title anyway, so the
 // one thing the header does carry can still be checked.
 const mockScreenOptions = jest.fn();
+// the one navigation this screen performs: a field's preview opens that field's
+// editor. the route it pushes is asserted here because the screen is what
+// decides it; that the route exists and mounts a sheet is the router's business
+// and the e2e suite's.
+const mockPush = jest.fn();
 
 jest.mock("expo-router", () => ({
 	Stack: {
@@ -61,6 +66,7 @@ jest.mock("expo-router", () => ({
 			return null;
 		},
 	},
+	useRouter: () => ({ push: mockPush }),
 }));
 
 // mock the transport; the queries, their factories, the field model, and the
@@ -336,9 +342,12 @@ describe("<CollectionRecordScreen>", () => {
 				"7",
 			);
 			expect(getByTestId("record-field-featured-input").props.value).toBe(true);
-			expect(getByTestId("record-field-seo-input").props.value).toBe(
-				'{\n  "title": "Shipping v2",\n  "noIndex": false\n}',
-			);
+			// an array or object gets the preview rather than an input, and the
+			// preview shows the JSON its editor would open on.
+			expect(getByTestId("record-field-seo-preview")).toBeTruthy();
+			expect(
+				getByText('{\n  "title": "Shipping v2",\n  "noIndex": false\n}'),
+			).toBeTruthy();
 			// and each row still names its field.
 			expect(getByText("Reading Minutes")).toBeTruthy();
 			expect(getByText("readingMinutes")).toBeTruthy();
@@ -469,6 +478,77 @@ describe("<CollectionRecordScreen>", () => {
 
 			expect(fields.paddingStart).toBe(themes.light.gap.md);
 			expect(fields.paddingEnd).toBe(themes.light.gap.md);
+		});
+	});
+
+	// a field whose value does not fit a line is edited in a screen of its own.
+	// what this screen owns is the affordance and what it previews; the editor's
+	// own behaviour is its suite's.
+	describe("opening a field's editor", () => {
+		it("pushes the field's editor route when its preview is pressed", async () => {
+			const { getByTestId } = await renderLoaded();
+
+			fireEvent.press(getByTestId("record-field-seo-preview"));
+
+			expect(mockPush).toHaveBeenCalledWith({
+				pathname: "/collections/[slug]/[recordId]/[fieldName]",
+				params: { slug: SLUG, recordId: RECORD_ID, fieldName: "seo" },
+			});
+		});
+
+		// the preview shows what the queue holds rather than what the record does,
+		// which is what lets a change survive a row that holds nothing itself.
+		it("previews a queued change rather than the value it replaces", async () => {
+			const view = await renderLoaded({
+				send: () =>
+					new Promise<void>(() => {
+						// never settles: the change stays queued, which is the state
+						// under test.
+					}),
+			});
+
+			await act(async () => {
+				await view.queue.enqueue({
+					slug: SLUG,
+					recordId: RECORD_ID,
+					fieldName: "seo",
+					value: { title: "Queued", noIndex: true },
+				});
+			});
+
+			await waitFor(() => {
+				expect(
+					view.getByText('{\n  "title": "Queued",\n  "noIndex": true\n}'),
+				).toBeTruthy();
+			});
+			expect(
+				within(view.getByTestId("record-field-seo")).getByText("Not saved yet"),
+			).toBeTruthy();
+		});
+
+		// the refused value is the user's own last words on the field, and the
+		// message under the row is about that value rather than the record's.
+		it("previews a refused value beneath its refusal", async () => {
+			const refuse = async () => {
+				throw new PayloadRequestError("server", "Refused.", 400);
+			};
+			const view = await renderLoaded({ send: refuse });
+
+			await act(async () => {
+				await view.queue.enqueue({
+					slug: SLUG,
+					recordId: RECORD_ID,
+					fieldName: "seo",
+					value: { title: "Refused", noIndex: false },
+				});
+			});
+
+			await waitFor(() => {
+				expect(view.getByText("Refused.")).toBeTruthy();
+			});
+			expect(
+				view.getByText('{\n  "title": "Refused",\n  "noIndex": false\n}'),
+			).toBeTruthy();
 		});
 	});
 

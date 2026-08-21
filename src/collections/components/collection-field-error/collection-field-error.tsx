@@ -7,16 +7,23 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 const ICON_SIZE = 16;
 
 /**
- * the server's own words about a refused save, beneath the row that carries the
- * value it refused.
+ * what is wrong with one field, stated beneath the control that holds it: the
+ * server's own words about a save it refused, or the editor's own about text it
+ * cannot read back into a value.
  *
- * it renders the message rather than only tinting the input, because the tint
- * says a save failed and the message says why — and Payload's own
+ * it renders the message rather than only tinting the control, because the tint
+ * says something failed and the message says what — and Payload's own
  * "This field is required." is the only version of a refusal anyone can act on.
  * the icon is the second cue beside the destructive ink, for a reader who
  * cannot separate the two tones by hue.
+ *
+ * it sits in a directory of its own rather than beside either consumer, because
+ * both the record screen's field row and the field editor draw it and neither
+ * owns it. it stays inside this feature: nothing outside `src/collections/`
+ * renders one, which is the threshold `docs/conventions/directory-structure.md`
+ * sets for promoting a component further.
  */
-export function CollectionRecordFieldError({
+export function CollectionFieldError({
 	message,
 	testID,
 }: Readonly<{ message: string; testID: string }>): JSX.Element {

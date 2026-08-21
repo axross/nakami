@@ -7,12 +7,15 @@ import type {
 } from "~/collections/helpers/record-fields";
 import {
 	describeBoolean,
+	describePreviewValue,
 	describeReadOnlyReason,
 	formatReadOnlyValue,
 	hasEditedText,
 	parseEditedText,
+	parseEditorText,
 	readOnlyReasonIcon,
 	toEditableText,
+	toEditorText,
 	toJsonText,
 } from "./record-field-display";
 
@@ -252,5 +255,70 @@ describe("hasEditedText()", () => {
 		// re-indented JSON parses to the same object but is a different stored
 		// string, so it is a change worth sending.
 		expect(hasEditedText(fieldOf("tags", ["a"], "json"), '["a"]')).toBe(true);
+	});
+});
+
+// the pair the field editor uses. they take the kind and the value rather than
+// the field, because what a sheet opens on is not necessarily what the record
+// holds — a change still queued, or one the server refused, is more recent.
+describe("toEditorText()", () => {
+	it.each<[string, RecordFieldKind, unknown, string]>([
+		["a multi-line string as itself", "multiline-text", "One\nTwo", "One\nTwo"],
+		["a single-line string as itself", "text", "Hello", "Hello"],
+		["a number as its digits", "number", 7, "7"],
+		["an object as pretty JSON", "json", { a: 1 }, '{\n  "a": 1\n}'],
+		["an array as pretty JSON", "json", ["a"], '[\n  "a"\n]'],
+		["a null as nothing at all", "multiline-text", null, ""],
+	])("opens %s", (_, kind, value, expected) => {
+		expect(toEditorText(kind, value)).toBe(expected);
+	});
+});
+
+describe("parseEditorText()", () => {
+	it("reads raw JSON back into its value", () => {
+		expect(parseEditorText("json", '["a", "b"]')).toEqual({
+			value: ["a", "b"],
+		});
+	});
+
+	// the server answers 200 to a value of the wrong type and stores `null`, so
+	// text that cannot be read back is held rather than sent and quietly lost.
+	it("refuses raw JSON that does not parse", () => {
+		expect(parseEditorText("json", "[release")).toBeNull();
+	});
+
+	it("takes a multi-line string exactly as typed, newlines and all", () => {
+		expect(parseEditorText("multiline-text", "One\n\nThree")).toEqual({
+			value: "One\n\nThree",
+		});
+	});
+
+	// an emptied multi-line field is an ordinary edit that clears the value,
+	// unlike an emptied numeric one, where there is no number to send.
+	it("takes an emptied multi-line string as an edit, and an emptied number as nothing", () => {
+		expect(parseEditorText("multiline-text", "")).toEqual({ value: "" });
+		expect(parseEditorText("number", "")).toBeNull();
+	});
+});
+
+describe("describePreviewValue()", () => {
+	// a screen reader given the serialized value reads out every brace and
+	// quotation mark, on a control whose whole job is to be tapped.
+	it.each<[unknown, string]>([
+		[{ title: "A", noIndex: false }, "Object with 2 keys"],
+		[{ title: "A" }, "Object with 1 key"],
+		[{}, "Empty object"],
+		[["a", "b", "c"], "List of 3 items"],
+		[["a"], "List of 1 item"],
+		[[], "Empty list"],
+	])("summarises raw JSON rather than reading it out", (value, expected) => {
+		expect(describePreviewValue("json", value)).toBe(expected);
+	});
+
+	// every other kind is prose or digits, and reads perfectly well as itself.
+	it("announces every other kind as its own text", () => {
+		expect(describePreviewValue("multiline-text", "One\nTwo")).toBe("One\nTwo");
+		expect(describePreviewValue("text", "Hello")).toBe("Hello");
+		expect(describePreviewValue("number", 7)).toBe("7");
 	});
 });

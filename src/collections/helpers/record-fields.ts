@@ -26,8 +26,66 @@ const SERVER_ASSIGNED_FIELDS: readonly string[] = [
  * value is the only evidence there is: `"json"` covers an array or an object,
  * edited as raw JSON, and `"none"` is a field holding `null`, where nothing
  * distinguishes an empty number field from an empty Rich Text one.
+ *
+ * `"multiline-text"` is a string that carries a newline. Payload's `textarea`
+ * and `text` are the same `string` over the wire — the REST response, the
+ * GraphQL schema, and an introspection that is off in production by default all
+ * say so — so the value is the only evidence of which one the collection
+ * configured, and a newline in it is the whole of that evidence. Two
+ * consequences are accepted rather than worked around: a long single-line
+ * description stays a one-line field, and a multi-line value whose newlines are
+ * all removed becomes one once the save lands.
  */
-export type RecordFieldKind = "text" | "number" | "boolean" | "json" | "none";
+export type RecordFieldKind =
+	| "text"
+	| "multiline-text"
+	| "number"
+	| "boolean"
+	| "json"
+	| "none";
+
+/**
+ * the kinds a row edits in place, on the record screen itself. the others are
+ * edited in a screen of their own — see {@link editsInDialog} — which is what
+ * this type keeps the inline control's prop honest about.
+ */
+export type InlineFieldKind = "text" | "number";
+
+/** the kinds edited in the field-editor dialog rather than in the row. */
+export type DialogFieldKind = "multiline-text" | "json";
+
+/**
+ * whether a field of this kind is edited in the field-editor dialog rather than
+ * in the row. the two kinds that are — a newline-carrying string and raw JSON —
+ * are the two whose value does not fit a line, so the row previews the value and
+ * the editing happens where there is room for it.
+ *
+ * a type predicate rather than a plain boolean, so a row that has already ruled
+ * out the read-only, `none`, and `boolean` cases is left holding an
+ * {@link InlineFieldKind} by the compiler rather than by a cast — which is what
+ * makes adding a seventh kind a type error at every branch that has to decide
+ * about it.
+ */
+export function editsInDialog(kind: RecordFieldKind): kind is DialogFieldKind {
+	return kind === "multiline-text" || kind === "json";
+}
+
+/** a field the dialog editor can open: editable, and of a kind edited there. */
+export interface DialogEditableField extends RecordField {
+	readonly kind: DialogFieldKind;
+}
+
+/**
+ * whether the dialog editor can open this field at all — which is both halves of
+ * the question, not just the kind. a read-only field of a dialog kind still has
+ * no editor, and the route that names one is a link rather than something a row
+ * can produce.
+ */
+export function isDialogEditable(
+	field: RecordField,
+): field is DialogEditableField {
+	return field.isEditable && editsInDialog(field.kind);
+}
 
 /**
  * why a field cannot be edited. the UI states which one applies rather than
@@ -96,7 +154,9 @@ function inferKind(value: unknown): RecordFieldKind {
 
 	switch (typeof value) {
 		case "string":
-			return "text";
+			// the one inference the value carries about a Payload field type. see
+			// `RecordFieldKind` for why a newline is the whole of the evidence.
+			return value.includes("\n") ? "multiline-text" : "text";
 		case "number":
 			return "number";
 		case "boolean":

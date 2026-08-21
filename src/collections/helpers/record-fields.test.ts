@@ -4,7 +4,13 @@ import {
 	accessResponseSchema,
 } from "~/collections/models/collection";
 import { recordSchema } from "~/collections/models/record";
-import { toRecordFields } from "./record-fields";
+import {
+	editsInDialog,
+	isDialogEditable,
+	type RecordField,
+	type RecordFieldKind,
+	toRecordFields,
+} from "./record-fields";
 
 /** an access response granting update everywhere, so a case can vary one thing. */
 const UNRESTRICTED: AccessResponse = accessResponseSchema.parse({
@@ -113,6 +119,30 @@ describe("toRecordFields()", () => {
 		]);
 	});
 
+	// the one inference the value carries about a Payload field type, and the
+	// whole of the evidence there is: a `textarea` and a `text` are the same
+	// `string` over the wire.
+	it.each<[string, string, string]>([
+		["a newline in the middle", "First line\nSecond line", "multiline-text"],
+		["a trailing newline alone", "One line\n", "multiline-text"],
+		["a carriage return alone", "One line\rTwo", "text"],
+		["no newline at all", "A long single line of prose", "text"],
+		["an empty string", "", "text"],
+	])("reads %s as %s", (_, value, kind) => {
+		expect(fieldsOf({ id: "a1", body: value })[1]?.kind).toBe(kind);
+	});
+
+	// a value moving across the boundary re-decides the row's shape, and that is
+	// the accepted consequence of inferring from the value rather than a defect:
+	// the record's stored value is what decides, so a row never changes shape
+	// while it is being edited.
+	it("reads the same field either way as its value changes", () => {
+		expect(fieldsOf({ id: "a1", body: "One\nTwo" })[1]?.kind).toBe(
+			"multiline-text",
+		);
+		expect(fieldsOf({ id: "a1", body: "One Two" })[1]?.kind).toBe("text");
+	});
+
 	it("locks a field holding no value, stating that it has none", () => {
 		const [, publishedAt] = fieldsOf({ id: "a1", publishedAt: null });
 
@@ -209,5 +239,56 @@ describe("toRecordFields()", () => {
 			"permission",
 			"permission",
 		]);
+	});
+});
+
+describe("editsInDialog()", () => {
+	it.each<[string, boolean]>([
+		["multiline-text", true],
+		["json", true],
+		["text", false],
+		["number", false],
+		["boolean", false],
+		["none", false],
+	])("answers %s with %s", (kind, expected) => {
+		expect(editsInDialog(kind as RecordFieldKind)).toBe(expected);
+	});
+});
+
+describe("isDialogEditable()", () => {
+	function fieldOf(overrides: Partial<RecordField>): RecordField {
+		return {
+			name: "body",
+			label: "Body",
+			value: "One\nTwo",
+			kind: "multiline-text",
+			isEditable: true,
+			readOnlyReason: null,
+			...overrides,
+		};
+	}
+
+	it("accepts an editable field of a kind the dialog edits", () => {
+		expect(isDialogEditable(fieldOf({}))).toBe(true);
+		expect(isDialogEditable(fieldOf({ kind: "json", value: ["a"] }))).toBe(
+			true,
+		);
+	});
+
+	// both halves are asked, which is the whole point of the pair: a read-only
+	// field of a dialog kind has no editor either, and a route naming one is a
+	// link rather than something a row can produce.
+	it("refuses a field that is read-only, whatever its kind", () => {
+		expect(
+			isDialogEditable(
+				fieldOf({ isEditable: false, readOnlyReason: "permission" }),
+			),
+		).toBe(false);
+	});
+
+	it("refuses an editable field the row edits in place", () => {
+		expect(isDialogEditable(fieldOf({ kind: "text", value: "One line" }))).toBe(
+			false,
+		);
 	});
 });

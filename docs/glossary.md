@@ -46,6 +46,19 @@ its **Collection**'s own configuration on the **Payload server**, and this app
 never sees that configuration: a record's JSON is the whole list, the server
 returning every configured field and giving `null` for one that was never set.
 
+**multi-line field** — a **field** whose value is a string containing a newline.
+Payload's `textarea` and its `text` are the same `string` over the wire, so this
+app infers the distinction from the value and nothing else: a newline in it, and
+no other evidence. A field that is one is previewed rather than typed into on
+the record screen, and is edited in the **field editor**. The same treatment
+covers a field whose value is an array or object, which is edited as raw JSON —
+that one is recognised by its type rather than by a newline.
+
+**field editor** — the screen one **field** is edited in when its value does not
+fit a line, opened from the preview standing where that field's input would be.
+It is the one place in this app where an edit is committed deliberately, by a
+Save, rather than by leaving an input.
+
 **access** — a **Payload server**'s own verdict on what the signed-in account
 may do with each **Collection**, answered per collection and per operation,
 either as a plain yes or no or as a yes qualified by a condition. Where the
@@ -82,6 +95,14 @@ reached the **Payload server** yet. Changes wait in one queue and leave it
 oldest first, and a second change to a field already waiting replaces it. The
 queue is held in memory alone and belongs to the signed-in session, so whatever
 is still waiting when the app closes or the session ends is lost.
+
+**refused change** — a **queued change** the **Payload server** read and
+declined. It leaves the queue and is not retried, and both the server's message
+and the value it refused are kept: the message is what the row states, and the
+value is what the row previews and the **field editor** reopens on, so a
+refusal can be corrected rather than retyped. A change the server never gave a
+verdict on — one that could not reach it, or one turned away before the value
+was read — is not one of these and stays queued.
 
 # Development vocabulary
 
