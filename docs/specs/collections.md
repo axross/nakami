@@ -60,8 +60,10 @@ load-failure state rather than an empty collection.
 
 A collection's records are a scrollable feed of cards, headed by the number of
 records the server reports the collection holds. Each card carries a title over
-a metadata row holding the record's id in a small pill at the row's left and
-when it was last updated at its right. Every card carries the pill, whether or
+a metadata row holding the record's id at the row's left and when it was last
+updated at its right. Both sit at the same supporting scale as plain text, with
+nothing drawn around the id — the id in the monospace face, the update label in
+the reading one, on one shared line box. Every card carries the id, whether or
 not the record has a title, so one feed reads as one shape. A card opens the
 record it stands for.
 
