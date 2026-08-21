@@ -11,6 +11,7 @@ import {
 import {
 	AccessibilityInfo,
 	ActivityIndicator,
+	Keyboard,
 	KeyboardAvoidingView,
 	Platform,
 	Pressable,
@@ -19,6 +20,7 @@ import {
 	type TextInput,
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { CredentialConsentDialog } from "~/auth/components/credential-consent-dialog/credential-consent-dialog";
 import { SignInCollectionField } from "~/auth/components/sign-in-screen/sign-in-collection-field";
 import { SignInErrorSummary } from "~/auth/components/sign-in-screen/sign-in-error-summary";
 import { SignInTextField } from "~/auth/components/sign-in-screen/sign-in-text-field";
@@ -31,9 +33,26 @@ import {
 	type SignInFormErrors,
 	validateSignInForm,
 } from "~/auth/helpers/sign-in-form";
-import { getSignInMutationOptions } from "~/auth/mutations/sign-in-mutation";
+import type { Session } from "~/auth/models/session";
+import {
+	getSignInMutationOptions,
+	type SignInInput,
+} from "~/auth/mutations/sign-in-mutation";
+import { useAuthStore } from "~/auth/stores/auth-store";
 
 const DEFAULT_COLLECTION = "users";
+
+/**
+ * a sign-in the server has already accepted, waiting on the consent dialog. it
+ * is held here rather than committed by the mutation, because committing it
+ * flips the store and unmounts this whole stack — so the dialog would never be
+ * seen. `credentials` is the mutation's own input, so what the dialog offers to
+ * keep is exactly what the server just accepted.
+ */
+interface PendingSignIn {
+	credentials: SignInInput;
+	session: Session;
+}
 
 function messageForError(error: unknown): string {
 	if (error instanceof PayloadRequestError) {
@@ -137,6 +156,15 @@ export function SignInScreen(): JSX.Element {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [fieldErrors, setFieldErrors] = useState<SignInFormErrors>({});
+	const [pendingSignIn, setPendingSignIn] = useState<PendingSignIn | null>(
+		null,
+	);
+	const [answering, setAnswering] = useState(false);
+	// a failure of the keychain write behind the consent answer. it is not the
+	// mutation's error — the server already said yes by then — but it is the same
+	// kind of thing to the person reading it, so it shares the mutation's slot
+	// rather than inventing a second place for a failed sign-in to be reported.
+	const [completionError, setCompletionError] = useState<unknown>(null);
 	const serverUrlEdited = useRef(false);
 
 	const serverUrlRef = useRef<TextInput>(null);
@@ -144,7 +172,9 @@ export function SignInScreen(): JSX.Element {
 	const emailRef = useRef<TextInput>(null);
 	const passwordRef = useRef<TextInput>(null);
 
-	const serverErrorMessage = error === null ? null : messageForError(error);
+	const signInFailure = error ?? completionError;
+	const serverErrorMessage =
+		signInFailure === null ? null : messageForError(signInFailure);
 
 	// the server's rejection is announced the same way a validation failure is;
 	// the banner's own live region covers Android.
@@ -179,6 +209,7 @@ export function SignInScreen(): JSX.Element {
 			if (error !== null) {
 				reset();
 			}
+			setCompletionError(null);
 		},
 		[serverUrl, collection, email, password, error, reset],
 	);
@@ -269,8 +300,50 @@ export function SignInScreen(): JSX.Element {
 			return;
 		}
 
-		mutate(values);
+		// `mutate` clears the mutation's own error; this is the other half of the
+		// slot the two share, so a stale failure does not sit over a fresh attempt.
+		setCompletionError(null);
+		mutate(values, {
+			// the session is held rather than committed: `authenticate` is what the
+			// consent dialog's answer calls, once there is an answer.
+			onSuccess: (session) => {
+				// pressing the button rather than the Password field's Go leaves the
+				// keyboard up, and it would otherwise stay up behind the dialog —
+				// over the dialog's own answers on a short screen.
+				Keyboard.dismiss();
+				setPendingSignIn({ credentials: values, session });
+			},
+		});
 	}, [serverUrl, collection, email, password, isPending, mutate]);
+
+	// the dialog's two answers differ in one argument and nothing else, so they
+	// are one callback rather than two that could drift apart.
+	const onConsentAnswer = useCallback(
+		(keep: boolean) => {
+			if (pendingSignIn === null || answering) {
+				return;
+			}
+
+			setAnswering(true);
+			void useAuthStore
+				.getState()
+				.authenticate(
+					pendingSignIn.session,
+					keep ? pendingSignIn.credentials : undefined,
+				)
+				.catch((failure: unknown) => {
+					// the keychain refused the write, so the user is not signed in
+					// after all. drop the dialog and say so on the form, which is still
+					// mounted underneath holding everything they typed.
+					setPendingSignIn(null);
+					setCompletionError(failure);
+				})
+				.finally(() => {
+					setAnswering(false);
+				});
+		},
+		[answering, pendingSignIn],
+	);
 
 	// the summary links to the first offending field rather than focusing it on
 	// press, which would open the keyboard on every failed submit.
@@ -469,6 +542,15 @@ export function SignInScreen(): JSX.Element {
 					</Text>
 				</Pressable>
 			</ScrollView>
+
+			{pendingSignIn === null ? null : (
+				<CredentialConsentDialog
+					disabled={answering}
+					onAllow={() => onConsentAnswer(true)}
+					onDecline={() => onConsentAnswer(false)}
+					serverUrl={pendingSignIn.session.serverUrl}
+				/>
+			)}
 		</KeyboardAvoidingView>
 	);
 }

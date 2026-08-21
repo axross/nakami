@@ -2,8 +2,9 @@
 
 How the app reaches a Payload server and stays signed in to it. This domain
 covers the signed-out landing, the sign-in form and what it validates, the
-session the app keeps on the device, how that session is verified at launch and
-kept alive while the app runs, and signing out.
+choice a successful sign-in stops to ask, the session the app keeps on the
+device, how that session is verified at launch and kept alive while the app
+runs, and signing out.
 
 ## Signed out
 
@@ -107,10 +108,43 @@ endpoint on the named server. They travel to no other host, and neither of them
 is written to a log — a sign-in records the endpoint and the collection it was
 attempted against, and nothing more.
 
-A successful sign-in produces a session, and the app switches to the signed-in
-tab UI at once; the sign-in and welcome screens are unmounted with the rest of
-the signed-out stack. The successful server URL is also remembered on its own,
-separately from the session, and that is what the next sign-in pre-fills from.
+A successful sign-in produces a session, but the app does not switch to the
+signed-in tab UI yet: it stops at the question below first, and only the answer
+to that commits the session. Once it does, the sign-in and welcome screens are
+unmounted with the rest of the signed-out stack. The successful server URL is
+also remembered on its own, separately from the session, and that is what the
+next sign-in pre-fills from.
+
+## Being asked whether to stay signed in
+
+Every successful sign-in is followed by one question, asked in a dialog over the
+sign-in form: may the app keep this sign-in on the device, so it can start a new
+session by itself when the server ends this one?
+
+The question is asked because the answer is the difference between a session
+that lasts hours and one that lasts months, and it is asked rather than assumed
+because what it keeps is a password. The dialog therefore says both things: that
+a stored sign-in keeps the user signed in for months rather than hours, and that
+a device someone gets past the lock of then yields the password itself rather
+than a session that expires on its own. It also says that signing out removes
+it, and that changing the answer means signing out and signing back in — there
+is no switch anywhere else in the app.
+
+Nothing dismisses the dialog but its two answers. There is no close control, a
+tap outside it does nothing, and neither the Android back gesture nor an iOS
+swipe closes it. Until one of the two is pressed the app is still signed out,
+with the sign-in form behind the dialog holding everything that was typed.
+
+Both answers are ordinary buttons of the same size, and neither is a faint link
+under the other. Allowing it keeps the email and password that were just
+accepted; declining keeps nothing beyond the session, which is exactly what the
+app did before this question existed. The dialog's own text scrolls when it does
+not fit, and the two answers stay put below it rather than scrolling away.
+
+A keychain that refuses the write drops the dialog and states the failure on the
+form, where a rejected sign-in is already stated. Backgrounding the app while
+the dialog is up commits nothing: the next launch is signed out, and signing in
+again asks again.
 
 ## The session
 
@@ -123,6 +157,13 @@ the device keychain — never in the app's database or in plain key-value storag
 The app holds one session at a time. Signing in to a different server, or as a
 different user, replaces the previous session rather than adding to it.
 
+A stored sign-in, where the question above was allowed, is a second keychain
+entry of its own, holding the server, the collection, the email, and the
+password — everything a fresh sign-in needs and nothing more. It is pinned to
+the device it was written on, so it is left out of an encrypted device backup
+and never restored onto another device. It never outlives the session it was
+stored beside: a launch that finds no session discards it.
+
 ## Launch
 
 At launch the native splash screen stays up until the auth state settles, so no
@@ -130,10 +171,10 @@ signed-in or signed-out surface is ever shown and then corrected.
 
 The app reads the stored session and treats it as good while it re-checks it
 against the server it belongs to. A server answering that the token is no longer
-valid signs the user out. A server that cannot be reached does not: the stored
-session stays, and the app opens to its signed-in surfaces offline. A stored
-session that cannot be read or parsed is discarded, and the app opens signed
-out.
+valid does not end things on its own — that is where a stored sign-in is used,
+below. A server that cannot be reached changes nothing: the stored session
+stays, and the app opens to its signed-in surfaces offline. A stored session
+that cannot be read or parsed is discarded, and the app opens signed out.
 
 ## Keeping the token alive
 
@@ -145,15 +186,41 @@ is exchanged for a fresh one, and the new token and expiry replace the stored
 ones. A token with more life than that is left alone, so the check makes no
 request until one is due.
 
-A refresh the server rejects signs the user out. A refresh that cannot reach the
-server changes nothing and is tried again at the next check.
+A refresh that cannot reach the server changes nothing and is tried again at the
+next check. A refresh the server rejects is the same event as a rejection at
+launch, and takes the same path below.
+
+## Signing back in without being asked
+
+A token the server rejects — at launch, or at a refresh — is where a session
+used to end. It now ends only for someone who declined to have their sign-in
+kept.
+
+With a stored sign-in, the app signs in again with it, on the spot and with
+nothing shown: the new session replaces the old one and whatever the user was
+doing continues. This is what makes a session last a month or more against a
+server whose tokens last hours, and it is the only thing that can, because the
+app can only renew a token while it is open and a server will not issue a
+longer-lived one on request.
+
+With no stored sign-in, the rejection signs the user out, exactly as it always
+did.
+
+A stored sign-in the server refuses — a changed password, a deactivated account
+— is discarded there and then, and the user is signed out. It is never tried a
+second time, so a stale password cannot lock the account out by being replayed.
+
+A server that cannot be reached during any of this decides nothing: the session
+and the stored sign-in both stay, and the next check tries again.
 
 ## Signing out
 
 Sign out sits in the Account section of the Settings tab, beside the signed-in
 email and the server the session belongs to. It ends the session on the server
 where it can, and clears the local session either way — an unreachable server
-does not keep someone signed in. The app returns to the welcome screen.
+does not keep someone signed in. A stored sign-in goes with it, which is what
+makes signing out the way to take back the answer the dialog asked for. The app
+returns to the welcome screen.
 
 While a sign-out is in flight the row says so rather than only going quiet: it
 takes a heavier fill, its icon becomes a spinner, and its label reads as
@@ -181,6 +248,10 @@ it is.
 ## What authentication does not do
 
 The app does not create accounts, does not reset or change a password, and does
-not sign in through a third-party or single-sign-on provider. Signing in is an
+not sign in through a third-party or single-sign-on provider. It carries no
+setting for whether a sign-in is stored: the dialog after each sign-in is the
+only place that is decided, and signing out is the only way to undo it. It also
+does nothing at all while it is closed — no session is renewed in the
+background, and nothing is scheduled to run while the app is not open. Signing in is an
 email and a password checked against an auth collection that already exists on
 the server; everything else about an account belongs to Payload's own admin UI.
