@@ -26,13 +26,9 @@ const COLLECTIONS_LOAD_ERROR = {
 const COLLECTIONS_OFFLINE_SUBTITLE =
 	"Collections will load as soon as you're back online.";
 
-function CollectionListDivider(): JSX.Element {
-	return <View style={styles.divider} />;
-}
-
 /**
  * the Collections tab: lists the signed-in server's readable, non-system
- * collections, each row opening that collection's record list. renders an
+ * collections, each card opening that collection's record list. renders an
  * offline state, a loading skeleton, an error state (with a message tailored to
  * the failure), an empty state, or the list.
  */
@@ -93,9 +89,8 @@ export function CollectionsScreen(): JSX.Element {
 	} else if (data && data.length > 0) {
 		content = (
 			<FlatList
-				contentContainerStyle={styles.card}
+				contentContainerStyle={styles.feed}
 				data={data}
-				ItemSeparatorComponent={CollectionListDivider}
 				keyExtractor={(collection) => collection.slug}
 				renderItem={({ item }) => <CollectionListItem collection={item} />}
 				style={styles.list}
@@ -122,28 +117,20 @@ export function CollectionsScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create((theme, rt) => ({
-	// a stack header clears the top edge and the tab bar the bottom, so this
-	// screen owns only the horizontal pair — carried on the list's content
-	// container, not on the list itself, which would inset its scroll indicators
-	// and leave the rows stopping short of the screen edge.
-	// `CollectionListSkeleton` mirrors these values, or the card would shift
-	// when the collections arrive.
-	card: {
-		marginTop: theme.gap.md,
-		marginBottom: theme.gap.md,
-		marginStart: Math.max(rt.insets.left, theme.gap.md),
-		marginEnd: Math.max(rt.insets.right, theme.gap.md),
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		borderColor: theme.colors.border.neutral.subtle,
-		borderWidth: theme.borderWidth.hairline,
-		borderRadius: theme.radius.md,
-		overflow: "hidden",
-	},
-	// drawn as a filled `View` rather than a border, so the hairline is its
-	// height.
-	divider: {
-		height: theme.borderWidth.hairline,
-		backgroundColor: theme.colors.border.neutral.subtle,
+	// the record feed's own content container (see collection-records-screen):
+	// each collection carries its own card, so what is left here is the space
+	// between them and the space around them. a stack header clears the top edge
+	// and the tab bar the bottom, so this screen owns only the horizontal pair —
+	// carried on the list's content container, not on the list itself, which
+	// would inset its scroll indicators and leave the cards stopping short of
+	// the screen edge. `CollectionListSkeleton` mirrors these values, or the
+	// list would shift when the collections arrive.
+	feed: {
+		gap: theme.gap.sm,
+		paddingTop: theme.gap.md,
+		paddingBottom: theme.gap.md,
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
 	},
 	list: {
 		flex: 1,

@@ -20,16 +20,16 @@ const gap = {
 // today, folding them together means retuning spacing silently reshapes every
 // corner in the app.
 const radius = {
-	// inset marks and placeholder bars — a collection row's icon tile, a skeleton
-	// bar.
+	// inset marks and placeholder bars — a collection card's icon tile, a
+	// skeleton bar.
 	sm: 8,
 	// the default surface corner: cards, inputs, buttons, menu-group ends.
 	md: 12,
 	// large marks — a message state's icon plate.
 	lg: 16,
 	// fully rounded. React Native clamps a radius to half the shorter side, so
-	// one step covers both a pill (the record-id chip) and a circle (the account
-	// avatar) without either naming a measurement of its own.
+	// one step covers both a pill (a record field's read-only marker) and a
+	// circle (the account avatar) without either naming a measurement of its own.
 	pill: 999,
 } as const;
 
@@ -98,8 +98,10 @@ const fonts = {
 // on top of the real one.
 //
 // 22 is the shared line box of every role that fills a title or body line
-// (`heading`, `body`, `code`). that is what keeps a record card's height
-// deterministic — see `RECORD_CARD_LINE` in collection-record-card.tsx.
+// (`heading`, `body`, `code`), and 18 the shared line box of the two that
+// support one (`caption`, `codeCaption`). a record card's height is
+// deterministic because of the first and its metadata row reads as one tier
+// because of the second — see `RECORD_CARD_LINE` in collection-record-card.tsx.
 const typography = {
 	// a screen's hero title — the Home landing.
 	display: { fontFamily: fonts.heading, fontSize: 28, lineHeight: 34 },
@@ -114,12 +116,13 @@ const typography = {
 	// carried identical values and naming them apart implied a distinction the
 	// design does not draw.
 	caption: { fontFamily: fonts.paragraph, fontSize: 13, lineHeight: 18 },
-	// machine-readable text: a record id standing in for a missing title, an id
-	// chip, build details.
+	// machine-readable text: a record field's read-only or raw-JSON value, build
+	// details.
 	code: { fontFamily: fonts.monospace, fontSize: 14, lineHeight: 22 },
 	// machine-readable text supporting something else: a record field's Payload
-	// name, shown beside the label derived from it. it borrows `caption`'s 18pt
-	// line box, which is what lets the two sit on one shared baseline.
+	// name, shown beside the label derived from it, and a record card's id,
+	// shown beside the last-updated label. it borrows `caption`'s 18pt line box,
+	// which is what lets the two sit on one shared baseline.
 	codeCaption: { fontFamily: fonts.monospace, fontSize: 12, lineHeight: 18 },
 } as const;
 
@@ -244,6 +247,13 @@ const defaultTheme = {
 			// text drawn on top of a solid accent fill (Radix teal contrast)
 			onAccent: "#ffffff",
 		},
+		// the dim behind a modal surface. flat, with no tone or step, for the
+		// same reason `text.onAccent` is: it is one value with one use, and it
+		// belongs to no scale — Radix's own overlay is black-with-alpha in both
+		// themes rather than a step of any hue. it is a token rather than a
+		// literal at the use site so the dark theme cannot silently miss it, and
+		// it is darker there because the surface it dims is already dark.
+		scrim: "#00000073",
 	},
 	duration,
 	easing,
@@ -372,6 +382,7 @@ const themes: Record<ThemeName, Theme> = {
 				// text drawn on top of a solid accent fill (Radix teal contrast)
 				onAccent: "#ffffff",
 			},
+			scrim: "#000000a6",
 		},
 	},
 };

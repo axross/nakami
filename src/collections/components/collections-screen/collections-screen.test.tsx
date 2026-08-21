@@ -29,7 +29,7 @@ import { CollectionsScreen } from "./collections-screen";
 // mock only the data layer the real query calls; the query, its factory, and
 // the access→list mapping all run for real. `PayloadRequestError` stays real so
 // the error-mapping path is exercised end to end. `fetch-records` is mocked too
-// so that pressing a row (which navigates to the records screen) does not make a
+// so that pressing a card (which navigates to the records screen) does not make a
 // real request.
 jest.mock("~/collections/helpers/fetch-access", () => ({
 	fetchAccess: jest.fn(),
@@ -245,7 +245,7 @@ describe("<CollectionsScreen>", () => {
 		expect(getByText("Media")).toBeTruthy();
 	});
 
-	it("opens the collection's records screen when a row is pressed", async () => {
+	it("opens the collection's records screen when a card is pressed", async () => {
 		jest
 			.mocked(fetchAccess)
 			.mockResolvedValue({ collections: { "blog-posts": { read: true } } });
@@ -274,9 +274,9 @@ describe("<CollectionsScreen>", () => {
 	// a stack header and the tab bar clear this screen's vertical edges, so it
 	// owns only the horizontal pair — carried on the list's content container
 	// rather than the list itself. Unistyles' jest mock reports zero insets, so
-	// this is the zero-inset device: the card's margin has to fall back to the
+	// this is the zero-inset device: the feed's padding has to fall back to the
 	// design gutter rather than collapsing to the raw inset.
-	it("keeps the list card's horizontal gutter when the runtime reports no insets", async () => {
+	it("keeps the feed's horizontal gutter when the runtime reports no insets", async () => {
 		jest
 			.mocked(fetchAccess)
 			.mockResolvedValue({ collections: { posts: { read: true } } });
@@ -287,11 +287,36 @@ describe("<CollectionsScreen>", () => {
 			expect(getByTestId("collection-list-item-posts")).toBeTruthy();
 		});
 
-		const card = StyleSheet.flatten(
+		const feed = StyleSheet.flatten(
 			getByTestId("collections-list").props.contentContainerStyle,
 		);
 
-		expect(card.marginStart).toBe(themes.light.gap.md);
-		expect(card.marginEnd).toBe(themes.light.gap.md);
+		expect(feed.paddingStart).toBe(themes.light.gap.md);
+		expect(feed.paddingEnd).toBe(themes.light.gap.md);
+	});
+
+	// the shape the collections list and the record feed now share: each item
+	// carries its own card, so the list around them holds nothing but the space
+	// between. a content container that went back to being one grouped card
+	// would resolve a surface of its own here, and a separator would put a node
+	// between two items that this asserts is absent.
+	it("spaces the items rather than grouping them into one card", async () => {
+		jest.mocked(fetchAccess).mockResolvedValue({
+			collections: { posts: { read: true }, media: { read: true } },
+		});
+
+		const { getByTestId } = renderScreen();
+
+		await waitFor(() => {
+			expect(getByTestId("collection-list-item-posts")).toBeTruthy();
+		});
+
+		const list = getByTestId("collections-list");
+		const feed = StyleSheet.flatten(list.props.contentContainerStyle);
+
+		expect(feed.gap).toBe(themes.light.gap.sm);
+		expect(feed).not.toHaveProperty("borderRadius");
+		expect(feed).not.toHaveProperty("backgroundColor");
+		expect(list.props.ItemSeparatorComponent).toBeUndefined();
 	});
 });

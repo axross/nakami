@@ -2,31 +2,9 @@ import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import { RECORD_CARD_LINE } from "~/collections/components/collection-record-card/collection-record-card";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
+import { subtreeStyles } from "~/common/test-helpers/subtree-styles";
 import { themes } from "~/unistyles";
 import { CollectionRecordsSkeleton } from "./collection-records-skeleton";
-
-/**
- * every style in a rendered subtree, flattened, so a placeholder that carries
- * no test hook of its own can still be asserted on by its shape. an element
- * appears more than once (a composite node and the host node under it both hold
- * the style prop), so this answers "is there one like this" rather than "how
- * many".
- */
-function subtreeStyles(node: unknown): Record<string, unknown>[] {
-	if (typeof node !== "object" || node === null) {
-		return [];
-	}
-
-	const { props, children } = node as {
-		props?: { style?: unknown };
-		children?: readonly unknown[];
-	};
-
-	return [
-		...(props?.style === undefined ? [] : [resolveStyle(props.style)]),
-		...(children ?? []).flatMap(subtreeStyles),
-	];
-}
 
 type Node = { props?: { style?: unknown }; children?: readonly unknown[] };
 
@@ -97,10 +75,12 @@ describe("<CollectionRecordsSkeleton>", () => {
 	});
 
 	// the placeholder metadata row stands in for a loaded one holding two things
-	// at opposite ends — the id pill and the update label — and both it and the
-	// pill inside it have to keep the loaded row's line box, or the list reflows
-	// the moment the records replace it.
-	it("stands its metadata placeholder in for the loaded row's pill and label", () => {
+	// at opposite ends — the record's id and the update label — and it has to
+	// keep the loaded row's line box, or the list reflows the moment the records
+	// replace it. only the row: what sits inside it is two lines of text, so its
+	// bars are sized like text rather than to the row, and the test below is
+	// where their own metrics are pinned.
+	it("stands its metadata placeholder in for the loaded row's line box", () => {
 		const { getByTestId } = render(<CollectionRecordsSkeleton />);
 		const styles = subtreeStyles(getByTestId("collection-records-loading"));
 
@@ -112,21 +92,14 @@ describe("<CollectionRecordsSkeleton>", () => {
 					style.height === RECORD_CARD_LINE,
 			),
 		).toBe(true);
-		expect(
-			styles.some(
-				(style) =>
-					style.borderRadius === themes.light.radius.pill &&
-					style.height === RECORD_CARD_LINE,
-			),
-		).toBe(true);
 	});
 
-	// the pill alone would satisfy the row above while the label's own bar went
-	// missing, so the row is also asserted to hold two things, the second of them
-	// the short bar the update label stands behind. which end each sits at is a
-	// layout an off-device render never computes; the pair and their order are
-	// what it can show.
-	it("puts a second, shorter bar after the pill in that row", () => {
+	// the id's bar alone would satisfy the row above while the label's own bar
+	// went missing, so the row is also asserted to hold two things: the wider bar
+	// the id stands behind, then the short one the update label does. which end
+	// each sits at is a layout an off-device render never computes; the pair,
+	// their order, and their widths are what it can show.
+	it("puts a second, shorter bar after the id's in that row", () => {
 		const { getByTestId } = render(<CollectionRecordsSkeleton />);
 		const row = findNode(
 			getByTestId("collection-records-loading"),
@@ -140,7 +113,11 @@ describe("<CollectionRecordsSkeleton>", () => {
 		);
 
 		expect(bars).toHaveLength(2);
-		expect(bars[0]?.borderRadius).toBe(themes.light.radius.pill);
+		expect(bars[0]).toMatchObject({
+			width: "62%",
+			borderRadius: themes.light.radius.sm,
+		});
 		expect(bars[1]?.width).toBe("20%");
+		expect(bars[0]?.height).toBe(bars[1]?.height);
 	});
 });

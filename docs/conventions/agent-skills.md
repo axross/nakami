@@ -207,7 +207,7 @@ finding raised anyway costs a review round to answer.
 The installed `react-component-styling` capability requires `style` on every
 mobile-native component that renders a styled root, and
 `src/collections/components/collection-list-item/collection-list-item.tsx` renders one —
-the `Pressable` inside `CollectionRow`. It accepts every other prop that root takes, and
+the `Pressable` inside `CollectionCard`. It accepts every other prop that root takes, and
 omits `style` from its published type on purpose.
 
 The cause is in the platform rather than in the component. `Link asChild` slots its
@@ -221,7 +221,7 @@ here would type-check and not work — the exact defect the props-and-spread con
 issue #69 exists to remove, so publishing one to satisfy the rule would defeat the rule's
 own purpose.
 
-A row is therefore sized and placed from the list's `contentContainerStyle`. Any other
+A card is therefore spaced and inset from the list's `contentContainerStyle`. Any other
 component this repository slots through `Link asChild` inherits the same constraint;
 one that must take a `style` needs a different navigation shape — `onPress` with
 `router.push`, as `WelcomeScreen`'s button already uses for an unrelated `Link asChild`
@@ -446,9 +446,9 @@ rule asks for.
 
 | Style | Argument | Why it stays |
 | --- | --- | --- |
-| `collection-list-item.tsx:106` `row` | `pressed` | `pressed` |
+| `collection-list-item.tsx:102` `card` | `pressed` | `pressed` |
+| `collection-record-card.tsx:126` `card` | `pressed` | `pressed` |
 | `collections-message-state.tsx:63` `button` | `pressed` | `pressed` |
-| `collection-list-skeleton.tsx:120` `row` | `divided` | rendered through `ROW_WIDTHS.map(…)`, so the value differs per row within one body |
 
 `setting-menu-group-item.tsx` shows the third shape a `pressed` style can take and
 is **not** a deviation: its `item` is a static style carrying `position` and
@@ -458,13 +458,11 @@ rule's first clause is satisfied and only its own comment records why `pressed`
 stays outside the variant groups.
 
 Two neighbouring styles look similar and are **not** deviations:
-`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:109` both
+`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:125` both
 take a width, which the same rule's next clause requires stay a dynamic function.
 
-The two `pressed` styles convert the moment Unistyles offers a press state a
-component body can read, or its native `Pressable` honours the `variants` prop it
-already accepts. The skeleton row converts when its rows become a component of
-their own, which is worth doing for its own reasons rather than for this rule.
+All three convert the moment Unistyles offers a press state a component body can
+read, or its native `Pressable` honours the `variants` prop it already accepts.
 
 **One cost of following the rule is worth knowing before extending it.** The jest
 mock strips `variants` and `compoundVariants` from every stylesheet and stubs

@@ -13,14 +13,14 @@ import { getCollectionIcon } from "~/collections/helpers/collection-icon";
 import type { Collection } from "~/collections/models/collection";
 
 /**
- * the pressable row body: an icon guessed from the collection's slug, its name,
+ * the pressable card body: an icon guessed from the collection's slug, its name,
  * and a chevron. kept a separate component so `Link asChild` clones *this*
  * wrapper and threads its injected press/href props onto the root `Pressable` via
  * `...props`. wrapping the Unistyles-styled `Pressable` in `Link asChild`
- * directly drops the row's computed style — the clone takes over the ref
+ * directly drops the card's computed style — the clone takes over the ref
  * Unistyles applies styles through — collapsing the horizontal layout.
  */
-function CollectionRow({
+function CollectionCard({
 	collection,
 	style,
 	...props
@@ -39,7 +39,7 @@ function CollectionRow({
 			accessibilityRole="link"
 			testID={`collection-list-item-${collection.slug}`}
 			{...props}
-			style={({ pressed }) => [styles.row(pressed), style]}
+			style={({ pressed }) => [styles.card(pressed), style]}
 		>
 			<View style={styles.mark}>
 				<Icon color={theme.colors.text.neutral.base} size={20} />
@@ -54,25 +54,30 @@ function CollectionRow({
 }
 
 /**
- * a single collection row that opens the collection's record list. navigation
- * is declarative via `Link`; the row body lives in
- * {@link CollectionRow} so `Link asChild` targets a wrapper component rather
- * than the Unistyles-styled `Pressable` directly (see that component's note).
+ * a single collection card that opens the collection's record list. it is drawn
+ * as the record feed's card — the same fill, hairline border, radius, and
+ * padding a `CollectionRecordCard` carries — so the two list screens one
+ * navigation step apart read as one app rather than as two. navigation is
+ * declarative via `Link`; the card body lives in {@link CollectionCard} so
+ * `Link asChild` targets a wrapper component rather than the Unistyles-styled
+ * `Pressable` directly (see that component's note).
  *
- * `style` is the one prop this row deliberately does **not** publish, against
+ * `style` is the one prop this card deliberately does **not** publish, against
  * the general rule that a component rendering a styled root accepts one.
  * `Link asChild` slots its child through `@radix-ui/react-slot`, which composes
  * a `style` by spreading it into an object literal — which throws in
  * development for the array form, and silently detaches a Unistyles style from
  * the updates it applies through its own reference. a `style` accepted here
  * would type-check and not work, which is the exact failure this component's
- * props contract exists to remove. size and place the row from the list's
- * `contentContainerStyle` instead.
+ * props contract exists to remove. space and inset the card from the list's
+ * `contentContainerStyle` instead, the way the record feed does.
  */
 export function CollectionListItem({
 	collection,
 	...props
-}: Readonly<Omit<ComponentProps<typeof CollectionRow>, "style">>): JSX.Element {
+}: Readonly<
+	Omit<ComponentProps<typeof CollectionCard>, "style">
+>): JSX.Element {
 	return (
 		<Link
 			asChild
@@ -81,12 +86,32 @@ export function CollectionListItem({
 				params: { slug: collection.slug },
 			}}
 		>
-			<CollectionRow collection={collection} {...props} />
+			<CollectionCard collection={collection} {...props} />
 		</Link>
 	);
 }
 
 const styles = StyleSheet.create((theme) => ({
+	// the record card's own container, property for property (see
+	// collection-record-card), with the horizontal layout this card's single
+	// line of content needs on top. `minHeight` outlives the 34pt mark that sets
+	// the height today: it is the touch-target floor, so a later change to the
+	// mark cannot quietly shrink the target below it. the loading skeleton
+	// mirrors these metrics, or the list would shift when the collections
+	// arrive.
+	card: (pressed: boolean) => ({
+		flexDirection: "row",
+		alignItems: "center",
+		columnGap: theme.gap.sm,
+		minHeight: 56,
+		paddingVertical: theme.gap.sm,
+		paddingHorizontal: theme.gap.md,
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderColor: theme.colors.border.neutral.subtle,
+		borderWidth: theme.borderWidth.hairline,
+		borderRadius: theme.radius.md,
+		opacity: pressed ? 0.6 : 1,
+	}),
 	label: {
 		...theme.typography.body,
 		flexShrink: 1,
@@ -100,16 +125,6 @@ const styles = StyleSheet.create((theme) => ({
 		backgroundColor: theme.colors.surface.neutral.base,
 		borderRadius: theme.radius.sm,
 	},
-	row: (pressed: boolean) => ({
-		flexDirection: "row",
-		alignItems: "center",
-		columnGap: theme.gap.sm,
-		minHeight: 56,
-		paddingVertical: theme.gap.xs,
-		paddingHorizontal: theme.gap.md,
-		backgroundColor: theme.colors.foundation.neutral.subtle,
-		opacity: pressed ? 0.6 : 1,
-	}),
 	spring: {
 		flex: 1,
 	},

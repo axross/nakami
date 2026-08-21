@@ -108,7 +108,11 @@ matches tests under `src/` only, so a test written anywhere else never runs.
 A module the unit suite alone uses — a helper that reads what a render produced, a
 factory that builds a throwaway client — MUST live in `src/common/test-helpers/`, and
 nothing that is not test-only belongs there. It holds `resolve-style.ts`, which flattens
-a rendered `style` prop into the single object the renderer would apply, and
+a rendered `style` prop into the single object the renderer would apply;
+`subtree-styles.ts`, which collects every style in a rendered subtree so an element
+carrying no test hook of its own can still be asserted on by its shape — which is how a
+skeleton's placeholders are reached, since a hook repeated across sibling placeholders
+would not be the globally unique one this project's flat-matching e2e runner needs; and
 `query-client.ts`, which builds the per-test `QueryClient`
 [server-state.md](./server-state.md) requires.
 
