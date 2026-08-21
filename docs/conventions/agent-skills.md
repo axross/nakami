@@ -574,6 +574,51 @@ column of its own. Until then this target MUST NOT be raised as a fresh finding,
 **second** control under 44×44 is not covered by this entry — it is its own decision,
 and this one is the exception rather than a precedent.
 
+## The record-id lookup swallows a server-kind failure
+
+`software-instrumentation`'s [error-handling rules](../../.claude/skills/software-instrumentation/references/error-handling.md)
+state that a nested helper MUST NOT swallow an error silently, and that a caught error
+representing an unexpected failure MUST be reported through `reportError`.
+`src/collections/helpers/find-record-by-id.ts` departs from both for exactly one class
+of failure, and the reason is that the class cannot be told apart from a normal answer.
+
+That helper exists because a record's id is not a text field a `where` clause can match:
+its type belongs to the server's database adapter, so the record search asks
+`GET /api/{slug}/{id}` beside its field query and reads the answer as "the typed string
+is one of this collection's ids, or it is not". The trouble is what "it is not" looks
+like on the wire. Payload answers an unusable id as a 404 on some adapters and as a cast
+failure — a 5xx — on others, which was
+[confirmed against Payload's own issue tracker](https://github.com/payloadcms/payload/issues/13045)
+rather than assumed. Both arrive as `PayloadRequestError`'s `"server"` kind, so the
+status cannot separate them, and neither can the kind.
+
+What the helper does with that:
+
+- A `"network"` or `"auth"` failure says nothing about the typed string, so **both
+  propagate**. The search around the lookup then fails the way its sibling field query
+  would, and the reader gets the offline or the permission surface rather than
+  `No matching records`. This half is not a deviation; it is the rule being followed.
+- A `"server"` failure resolves to `null` — no match — and is **not** reported. This is
+  the deviation.
+
+Reporting it instead was considered and rejected: a reader typing an ordinary word into
+the search field produces exactly this failure on a Mongo-backed collection, so
+reporting it would send the error tracker one event per search that does not look like
+an id. Propagating it was rejected for the same reason — it would turn every such search
+into a failed screen.
+
+What the deviation costs is real and worth naming: a genuine server fault on that one
+endpoint reads as "no id match" and reaches no tracker. It is bounded — the field query
+runs beside it and fails loudly on its own for any fault that is not specific to
+`findByID` — except on a collection whose records carry none of the eight title-ish
+fields, where the id lookup is the search's only request. A debug log keeps the case
+visible to anyone reading a session's log.
+
+This ends the moment Payload's REST API answers an unusable id with one status across
+adapters, or exposes the distinction some other way. Until then, the helper MUST stay
+this narrow: it exists for one speculative lookup, and widening what it is used for
+would put this swallow under a call that needs the error.
+
 ## Recording a new deviation or gap
 
 A **deviation** is a collision: an installed capability requires one thing and this

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import { RECORD_CARD_LINE } from "~/collections/components/collection-record-card/collection-record-card";
+import { SEARCH_FIELD_HEIGHT } from "~/collections/components/collection-records-header/collection-records-search-field";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
 import { subtreeStyles } from "~/common/test-helpers/subtree-styles";
 import { themes } from "~/unistyles";
@@ -65,13 +66,36 @@ describe("<CollectionRecordsSkeleton>", () => {
 	// collapsing to the raw inset.
 	it("keeps the loaded feed's horizontal gutter when the runtime reports no insets", () => {
 		const { getByTestId } = render(<CollectionRecordsSkeleton />);
-
-		const feed = resolveStyle(
-			getByTestId("collection-records-loading").props.style,
+		const feed = findNode(
+			getByTestId("collection-records-loading"),
+			(style) => style.gap === themes.light.gap.sm,
 		);
 
-		expect(feed.paddingStart).toBe(themes.light.gap.md);
-		expect(feed.paddingEnd).toBe(themes.light.gap.md);
+		const gutter = resolveStyle(feed?.props?.style);
+
+		expect(gutter.paddingStart).toBe(themes.light.gap.md);
+		expect(gutter.paddingEnd).toBe(themes.light.gap.md);
+	});
+
+	// the search section is drawn above the feed on the loaded screen, so the
+	// placeholder carries one too — at the same fixed field height and the same
+	// gutter — or the whole feed drops by the section's height the moment the
+	// records arrive.
+	it("stands a section placeholder in for the loaded search section", () => {
+		const { getByTestId } = render(<CollectionRecordsSkeleton />);
+		const styles = subtreeStyles(getByTestId("collection-records-loading"));
+
+		expect(
+			styles.some(
+				(style) =>
+					style.borderBottomWidth === themes.light.borderWidth.hairline &&
+					style.paddingStart === themes.light.gap.md &&
+					style.paddingEnd === themes.light.gap.md,
+			),
+		).toBe(true);
+		expect(styles.some((style) => style.height === SEARCH_FIELD_HEIGHT)).toBe(
+			true,
+		);
 	});
 
 	// the placeholder metadata row stands in for a loaded one holding two things

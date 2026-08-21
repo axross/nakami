@@ -96,18 +96,27 @@ reporting zero insets renders exactly as it did before this convention existed:
 | `collections-screen` + `collection-list-skeleton`           | `theme.gap.md`       |
 | `collection-records-screen` + `collection-records-skeleton` | `theme.gap.md`       |
 | `collection-record-screen` + `collection-record-skeleton`   | `theme.gap.md`       |
+| `collection-records-header`                                 | `theme.gap.md`       |
 | `collection-record-offline-notice`                          | `theme.gap.md`       |
 | `credential-consent-dialog` scrim (all four edges)          | `theme.gap.md`       |
 | `licenses-screen` root                                      | `theme.gap.lg`       |
 | `settings-screen` content container                         | nothing — see below  |
 
-`collection-record-offline-notice` is one of two rows above that are not a screen or a
-placeholder for one. It is the band the record detail screen draws above its fields
-while the device is offline, and it spans the screen rather than sitting inside the
-fields' gutter — so it carries the horizontal pair itself, floored against the same
-value the fields it sits above use.
+Three rows above are neither a screen nor a placeholder for one. Two of the three are
+bands that span the screen, and both are there for the same reason: a band that reaches
+the screen's own edges carries the horizontal pair itself rather than inheriting the
+gutter of the list beside it.
 
-`credential-consent-dialog` is the other, and it is the one surface here that owns all
+`collection-record-offline-notice` is the band the record detail screen draws above its
+fields while the device is offline, floored against the same value the fields it sits
+above use. `collection-records-header` is the search section fixed beneath the record
+feed's stack header — it meets the screen's edges rather than sitting inside the cards'
+gutter, so it floors against the same value those cards use. On that section the pair
+sits on the outer box that spans the screen, not on the animated body inside it that
+shrinks as the feed is scrolled: the inset belongs to whichever box actually reaches
+the edge.
+
+`credential-consent-dialog` is the third, and it is the one surface here that owns all
 four edges. It is a React Native `Modal` rather than a screen, so it appears in no row
 of the table above: it covers everything the navigator has mounted, under the system
 bars with it, and no chrome clears any edge for it. The inset sits on the scrim rather

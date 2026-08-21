@@ -12,6 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { RECORD_CARD_LINE } from "~/collections/components/collection-record-card/collection-record-card";
+import { SEARCH_FIELD_HEIGHT } from "~/collections/components/collection-records-header/collection-records-search-field";
 
 // placeholder title-bar widths per card, so the skeleton reads as varied
 // content rather than a repeated block (matching the loaded card feed).
@@ -24,12 +25,14 @@ const CARD_WIDTHS: readonly DimensionValue[] = [
 ];
 
 /**
- * the records loading state: placeholder cards in the same card feed as the
- * loaded list, gently pulsing. each placeholder card mirrors a real record
- * card's exact geometry — the count header, the inset card padding, and two
- * {@link RECORD_CARD_LINE}-tall line boxes (title + metadata row) — so the list
- * does not reflow when records arrive. honors the OS "reduce motion" setting
- * (via reanimated's `useReducedMotion`) by holding a steady opacity.
+ * the records loading state: the search section and placeholder cards in the
+ * same shapes the loaded screen draws, gently pulsing. the section placeholder
+ * mirrors the header's expanded geometry — its padding pair, a
+ * {@link SEARCH_FIELD_HEIGHT}-tall field, and the count line beneath — and each
+ * placeholder card a real record card's: the inset card padding and two
+ * {@link RECORD_CARD_LINE}-tall line boxes (title + metadata row). nothing
+ * reflows when the records arrive. honors the OS "reduce motion" setting (via
+ * reanimated's `useReducedMotion`) by holding a steady opacity.
  */
 export function CollectionRecordsSkeleton({
 	style,
@@ -73,23 +76,28 @@ export function CollectionRecordsSkeleton({
 			accessibilityLabel="Loading records"
 			testID={testID}
 			{...props}
-			style={[styles.feed, style]}
+			style={[styles.root, style]}
 		>
-			<View style={styles.count}>
-				<Animated.View style={[styles.countBar, pulse]} />
+			<View style={styles.section}>
+				<Animated.View style={[styles.fieldBar, pulse]} />
+				<View style={styles.count}>
+					<Animated.View style={[styles.countBar, pulse]} />
+				</View>
 			</View>
 
-			{CARD_WIDTHS.map((width) => (
-				<View key={String(width)} style={styles.card}>
-					<View style={styles.line}>
-						<Animated.View style={[styles.titleBar(width), pulse]} />
+			<View style={styles.feed}>
+				{CARD_WIDTHS.map((width) => (
+					<View key={String(width)} style={styles.card}>
+						<View style={styles.line}>
+							<Animated.View style={[styles.titleBar(width), pulse]} />
+						</View>
+						<View style={styles.metaLine}>
+							<Animated.View style={[styles.idBar, pulse]} />
+							<Animated.View style={[styles.metaBar, pulse]} />
+						</View>
 					</View>
-					<View style={styles.metaLine}>
-						<Animated.View style={[styles.idBar, pulse]} />
-						<Animated.View style={[styles.metaBar, pulse]} />
-					</View>
-				</View>
-			))}
+				))}
+			</View>
 		</View>
 	);
 }
@@ -105,10 +113,9 @@ const styles = StyleSheet.create((theme, rt) => ({
 		borderWidth: theme.borderWidth.hairline,
 		borderRadius: theme.radius.md,
 	},
-	// mirrors the screen's record-count header.
+	// mirrors the count line inside the search section.
 	count: {
 		paddingHorizontal: theme.gap.xs,
-		paddingBottom: theme.gap.xs,
 	},
 	countBar: {
 		width: 72,
@@ -125,6 +132,13 @@ const styles = StyleSheet.create((theme, rt) => ({
 		paddingBottom: theme.gap.md,
 		paddingStart: Math.max(rt.insets.left, theme.gap.md),
 		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+	},
+	// the search field's own placeholder, at the height the real field is fixed
+	// to and the radius it takes.
+	fieldBar: {
+		height: SEARCH_FIELD_HEIGHT,
+		backgroundColor: theme.colors.border.neutral.subtle,
+		borderRadius: theme.radius.md,
 	},
 	// the left end of the loaded metadata row: the record's id, which is a line
 	// of caption-scale monospace rather than a pill, so its placeholder takes the
@@ -160,6 +174,23 @@ const styles = StyleSheet.create((theme, rt) => ({
 		justifyContent: "space-between",
 		columnGap: theme.gap.xs,
 		height: RECORD_CARD_LINE,
+	},
+	root: {
+		flex: 1,
+	},
+	// mirrors the search section's expanded geometry (see
+	// collection-records-header): the same fill, the same edge against the feed,
+	// the same padding pair, and the same gap between the field and the count —
+	// so the section does not change size when the records arrive.
+	section: {
+		rowGap: theme.gap.xs,
+		paddingTop: theme.gap.sm,
+		paddingBottom: theme.gap.sm,
+		paddingStart: Math.max(rt.insets.left, theme.gap.md),
+		paddingEnd: Math.max(rt.insets.right, theme.gap.md),
+		backgroundColor: theme.colors.foundation.neutral.subtle,
+		borderBottomColor: theme.colors.border.neutral.subtle,
+		borderBottomWidth: theme.borderWidth.hairline,
 	},
 	titleBar: (width: DimensionValue) => ({
 		width,
