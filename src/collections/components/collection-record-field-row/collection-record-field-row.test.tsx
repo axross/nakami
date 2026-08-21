@@ -269,23 +269,91 @@ describe("<CollectionRecordFieldRow>", () => {
 	});
 
 	describe("the four read-only reasons", () => {
-		it.each<[RecordFieldReadOnlyReason, unknown, string]>([
-			["server-assigned", "a1", "Server-assigned"],
-			["permission", "Draft copy", "No permission"],
-			[
-				"rich-text",
-				{ root: { type: "root", children: [] } },
-				"Not editable here yet",
-			],
-			["no-value", null, "No value"],
-		])("states %s rather than showing a control", (reason, value, stated) => {
+		it.each<[RecordFieldReadOnlyReason, unknown]>([
+			["server-assigned", "a1"],
+			["permission", "Draft copy"],
+			["rich-text", { root: { type: "root", children: [] } }],
+			["no-value", null],
+		])("marks %s rather than showing a control", (reason, value) => {
 			const kind: RecordFieldKind = reason === "no-value" ? "none" : "text";
-			const { getByText, queryByTestId } = renderRow(
+			const { getByTestId, queryByTestId } = renderRow(
 				fieldOf("field", value, kind, reason),
 			);
 
-			expect(getByText(stated)).toBeTruthy();
+			expect(getByTestId("record-field-field-value-reason")).toBeTruthy();
 			expect(queryByTestId("record-field-field-input")).toBeNull();
+		});
+
+		// the reason is a mark now, so the row must not also be spending a third of
+		// its width saying the same thing in words — and tapping the mark has to be
+		// the way that sentence is reachable.
+		it.each<[RecordFieldReadOnlyReason, unknown, string]>([
+			[
+				"server-assigned",
+				"a1",
+				"Payload maintains this field itself, so it can't be edited here.",
+			],
+			[
+				"permission",
+				"Draft copy",
+				"Your account doesn't have permission to update this field.",
+			],
+			[
+				"rich-text",
+				{ root: { type: "root", children: [] } },
+				"This app can't edit a Rich Text field yet, so it's left as it is.",
+			],
+			[
+				"no-value",
+				null,
+				"This field is empty, and there's no way to tell which kind of value it takes.",
+			],
+		])("keeps %s's sentence behind its mark", (reason, value, sentence) => {
+			const kind: RecordFieldKind = reason === "no-value" ? "none" : "text";
+			const { getByTestId, getByText, queryByText } = renderRow(
+				fieldOf("field", value, kind, reason),
+			);
+
+			expect(queryByText(sentence)).toBeNull();
+
+			fireEvent.press(getByTestId("record-field-field-value-reason"));
+
+			expect(getByText(sentence)).toBeTruthy();
+		});
+
+		// the pair used to be one accessible element on the surface; a button
+		// cannot live inside one, so the value carries the same announcement.
+		it("announces the value and its reason together", () => {
+			const { getByText } = renderRow(
+				fieldOf("archivedAt", null, "none", "no-value"),
+			);
+
+			expect(getByText("—").props.accessibilityLabel).toBe(
+				"Archived At: —. This field is empty, and there's no way to tell which kind of value it takes.",
+			);
+		});
+
+		it("draws no reason mark on a row that can be edited", () => {
+			const { queryByTestId } = renderRow(fieldOf("title", "Shipping", "text"));
+
+			expect(queryByTestId("record-field-title-value-reason")).toBeNull();
+		});
+
+		// neither half of this pair is observable from what a render produces, and
+		// each is wrong on its own: the surface aligns to the start so the mark
+		// holds the top corner of a value that wraps, and the value opts back out
+		// so a single line still sits where an editable input's single line does.
+		it("holds the mark at the top while the value keeps the centre line", () => {
+			const { getByTestId, getByText } = renderRow(
+				fieldOf("id", "a1", "text", "server-assigned"),
+			);
+
+			expect(
+				resolveStyle(getByTestId("record-field-id-value").props.style),
+			).toMatchObject({ alignItems: "flex-start" });
+			expect(resolveStyle(getByText("a1").props.style)).toMatchObject({
+				alignSelf: "center",
+			});
 		});
 
 		it("shows a Rich Text field's shape rather than its markup", () => {

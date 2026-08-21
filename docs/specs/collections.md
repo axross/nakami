@@ -158,9 +158,9 @@ input, and a multi-line value whose newlines are all deleted becomes a one-line
 input once that save lands. The row's shape follows the record's stored value,
 so it never changes shape while it is being edited.
 
-A row is read-only for one of four reasons, and states which one — a disabled
+A row is read-only for one of four reasons, and marks which one — a disabled
 control would say only that something is wrong, where these are four different
-facts about the field. Where more than one is true, the row states the first of
+facts about the field. Where more than one is true, the row marks the first of
 them:
 
 - **Server-assigned** — `id`, `createdAt`, and `updatedAt`. Payload maintains
@@ -179,10 +179,37 @@ them:
   field from an empty Rich Text one, so no control is offered rather than the
   wrong one.
 
-A read-only row shows what value it does have where the control would be, with
-the reason at the end of the same surface: `createdAt` and `updatedAt` read as
-short dates the way a card's update label does, a Rich Text field reads as `Rich
-Text` rather than as its markup, and a field holding `null` reads as an em dash.
+A read-only row shows what value it does have where the control would be:
+`createdAt` and `updatedAt` read as short dates the way a card's update label
+does, a Rich Text field reads as `Rich Text` rather than as its markup, and a
+field holding `null` reads as an em dash.
+
+The reason itself is a small mark in the top corner of that same surface,
+trailing edge, one glyph per reason and all four in the same neutral ink — a
+field the account may not edit is a fact about the record rather than a fault,
+and the destructive ink on this screen already means a save the server refused.
+The value keeps the surface's leading edge, so a read-only row and an editable
+one start their text alike, and the mark holds the corner rather than the
+value's last line as a serialized object or a long id wraps beneath it.
+
+The mark is a mark rather than the sentence because the same four sentences
+appear on every record and a reader learns them by the second row, while the
+width they took is the value's and is different every time. Nothing is lost by
+a reader who has not learned them: tapping the mark opens the sentence in a
+bubble anchored to it, over a layer that closes it again on the next tap
+anywhere. The bubble opens below the mark where the screen has room beneath it
+and above it where it does not, and it never runs off either side.
+
+Exactly one bubble is on screen at any moment, and the layer is what guarantees
+it rather than any coordination between the marks. While a bubble is open that
+layer covers the screen, so no mark is reachable — a tap aimed at a second mark
+closes the open bubble instead, and opening the second one is the tap after
+that. Two bubbles therefore cannot stack, and moving between two marks costs two
+taps rather than one.
+
+The sentence is also what a screen reader announces — from the mark itself, and
+alongside the value on the value's own announcement — so it is heard without
+the bubble having to be opened at all.
 
 ## Editing a field in its own screen
 

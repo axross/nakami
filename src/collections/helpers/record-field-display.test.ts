@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
+import { CircleSlash, Lock, PencilOff, Server } from "lucide-react-native";
 import type {
 	RecordField,
 	RecordFieldKind,
@@ -12,6 +13,7 @@ import {
 	hasEditedText,
 	parseEditedText,
 	parseEditorText,
+	readOnlyReasonIcon,
 	toEditableText,
 	toEditorText,
 	toJsonText,
@@ -34,15 +36,57 @@ function fieldOf(
 }
 
 describe("describeReadOnlyReason()", () => {
-	// each cause states what is true of the field, so the four stay
-	// distinguishable rather than collapsing into one "read-only".
+	// each cause explains what is true of the field, so the four stay
+	// distinguishable rather than collapsing into one "read-only". the sentence
+	// is what a tapped mark opens with and what a screen reader announces, so it
+	// is asserted whole rather than by a keyword.
 	it.each<[RecordFieldReadOnlyReason, string]>([
-		["server-assigned", "Server-assigned"],
-		["permission", "No permission"],
-		["rich-text", "Not editable here yet"],
-		["no-value", "No value"],
-	])("states %s as %s", (reason, expected) => {
+		[
+			"server-assigned",
+			"Payload maintains this field itself, so it can't be edited here.",
+		],
+		[
+			"permission",
+			"Your account doesn't have permission to update this field.",
+		],
+		[
+			"rich-text",
+			"This app can't edit a Rich Text field yet, so it's left as it is.",
+		],
+		[
+			"no-value",
+			"This field is empty, and there's no way to tell which kind of value it takes.",
+		],
+	])("explains %s as %s", (reason, expected) => {
 		expect(describeReadOnlyReason(reason)).toBe(expected);
+	});
+});
+
+describe("readOnlyReasonIcon()", () => {
+	it.each<[RecordFieldReadOnlyReason, typeof Lock]>([
+		["server-assigned", Server],
+		["permission", Lock],
+		["rich-text", PencilOff],
+		["no-value", CircleSlash],
+	])("marks %s with its own icon", (reason, expected) => {
+		expect(readOnlyReasonIcon(reason)).toBe(expected);
+	});
+
+	// the mark is the only thing on screen distinguishing the four now, and it is
+	// drawn in one ink, so the glyphs are the whole of what separates them.
+	it("gives no two reasons the same icon", () => {
+		const icons = new Set(
+			(
+				[
+					"server-assigned",
+					"permission",
+					"rich-text",
+					"no-value",
+				] satisfies RecordFieldReadOnlyReason[]
+			).map(readOnlyReasonIcon),
+		);
+
+		expect(icons.size).toBe(4);
 	});
 });
 
