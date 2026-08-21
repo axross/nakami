@@ -56,7 +56,7 @@ than for its value, so a surface picks by role instead of by eye:
 
 | Step   | Value | Role                                                              |
 | ------ | ----- | ------------------------------------------------------------------- |
-| `sm`   | 8     | Inset marks and placeholder bars — a collection row's icon tile, a skeleton bar |
+| `sm`   | 8     | Inset marks and placeholder bars — a collection card's icon tile, a skeleton bar |
 | `md`   | 12    | The default surface corner — cards, inputs, buttons, menu-group ends |
 | `lg`   | 16    | Large marks — a message state's icon plate                        |
 | `pill` | 999   | Fully rounded — the record-id chip, the account avatar            |

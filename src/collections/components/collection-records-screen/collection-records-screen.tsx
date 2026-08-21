@@ -35,7 +35,7 @@ function RecordCount({ total }: Readonly<{ total: number }>): JSX.Element {
 }
 
 /**
- * a collection's records: the screen a Collections row opens. renders an offline
+ * a collection's records: the screen a Collections card opens. renders an offline
  * state, a loading skeleton, a failure-aware error state (permission failures
  * get calm, retry-less copy; connectivity/unexpected failures offer a retry), an
  * empty state, or the paginated card feed — appending the next page on scroll.

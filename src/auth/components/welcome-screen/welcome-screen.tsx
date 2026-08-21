@@ -17,7 +17,7 @@ import { MessageState } from "~/common/components/message-state/message-state";
  * applies styles through — see `CollectionListItem`'s note), which left this
  * button rendering invisibly (its accent background never painted). press
  * feedback is the codebase's standard pressed-opacity dip, applied through the
- * `Pressable`'s own render-prop `style` (the same pattern as `CollectionRow`,
+ * `Pressable`'s own render-prop `style` (the same pattern as `CollectionCard`,
  * which proves it paints on release) — no `Link asChild` cloning involved.
  */
 export function WelcomeScreen(): JSX.Element {

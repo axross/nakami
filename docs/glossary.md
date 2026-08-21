@@ -61,7 +61,7 @@ such field has no derived title, and reads as `Untitled` instead.
 **derived label** — the display name this app works out for a **field** from
 that field's Payload name, the **Payload server** publishing none. Separators
 and camelCase boundaries alike read as word breaks, so `readingMinutes` reads as
-`Reading Minutes`. A **Collection**'s own row name is derived the same way but
+`Reading Minutes`. A **Collection**'s own card name is derived the same way but
 from a **slug**, which Payload guarantees lowercase and hyphenated and which
 therefore needs no camelCase rule.
 

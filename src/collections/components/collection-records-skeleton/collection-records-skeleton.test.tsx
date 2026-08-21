@@ -2,31 +2,9 @@ import { describe, expect, it } from "@jest/globals";
 import { render } from "@testing-library/react-native";
 import { RECORD_CARD_LINE } from "~/collections/components/collection-record-card/collection-record-card";
 import { resolveStyle } from "~/common/test-helpers/resolve-style";
+import { subtreeStyles } from "~/common/test-helpers/subtree-styles";
 import { themes } from "~/unistyles";
 import { CollectionRecordsSkeleton } from "./collection-records-skeleton";
-
-/**
- * every style in a rendered subtree, flattened, so a placeholder that carries
- * no test hook of its own can still be asserted on by its shape. an element
- * appears more than once (a composite node and the host node under it both hold
- * the style prop), so this answers "is there one like this" rather than "how
- * many".
- */
-function subtreeStyles(node: unknown): Record<string, unknown>[] {
-	if (typeof node !== "object" || node === null) {
-		return [];
-	}
-
-	const { props, children } = node as {
-		props?: { style?: unknown };
-		children?: readonly unknown[];
-	};
-
-	return [
-		...(props?.style === undefined ? [] : [resolveStyle(props.style)]),
-		...(children ?? []).flatMap(subtreeStyles),
-	];
-}
 
 type Node = { props?: { style?: unknown }; children?: readonly unknown[] };
 
