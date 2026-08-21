@@ -31,12 +31,16 @@ Within a role the steps run from least to most emphatic, which is what decides b
 them: a secondary or muted label takes `theme.colors.text.<tone>.base` and the primary
 one takes `intense` — Radix steps 11 and 12 respectively.
 
-`theme.colors.text.onAccent` is the one flat token, with no tone or step: text drawn on
-top of a solid accent fill. The scales mirror
+Two tokens are flat, with no tone or step. `theme.colors.text.onAccent` is text drawn
+on top of a solid accent fill. `theme.colors.scrim` is the dim behind a modal surface —
+one value with one use, belonging to no scale, since Radix's own overlay is
+black-with-alpha in both themes rather than a step of any hue; it is darker in the dark
+theme, because the surface it dims is already dark. The scales mirror
 [axross/cunnpe](https://github.com/axross/cunnpe) — Radix Slate for neutral, Teal for
 accent, Ruby for destructive — and `text.onAccent` is the one field this app adds
 beyond that structure, because cunnpe never draws text on a solid accent fill and this
-app's filled buttons do.
+app's filled buttons do. `scrim` is this app's own too, for the same kind of reason —
+cunnpe has no modal surface to dim.
 
 A colour MUST come from a token. A shade the tokens do not already carry MUST be added
 to `src/unistyles.ts` rather than inlined at the use site, so that the value has one
@@ -56,14 +60,14 @@ than for its value, so a surface picks by role instead of by eye:
 
 | Step   | Value | Role                                                              |
 | ------ | ----- | ------------------------------------------------------------------- |
-| `sm`   | 8     | Inset marks and placeholder bars — a collection row's icon tile, a skeleton bar |
+| `sm`   | 8     | Inset marks and placeholder bars — a collection card's icon tile, a skeleton bar |
 | `md`   | 12    | The default surface corner — cards, inputs, buttons, menu-group ends |
 | `lg`   | 16    | Large marks — a message state's icon plate                        |
-| `pill` | 999   | Fully rounded — the record-id chip, the account avatar            |
+| `pill` | 999   | Fully rounded — a record field's read-only marker, the account avatar |
 
 A border radius MUST come from this family. `pill` needs no per-surface measurement:
 React Native clamps a radius to half the shorter side, so one step draws a pill on a
-short chip and a circle on a square avatar.
+short marker and a circle on a square avatar.
 
 ## Border widths
 
@@ -112,8 +116,8 @@ size:
 | `heading`  | `InnovatorGrotesk-SemiBold` | 16 / 22        | Button labels, card titles, section headings                       |
 | `body`     | `InnovatorGrotesk-Regular`  | 16 / 22        | Running text, text inputs, list row labels                         |
 | `caption`  | `InnovatorGrotesk-Regular`  | 13 / 18        | A form field's name, hints, errors, counts, metadata               |
-| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Id chips, build details, read-only and raw-JSON field values        |
-| `codeCaption` | `JetBrainsMono-Regular`  | 12 / 18        | Machine-readable text supporting something else — a record field's Payload name beside its label |
+| `code`     | `JetBrainsMono-Regular`     | 14 / 22        | Build details, read-only and raw-JSON field values                  |
+| `codeCaption` | `JetBrainsMono-Regular`  | 12 / 18        | Machine-readable text supporting something else — a record field's Payload name beside its label, a record card's id beside its update label |
 
 A text style MUST apply a role **whole** — `...theme.typography.body` — and MUST NOT
 pick values out of one or override a part of it at the use site. A numeric `fontSize`

@@ -25,6 +25,8 @@ without losing what a flow has to assert.
 | `auth.signed-out`      | Signed out, the welcome screen offers sign-in and shows no tab bar      | auth        | must     |
 | `auth.sign-in-form`    | Blank fields are named on press, Collection toggles, an unreachable server errors | auth  | must     |
 | `auth.session`         | Signing in mounts the tab UI, and Sign out returns to the welcome screen | auth       | should   |
+| `auth.credential-consent` | Signing in stops to ask whether to keep the sign-in, and neither answer can be skipped | auth | should |
+| `auth.silent-reauth`   | An expired token is replaced from a stored sign-in with no visible sign-out | auth     | should   |
 | `auth.last-server-url` | Reopening sign-in pre-fills the last-used server URL                    | auth        | should   |
 | `tabs.navigation`      | The bottom tabs reach Home, Collections, and Settings                   | tabs        | should   |
 | `collections.list`     | The Collections tab lists the server's readable collections             | collections | should   |
@@ -38,19 +40,24 @@ without losing what a flow has to assert.
 
 ## Journeys
 
-Eleven of the fourteen carry a gap note. Each names what it is waiting on in its own
-terms, and nine of the eleven wait on the same thing: a session signed in against
-a Payload fixture, which this suite does not have.
+Thirteen of the sixteen carry a gap note. Each names what it is waiting on in its own
+terms, and ten of the thirteen wait on the same thing: a session signed in against a
+Payload fixture, which this suite does not have.
 [docs/conventions/end-to-end-testing.md](../docs/conventions/end-to-end-testing.md)
-states the contract such a fixture satisfies, and eight of those flows are tracked
-by [#135](https://github.com/axross/nakami/issues/135); the ninth,
-[`collections.search`](#collectionssearch), arrived after that issue was written
-and is not in its scope. The other two,
+states the contract such a fixture satisfies. Eight of those ten are tracked by
+[#135](https://github.com/axross/nakami/issues/135), which predates both
+[`auth.credential-consent`](#authcredential-consent) and
+[`collections.search`](#collectionssearch); neither of those two needs anything the
+other eight do not, so both belong with them rather than with the three below.
+
+The other three need something further on top of that fixture.
 [`collections.offline`](#collectionsoffline) and
-[`collections.record-offline`](#collectionsrecord-offline), need a device whose
-connectivity can be cut on top of that fixture, so neither is in that issue's
-scope. Nothing else covers any of these journeys end-to-end in the meantime: the
-unit suite exercises their components in isolation, which is not the same claim.
+[`collections.record-offline`](#collectionsrecord-offline) need a device whose
+connectivity can be cut mid-flow, and [`auth.silent-reauth`](#authsilent-reauth)
+needs a fixture whose issued token can be made to expire or be revoked on demand.
+None of the three is in that issue's scope. Nothing else covers any of these
+journeys end-to-end in the meantime: the unit suite exercises their components in
+isolation, which is not the same claim.
 
 ### `app.launch`
 
@@ -70,11 +77,38 @@ an inline error.
 
 ### `auth.session`
 
-After signing in, the tab UI mounts — the Home, Collections, and Settings tabs and
-the Settings Account section appear — and Sign out returns to the welcome screen.
+After signing in and answering the dialog that follows it, the tab UI mounts — the
+Home, Collections, and Settings tabs and the Settings Account section appear — and
+Sign out returns to the welcome screen.
 
 **Gap:** no automated flow asserts this. Signing in is the journey itself, so it
 cannot be arranged around: it needs credentials that a Payload fixture accepts.
+
+### `auth.credential-consent`
+
+A successful sign-in stops on a dialog asking whether to keep the sign-in on the
+device. The dialog states what keeping it buys and what it costs, offers two
+answers of equal prominence, and closes to neither the Android back gesture nor a
+tap outside it. Either answer reaches the tab UI; only one of them leaves a stored
+sign-in behind, and signing out removes it.
+
+**Gap:** no automated flow asserts this. The dialog only appears after a sign-in
+the server accepted, so it needs the same Payload fixture the journeys above wait
+on and nothing beyond it.
+
+### `auth.silent-reauth`
+
+Signed in with a stored sign-in, reopening the app after the server has ended the
+session lands on the signed-in surfaces without passing through the welcome
+screen. With no stored sign-in the same lapse signs the user out, and a stored
+sign-in the server refuses signs them out once rather than being retried.
+
+**Gap:** no automated flow asserts this, and a Payload fixture alone does not close
+it. The journey is about a token the server no longer accepts, so it needs a
+fixture whose issued token can be expired or revoked on demand — either a very
+short `tokenExpiration` the flow can wait out, or a way to end the session
+server-side mid-flow — on top of the signed-in session the other gaps here wait
+on.
 
 ### `auth.last-server-url`
 

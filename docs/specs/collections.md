@@ -14,7 +14,11 @@ reachable at all.
 ## The Collections tab
 
 The Collections tab lists the collections the signed-in account can read on its
-server, one row each, ordered alphabetically by name.
+server, one card each, ordered alphabetically by name. A collection is drawn as
+the same card a record takes in the feed one screen deeper — the same fill,
+border, corner, and spacing — so the two lists read as one app rather than as
+two. What the card holds differs, the collection's being a single line: its
+icon, its name, and a chevron.
 
 What is listed comes from the server's own access report for that account, which
 answers per collection and per operation. A collection is listed when the report
@@ -23,9 +27,9 @@ shown locked. Payload's own system collections are excluded on top of that, even
 where the account can read them; the REST API does not expose the flag Payload's
 admin UI hides them by, so their slug prefix is what identifies them.
 
-Payload's REST API reports no display label for a collection, so a row's name is
-derived from the slug: `-` and `_` separators become spaces and each word is
-capitalised, so `blog-posts` reads as Blog Posts. Each row also carries an icon,
+Payload's REST API reports no display label for a collection, so a card's name
+is derived from the slug: `-` and `_` separators become spaces and each word is
+capitalised, so `blog-posts` reads as Blog Posts. Each card also carries an icon,
 and the slug is the only signal for that too — the API reports nothing about
 what a collection holds.
 
@@ -37,11 +41,16 @@ recognised as neither, which is what lets `podcast-episodes` pass over
 `episodes` and read as audio. A slug nothing recognises carries a plain box,
 since a neutral mark beats a confident wrong one.
 
+Those silences are REST's, and REST is the API the app reads by a settled choice:
+[reading Payload over REST rather than GraphQL](../decisions/2026-08-20-read-payload-over-rest-rather-than-graphql.md)
+holds why the GraphQL API Payload also serves answers none of them either, and why it
+cannot be queried at all by a client that has not been told a server's schema.
+
 ## Opening a collection
 
-A row opens that collection's records, titled with the same derived name the row
-carried. The screen is addressed by the collection's slug, so a link into it
-resolves to one collection.
+A card opens that collection's records, titled with the same derived name the
+card carried. The screen is addressed by the collection's slug, so a link into
+it resolves to one collection.
 
 The slug arrives as an untrusted route parameter and is validated before use. A
 link carrying no usable slug identifies no collection, so the screen shows its
@@ -51,10 +60,12 @@ load-failure state rather than an empty collection.
 
 A collection's records are a scrollable feed of cards, under a section holding
 the search field and the number of records the server reports the collection
-holds. Each card carries a title over a metadata row holding the record's id in
-a small pill at the row's left and when it was last updated at its right. Every
-card carries the pill, whether or not the record has a title, so one feed reads
-as one shape. A card opens the record it stands for.
+holds. Each card carries a title over a metadata row holding the record's id at
+the row's left and when it was last updated at its right. Both sit at the same
+supporting scale as plain text, with nothing drawn around the id — the id in the
+monospace face, the update label in the reading one, on one shared line box.
+Every card carries the id, whether or not the record has a title, so one feed
+reads as one shape. A card opens the record it stands for.
 
 Payload's REST responses carry no title for a record, so the title is derived
 from the record's own fields: the first non-empty string among `title`, `name`,
@@ -161,7 +172,7 @@ more than it does for a collection, so the label is worked out from the name:
 each word is capitalised, so `readingMinutes` reads as Reading Minutes and
 `created_at` as Created At. A run of capitals stays whole, so `seoURL` reads as
 Seo URL rather than Seo Url. This is a different derivation from a collection
-row's name, which starts from a slug Payload guarantees lowercase and hyphenated
+card's name, which starts from a slug Payload guarantees lowercase and hyphenated
 and so needs no rule about camelCase.
 
 The label and the name share one line, the label at its start and the name at
@@ -180,9 +191,9 @@ one, `true` or `false` a switch, and an array or object a raw-JSON editor a few
 lines tall, opened on that value pretty-printed. Each opens on what the record
 holds today.
 
-A row is read-only for one of four reasons, and states which one — a disabled
+A row is read-only for one of four reasons, and marks which one — a disabled
 control would say only that something is wrong, where these are four different
-facts about the field. Where more than one is true, the row states the first of
+facts about the field. Where more than one is true, the row marks the first of
 them:
 
 - **Server-assigned** — `id`, `createdAt`, and `updatedAt`. Payload maintains
@@ -201,10 +212,37 @@ them:
   field from an empty Rich Text one, so no control is offered rather than the
   wrong one.
 
-A read-only row shows what value it does have where the control would be, with
-the reason at the end of the same surface: `createdAt` and `updatedAt` read as
-short dates the way a card's update label does, a Rich Text field reads as `Rich
-Text` rather than as its markup, and a field holding `null` reads as an em dash.
+A read-only row shows what value it does have where the control would be:
+`createdAt` and `updatedAt` read as short dates the way a card's update label
+does, a Rich Text field reads as `Rich Text` rather than as its markup, and a
+field holding `null` reads as an em dash.
+
+The reason itself is a small mark in the top corner of that same surface,
+trailing edge, one glyph per reason and all four in the same neutral ink — a
+field the account may not edit is a fact about the record rather than a fault,
+and the destructive ink on this screen already means a save the server refused.
+The value keeps the surface's leading edge, so a read-only row and an editable
+one start their text alike, and the mark holds the corner rather than the
+value's last line as a serialized object or a long id wraps beneath it.
+
+The mark is a mark rather than the sentence because the same four sentences
+appear on every record and a reader learns them by the second row, while the
+width they took is the value's and is different every time. Nothing is lost by
+a reader who has not learned them: tapping the mark opens the sentence in a
+bubble anchored to it, over a layer that closes it again on the next tap
+anywhere. The bubble opens below the mark where the screen has room beneath it
+and above it where it does not, and it never runs off either side.
+
+Exactly one bubble is on screen at any moment, and the layer is what guarantees
+it rather than any coordination between the marks. While a bubble is open that
+layer covers the screen, so no mark is reachable — a tap aimed at a second mark
+closes the open bubble instead, and opening the second one is the tap after
+that. Two bubbles therefore cannot stack, and moving between two marks costs two
+taps rather than one.
+
+The sentence is also what a screen reader announces — from the mark itself, and
+alongside the value on the value's own announcement — so it is heard without
+the bubble having to be opened at all.
 
 ## Saving a change
 
@@ -274,7 +312,7 @@ lost, sent neither later nor at the next launch.
 ## Loading, empty, and failure
 
 While a first load is in flight, each screen shows a placeholder in the shape of
-what is coming — rows in the collection list, the search section and cards in
+what is coming — cards in the collection list, the search section and cards in
 the record feed, field rows on a record — laid out to the same geometry as the
 real thing, so nothing shifts when the content arrives.
 The placeholders pulse, and hold a steady opacity instead when the device asks

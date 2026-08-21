@@ -1,4 +1,11 @@
 import {
+	CircleSlash,
+	Lock,
+	type LucideIcon,
+	PencilOff,
+	Server,
+} from "lucide-react-native";
+import {
 	formatRecordDate,
 	parseUpdatedAt,
 } from "~/collections/helpers/format-updated-at";
@@ -33,24 +40,56 @@ const RICH_TEXT_DISPLAY = "Rich Text";
 const DATE_FIELDS: readonly string[] = ["createdAt", "updatedAt"];
 
 /**
- * the sentence a read-only row states instead of showing an inert control, one
- * per cause, so the four stay distinguishable rather than collapsing into
- * "read-only". each is written as what is true of the field rather than as an
- * apology, and `rich-text` says "yet" because Rich Text editing is a follow-up
- * rather than a decision against it.
+ * the sentence a read-only row explains its mark with, one per cause, so the
+ * four stay distinguishable rather than collapsing into "read-only". each is
+ * written as what is true of the field rather than as an apology, and
+ * `rich-text` says "yet" because Rich Text editing is a follow-up rather than a
+ * decision against it.
+ *
+ * these are whole sentences rather than the labels they replaced because the
+ * row no longer shows them: a mark carries the reason on screen and this is
+ * what the mark's tooltip opens with, so it is read by someone who has asked
+ * what the mark means and has room for an answer. it is also what a screen
+ * reader announces, which is the one place the sentence is heard without being
+ * asked for.
  */
 const READ_ONLY_REASONS: Record<RecordFieldReadOnlyReason, string> = {
-	"server-assigned": "Server-assigned",
-	permission: "No permission",
-	"rich-text": "Not editable here yet",
-	"no-value": "No value",
+	"server-assigned":
+		"Payload maintains this field itself, so it can't be edited here.",
+	permission: "Your account doesn't have permission to update this field.",
+	"rich-text":
+		"This app can't edit a Rich Text field yet, so it's left as it is.",
+	"no-value":
+		"This field is empty, and there's no way to tell which kind of value it takes.",
 };
 
-/** the short sentence stating why a field cannot be edited. */
+/**
+ * the mark a read-only row shows in place of the sentence above.
+ *
+ * the four are chosen to be distinguishable by shape rather than by tone — they
+ * are all drawn in the same neutral ink, so a reader who cannot separate hues
+ * loses nothing. `Lock` is already this app's mark for a permission failure (see
+ * `describe-collections-error.ts`), and reusing it keeps one meaning per glyph.
+ */
+const READ_ONLY_REASON_ICONS: Record<RecordFieldReadOnlyReason, LucideIcon> = {
+	"server-assigned": Server,
+	permission: Lock,
+	"rich-text": PencilOff,
+	"no-value": CircleSlash,
+};
+
+/** the sentence explaining why a field cannot be edited. */
 export function describeReadOnlyReason(
 	reason: RecordFieldReadOnlyReason,
 ): string {
 	return READ_ONLY_REASONS[reason];
+}
+
+/** the mark standing for why a field cannot be edited. */
+export function readOnlyReasonIcon(
+	reason: RecordFieldReadOnlyReason,
+): LucideIcon {
+	return READ_ONLY_REASON_ICONS[reason];
 }
 
 /**

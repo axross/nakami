@@ -98,19 +98,31 @@ reporting zero insets renders exactly as it did before this convention existed:
 | `collection-record-screen` + `collection-record-skeleton`   | `theme.gap.md`       |
 | `collection-records-header`                                 | `theme.gap.md`       |
 | `collection-record-offline-notice`                          | `theme.gap.md`       |
+| `credential-consent-dialog` scrim (all four edges)          | `theme.gap.md`       |
 | `licenses-screen` root                                      | `theme.gap.lg`       |
 | `settings-screen` content container                         | nothing — see below  |
 
-Two rows above are neither a screen nor a placeholder for one, and both are there for
-the same reason: a band that spans the screen carries the horizontal pair itself rather
-than inheriting the gutter of the list beside it.
+Three rows above are neither a screen nor a placeholder for one. Two of the three are
+bands that span the screen, and both are there for the same reason: a band that reaches
+the screen's own edges carries the horizontal pair itself rather than inheriting the
+gutter of the list beside it.
+
 `collection-record-offline-notice` is the band the record detail screen draws above its
-fields while the device is offline. `collection-records-header` is the search section
-fixed beneath the record feed's stack header — it meets the screen's edges rather than
-sitting inside the cards' gutter, so it floors against the same value those cards use.
-On that section the pair sits on the outer box that spans the screen, not on the
-animated body inside it that shrinks as the feed is scrolled: the inset belongs to
-whichever box actually reaches the edge.
+fields while the device is offline, floored against the same value the fields it sits
+above use. `collection-records-header` is the search section fixed beneath the record
+feed's stack header — it meets the screen's edges rather than sitting inside the cards'
+gutter, so it floors against the same value those cards use. On that section the pair
+sits on the outer box that spans the screen, not on the animated body inside it that
+shrinks as the feed is scrolled: the inset belongs to whichever box actually reaches
+the edge.
+
+`credential-consent-dialog` is the third, and it is the one surface here that owns all
+four edges. It is a React Native `Modal` rather than a screen, so it appears in no row
+of the table above: it covers everything the navigator has mounted, under the system
+bars with it, and no chrome clears any edge for it. The inset sits on the scrim rather
+than on the card, so the card is centred inside the safe area rather than centred on
+the screen and cropped by a notch or a home indicator. Any future modal surface takes
+the same shape, and the table above stays a table of screens.
 
 A new surface takes the gutter it already had rather than inventing one, so adding
 clearance never doubles as a redesign.

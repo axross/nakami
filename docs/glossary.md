@@ -22,6 +22,13 @@ like any other **Collection**.
 which **auth collection** the account lives in, the token Payload issued for it,
 that token's expiry, and the signed-in user's id and email.
 
+**stored sign-in** — the email and password of a **session**, kept on the device
+so the app can start a new session by itself once the **Payload server** ends
+the current one. It exists only where the user allowed it at the dialog every
+sign-in ends with, it is discarded when they sign out or the server refuses it,
+and it is what makes a session outlast the server's own token lifetime. A
+**session** without one ends when its token does.
+
 ## Collections
 
 **Collection** — a named group of **records** on a **Payload server**, addressed
@@ -61,7 +68,7 @@ such field has no derived title, and reads as `Untitled` instead.
 **derived label** — the display name this app works out for a **field** from
 that field's Payload name, the **Payload server** publishing none. Separators
 and camelCase boundaries alike read as word breaks, so `readingMinutes` reads as
-`Reading Minutes`. A **Collection**'s own row name is derived the same way but
+`Reading Minutes`. A **Collection**'s own card name is derived the same way but
 from a **slug**, which Payload guarantees lowercase and hyphenated and which
 therefore needs no camelCase rule.
 

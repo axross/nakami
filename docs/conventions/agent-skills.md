@@ -207,7 +207,7 @@ finding raised anyway costs a review round to answer.
 The installed `react-component-styling` capability requires `style` on every
 mobile-native component that renders a styled root, and
 `src/collections/components/collection-list-item/collection-list-item.tsx` renders one —
-the `Pressable` inside `CollectionRow`. It accepts every other prop that root takes, and
+the `Pressable` inside `CollectionCard`. It accepts every other prop that root takes, and
 omits `style` from its published type on purpose.
 
 The cause is in the platform rather than in the component. `Link asChild` slots its
@@ -221,7 +221,7 @@ here would type-check and not work — the exact defect the props-and-spread con
 issue #69 exists to remove, so publishing one to satisfy the rule would defeat the rule's
 own purpose.
 
-A row is therefore sized and placed from the list's `contentContainerStyle`. Any other
+A card is therefore spaced and inset from the list's `contentContainerStyle`. Any other
 component this repository slots through `Link asChild` inherits the same constraint;
 one that must take a `style` needs a different navigation shape — `onPress` with
 `router.push`, as `WelcomeScreen`'s button already uses for an unrelated `Link asChild`
@@ -446,9 +446,9 @@ rule asks for.
 
 | Style | Argument | Why it stays |
 | --- | --- | --- |
-| `collection-list-item.tsx:106` `row` | `pressed` | `pressed` |
+| `collection-list-item.tsx:102` `card` | `pressed` | `pressed` |
+| `collection-record-card.tsx:126` `card` | `pressed` | `pressed` |
 | `collections-message-state.tsx:63` `button` | `pressed` | `pressed` |
-| `collection-list-skeleton.tsx:120` `row` | `divided` | rendered through `ROW_WIDTHS.map(…)`, so the value differs per row within one body |
 
 `setting-menu-group-item.tsx` shows the third shape a `pressed` style can take and
 is **not** a deviation: its `item` is a static style carrying `position` and
@@ -458,13 +458,11 @@ rule's first clause is satisfied and only its own comment records why `pressed`
 stays outside the variant groups.
 
 Two neighbouring styles look similar and are **not** deviations:
-`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:109` both
+`collection-records-skeleton.tsx:162` and `collection-list-skeleton.tsx:125` both
 take a width, which the same rule's next clause requires stay a dynamic function.
 
-The two `pressed` styles convert the moment Unistyles offers a press state a
-component body can read, or its native `Pressable` honours the `variants` prop it
-already accepts. The skeleton row converts when its rows become a component of
-their own, which is worth doing for its own reasons rather than for this rule.
+All three convert the moment Unistyles offers a press state a component body can
+read, or its native `Pressable` honours the `variants` prop it already accepts.
 
 **One cost of following the rule is worth knowing before extending it.** The jest
 mock strips `variants` and `compoundVariants` from every stylesheet and stubs
@@ -537,6 +535,44 @@ give the gated case a surface of its own, keeping the paused branch ahead of it.
 Until then the three screens' branching MUST NOT be raised as a fresh finding, and a
 fourth screen added to this pattern MUST be listed in the table above rather than left
 for the next reader to find.
+
+## A record field's read-only reason mark is a 36×36pt target
+
+The installed `high-fidelity-ui-design` capability sets a floor on every tappable
+target:
+
+> MUST size every tappable target to at least 44×44 pt (24×24 CSS px absolute floor),
+> extending the hit area with padding or hit-slop rather than shrinking the visible
+> glyph, so no control's hit area is smaller than its interactive appearance implies.
+> — [interaction-states-and-feedback.md](../../.claude/skills/high-fidelity-ui-design/references/interaction-states-and-feedback.md)
+
+`CollectionRecordFieldReason` — the mark in the top-right corner of a read-only field
+row's value surface, which opens the reason it cannot be edited — has a pressable box
+of **36×36pt**. It is the one control in this app under the floor.
+
+The three numbers that produce it are each deliberate, and the first is a product
+decision rather than an implementation one. The glyph is 12pt, below the caption role's
+13, because a mark at the size of the surrounding text reads as a second piece of
+content competing with the value — which is exactly what the sentence it replaced did,
+and removing that was the point of [#161](https://github.com/axross/nakami/issues/161).
+The mark sits inside the surface's own top-right corner, which is where that issue's
+approval gate put it. And the surface's padding is `theme.gap.sm`, so a trigger padded
+by that same step — with a matching negative margin cancelling the layout footprint —
+reaches exactly the surface's outer edges. 12 + 12 + 12 is 36, and the box cannot grow
+past the surface without leaving its parent's bounds, which is not somewhere this app
+routes a touch. `hitSlop` is set to `theme.gap.xs` and buys reach only inside those
+bounds, chiefly leftward across the column gap; it is not what makes the target
+adequate and is not counted here as if it were.
+
+Both ways to reach 44 give up something the change was for. A larger glyph is the
+competing-content problem again. Making the whole value surface the trigger takes the
+tap away from the value, on the one row whose value is the server's own string.
+
+The deviation would end, rather than be re-argued, if the read-only surface's minimum
+height or padding grows, or if the row gains a control layout that gives the mark a
+column of its own. Until then this target MUST NOT be raised as a fresh finding, and a
+**second** control under 44×44 is not covered by this entry — it is its own decision,
+and this one is the exception rather than a precedent.
 
 ## The record-id lookup swallows a server-kind failure
 

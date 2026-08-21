@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { Session } from "~/auth/models/session";
 import { useAuthStore } from "~/auth/stores/auth-store";
 import { addBreadcrumb } from "~/core/helpers/error-reporting";
-import { PayloadRequestError, refreshToken } from "./payload-client";
+import { readCredentials } from "./credentials-storage";
+import { login, PayloadRequestError, refreshToken } from "./payload-client";
 import {
 	isWithinRefreshWindow,
 	REFRESH_LEAD_SECONDS,
@@ -20,11 +21,26 @@ jest.mock("~/auth/helpers/session-storage", () => ({
 	clearSession: jest.fn(async () => undefined),
 }));
 
+// a rejected token now reaches the store's `reauthenticate`, which asks this
+// module first. the default is a user who declined the consent dialog, so every
+// case below behaves as it did before credentials existed unless it says
+// otherwise.
+jest.mock("~/auth/helpers/credentials-storage", () => ({
+	readCredentials: jest.fn(async () => null),
+	writeCredentials: jest.fn(async () => undefined),
+	clearCredentials: jest.fn(async () => undefined),
+}));
+
 jest.mock("~/auth/helpers/payload-client", () => {
 	const actual = jest.requireActual(
 		"~/auth/helpers/payload-client",
 	) as typeof import("~/auth/helpers/payload-client");
-	return { __esModule: true, ...actual, refreshToken: jest.fn() };
+	return {
+		__esModule: true,
+		...actual,
+		login: jest.fn(),
+		refreshToken: jest.fn(),
+	};
 });
 
 function sessionExpiringIn(seconds: number): Session {
@@ -173,6 +189,46 @@ describe("refreshSessionIfDue", () => {
 				},
 			},
 		]);
+	});
+
+	// the whole point of the feature, at the trigger that fires while the app is
+	// open: the token is gone, and the user never sees it happen.
+	it("re-authenticates rather than signing out when credentials were kept", async () => {
+		useAuthStore.setState({
+			status: "authenticated",
+			session: sessionExpiringIn(60),
+		});
+		jest
+			.mocked(refreshToken)
+			.mockRejectedValue(new PayloadRequestError("auth", "rejected", 401));
+		jest.mocked(readCredentials).mockResolvedValue({
+			serverUrl: "https://cms.example.com",
+			collectionSlug: "users",
+			email: "you@example.com",
+			password: "password-that-must-not-be-logged",
+		});
+		jest.mocked(login).mockResolvedValue({
+			user: { id: "1", email: "you@example.com" },
+			token: "reissued-token",
+			exp: Math.floor(Date.now() / 1000) + 7200,
+		});
+
+		await refreshSessionIfDue();
+
+		expect(useAuthStore.getState().status).toBe("authenticated");
+		expect(useAuthStore.getState().session?.token).toBe("reissued-token");
+		// the bracket closes on what actually happened rather than on the
+		// `signed-out` this branch used to write unconditionally.
+		expect(refreshBreadcrumbs().at(-1)).toEqual({
+			message: "Completed refreshing the session token.",
+			category: "auth/session-refresh",
+			level: "info",
+			data: {
+				outcome: "reauthenticated",
+				reason: "token-rejected",
+				duration: expect.any(Number),
+			},
+		});
 	});
 
 	it("keeps the session when the refresh is unreachable", async () => {
